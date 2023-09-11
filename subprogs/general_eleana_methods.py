@@ -40,6 +40,7 @@ class Eleana():
 
         data_x = np.array([])
         data_y = np.array([])
+        data_z =np.array([])
 
     # ----- Methods definition of Eleana subprogs ------
 
