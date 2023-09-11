@@ -5,7 +5,7 @@ import tempfile
 from functools import partial
 from json import loads, dumps
 from pathlib import Path
-
+import customtkinter as ctk
 
 # Set Eleana temporary file containing the text
 tmp_folder = tempfile.gettempdir()
@@ -14,7 +14,7 @@ filename = Path(tmp_folder, filename)
 filePath = filename
 
 # Setup window
-root = Tk()
+root = ctk.CTk()
 root.geometry('600x600')
 root.attributes('-topmost',True)
 
