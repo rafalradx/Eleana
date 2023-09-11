@@ -5,15 +5,14 @@ import numpy as np
 from pathlib import Path
 import tempfile
 
-notes = {"content": "",
-         "tags": {"bold": [], "italic": [], "code": [], "normal size": [], "larger size": [], "largest size": [],
-                  "highlight": [], "highlight red": [], "highlight green": [], "highlight black": [], "text white": [],
-                  "text grey": [], "text blue": [], "text green": [], "text red": []}}
-
-
 class Eleana():
     # Set the most important directories for the program
     interpreter = sys.executable
+    notes = {"content": "",
+             "tags": {"bold": [], "italic": [], "code": [], "normal size": [], "larger size": [], "largest size": [],
+                      "highlight": [], "highlight red": [], "highlight green": [], "highlight black": [],
+                      "text white": [],
+                      "text grey": [], "text blue": [], "text green": [], "text red": []}}
 
     paths = {'program_dir': Path(__file__).resolve().parent,
              'home_dir': Path.home(),
@@ -33,7 +32,11 @@ class Eleana():
             'type': '',
         }
 
-        comments = notes
+        comments = notes = {"content": "",
+             "tags": {"bold": [], "italic": [], "code": [], "normal size": [], "larger size": [], "largest size": [],
+                      "highlight": [], "highlight red": [], "highlight green": [], "highlight black": [],
+                      "text white": [],
+                      "text grey": [], "text blue": [], "text green": [], "text red": []}}
 
         data_x = np.array([])
         data_y = np.array([])

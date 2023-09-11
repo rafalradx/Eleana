@@ -1,8 +1,5 @@
 #!/usr/bin/python3
 
-# Hello I am Dashboard
-# OK. dodaje nową klasę przed class Eleana
-
 # Import Standard Python Modules
 import json
 import pathlib
@@ -22,10 +19,6 @@ from subprogs.general_eleana_methods import Eleana
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "ui" / "Eleana_main.ui"
 
-
-
-class ale_to_jest_git():
-    print("no nie wiem, chyba nie.")
 
 class EleanaMainApp:
     def __init__(self, master=None):
