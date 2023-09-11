@@ -32,11 +32,7 @@ class Eleana():
             'type': '',
         }
 
-        comments = notes = {"content": "",
-             "tags": {"bold": [], "italic": [], "code": [], "normal size": [], "larger size": [], "largest size": [],
-                      "highlight": [], "highlight red": [], "highlight green": [], "highlight black": [],
-                      "text white": [],
-                      "text grey": [], "text blue": [], "text green": [], "text red": []}}
+        comments = notes 
 
         data_x = np.array([])
         data_y = np.array([])
