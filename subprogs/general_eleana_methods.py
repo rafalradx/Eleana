@@ -1,18 +1,15 @@
 import sys
 from typing import List, Any
-
 import numpy as np
 from pathlib import Path
 import tempfile
 
+notes = {"content": "","tags": {"bold": [], "italic": [], "code": [], "normal size": [], "larger size": [], "largest size": [],"highlight": [], "highlight red": [], "highlight green": [], "highlight black": [],"text white": [],"text grey": [], "text blue": [], "text green": [], "text red": []}}
+
 class Eleana():
     # Set the most important directories for the program
     interpreter = sys.executable
-    notes = {"content": "",
-             "tags": {"bold": [], "italic": [], "code": [], "normal size": [], "larger size": [], "largest size": [],
-                      "highlight": [], "highlight red": [], "highlight green": [], "highlight black": [],
-                      "text white": [],
-                      "text grey": [], "text blue": [], "text green": [], "text red": []}}
+    notes = notes
 
     paths = {'program_dir': Path(__file__).resolve().parent,
              'home_dir': Path.home(),
@@ -23,23 +20,6 @@ class Eleana():
              'last_import_dir': '/home/marcin/PycharmProjects/Eleana/Example_data/Elexsys/'
              }
 
-    # Create class for single spectrum
-    class Spectrum():
-        par = {
-            'groups': [],
-            'name': '',
-            'title': '',
-            'type': '',
-        }
-
-        comments = {"content": "",
-             "tags": {"bold": [], "italic": [], "code": [], "normal size": [], "larger size": [], "largest size": [],
-                      "highlight": [], "highlight red": [], "highlight green": [], "highlight black": [],
-                      "text white": [],
-                      "text grey": [], "text blue": [], "text green": [], "text red": []}}
-
-        data_x = np.array([])
-        data_y = np.array([])
 
     # ----- Methods definition of Eleana subprogs ------
 
@@ -57,8 +37,9 @@ class Eleana():
             file_content = file.read()
         return file_content  #
 
-    # Loading elexsys spectrum from a file
+    # Load Elexsys spectra from files
     def load_elexsys(self, filenames: tuple):
+    '''
         elexsys_DTA_files = []
         elexsys_DSC_files = []
         elexsys_YGF_files = []
@@ -134,18 +115,61 @@ class Eleana():
             ygf_data = []
             return {'status': True, 'desc': traceback.format_exc()}
 
-        # Tutaj będzie algorytm który analizuje co jest w plikach DSC i na tej podstawie generuje dalsze dane.
-        ######################################################################################################
-
+        desc_table=[{}]
+        # Read the DSC content
         for eachline in desc_data:
             lines = [line for line in eachline.splitlines() if line.strip()]
             i: str
+            desc_single = {}
+
             for i in lines:
                 raw_par = i.split('\t')
+                try:
+                    par = raw_par[0]
+                    val = raw_par[1]
+                    desc_single[par] = val
 
+                except:
+                    pass
+            desc_table.append(desc_single)
+        print(desc_table)
 
-        print(var)
+        # Create X axis
+        error = False
+        try:
+            points = int(desc_data['XPTS'])
+            x_min = float(desc_data['XMIN'])
+            x_wid = float(desc_data['XWID'])
+            step = x_wid/points
+            x_axis =[]
+            for i in range(0, points):
+                x_axis.append(i * step + x_min)
+            x_data = np.array(x_axis)
+        except:
+            return {'status': True, 'desc': traceback.format_exc()}
+
+        # Colected data from Elexsys
+        print(x_data)
         print(y_data)
         print(desc_data)
         print(ygf_data)
-        print(var)
+
+        exit()
+    '''
+# Classes of data objects
+
+class Spectrum():
+    par = {
+        'groups': [],
+        'name': '',
+        'title': '',
+        'type': '',
+    }
+
+    comments = notes
+
+    data_x = np.array([])
+    data_y = np.array([])
+
+if __name__ == "__main__":
+    pass
