@@ -78,7 +78,25 @@ class Elexsys():
 
         # Colected data from Elexsys
         return {'Error': False, 'desc':'', 'x-data':x_axis, 'y-data':dta, 'z-data':ygf, 'par':dsc}
-
+    def dsc2par(self, dsc: dict):
+        bruker2eleana = {'TITL'  : 'title',
+                         'XUNI'  : 'unit-X',
+                         'XNAM'  : 'name-X',
+                         'YUNI'  : 'unit-Y',
+                         'IRNAM' : 'name-Y',
+                         'YUNI'  : 'unit-Z',
+                         'YNAM'  : 'name-Z',
+                         'IKKF'  : 'Compl',
+                         'FrequencyMon':'MwFreq',
+                         'ModAmp':'ModAmpl',
+                         'Modfreq':'Modfreq',
+                         'ConvTime':'ConvTime',
+                         'SweepTime':'SweepTime',
+                         'TimeConst':'T-Const',
+                         'RESO':'ResModel',
+                         'Power' : 'Power',
+                         'PowerAtten':'Attenu'
+                         }
 
 if __name__ == "__main__":
     elexsys = Elexsys()

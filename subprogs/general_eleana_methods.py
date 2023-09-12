@@ -20,6 +20,9 @@ class Eleana():
              'last_import_dir': '/home/marcin/PycharmProjects/Eleana/Example_data/Elexsys/'
              }
 
+    param_translate = {'':''}
+
+    }
 
     # ----- Methods definition of Eleana subprogs ------
 
