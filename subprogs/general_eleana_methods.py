@@ -39,6 +39,7 @@ class Eleana():
 
     # Load Elexsys spectra from files
     def load_elexsys(self, filenames: tuple):
+    '''
         elexsys_DTA_files = []
         elexsys_DSC_files = []
         elexsys_YGF_files = []
@@ -154,7 +155,7 @@ class Eleana():
         print(ygf_data)
 
         exit()
-
+    '''
 # Classes of data objects
 
 class Spectrum():
