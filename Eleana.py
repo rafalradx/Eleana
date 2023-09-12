@@ -14,6 +14,7 @@ from matplotlib.figure import Figure
 
 # Import Eleana specific classes
 from subprogs.general_eleana_methods import Eleana
+from subprogs.assets.bruker_elexsys import Elexsys
 
 
 PROJECT_PATH = pathlib.Path(__file__).parent
@@ -77,7 +78,7 @@ class EleanaMainApp:
     # FILE
     # -- Import EPR --> Bruker Elexsys
     def import_elexsys(self):
-        MenuAction.import_elexsys(self)
+        MenuAction.loadElexsys(self)
 
     # --- Quit
     def quit(self):
@@ -129,18 +130,25 @@ class UpdateCTkComboboxValues():
         val = current[:between[0]] + current[between[1] + 1:]
         widget.configure(values=val)
 
-
 # -----------------------FUNCTIONS -----------------------------------------
 
 class MenuAction():
-    def import_elexsys(self) -> object:
+    def loadElexsys(self) -> object:
         filetypes = (
             ('Elexsys', '*.DSC'),
             ('All files', '*.*')
         )
 
         filenames = filedialog.askopenfilenames(initialdir=Eleana.paths['last_import_dir'], filetypes=filetypes)
-        Eleana.load_elexsys(self, filenames)
+        if len(filenames) == 0:
+            return
+
+        elexsys = Elexsys()
+        for file in filenames:
+            raw_spectrum = elexsys.read(file)
+            print(raw_spectrum['x-data'])
+            exit()
+
 
 
     def quit(self):
