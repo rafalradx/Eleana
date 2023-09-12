@@ -100,13 +100,10 @@ class Elexsys():
             self.create_stacked_CWEPR_spectra()     # <-- This will create stacked CW EPR spectra
 
 
-
-
         # Tutaj skończyłem
 
         elif dsc['IKKF'] != 'REAL':
             self.create_complex_EPR_data()
-
 
 
     def dsc2par(self, dsc: dict):
