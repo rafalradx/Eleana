@@ -1,18 +1,10 @@
 import numpy as np
 from pathlib import Path, PurePath
 import re
-test_file = '/home/marcin/PycharmProjects/Eleana/Example_data/Elexsys/cw.DSC'
+from general_eleana_methods import Spectrum_CWEPR
 
+test_file = '../Example_data/Elexsys/cw.DSC'
 class Elexsys():
-
-    def create_single_CWEPR_spectrum(self, x_axis: list, dta: list, dsc: dict):
-        pass
-
-    def create_stacked_CWEPR_spectra(self, x_axis: list, dta: list, dsc: dict, ygf: list):
-        pass
-
-    def create_complex_EPR_data(self, x_axis: list, dta: list, dsc: dict):
-        pass
 
     def read(self, filename: str) -> object:
         elexsys_DTA = Path(filename[:-3]+'DTA')
@@ -38,7 +30,6 @@ class Elexsys():
         except:
             elexsys_DTA = PurePath(elexsys_DTA).name
             return {"Error":True,'desc':f"Error in loading {elexsys_DTA}"}
-
 
         # If DTA sucessfully opened then read DSC
         if error != True:
@@ -87,49 +78,21 @@ class Elexsys():
         except:
             return {'Error': True, 'desc': f'Cannot create x axis for {elexsys_DTA}'}
 
-        # Collected data from Elexsys in x_axis, dta, ygf, dsc
-        # Check if dta contains stack of spectra:
+        # Now create object containing particular type of data
 
-
-
-
+        filename = Path(filename).name
         if dsc['YTYP'] == 'NODATA' and dsc['EXPT'] == 'CW':
-            self.create_single_CWEPR_spectrum(x_axis, dta, dsc)  # <-- This will create simple CW EPR spectrum
+            # This will create single CW EPR spectrum
+            cw_spectrum = Spectrum_CWEPR(filename[:-4], x_axis, dta, dsc)
+            return cw_spectrum # <--- Return object based on Spectrum_CWEPR
 
         elif dsc['YTYP'] != 'NODATA' and dsc['EXPT'] == 'CW':
             self.create_stacked_CWEPR_spectra()     # <-- This will create stacked CW EPR spectra
 
 
-        # Tutaj skończyłem
-
         elif dsc['IKKF'] != 'REAL':
             self.create_complex_EPR_data()
 
-
-    def dsc2par(self, dsc: dict):
-        bruker2eleana = {'TITL'  : 'title',
-                         'XUNI'  : 'unit-X',
-                         'XNAM'  : 'name-X',
-                         'YUNI'  : 'unit-Y',
-                         'IRNAM' : 'name-Y',
-                         'YUNI'  : 'unit-Z',
-                         'YNAM'  : 'name-Z',
-                         'IKKF'  : 'Compl',
-                         'FrequencyMon':'MwFreq',
-                         'ModAmp':'ModAmpl',
-                         'Modfreq':'Modfreq',
-                         'ConvTime':'ConvTime',
-                         'SweepTime':'SweepTime',
-                         'TimeConst':'T-Const',
-                         'RESO':'ResModel',
-                         'Power' : 'Power',
-                         'PowerAtten':'Attenu'
-                         }
-
-
-
-
-
 if __name__ == "__main__":
     elexsys = Elexsys()
-    wynik = elexsys.read(test_file)
+    elexsys.read(test_file)

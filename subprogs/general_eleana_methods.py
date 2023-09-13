@@ -44,21 +44,70 @@ class Eleana():
             file_content = file.read()
         return file_content  #
 
+    # Translate DSC keys into Eleana format
+    dsc2eleana = {'title':'TITL',
+                'unit_x':'XUNI',
+                'name_x':'XNAM',
+                'unit_y':'YUNI',
+                'name_y':'IRNAM',
+                'unit_z':'YUNI',
+                'name_z':'YNAM',
+                'Compl': 'IKKF',
+                'MwFreq':'MWFQ',
+                'ModAmp': 'ModAmp',
+                'ModFreq': 'Modfreq',
+                'ConvTime': 'ConvTime',
+                'SweepTime': 'SweepTime',
+                'Tconst':'TimeConst',
+                'Resonat':'RESO',
+                'Power':'MWPW',
+                'PowAtten':'PowerAtten'
+                }
+# Class for creating data objects
 
-# Classes of data objects
-
-class Spectrum_CWEPR():
-    par = {
-        'groups': [],
-        'name': '',
-        'title': '',
-        'type': '',
-    }
-
+class Spectrum_CWEPR():     # Class constructor for single CW EPR data
+    name = ''
+    groups = []
+    is_complex = False
+    type = ''
+    origin = ''
     comments = Eleana.notes
+    parameters = {'title':'',
+                'unit_x':'G',
+                'name_x':'Magnetic field',
+                'name_y':'Amplitude',
+                'MwFreq':'',
+                'ModAmp':'',
+                'ModFreq':'',
+                'ConvTime':'',
+                'SweepTime':'',
+                'TimeConst':'',
+                'RESO': 'Resonator',
+                'Power': 'Power',
+                'PowerAtten': 'PowAtten'
+                }
+    def __init__(self, name, x_axis: list, dta: list, dsc: dict):
+        self.x = x_axis
+        self.y = dta
+        self.name = name
+        self.groups = ['All']
+        self.complex = False
+        self.type = 'single 2D'
+        self.origin = 'CW EPR'
 
-    data_x = np.array([])
-    data_y = np.array([])
+        fill_missing_keys =['title','MwFreq','ModAmp','ModFreq','SweepTime','ConvTime','TimeConst','Power','PowAtten']
+        for key in fill_missing_keys:
+            try:
+                bruker_key = Eleana.dsc2eleana[key]
+                value = dsc[bruker_key]
+                self.parameters[key] = value
+            except:
+                pass
+
+        print(self.parameters)
+        exit()
+        self.x = np.array(x_axis)
+        self.y = np.array(dta)
 
 if __name__ == "__main__":
     pass

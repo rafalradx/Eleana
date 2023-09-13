@@ -14,7 +14,7 @@ from matplotlib.figure import Figure
 
 # Import Eleana specific classes
 from subprogs.general_eleana_methods import Eleana
-from subprogs.assets.bruker_elexsys import Elexsys
+from subprogs.bruker_elexsys import Elexsys
 
 
 PROJECT_PATH = pathlib.Path(__file__).parent
