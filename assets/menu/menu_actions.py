@@ -1,6 +1,6 @@
 from customtkinter import filedialog
-from .general_eleana_methods import Eleana
-from .bruker_elexsys import Elexsys
+from assets.general_eleana_methods import Eleana
+from assets.modules.bruker_elexsys import Elexsys
 class MenuAction():
     def loadElexsys(self) -> object:
         filetypes = (
@@ -18,7 +18,6 @@ class MenuAction():
             Eleana.dataset.append(spectrum)
 
         return Eleana.dataset
-
 
     def quit(self):
         decission = subprocess.run(["python3", "libs/quit_dialog.py"], capture_output=True, text=True)

@@ -22,7 +22,7 @@ class Eleana():
              'tmp_dir': tempfile.gettempdir(),
              'pixmaps': Path(Path(__file__).resolve().parent, "../pixmaps"),
              'ui': Path(Path(__file__).resolve().parent, "../pixmaps"),
-             'subprogs': Path(Path(__file__).resolve().parent, ""),
+             'assets': Path(Path(__file__).resolve().parent, ""),
              'last_import_dir': '/home/marcin/PycharmProjects/Eleana/Example_data/Elexsys/'
              }
     # Selections define what is the state of widgets that selsect spectra

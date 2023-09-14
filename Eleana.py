@@ -12,8 +12,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 # Import Eleana specific classes
-from subprogs.general_eleana_methods import Eleana
-import subprogs.menu_actions
+from assets.general_eleana_methods import Eleana
+import assets.menu.menu_actions
 
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "ui" / "Eleana_main.ui"
@@ -73,9 +73,9 @@ class EleanaMainApp:
 
     # Functions triggered by Menu selections
     # FILE
-    # -- Import EPR --> Bruker Elexsys
+    # --- Import EPR --> Bruker Elexsys
     def import_elexsys(self):
-        subprogs.menu_actions.MenuAction.loadElexsys(self)
+        assets.menu.menu_actions.MenuAction.loadElexsys(self)
         first = Eleana.dataset[0]
 
     # --- Quit
@@ -85,7 +85,7 @@ class EleanaMainApp:
     # EDIT Menu:
     #   Notes
     def notes(self):
-        subprocess_path = Path(Eleana.paths['subprogs'], 'editor.py')
+        subprocess_path = Path(Eleana.paths['assets'], 'subprogs', 'editor.py')
         # Example of text for editor
         # content_to_sent = {"content": "Jaki\u015b przykladowy plik\n", "tags": {"bold": [], "italic": [], "code": [], "normal size": [], "larger size": [], "largest size": [], "highlight": [], "highlight red": [], "highlight green": [], "highlight black": [], "text white": [], "text grey": [], "text blue": [], "text green": [], "text red": []}}
         content_to_sent = Eleana.notes
@@ -97,7 +97,7 @@ class EleanaMainApp:
         # Create /tmp/eleana_edit_notes.rte
         Eleana.create_tmp_file(self, filename, formatted_str)
 
-        # Run editor in subprocess_path (./subprogs/edit.py) and wait for end
+        # Run editor in subprocess_path (./assets/edit.py) and wait for end
         notes = subprocess.run([Eleana.interpreter, subprocess_path], capture_output=True, text=True)
 
         # Grab result
@@ -155,7 +155,7 @@ ctk.set_default_color_theme("dark-blue")
 
 
 def quit_application():
-    subprocess_path = Path(Eleana.paths['subprogs'], 'quit_dialog.py')
+    subprocess_path = Path(Eleana.paths['assets'], 'subprogs', 'quit_dialog.py')
 
     decission = subprocess.run(["python3.10", subprocess_path], capture_output=True, text=True)
     print(decission.stdout[:4])

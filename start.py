@@ -34,9 +34,9 @@ class SplashScreenApp:
 
 
 def close_app():
-    app.mainwindow.destroy()
+    #app.mainwindow.destroy()
     # Tutaj możesz dodać kod, który inicjuje główne okno Twojej aplikacji
-
+    pass
 
 def load_main():
     try:
