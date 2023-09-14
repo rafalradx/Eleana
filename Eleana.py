@@ -8,18 +8,15 @@ import tkinter as tk
 from pathlib import Path
 import customtkinter as ctk
 import pygubu
-from customtkinter import filedialog
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 # Import Eleana specific classes
 from subprogs.general_eleana_methods import Eleana
-from subprogs.bruker_elexsys import Elexsys
-
+import subprogs.menu_actions
 
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "ui" / "Eleana_main.ui"
-
 
 class EleanaMainApp:
     def __init__(self, master=None):
@@ -78,7 +75,8 @@ class EleanaMainApp:
     # FILE
     # -- Import EPR --> Bruker Elexsys
     def import_elexsys(self):
-        MenuAction.loadElexsys(self)
+        subprogs.menu_actions.MenuAction.loadElexsys(self)
+        first = Eleana.dataset[0]
 
     # --- Quit
     def quit(self):
@@ -130,35 +128,7 @@ class UpdateCTkComboboxValues():
         val = current[:between[0]] + current[between[1] + 1:]
         widget.configure(values=val)
 
-# -----------------------FUNCTIONS -----------------------------------------
-
-class MenuAction():
-    def loadElexsys(self) -> object:
-        filetypes = (
-            ('Elexsys', '*.DSC'),
-            ('All files', '*.*')
-        )
-
-        filenames = filedialog.askopenfilenames(initialdir=Eleana.paths['last_import_dir'], filetypes=filetypes)
-        if len(filenames) == 0:
-            return
-
-        elexsys = Elexsys()
-        for file in filenames:
-            raw_spectrum = elexsys.read(file)
-            print(raw_spectrum['x-data'])
-            exit()
-
-
-
-    def quit(self):
-        decission = subprocess.run(["python3", "libs/quit_dialog.py"], capture_output=True, text=True)
-        print(decission.stdout[:4])
-        if decission.stdout[:4] == "quit":
-            app.mainwindow.destroy()
-
-
-# -----------------------Prepare GUI  --------------------------------
+# ----------------------- Start GUI  --------------------------------
 
 app = EleanaMainApp()
 

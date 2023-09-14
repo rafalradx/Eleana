@@ -1,7 +1,7 @@
 import numpy as np
 from pathlib import Path, PurePath
 import re
-from general_eleana_methods import Spectrum_CWEPR
+from subprogs.general_eleana_methods import Spectrum_CWEPR
 
 test_file = '../Example_data/Elexsys/cw.DSC'
 class Elexsys():

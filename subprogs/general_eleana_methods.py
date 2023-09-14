@@ -4,17 +4,19 @@ import numpy as np
 from pathlib import Path
 import tempfile
 
-
-#notes = {"content": "","tags": {"bold": [], "italic": [], "code": [], "normal size": [], "larger size": [], "largest size": [],"highlight": [], "highlight red": [], "highlight green": [], "highlight black": [],"text white": [],"text grey": [], "text blue": [], "text green": [], "text red": []}}
-
 class Eleana():
-    # Set the most important directories for the program
+
+    dataset = []
+    set_result = []
+
     interpreter = sys.executable
+
     notes = {"content": "",
              "tags": {"bold": [], "italic": [], "code": [], "normal size": [], "larger size": [], "largest size": [],
                       "highlight": [], "highlight red": [], "highlight green": [], "highlight black": [],
                       "text white": [], "text grey": [], "text blue": [], "text green": [], "text red": []}}
 
+    # Set the most important directories for the program
     paths = {'program_dir': Path(__file__).resolve().parent,
              'home_dir': Path.home(),
              'tmp_dir': tempfile.gettempdir(),
@@ -79,7 +81,6 @@ class Eleana():
     # Method fo reading temporary text file in /tmp
     def read_tmp_file(self, filename):
         path_to_file = Path(Eleana.paths['tmp_dir'], filename)
-        print('Read tmp_file: ', path_to_file)
         with open(path_to_file) as file:
             file_content = file.read()
         return file_content  #
@@ -130,8 +131,6 @@ class Spectrum_CWEPR():     # Class constructor for single CW EPR data
 
         self.x = np.array(x_axis)
         self.y = np.array(dta)
-        print(self.parameters)
-        print(self.y)
 
 if __name__ == "__main__":
     pass
