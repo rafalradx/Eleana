@@ -36,7 +36,7 @@ class Eleana():
 
     selections = {'group':0,
                   'first':0, 'second':0, 'result':0,
-                  'r_cpl':'','s_cpl':'', 'r_cpl':'',
+                  'f_cpl':'','s_cpl':'', 'r_cpl':'',
                   'f_stk':0, 's_stk':'', 'r_stk':'',
                   'f_dsp':True, 's_dsp':True ,'r_dsp':True
                   }
@@ -51,14 +51,14 @@ class Eleana():
                   'unit_z': 'YUNI',
                   'name_z': 'YNAM',
                   'Compl': 'IKKF',
-                  'MwFreq': 'MWFQ',
+                  'MwFreq': 'FrequencyMon',
                   'ModAmp': 'ModAmp',
-                  'ModFreq': 'Modfreq',
+                  'ModFreq': 'ModFreq',
                   'ConvTime': 'ConvTime',
                   'SweepTime': 'SweepTime',
-                  'Tconst': 'TimeConst',
-                  'Resonat': 'RESO',
-                  'Power': 'MWPW',
+                  'Tconst': 'TIMEC',
+                  'Reson': 'RESO',
+                  'Power': 'Power',
                   'PowAtten': 'PowerAtten'
                   }
 
@@ -105,7 +105,7 @@ class Spectrum_CWEPR():     # Class constructor for single CW EPR data
                 'SweepTime':'',
                 'TimeConst':'',
                 'RESO': 'Resonator',
-                'Power': 'Power',
+                'Power': '',
                 'PowerAtten': 'PowAtten'
                 }
     def __init__(self, name, x_axis: list, dta: list, dsc: dict):
@@ -122,12 +122,16 @@ class Spectrum_CWEPR():     # Class constructor for single CW EPR data
             try:
                 bruker_key = Eleana.dsc2eleana[key]
                 value = dsc[bruker_key]
-                self.parameters[key] = value
+                value = value.split(' ')
+                value_txt = value[0]
+                self.parameters[key] = value_txt
             except:
                 pass
 
         self.x = np.array(x_axis)
         self.y = np.array(dta)
+        print(self.parameters)
+        print(self.y)
 
 if __name__ == "__main__":
     pass

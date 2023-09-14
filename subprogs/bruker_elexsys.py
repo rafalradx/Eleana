@@ -60,7 +60,8 @@ class Elexsys():
             #element = i.split("\t")
             element = re.split(r'\s+', i.strip(), maxsplit=1)
             try:
-                dsc[element[0].upper()] = element[1]
+                #dsc[element[0].upper()] = element[1]
+                dsc[element[0]] = element[1]
             except:
                 pass
 
@@ -77,6 +78,7 @@ class Elexsys():
 
         except:
             return {'Error': True, 'desc': f'Cannot create x axis for {elexsys_DTA}'}
+
 
         # Now create object containing particular type of data
 
