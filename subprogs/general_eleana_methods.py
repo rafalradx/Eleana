@@ -23,10 +23,50 @@ class Eleana():
              'subprogs': Path(Path(__file__).resolve().parent, ""),
              'last_import_dir': '/home/marcin/PycharmProjects/Eleana/Example_data/Elexsys/'
              }
+    # Selections define what is the state of widgets that selsect spectra
+    # group: int --> number of selected group
+    # first, second, result: int --> number on combobox selector
+    # f_cpl, s_cpl, r_cpl: str (ONLY FOR COMPLEX) --> selection of what is shown in the graph:
+    #                                 empty or re - show real part
+    #                                 im -          show imaginary part
+    #                                 cpl -         show both re and im
+    #                                 magn -        show complex magnitude
+    # f_stk, s_stk, r_stk: int (ONLY FO STACK) --> selects subspectra in the spectra stack
+    # f_dsp, s_dsp, r_dsp: bool --> if thrue then first, second and result appears in the graph, respectively
+
+    selections = {'group':0,
+                  'first':0, 'second':0, 'result':0,
+                  'r_cpl':'','s_cpl':'', 'r_cpl':'',
+                  'f_stk':0, 's_stk':'', 'r_stk':'',
+                  'f_dsp':True, 's_dsp':True ,'r_dsp':True
+                  }
+
+    # Dictionaries for different par files to Eleana format
+    # Bruker Elexsys
+    dsc2eleana = {'title': 'TITL',
+                  'unit_x': 'XUNI',
+                  'name_x': 'XNAM',
+                  'unit_y': 'YUNI',
+                  'name_y': 'IRNAM',
+                  'unit_z': 'YUNI',
+                  'name_z': 'YNAM',
+                  'Compl': 'IKKF',
+                  'MwFreq': 'MWFQ',
+                  'ModAmp': 'ModAmp',
+                  'ModFreq': 'Modfreq',
+                  'ConvTime': 'ConvTime',
+                  'SweepTime': 'SweepTime',
+                  'Tconst': 'TimeConst',
+                  'Resonat': 'RESO',
+                  'Power': 'MWPW',
+                  'PowAtten': 'PowerAtten'
+                  }
+
+    # Bruker EMX
+    parEMX2elena = {}
 
 
-    # ----- Methods definition of Eleana subprogs ------
-
+    # ----- METHODS ------
     # Method for saving temporary text file in file /tmp
     def create_tmp_file(self, filename: str, content=""):
         path_to_file = Path(Eleana.paths['tmp_dir'], filename)
@@ -44,26 +84,8 @@ class Eleana():
             file_content = file.read()
         return file_content  #
 
-    # Translate DSC keys into Eleana format
-    dsc2eleana = {'title':'TITL',
-                'unit_x':'XUNI',
-                'name_x':'XNAM',
-                'unit_y':'YUNI',
-                'name_y':'IRNAM',
-                'unit_z':'YUNI',
-                'name_z':'YNAM',
-                'Compl': 'IKKF',
-                'MwFreq':'MWFQ',
-                'ModAmp': 'ModAmp',
-                'ModFreq': 'Modfreq',
-                'ConvTime': 'ConvTime',
-                'SweepTime': 'SweepTime',
-                'Tconst':'TimeConst',
-                'Resonat':'RESO',
-                'Power':'MWPW',
-                'PowAtten':'PowerAtten'
-                }
-# Class for creating data objects
+
+# --- DATA OBJECTS CONSTUCTORS ---
 
 class Spectrum_CWEPR():     # Class constructor for single CW EPR data
     name = ''
@@ -104,8 +126,6 @@ class Spectrum_CWEPR():     # Class constructor for single CW EPR data
             except:
                 pass
 
-        print(self.parameters)
-        exit()
         self.x = np.array(x_axis)
         self.y = np.array(dta)
 
