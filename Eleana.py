@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 # Import Standard Python Modules
-import json
 import pathlib
 import subprocess
 import tkinter as tk
@@ -13,7 +12,13 @@ from matplotlib.figure import Figure
 
 # Import Eleana specific classes
 from assets.general_eleana_methods import Eleana
-import assets.menu.menu_actions
+from assets.gui_actions.menu_actions import MenuAction
+from assets.gui_actions.update_selection_lists import Upadte
+
+# Create Eleana instances
+eleana = Eleana()
+menuAction: MenuAction = MenuAction()
+update_lists = Upadte()
 
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "ui" / "Eleana_main.ui"
@@ -37,6 +42,11 @@ class EleanaMainApp:
             self, ['group', 'group_down', 'group_up', 'first_down'])
 
         builder.connect_callbacks(self)
+
+        # Create references to Widgets
+        self.sel_first = builder.get_object("sel_first", self.mainwindow)
+        # self.sel_second = builder.get_object("sel_second", self.mainwindow)
+
 
     def run(self):
         self.mainwindow.mainloop()
@@ -75,8 +85,11 @@ class EleanaMainApp:
     # FILE
     # --- Import EPR --> Bruker Elexsys
     def import_elexsys(self):
-        assets.menu.menu_actions.MenuAction.loadElexsys(self)
-        first = Eleana.dataset[0]
+        menuAction.loadElexsys()
+        #entries = ['None', 'Cw', 'Cw2']
+        #app.sel_first.configure(values=entries)
+        update_lists.first(app.sel_first)
+
 
     # --- Quit
     def quit(self):
@@ -85,24 +98,25 @@ class EleanaMainApp:
     # EDIT Menu:
     #   Notes
     def notes(self):
-        subprocess_path = Path(Eleana.paths['assets'], 'subprogs', 'editor.py')
-        # Example of text for editor
-        # content_to_sent = {"content": "Jaki\u015b przykladowy plik\n", "tags": {"bold": [], "italic": [], "code": [], "normal size": [], "larger size": [], "largest size": [], "highlight": [], "highlight red": [], "highlight green": [], "highlight black": [], "text white": [], "text grey": [], "text blue": [], "text green": [], "text red": []}}
-        content_to_sent = Eleana.notes
-        content_to_sent.update({'window_title': 'Edit notes'})  # Add text for window title
-
-        filename = "eleana_edit_notes.rte"
-        formatted_str = json.dumps(content_to_sent, indent=4)
-
-        # Create /tmp/eleana_edit_notes.rte
-        Eleana.create_tmp_file(self, filename, formatted_str)
-
-        # Run editor in subprocess_path (./assets/edit.py) and wait for end
-        notes = subprocess.run([Eleana.interpreter, subprocess_path], capture_output=True, text=True)
-
-        # Grab result
-        file_back = Eleana.read_tmp_file(self, filename)
-        Eleana.notes = json.loads(file_back)
+        menuAction.notes()
+    #     subprocess_path = Path(eleana.paths['assets'], 'subprogs', 'editor.py')
+    #     # Example of text for editor
+    #     # content_to_sent = {"content": "Jaki\u015b przykladowy plik\n", "tags": {"bold": [], "italic": [], "code": [], "normal size": [], "larger size": [], "largest size": [], "highlight": [], "highlight red": [], "highlight green": [], "highlight black": [], "text white": [], "text grey": [], "text blue": [], "text green": [], "text red": []}}
+    #     content_to_sent = Eleana.notes
+    #     content_to_sent.update({'window_title': 'Edit notes'})  # Add text for window title
+    #
+    #     filename = "eleana_edit_notes.rte"
+    #     formatted_str = json.dumps(content_to_sent, indent=4)
+    #
+    #     # Create /tmp/eleana_edit_notes.rte
+    #     Eleana.create_tmp_file(self, filename, formatted_str)
+    #
+    #     # Run editor in subprocess_path (./assets/edit.py) and wait for end
+    #     notes = subprocess.run([Eleana.interpreter, subprocess_path], capture_output=True, text=True)
+    #
+    #     # Grab result
+    #     file_back = Eleana.read_tmp_file(self, filename)
+    #     Eleana.notes = json.loads(file_back)
 
 
 class UpdateCTkComboboxValues():
@@ -144,7 +158,7 @@ width = app.mainwindow.winfo_screenwidth()  # Get screen width
 height = app.mainwindow.winfo_screenheight()  # Get screen height
 app.mainwindow.geometry(str(width) + 'x' + str(height) + "+0+0")  # Set geometry to max
 # Add icon to the top window bar form pixmaps folder
-top_window_icon = Path(Eleana.paths['pixmaps'], "eleana_top_window.png")
+top_window_icon = Path(eleana.paths['pixmaps'], "eleana_top_window.png")
 main_icon = tk.PhotoImage(file=top_window_icon)
 app.mainwindow.iconphoto(True, main_icon)
 # Set color motive for GUI
@@ -155,7 +169,7 @@ ctk.set_default_color_theme("dark-blue")
 
 
 def quit_application():
-    subprocess_path = Path(Eleana.paths['assets'], 'subprogs', 'quit_dialog.py')
+    subprocess_path = Path(eleana.paths['assets'], 'subprogs', 'quit_dialog.py')
 
     decission = subprocess.run(["python3.10", subprocess_path], capture_output=True, text=True)
     print(decission.stdout[:4])
