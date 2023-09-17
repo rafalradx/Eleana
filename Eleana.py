@@ -13,12 +13,12 @@ from matplotlib.figure import Figure
 # Import Eleana specific classes
 from assets.general_eleana_methods import Eleana
 from assets.gui_actions.menu_actions import MenuAction
-from assets.gui_actions.update_selection_lists import Upadte
+from assets.gui_actions.update_selection_lists import Update
 
 # Create Eleana instances
 eleana = Eleana()
 menuAction: MenuAction = MenuAction()
-update_lists = Upadte()
+update_lists = Update()
 
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "ui" / "Eleana_main.ui"

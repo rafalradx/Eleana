@@ -3,11 +3,13 @@ import sys
 import numpy as np
 from pathlib import Path
 import tempfile
-
+from assets.gui_actions.update_selection_lists import Update
 class Eleana():
 
-    dataset = []
-    set_result = []
+    dataset = []            # <-- This variable keeps all spectra available in Eleana. It is a list of objects
+    set_result = []         # <-- This keeps data containing results
+    assignmentToGroups = {} # <-- This keeps information about which data from dataset is assigned to particular group
+    groupsHierarchy = {}    # <-- This store information about which group belongs to other
 
     interpreter = sys.executable
 
@@ -33,7 +35,7 @@ class Eleana():
     #                                 im -          show imaginary part
     #                                 cpl -         show both re and im
     #                                 magn -        show complex magnitude
-    # f_stk, s_stk, r_stk: int (ONLY FO STACK) --> selects subspectra in the spectra stack
+    # f_stk, s_stk, r_stk: int (ONLY FOR STACK) --> selects subspectra in the spectra stack
     # f_dsp, s_dsp, r_dsp: bool --> if thrue then first, second and result appears in the graph, respectively
 
     selections = {'group':0,
@@ -87,14 +89,16 @@ class Eleana():
 
 
 # --- DATA OBJECTS CONSTUCTORS ---
-
-class Spectrum_CWEPR():     # Class constructor for single CW EPR data
+class GeneralDataTemplate():
     name = ''
-    groups = []
+    groups = ['All', 'Grupa2', 'Grupa3']
     is_complex = False
     type = ''
     origin = ''
     comments = Eleana.notes
+
+class Spectrum_CWEPR(GeneralDataTemplate):     # Class constructor for single CW EPR data
+
     parameters = {'title':'',
                 'unit_x':'G',
                 'name_x':'Magnetic field',
@@ -113,7 +117,7 @@ class Spectrum_CWEPR():     # Class constructor for single CW EPR data
         self.x = x_axis
         self.y = dta
         self.name = name
-        self.groups = ['All']
+        #self.groups = ['All']
         self.complex = False
         self.type = 'single 2D'
         self.origin = 'CW EPR'
@@ -133,4 +137,34 @@ class Spectrum_CWEPR():     # Class constructor for single CW EPR data
         self.y = np.array(dta)
 
 if __name__ == "__main__":
-    pass
+    eleana = Eleana()
+
+    #Example spectra
+    spectrum = Spectrum_CWEPR('widmo1', [], [], 'empty')
+    spectrum.groups = ['grupa_w1', 'grupa_w2']
+    eleana.dataset.append(spectrum)
+    spectrum = Spectrum_CWEPR('widmo2', [], [], 'empty')
+    spectrum.groups = ['grupa_w1']
+    eleana.dataset.append(spectrum)
+    spectrum = Spectrum_CWEPR('widmo3', [], [], 'empty')
+    spectrum.groups = ['grupa_w2']
+    eleana.dataset.append(spectrum)
+    spectrum = Spectrum_CWEPR('widmo4', [], [], 'empty')
+    spectrum.groups = []
+    eleana.dataset.append(spectrum)
+
+    # widmo1 należą do grupa_w1 i grupa_w2
+    # widmo2 nalezy do grupa_w1
+    # widmo3 należy do grupa_w2
+    # widmo4 nie nalezy do żadnej
+    # Powinismy dostać {'grupa_w1':[0,1], 'grupa_w2': [0,2]}
+
+    # print('Tak są utworzone kolejne przypuisania do grup')
+    # print(eleana.dataset[0].groups)
+    # print(eleana.dataset[1].groups)
+    # print(eleana.dataset[2].groups)
+    # print(eleana.dataset[3].groups)
+    # print('------------')
+    #print(eleana.dataset)
+    usl = Update()
+    usl.create_list_of_data(eleana.dataset)

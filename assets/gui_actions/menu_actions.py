@@ -21,7 +21,6 @@ class MenuAction():
         if len(filenames) == 0:
             return
 
-
         for file in filenames:
             spectrum = elexsys.read(file)
             eleana.dataset.append(spectrum)
