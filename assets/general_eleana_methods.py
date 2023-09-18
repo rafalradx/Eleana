@@ -38,7 +38,7 @@ class Eleana():
     # f_stk, s_stk, r_stk: int (ONLY FOR STACK) --> selects subspectra in the spectra stack
     # f_dsp, s_dsp, r_dsp: bool --> if thrue then first, second and result appears in the graph, respectively
 
-    selections = {'group':0,
+    selections = {'group':'All',
                   'first':0, 'second':0, 'result':0,
                   'f_cpl':'','s_cpl':'', 'r_cpl':'',
                   'f_stk':0, 's_stk':'', 'r_stk':'',
@@ -71,6 +71,17 @@ class Eleana():
 
 
     # ----- METHODS ------
+    def add_numbers_to_dataset(self):
+        names = []
+        i = 0
+        for data in self.dataset:
+            name = str(i+1) + '. ' + data.name
+            self.dataset[i].name = name
+            i += 1
+
+
+
+
     # Method for saving temporary text file in file /tmp
     def create_tmp_file(self, filename: str, content=""):
         path_to_file = Path(Eleana.paths['tmp_dir'], filename)
@@ -153,6 +164,7 @@ if __name__ == "__main__":
     spectrum.groups = []
     eleana.dataset.append(spectrum)
 
+
     # widmo1 należą do grupa_w1 i grupa_w2
     # widmo2 nalezy do grupa_w1
     # widmo3 należy do grupa_w2
@@ -167,4 +179,5 @@ if __name__ == "__main__":
     # print('------------')
     #print(eleana.dataset)
     usl = Update()
-    usl.create_list_of_data(eleana.dataset)
+    #grupy = usl.create_list_of_data(eleana.dataset)
+    eleana.add_numbers_to_dataset()

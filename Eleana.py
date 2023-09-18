@@ -18,7 +18,7 @@ from assets.gui_actions.update_selection_lists import Update
 # Create Eleana instances
 eleana = Eleana()
 menuAction: MenuAction = MenuAction()
-update_lists = Update()
+update = Update()
 
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "ui" / "Eleana_main.ui"
@@ -44,9 +44,10 @@ class EleanaMainApp:
         builder.connect_callbacks(self)
 
         # Create references to Widgets
+        self.sel_group = builder.get_object("sel_group", self.mainwindow)
         self.sel_first = builder.get_object("sel_first", self.mainwindow)
-        # self.sel_second = builder.get_object("sel_second", self.mainwindow)
-
+        self.sel_second = builder.get_object("sel_second", self.mainwindow)
+        self.sel_result = builder.get_object("sel_result", self.mainwindow)
 
     def run(self):
         self.mainwindow.mainloop()
@@ -86,9 +87,17 @@ class EleanaMainApp:
     # --- Import EPR --> Bruker Elexsys
     def import_elexsys(self):
         menuAction.loadElexsys()
-        #entries = ['None', 'Cw', 'Cw2']
-        #app.sel_first.configure(values=entries)
-        update_lists.first(app.sel_first)
+
+        # When selected group is 'All' or 'all' (case insensitive) then get names of whole dataset (func. update.dataset_list)
+        if eleana.selections['group'] == 'All':
+            entries = update.dataset_list(eleana.dataset)
+        # When there is different group selected then take names from this group
+        else:
+            entries = update.data_in_group_list(eleana.dataset, eleana.assignmentToGroups)
+
+        # Update values in Comboboxes
+        app.sel_first.configure(values=entries)
+        app.sel_second.configure(values=entries)
 
 
     # --- Quit
@@ -99,48 +108,10 @@ class EleanaMainApp:
     #   Notes
     def notes(self):
         menuAction.notes()
-    #     subprocess_path = Path(eleana.paths['assets'], 'subprogs', 'editor.py')
-    #     # Example of text for editor
-    #     # content_to_sent = {"content": "Jaki\u015b przykladowy plik\n", "tags": {"bold": [], "italic": [], "code": [], "normal size": [], "larger size": [], "largest size": [], "highlight": [], "highlight red": [], "highlight green": [], "highlight black": [], "text white": [], "text grey": [], "text blue": [], "text green": [], "text red": []}}
-    #     content_to_sent = Eleana.notes
-    #     content_to_sent.update({'window_title': 'Edit notes'})  # Add text for window title
-    #
-    #     filename = "eleana_edit_notes.rte"
-    #     formatted_str = json.dumps(content_to_sent, indent=4)
-    #
-    #     # Create /tmp/eleana_edit_notes.rte
-    #     Eleana.create_tmp_file(self, filename, formatted_str)
-    #
-    #     # Run editor in subprocess_path (./assets/edit.py) and wait for end
-    #     notes = subprocess.run([Eleana.interpreter, subprocess_path], capture_output=True, text=True)
-    #
-    #     # Grab result
-    #     file_back = Eleana.read_tmp_file(self, filename)
-    #     Eleana.notes = json.loads(file_back)
+        # Grab result
+        file_back = eleana.read_tmp_file(self, filename)
+        eleana.notes = json.loads(file_back)
 
-
-class UpdateCTkComboboxValues():
-    def set_values(self, widget, val=['']):
-        # This function sets the values to the combobox ascribed to widget. Widget can be "app.sel_first"
-        widget.configure(values=val)
-
-    def append_values(self, widget, val=['']):
-        # This appends val[] to the widged combobox
-        current = widget.cget('values')
-        val = current + val
-        widget.configure(values=val)
-
-    def del_values(self, widget, between=(0, 0)):
-        # This deletes the values between range in between[0] and between[1] from the widget combobx
-        current = widget.cget('values')
-        if between[0] > between[1]:
-            between[0], between[1] = between[1], between[0]
-        if between[0] < 0:
-            between[0] = 0
-        if between[1] > len(current) - 1:
-            between[1] = len(current) - 1
-        val = current[:between[0]] + current[between[1] + 1:]
-        widget.configure(values=val)
 
 # ----------------------- Start GUI  --------------------------------
 
@@ -164,6 +135,15 @@ app.mainwindow.iconphoto(True, main_icon)
 # Set color motive for GUI
 ctk.set_default_color_theme("dark-blue")
 
+# ---------------------- Set default values in GUI -------
+app.sel_group.configure(values=['All'])
+app.sel_group.set('All')
+app.sel_first.configure(values=['None'])
+app.sel_first.set('None')
+app.sel_second.configure(values=['None'])
+app.sel_second.set('None')
+app.sel_result.configure(values=['None', 'yes'])
+app.sel_result.set('None')
 
 # -----------------------Set important variables ---------
 

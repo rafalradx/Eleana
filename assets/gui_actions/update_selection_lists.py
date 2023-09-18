@@ -1,6 +1,29 @@
 class Update():
 
-    def create_list_of_data(self, dataset: list):
+    def dataset_list(self, dataset: list) -> list:
+        # This function is used to create list of data for all
+        names = ['None']
+        i = 0
+        for data in dataset:
+            name = str(i + 1) + '. ' + data.name
+            names.append(name)
+            i += 1
+
+        return names
+
+    def data_in_group_list(self, dataset: list, eleana_selections: dict, assignmentToGroups: dict):
+        # This function is used to create list of data that belongs to the group which is currently selected
+        group = eleana_selections['group']
+        data_list = assignmentToGroups[group]
+        names = ['None']
+        for index in data_list:
+            name = str(index+1) + '. ' + dataset[index]
+            names.append(name)
+        return names
+
+
+
+    def results_list(self, results):
         names = []
         i = 1
         for data in dataset:
@@ -9,7 +32,6 @@ class Update():
             names.append(name)
             i += 1
         return names
-
 
         #     for name in names:
         #         name = str(i) + '. ' + name
