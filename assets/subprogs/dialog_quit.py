@@ -2,7 +2,6 @@
 import tkinter as tk
 from customtkinter import (CTkButton, CTkLabel)
 
-
 class QuitDialog:
     def __init__(self, master=None):
         self.result = None
@@ -19,24 +18,26 @@ class QuitDialog:
         self.btn_quit.configure(text='Yes, quit')
         self.btn_quit.grid(column=0, padx=10, pady=10, row=1)
         self.btn_quit.configure(command=self.quit_appication)
+        #self.btn_quit.configure(command=lambda: choice('yes'))
         self.btn_cancel_quit = CTkButton(toplevel1)
         self.btn_cancel_quit.configure(text='Cancel')
         self.btn_cancel_quit.grid(column=1, row=1)
         self.btn_cancel_quit.configure(command=self.cancel_quit)
 
         # Main widget
-        self.mainwindow = toplevel1
+        self.window = toplevel1
 
-        self.decission = ""
-    def run(self):
-        self.mainwindow.mainloop()
+        self.choice = ""
+    #def run(self):
+    #    self.mainwindow.mainloop()
 
     def quit_appication(self):
-        app.mainwindow.destroy()
+        choice = 'yes'
+        return choice
 
     def cancel_quit(self):
-        print("cancel")
-        app.mainwindow.destroy()
+        self.window.destroy()
+
 
 if __name__ == "__main__":
     app = QuitDialog()

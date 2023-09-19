@@ -27,10 +27,10 @@ class MenuAction():
         return eleana.dataset
 
     def quit(self):
-        decission = subprocess.run(["python3", "libs/quit_dialog.py"], capture_output=True, text=True)
+        decission = subprocess.run(["python3", "libs/dialog_quit.py"], capture_output=True, text=True)
         print(decission.stdout[:4])
         if decission.stdout[:4] == "quit":
-            app.mainwindow.destroy()
+            app.window.destroy()
 
     # EDIT
     #       Notes

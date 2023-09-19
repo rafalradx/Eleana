@@ -14,6 +14,7 @@ from matplotlib.figure import Figure
 from assets.general_eleana_methods import Eleana
 from assets.gui_actions.menu_actions import MenuAction
 from assets.general_eleana_methods import Update
+from assets.subprogs.dialog_quit import QuitDialog
 
 # Create Eleana instances
 eleana = Eleana()
@@ -34,12 +35,12 @@ class EleanaMainApp:
         _main_menu = builder.get_object("mainmenu", self.mainwindow)
         self.mainwindow.configure(menu=_main_menu)
 
-        self.group = None
         self.group_down = None
         self.group_up = None
+        self.group = None
         self.first_down = None
         builder.import_variables(
-            self, ['group', 'group_down', 'group_up', 'first_down'])
+            self, ['group_down', 'group_up', 'group', 'first_down'])
 
         builder.connect_callbacks(self)
 
@@ -48,7 +49,6 @@ class EleanaMainApp:
         self.sel_first = builder.get_object("sel_first", self.mainwindow)
         self.sel_second = builder.get_object("sel_second", self.mainwindow)
         self.sel_result = builder.get_object("sel_result", self.mainwindow)
-
         self.firstframe = builder.get_object("firstFrame", self.mainwindow)
 
 
@@ -125,8 +125,22 @@ class EleanaMainApp:
             eleana.dataset[i].name
             i += 1
     # --- Quit
-    def quit(self):
-        quit_application()
+    #def quit(self):
+    #    close_application()
+
+    #def close_application(self):
+    #    exit()
+    def close_application(self):
+        # Display dialog window created in dialog_quit.py
+        def quit_button_clicked():
+            # This closes the pop-up window and then main application
+            dialog_quit.window.destroy()
+            app.mainwindow.destroy()
+
+        # Create instance of the dialog window
+        dialog_quit = QuitDialog(master=app.mainwindow)
+        # Define function called after clicking quit_button
+        dialog_quit.btn_quit.configure(command=quit_button_clicked)
 
     # EDIT Menu:
     #   Notes
@@ -148,6 +162,7 @@ app = EleanaMainApp()
 
 app.graphFrame = app.builder.get_object('graphFrame', app.mainwindow)
 
+
 # -----------------------Set geometry and icon ----------------------
 width = app.mainwindow.winfo_screenwidth()  # Get screen width
 height = app.mainwindow.winfo_screenheight()  # Get screen height
@@ -158,6 +173,7 @@ main_icon = tk.PhotoImage(file=top_window_icon)
 app.mainwindow.iconphoto(True, main_icon)
 # Set color motive for GUI
 ctk.set_default_color_theme("dark-blue")
+
 
 # ---------------------- Set default values in GUI -------
 app.sel_group.configure(values=['All'])
@@ -171,14 +187,25 @@ app.sel_result.set('None')
 
 # -----------------------Set important variables ---------
 
+# def close_application():
+#     # Display dialog window created in dialog_quit.py
+#     def quit_button_clicked():
+#         # This closes the pop-up window and then main application
+#         dialog_quit.window.destroy()
+#         app.mainwindow.destroy()
+#     # Create instance of the dialog window
+#     dialog_quit = QuitDialog(master=app.mainwindow)
+#     # Define function called after clicking quit_button
+#     dialog_quit.btn_quit.configure(command=quit_button_clicked)
 
-def quit_application():
-    subprocess_path = Path(eleana.paths['assets'], 'subprogs', 'quit_dialog.py')
 
-    decission = subprocess.run(["python3.10", subprocess_path], capture_output=True, text=True)
-    print(decission.stdout[:4])
-    if decission.stdout[:4] == "quit":
-        app.mainwindow.destroy()
+
+    # subprocess_path = Path(eleana.paths['assets'], 'subprogs', 'dialog_quit.py')
+    #
+    # decission = subprocess.run(["python3.10", subprocess_path], capture_output=True, text=True)
+    # print(decission.stdout[:4])
+    # if decission.stdout[:4] == "quit":
+    #     app.mainwindow.destroy()
 
 
 # ----------- Examples and tests ------------------------
@@ -216,8 +243,8 @@ app.graphFrame.rowconfigure(0, weight=1)
 #app.sel_first.grid(row=1, column=0, columnspan=3)
 
 # ----------------- Final configuration and App Start---------------------
-# Configure closing actio
-app.mainwindow.protocol('WM_DELETE_WINDOW', quit_application)
+# Configure closing action
+app.mainwindow.protocol('WM_DELETE_WINDOW', app.close_application)
 
 # Run
 if __name__ == "__main__":
