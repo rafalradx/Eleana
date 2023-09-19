@@ -44,7 +44,7 @@ class Elexsys():
         if error != True:
             if elexsys_YGF.exists() == True:
                 try:
-                    ygf = np.fromfile(ygf_binary, dtype='>d')
+                    ygf = np.fromfile(elexsys_YGF, dtype='>d')
                 except:
                         error = True
                         elexsys_YGF = PurePath(elexsys_YGF).name
@@ -89,7 +89,7 @@ class Elexsys():
             return cw_spectrum # <--- Return object based on Spectrum_CWEPR
 
         elif dsc['YTYP'] != 'NODATA' and dsc['EXPT'] == 'CW':
-            self.create_stacked_CWEPR_spectra()     # <-- This will create stacked CW EPR spectra
+            cw_stack = Spectrum_CWEPR_stack(filename[:-4], x_axis, dta, dsc, ygf)   # <-- This will create stacked CW EPR spectra
 
 
         elif dsc['IKKF'] != 'REAL':

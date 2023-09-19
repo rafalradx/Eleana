@@ -109,9 +109,19 @@ class GeneralDataTemplate():
     origin = ''
     comments = Eleana.notes
 
-    def numbered_name(self):
-        numbered_name = number + '. ' + self.name
-        return numbered_name
+    def get(self, which: str):
+        selection = Eleana.selections
+        data = Eleana.dataset[selection[which]]
+        # Not complex
+        if data.is_complex:
+            # Utwórz dane complex
+
+            return x,y
+        else:
+            x = data.x
+            y = data.y
+        return {'x':x, 'y':y}
+
 
 class Spectrum_CWEPR(GeneralDataTemplate):     # Class constructor for single CW EPR data
 
@@ -152,6 +162,20 @@ class Spectrum_CWEPR(GeneralDataTemplate):     # Class constructor for single CW
         self.x = np.array(x_axis)
         self.y = np.array(dta)
 
+class Spectrum_CWEPR_stack(GeneralDataTemplate):
+    def __init__(self, name, x_axis: list, dta: list, dsc: dict, ygf):
+        self.name = name
+        self.x_axis = x_axis
+        self.dta = dta
+        self.dsc = dsc
+        self.ygf = ygf
+
+        print(self.name)
+        print(x_axis)
+        print(dta)
+        print(dsc)
+        print(ygf)
+        exit()
 class Update():
 
     def dataset_list(self) -> list:
@@ -195,11 +219,7 @@ class Update():
             i += 1
         return names
 
-        #     for name in names:
-        #         name = str(i) + '. ' + name
-        #         names = names + name
-        #     #name.append(data.name)
-        # print(names)
+
 
 
     # Creating groups on basis of groups defined in Eleana.dataset
@@ -235,34 +255,34 @@ class Update():
 if __name__ == "__main__":
     eleana = Eleana()
 
-    #Example spectra
-    spectrum = Spectrum_CWEPR('widmo1', [], [], 'empty')
-    spectrum.groups = ['grupa_w1', 'grupa_w2']
-    eleana.dataset.append(spectrum)
-    spectrum = Spectrum_CWEPR('widmo2', [], [], 'empty')
-    spectrum.groups = ['grupa_w1']
-    eleana.dataset.append(spectrum)
-    spectrum = Spectrum_CWEPR('widmo3', [], [], 'empty')
-    spectrum.groups = ['grupa_w2']
-    eleana.dataset.append(spectrum)
-    spectrum = Spectrum_CWEPR('widmo4', [], [], 'empty')
-    spectrum.groups = []
-    eleana.dataset.append(spectrum)
-
-
-    # widmo1 należą do grupa_w1 i grupa_w2
-    # widmo2 nalezy do grupa_w1
-    # widmo3 należy do grupa_w2
-    # widmo4 nie nalezy do żadnej
-    # Powinismy dostać {'grupa_w1':[0,1], 'grupa_w2': [0,2]}
-
-    # print('Tak są utworzone kolejne przypuisania do grup')
-    # print(eleana.dataset[0].groups)
-    # print(eleana.dataset[1].groups)
-    # print(eleana.dataset[2].groups)
-    # print(eleana.dataset[3].groups)
-    # print('------------')
-    #print(eleana.dataset)
-    usl = Update()
-    #grupy = usl.create_list_of_data(eleana.dataset)
-    eleana.add_numbers_to_dataset()
+    # #Example spectra
+    # spectrum = Spectrum_CWEPR('widmo1', [], [], 'empty')
+    # spectrum.groups = ['grupa_w1', 'grupa_w2']
+    # eleana.dataset.append(spectrum)
+    # spectrum = Spectrum_CWEPR('widmo2', [], [], 'empty')
+    # spectrum.groups = ['grupa_w1']
+    # eleana.dataset.append(spectrum)
+    # spectrum = Spectrum_CWEPR('widmo3', [], [], 'empty')
+    # spectrum.groups = ['grupa_w2']
+    # eleana.dataset.append(spectrum)
+    # spectrum = Spectrum_CWEPR('widmo4', [], [], 'empty')
+    # spectrum.groups = []
+    # eleana.dataset.append(spectrum)
+    #
+    #
+    # # widmo1 należą do grupa_w1 i grupa_w2
+    # # widmo2 nalezy do grupa_w1
+    # # widmo3 należy do grupa_w2
+    # # widmo4 nie nalezy do żadnej
+    # # Powinismy dostać {'grupa_w1':[0,1], 'grupa_w2': [0,2]}
+    #
+    # # print('Tak są utworzone kolejne przypuisania do grup')
+    # # print(eleana.dataset[0].groups)
+    # # print(eleana.dataset[1].groups)
+    # # print(eleana.dataset[2].groups)
+    # # print(eleana.dataset[3].groups)
+    # # print('------------')
+    # #print(eleana.dataset)
+    # usl = Update()
+    # #grupy = usl.create_list_of_data(eleana.dataset)
+    # eleana.add_numbers_to_dataset()

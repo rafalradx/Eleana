@@ -49,6 +49,9 @@ class EleanaMainApp:
         self.sel_second = builder.get_object("sel_second", self.mainwindow)
         self.sel_result = builder.get_object("sel_result", self.mainwindow)
 
+        self.firstframe = builder.get_object("firstFrame", self.mainwindow)
+
+
     def run(self):
         self.mainwindow.mainloop()
 
@@ -75,9 +78,14 @@ class EleanaMainApp:
 
         if selected_value_text in numbered_names:
             index = numbered_names.index(selected_value_text)
-            print('Wybrane widmo nr: '+str(index))
+
         else:
-             print("nie ma: ", selected_value_text)
+            pass
+        eleana.selections['first'] = index
+        data_for_plot = eleana.dataset[index].get('first')
+        x = data_for_plot['x']
+        y = data_for_plot['y']
+        create_matplotlib_chart(x, y)
 
 
     def second_down_clicked(self):
@@ -108,8 +116,6 @@ class EleanaMainApp:
         # When there is different group selected then take names from this group
         else:
             entries = update.data_in_group_list()
-
-
         # Update values in Comboboxes
         app.sel_first.configure(values=entries)
         app.sel_second.configure(values=entries)
@@ -178,12 +184,12 @@ def quit_application():
 # ----------- Examples and tests ------------------------
 
 # Umieszczenie matplotlib wykresu w app.graphframe
-def create_matplotlib_chart():
+def create_matplotlib_chart(x,y):
     fig = Figure(figsize=(5, 4), dpi=100)
     ax = fig.add_subplot(111)
 
-    x = [1, 2, 3, 4, 5]
-    y = [10, 8, 6, 4, 2]
+    #x = [1, 2, 3, 4, 5]
+    #y = [10, 8, 6, 4, 2]
 
     ax.plot(x, y, label="Przykładowe dane")
     ax.set_xlabel('Oś x')
@@ -195,12 +201,22 @@ def create_matplotlib_chart():
     canvas.get_tk_widget().grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
 
-create_matplotlib_chart()
+
+x = [1, 2, 3, 4, 5]
+y = [10, 8, 6, 4, 2]
+
+
+create_matplotlib_chart(x,y)
 app.graphFrame.columnconfigure(0, weight=1)
 app.graphFrame.rowconfigure(0, weight=1)
 
+
+# Sposób na ukrycie
+#app.sel_first.grid_remove()
+#app.sel_first.grid(row=1, column=0, columnspan=3)
+
 # ----------------- Final configuration and App Start---------------------
-# Configure closing action
+# Configure closing actio
 app.mainwindow.protocol('WM_DELETE_WINDOW', quit_application)
 
 # Run
