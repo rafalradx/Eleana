@@ -3,7 +3,7 @@ import sys
 import numpy as np
 from pathlib import Path
 import tempfile
-#from assets.gui_actions.update_selection_lists import Update
+
 class Eleana():
 
     dataset = []            # <-- This variable keeps all spectra available in Eleana. It is a list of objects
@@ -218,8 +218,6 @@ class Update():
             names.append(name)
             i += 1
         return names
-
-
 
 
     # Creating groups on basis of groups defined in Eleana.dataset

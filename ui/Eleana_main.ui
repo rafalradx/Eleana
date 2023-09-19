@@ -462,7 +462,7 @@
         </child>
         <child>
           <object class="tk.Menuitem.Command" id="menu_quit" named="True">
-            <property name="command" type="command" cbtype="simple">close_application</property>
+            <property name="command" type="command" cbtype="simple">quit</property>
             <property name="font">TkDefaultFont</property>
             <property name="hidemargin">false</property>
             <property name="label" translatable="yes">Quit</property>

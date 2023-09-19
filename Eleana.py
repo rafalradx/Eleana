@@ -4,11 +4,14 @@
 import pathlib
 import subprocess
 import tkinter as tk
+from tkinter import ttk
 from pathlib import Path
 import customtkinter as ctk
 import pygubu
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+import json
+from json import loads, dumps
 
 # Import Eleana specific classes
 from assets.general_eleana_methods import Eleana
@@ -16,9 +19,9 @@ from assets.gui_actions.menu_actions import MenuAction
 from assets.general_eleana_methods import Update
 from assets.subprogs.dialog_quit import QuitDialog
 
-# Create Eleana instances
+# Create Eleana additional instances
 eleana = Eleana()
-menuAction: MenuAction = MenuAction()
+menuAction = MenuAction()
 update = Update()
 
 PROJECT_PATH = pathlib.Path(__file__).parent
@@ -87,7 +90,6 @@ class EleanaMainApp:
         y = data_for_plot['y']
         create_matplotlib_chart(x, y)
 
-
     def second_down_clicked(self):
         pass
 
@@ -124,12 +126,8 @@ class EleanaMainApp:
         while i < len(eleana.dataset):
             eleana.dataset[i].name
             i += 1
-    # --- Quit
-    #def quit(self):
-    #    close_application()
 
-    #def close_application(self):
-    #    exit()
+    # --- Quit (also window close by clicking on X)
     def close_application(self):
         # Display dialog window created in dialog_quit.py
         def quit_button_clicked():
@@ -145,10 +143,12 @@ class EleanaMainApp:
     # EDIT Menu:
     #   Notes
     def notes(self):
-        menuAction.notes()
+        filename=menuAction.notes()
+        print(filename)
         # Grab result
-        file_back = eleana.read_tmp_file(self, filename)
-        eleana.notes = json.loads(file_back)
+
+        file_back = eleana.read_tmp_file(filename)
+        Eleana.notes = json.loads(file_back)
 
 
 # ----------------------- Start GUI  --------------------------------
@@ -174,7 +174,6 @@ app.mainwindow.iconphoto(True, main_icon)
 # Set color motive for GUI
 ctk.set_default_color_theme("dark-blue")
 
-
 # ---------------------- Set default values in GUI -------
 app.sel_group.configure(values=['All'])
 app.sel_group.set('All')
@@ -185,27 +184,6 @@ app.sel_second.set('None')
 app.sel_result.configure(values=['None', 'yes'])
 app.sel_result.set('None')
 
-# -----------------------Set important variables ---------
-
-# def close_application():
-#     # Display dialog window created in dialog_quit.py
-#     def quit_button_clicked():
-#         # This closes the pop-up window and then main application
-#         dialog_quit.window.destroy()
-#         app.mainwindow.destroy()
-#     # Create instance of the dialog window
-#     dialog_quit = QuitDialog(master=app.mainwindow)
-#     # Define function called after clicking quit_button
-#     dialog_quit.btn_quit.configure(command=quit_button_clicked)
-
-
-
-    # subprocess_path = Path(eleana.paths['assets'], 'subprogs', 'dialog_quit.py')
-    #
-    # decission = subprocess.run(["python3.10", subprocess_path], capture_output=True, text=True)
-    # print(decission.stdout[:4])
-    # if decission.stdout[:4] == "quit":
-    #     app.mainwindow.destroy()
 
 
 # ----------- Examples and tests ------------------------

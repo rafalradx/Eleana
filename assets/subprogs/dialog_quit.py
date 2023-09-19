@@ -9,7 +9,7 @@ class QuitDialog:
         toplevel1 = tk.Tk() if master is None else tk.Toplevel(master)
         toplevel1.configure(height=200, padx=10, pady=10, width=200)
         toplevel1.title("Quit")
-        ctklabel1 = CTkLabel(toplevel1)
+        ctklabel1 = CTkLabel(toplevel1, font=("Verdana", 12))
         ctklabel1.configure(
             justify="center",
             text='Do you really want to quit?')
