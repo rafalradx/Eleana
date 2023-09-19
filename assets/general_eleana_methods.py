@@ -3,7 +3,7 @@ import sys
 import numpy as np
 from pathlib import Path
 import tempfile
-from assets.gui_actions.update_selection_lists import Update
+#from assets.gui_actions.update_selection_lists import Update
 class Eleana():
 
     dataset = []            # <-- This variable keeps all spectra available in Eleana. It is a list of objects
@@ -102,11 +102,16 @@ class Eleana():
 # --- DATA OBJECTS CONSTUCTORS ---
 class GeneralDataTemplate():
     name = ''
-    groups = ['All', 'Grupa2', 'Grupa3']
+    name_nr = ''
+    groups = ['All']
     is_complex = False
     type = ''
     origin = ''
     comments = Eleana.notes
+
+    def numbered_name(self):
+        numbered_name = number + '. ' + self.name
+        return numbered_name
 
 class Spectrum_CWEPR(GeneralDataTemplate):     # Class constructor for single CW EPR data
 
@@ -146,6 +151,86 @@ class Spectrum_CWEPR(GeneralDataTemplate):     # Class constructor for single CW
 
         self.x = np.array(x_axis)
         self.y = np.array(dta)
+
+class Update():
+
+    def dataset_list(self) -> list:
+        # This function is used to create list of data for all
+        names_numbered = ['None']
+        i = 0
+        for data in Eleana.dataset:
+            number = str(i+1)
+            name_number = number + '. ' + data.name
+            names_numbered.append(name_number)
+            i += 1
+
+        i = 0
+        while i < len(Eleana.dataset):
+            Eleana.dataset[i].name_nr = names_numbered[i+1]
+            i += 1
+        #return names_numbered
+
+    # def data_in_group_list(self, dataset: list, eleana_selections: dict, assignmentToGroups: dict):
+    #     # This function is used to create list of data that belongs to the group which is currently selected
+    #
+    #     # WYMAGA TESTOWANIA
+    #
+    #     names_numbered = self.dataset_list()
+    #     group = eleana_selections['group']
+    #     data_list = assignmentToGroups[group]
+    #     for index in data_list:
+    #         name = names_numbered[index]
+    #         names.append(name)
+    #     return names
+
+
+
+    def results_list(self, results):
+        names = []
+        i = 1
+        for data in dataset:
+            name = data.name
+            name = str(i) + ". " + name
+            names.append(name)
+            i += 1
+        return names
+
+        #     for name in names:
+        #         name = str(i) + '. ' + name
+        #         names = names + name
+        #     #name.append(data.name)
+        # print(names)
+
+
+    # Creating groups on basis of groups defined in Eleana.dataset
+    def groups(self, dataset):
+        found_groups = set()
+        self.groups = []
+        for data in dataset:
+            self.groups.extend(data.groups)
+        found_groups.update(self.groups)
+
+        self.assignToGroups ={}
+        for group_name in found_groups:
+
+            i = 0
+            spectra_numbers = []
+            while i < len(dataset):
+                groups_in_single_spectrum = dataset[i].groups
+                if group_name in groups_in_single_spectrum:
+                    spectra_numbers.append(i)
+                i += 1
+            self.assignToGroups[group_name] = spectra_numbers
+        return self.assignToGroups
+
+
+    def firstComobox(self, selections: dict, groups: dict):
+
+
+        pass
+
+
+
 
 if __name__ == "__main__":
     eleana = Eleana()

@@ -13,7 +13,7 @@ from matplotlib.figure import Figure
 # Import Eleana specific classes
 from assets.general_eleana_methods import Eleana
 from assets.gui_actions.menu_actions import MenuAction
-from assets.gui_actions.update_selection_lists import Update
+from assets.general_eleana_methods import Update
 
 # Create Eleana instances
 eleana = Eleana()
@@ -68,7 +68,17 @@ class EleanaMainApp:
         pass
 
     def first_selected(self, value):
-        pass
+        selected_value_text = app.sel_first.get()
+        numbered_names = []
+        for each in eleana.dataset:
+            numbered_names.append(each.name_nr)
+
+        if selected_value_text in numbered_names:
+            index = numbered_names.index(selected_value_text)
+            print('Wybrane widmo nr: '+str(index))
+        else:
+             print("nie ma: ", selected_value_text)
+
 
     def second_down_clicked(self):
         pass
@@ -90,16 +100,24 @@ class EleanaMainApp:
 
         # When selected group is 'All' or 'all' (case insensitive) then get names of whole dataset (func. update.dataset_list)
         if eleana.selections['group'] == 'All':
-            entries = update.dataset_list(eleana.dataset)
+            update.dataset_list()
+            entries = ['None']
+            for each in eleana.dataset:
+                entries.append(each.name_nr)
+            print(entries)
         # When there is different group selected then take names from this group
         else:
-            entries = update.data_in_group_list(eleana.dataset, eleana.assignmentToGroups)
+            entries = update.data_in_group_list()
+
 
         # Update values in Comboboxes
         app.sel_first.configure(values=entries)
         app.sel_second.configure(values=entries)
 
-
+        i = 0
+        while i < len(eleana.dataset):
+            eleana.dataset[i].name
+            i += 1
     # --- Quit
     def quit(self):
         quit_application()
