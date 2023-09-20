@@ -66,6 +66,7 @@
                 </containerlayout>
                 <child>
                   <object class="customtkinter.CTkLabel" id="lbl_group" named="True">
+                    <property name="font">{Arial} 12 {}</property>
                     <property name="text" translatable="yes">Group</property>
                     <layout manager="grid">
                       <property name="column">0</property>
@@ -113,7 +114,7 @@
                     <property name="border_color">#aaaaaa</property>
                     <property name="button_color">#aaaaaa</property>
                     <property name="command" type="command" cbtype="simple">group_selected</property>
-                    <property name="fg_color">#aaaaaa</property>
+                    <property name="font">{Arial} 12 {}</property>
                     <property name="values">['None']</property>
                     <property name="variable">string:group</property>
                     <layout manager="grid">
@@ -139,6 +140,7 @@
                 </containerlayout>
                 <child>
                   <object class="customtkinter.CTkLabel" id="lbl_first" named="True">
+                    <property name="font">{Arial} 12 {}</property>
                     <property name="text" translatable="yes">First</property>
                     <layout manager="grid">
                       <property name="column">0</property>
@@ -186,7 +188,8 @@
                     <property name="border_color">#ec5411</property>
                     <property name="button_color">#ec5411</property>
                     <property name="command" type="command" cbtype="simple">first_selected</property>
-                    <property name="fg_color">#ec5411</property>
+                    <property name="corner_radius">6</property>
+                    <property name="font">{Arial} 12 {}</property>
                     <property name="values">['None']</property>
                     <layout manager="grid">
                       <property name="column">0</property>
@@ -211,6 +214,7 @@
                 </containerlayout>
                 <child>
                   <object class="customtkinter.CTkLabel" id="lbl_second" named="True">
+                    <property name="font">{Arial} 12 {}</property>
                     <property name="text" translatable="yes">Second</property>
                     <layout manager="grid">
                       <property name="column">0</property>
@@ -258,7 +262,7 @@
                     <property name="border_color">#3473d9</property>
                     <property name="button_color">#3473d9</property>
                     <property name="command" type="command" cbtype="simple">first_selected</property>
-                    <property name="fg_color">#3473d9</property>
+                    <property name="font">{Arial} 12 {}</property>
                     <layout manager="grid">
                       <property name="column">0</property>
                       <property name="columnspan">3</property>
@@ -282,6 +286,7 @@
                 </containerlayout>
                 <child>
                   <object class="customtkinter.CTkLabel" id="lbl_Results" named="True">
+                    <property name="font">{Arial} 12 {}</property>
                     <property name="text" translatable="yes">Result</property>
                     <layout manager="grid">
                       <property name="column">0</property>
@@ -329,7 +334,7 @@
                     <property name="border_color">#348b4c</property>
                     <property name="button_color">#348b4c</property>
                     <property name="command" type="command" cbtype="simple">first_selected</property>
-                    <property name="fg_color">#348b4c</property>
+                    <property name="font">{Arial} 12 {}</property>
                     <layout manager="grid">
                       <property name="column">0</property>
                       <property name="columnspan">3</property>
@@ -344,6 +349,8 @@
         </child>
         <child>
           <object class="customtkinter.CTkFrame" id="graphFrame" named="True">
+            <property name="corner_radius">0</property>
+            <property name="fg_color">#ffffff</property>
             <layout manager="grid">
               <property name="column">1</property>
               <property name="row">0</property>

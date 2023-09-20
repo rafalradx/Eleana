@@ -32,8 +32,7 @@ class QuitDialog:
     #    self.mainwindow.mainloop()
 
     def quit_appication(self):
-        choice = 'yes'
-        return choice
+        self.window.destroy()
 
     def cancel_quit(self):
         self.window.destroy()

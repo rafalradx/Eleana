@@ -162,7 +162,7 @@ class Spectrum_CWEPR(GeneralDataTemplate):     # Class constructor for single CW
         self.x = np.array(x_axis)
         self.y = np.array(dta)
 
-class Spectrum_CWEPR_stack(GeneralDataTemplate):
+class Spectrum_CWEPR_stack(Spectrum_CWEPR):
     def __init__(self, name, x_axis: list, dta: list, dsc: dict, ygf):
         self.name = name
         self.x_axis = x_axis
@@ -176,6 +176,9 @@ class Spectrum_CWEPR_stack(GeneralDataTemplate):
         print(dsc)
         print(ygf)
         exit()
+
+
+
 class Update():
 
     def dataset_list(self) -> list:

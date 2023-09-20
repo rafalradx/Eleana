@@ -1,14 +1,10 @@
-x_axis = []
-i = 0
-x_min = 150
-x_wid = 3500
-res = 4096
+import tkinter as tk
+from tkinter import ttk
+from tkinter import messagebox
 
-step = x_wid/res
-print(step)
+root = tk.Tk()
+root.title('Tytuł')
+root.geometry('300x300')
 
-for i in range(0,res):
-    x_axis.append(i*step+x_min)
 
-print(x_axis)
-print(len(x_axis))
+root.mainloop()
