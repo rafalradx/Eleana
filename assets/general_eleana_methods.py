@@ -143,7 +143,6 @@ class Spectrum_CWEPR(GeneralDataTemplate):     # Class constructor for single CW
         self.x = x_axis
         self.y = dta
         self.name = name
-        #self.groups = ['All']
         self.complex = False
         self.type = 'single 2D'
         self.origin = 'CW EPR'
@@ -155,6 +154,7 @@ class Spectrum_CWEPR(GeneralDataTemplate):     # Class constructor for single CW
                 value = dsc[bruker_key]
                 value = value.split(' ')
                 value_txt = value[0]
+                value_txt = value_txt.replace("'", "")
                 self.parameters[key] = value_txt
             except:
                 pass
@@ -162,21 +162,44 @@ class Spectrum_CWEPR(GeneralDataTemplate):     # Class constructor for single CW
         self.x = np.array(x_axis)
         self.y = np.array(dta)
 
-class Spectrum_CWEPR_stack(Spectrum_CWEPR):
+class Spectra_CWEPR_stack(Spectrum_CWEPR):
+
     def __init__(self, name, x_axis: list, dta: list, dsc: dict, ygf):
+        super().__init__(name, x_axis, dta, dsc)
         self.name = name
         self.x_axis = x_axis
         self.dta = dta
         self.dsc = dsc
         self.ygf = ygf
+        parameters = self.parameters
 
-        print(self.name)
-        print(x_axis)
-        print(dta)
-        print(dsc)
-        print(ygf)
+        fill_missing_keys = ['name_z', 'unit_z']
+        for key in fill_missing_keys:
+            try:
+                bruker_key = Eleana.dsc2eleana[key]
+                value = dsc[bruker_key]
+                value = value.split(' ')
+                value_txt = value[0]
+                value_txt = value_txt.replace("'", "")
+                parameters[key] = value_txt
+            except:
+                pass
+
+        # Divide y into list of spectra amplitudes:
+
+        length_of_one = len(x_axis)
+        list_of_y = []
+        i = 0
+        while i < len(ygf):
+            spectrum = dta[i*length_of_one:(i+1)*length_of_one]
+            list_of_y.append(spectrum)
+            i += 1
+
+        list_of_y_array = np.array(list_of_y)
+
+        print(list_of_y_array[2])
         exit()
-
+        # TUTAJ SKOŃCZYLEM
 
 
 class Update():

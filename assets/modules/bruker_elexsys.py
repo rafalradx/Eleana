@@ -1,7 +1,7 @@
 import numpy as np
 from pathlib import Path, PurePath
 import re
-from assets.general_eleana_methods import Spectrum_CWEPR
+from assets.general_eleana_methods import *
 
 test_file = '../../Example_data/Elexsys/cw.DSC'
 class Elexsys():
@@ -89,7 +89,7 @@ class Elexsys():
             return cw_spectrum # <--- Return object based on Spectrum_CWEPR
 
         elif dsc['YTYP'] != 'NODATA' and dsc['EXPT'] == 'CW':
-            cw_stack = Spectrum_CWEPR_stack(filename[:-4], x_axis, dta, dsc, ygf)   # <-- This will create stacked CW EPR spectra
+            cw_stack = Spectra_CWEPR_stack(filename[:-4], x_axis, dta, dsc, ygf)   # <-- This will create stacked CW EPR spectra
 
 
         elif dsc['IKKF'] != 'REAL':
