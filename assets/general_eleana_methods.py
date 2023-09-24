@@ -7,7 +7,7 @@ import tempfile
 class Eleana():
 
     dataset = []            # <-- This variable keeps all spectra available in Eleana. It is a list of objects
-    set_result = []         # <-- This keeps data containing results
+    results_dataset = []         # <-- This keeps data containing results
     assignmentToGroups = {} # <-- This keeps information about which data from dataset is assigned to particular group
     groupsHierarchy = {}    # <-- This store information about which group belongs to other
 
@@ -99,22 +99,30 @@ class Eleana():
         return file_content  #
 
 
-
 # --- DATA OBJECTS CONSTUCTORS ---
 class GeneralDataTemplate():
+    # Name of the data
     name = ''
+    # The number and name ex. 2. CW-EPR_heme_bL
     name_nr = ''
+    # Names of groups to which this data belongs
     groups = ['All']
-    is_complex = False
+    # If spectrum is complex numbers set to TRUE
+    complex = False
+    # This defines data type: '2D_stack'
+    # Empty or 'single 2D'  - single 2D spectrum
+    # 'stack 2D' - stack of 2D spectra
     type = ''
+    # Optional - origin specifies how the spectrum was created: for example CWEPR
     origin = ''
+    # Contains various comments
     comments = Eleana.notes
 
     def get(self, which: str):
         selection = Eleana.selections
         data = Eleana.dataset[selection[which]]
         # Not complex
-        if data.is_complex:
+        if data.complex:
             # Utwórz dane complex
 
             return x,y
@@ -146,7 +154,7 @@ class Spectrum_CWEPR(GeneralDataTemplate):     # Class constructor for single CW
         self.name = name
         self.complex = False
         self.type = 'single 2D'
-        self.origin = 'CW EPR'
+        self.origin = 'CWEPR'
 
         fill_missing_keys =['title','MwFreq','ModAmp','ModFreq','SweepTime','ConvTime','TimeConst','Power','PowAtten']
         for key in fill_missing_keys:
@@ -173,6 +181,7 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         self.dsc = dsc
         self.ygf = ygf
         parameters = self.parameters
+        parameters['stk_names'] = []
 
         fill_missing_keys = ['name_z', 'unit_z']
         for key in fill_missing_keys:
@@ -187,7 +196,6 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
                 pass
 
         # Divide y into list of spectra amplitudes:
-
         length_of_one = len(x_axis)
         list_of_y = []
         i = 0
@@ -198,9 +206,35 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
 
         list_of_y_array = np.array(list_of_y)
 
-        print(list_of_y_array[2])
-        exit()
-        # TUTAJ SKOŃCZYLEM
+        # Create in stack names:
+        for each in ygf:
+            name = parameters['name_z'] + ' ' + str(each) + ' ' + parameters['unit_z'] + ''
+            parameters['stk_names'].append(name)
+
+        self.y = list_of_y_array
+        self.type = 'stack 2D'
+        self.complex = False
+        self.origin = 'CWEPR'
+
+class Spectrum_complex(GeneralDataTemplate):
+    def __init__(self, name, x_axis: list, dta: list, dsc: dict):
+        #super().__init__(name, x_axis, dta, dsc)
+        self.name = name
+        self.x_axis = x_axis
+        self.dta = dta
+        self.dsc = dsc
+
+        length = len(dta)/2
+        reY = []
+        imY = []
+
+        i = 0
+        while i < length:
+            reY.append(dsc[i])
+            imY.append(dsc[i+1])
+            i += 1
+
+        self.y = reY + 1j * imY
 
 
 class Update():
@@ -221,20 +255,76 @@ class Update():
             i += 1
         #return names_numbered
 
-    # def data_in_group_list(self, dataset: list, eleana_selections: dict, assignmentToGroups: dict):
-    #     # This function is used to create list of data that belongs to the group which is currently selected
-    #
-    #     # WYMAGA TESTOWANIA
-    #
-    #     names_numbered = self.dataset_list()
-    #     group = eleana_selections['group']
-    #     data_list = assignmentToGroups[group]
-    #     for index in data_list:
-    #         name = names_numbered[index]
-    #         names.append(name)
-    #     return names
+    def selections_widgets(self, app: object):
+        selections = Eleana.selections
+        first_nr = selections['first']
+        try:
+            first = Eleana.dataset[first_nr]
+            f_stk = selections['f_stk']
+        except IndexError:
+            selections['first'] = 0
+            selections['f_stk'] = 0
+            f_stk = selections['f_stk']
 
+        second_nr = selections['second']
+        try:
+            second = Eleana.dataset[second_nr]
+            s_stk = selections['s_stk']
+        except IndexError:
+            selections['second'] = 0
+            selections['s_stk'] = 0
+            s_stk = selections['s_stk']
 
+        result_nr = selections['result']
+        try:
+            result = Eleana.results_dataset[result_nr]
+            r_stk = selections['r_stk']
+        except IndexError:
+            selections['result'] = 0
+            selections['r_stk'] = 0
+
+        # Show or hide widgets
+        if len(Eleana.results_dataset) == 0:
+            app.resultFrame.grid_remove()
+
+        # Upadte FIRST frame
+        if len(Eleana.dataset) == 0 or first.type != "stack 2D":
+            app.firstStkFrame.grid_remove()
+            app.firstComplex.grid_remove()
+
+        elif first.type == "stack 2D":
+            app.firstStkFrame.grid(row=2, column=0)
+            app.f_stk.configure(values=first.parameters['stk_names'])
+        try:
+            if first.complex:
+                app.firstComplex.grid()
+        except:
+            pass
+
+        # Update SECOND frame
+        if len(Eleana.dataset) == 0 or second.type != "stack 2D":
+            app.secondStkFrame.grid_remove()
+            app.secondImaginary.grid_remove()
+
+        elif second.type == "stack 2D":
+            app.secondStkFrame.grid(row=2, column=0)
+            app.s_stk.configure(values=second.parameters['stk_names'])
+        try:
+            if second.complex:
+                app.secondImaginary.grid()
+        except:
+            pass
+
+        # Update RESULT frame
+        if len(Eleana.dataset) == 0 or result.type != "stack 2D":
+            app.resultStkFrame.grid_remove()
+            app.resultImaginary.grid_remove()
+
+        elif second.type == "stack 2D":
+            app.resultStkFrame.grid(row=2, column=0)
+            app.r_stk.configure(values=result.parameters['stk_names'])
+            if result.complex:
+                app.resultImaginary.grid()
 
     def results_list(self, results):
         names = []
@@ -270,44 +360,8 @@ class Update():
 
 
     def firstComobox(self, selections: dict, groups: dict):
-
-
         pass
-
-
 
 
 if __name__ == "__main__":
     eleana = Eleana()
-
-    # #Example spectra
-    # spectrum = Spectrum_CWEPR('widmo1', [], [], 'empty')
-    # spectrum.groups = ['grupa_w1', 'grupa_w2']
-    # eleana.dataset.append(spectrum)
-    # spectrum = Spectrum_CWEPR('widmo2', [], [], 'empty')
-    # spectrum.groups = ['grupa_w1']
-    # eleana.dataset.append(spectrum)
-    # spectrum = Spectrum_CWEPR('widmo3', [], [], 'empty')
-    # spectrum.groups = ['grupa_w2']
-    # eleana.dataset.append(spectrum)
-    # spectrum = Spectrum_CWEPR('widmo4', [], [], 'empty')
-    # spectrum.groups = []
-    # eleana.dataset.append(spectrum)
-    #
-    #
-    # # widmo1 należą do grupa_w1 i grupa_w2
-    # # widmo2 nalezy do grupa_w1
-    # # widmo3 należy do grupa_w2
-    # # widmo4 nie nalezy do żadnej
-    # # Powinismy dostać {'grupa_w1':[0,1], 'grupa_w2': [0,2]}
-    #
-    # # print('Tak są utworzone kolejne przypuisania do grup')
-    # # print(eleana.dataset[0].groups)
-    # # print(eleana.dataset[1].groups)
-    # # print(eleana.dataset[2].groups)
-    # # print(eleana.dataset[3].groups)
-    # # print('------------')
-    # #print(eleana.dataset)
-    # usl = Update()
-    # #grupy = usl.create_list_of_data(eleana.dataset)
-    # eleana.add_numbers_to_dataset()

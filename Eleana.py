@@ -19,6 +19,7 @@ from assets.gui_actions.menu_actions import MenuAction
 from assets.general_eleana_methods import Update
 from assets.subprogs.dialog_quit import QuitDialog
 
+
 # Create Eleana additional instances
 eleana = Eleana()
 menuAction = MenuAction()
@@ -34,6 +35,7 @@ class EleanaMainApp:
         builder.add_from_file(PROJECT_UI)
         # Main widget
         self.mainwindow = builder.get_object("Eleana", master)
+        self.mainwindow.withdraw()
 
         # Main menu
         _main_menu = builder.get_object("mainmenu", self.mainwindow)
@@ -46,7 +48,6 @@ class EleanaMainApp:
         builder.connect_callbacks(self)
         # END OF PYGUBU BUILDER
 
-
         # Create references to Widgets and Frames
         self.sel_group = builder.get_object("sel_group", self.mainwindow)
         self.sel_first = builder.get_object("sel_first", self.mainwindow)
@@ -54,15 +55,17 @@ class EleanaMainApp:
         self.sel_result = builder.get_object("sel_result", self.mainwindow)
         self.firstFrame = builder.get_object("firstFrame", self.mainwindow)
         self.resultFrame = builder.get_object("resultFrame", self.mainwindow)
-
+        self.resultStkFrame = builder.get_object("resultStkFrame", self.mainwindow)
         self.firstStkFrame =  builder.get_object("firstStkFrame", self.mainwindow)
         self.secondStkFrame = builder.get_object("secondStkFrame", self.mainwindow)
-        self.firstImaginary = builder.get_object("firstImaginary", self.mainwindow)
+        self.firstComplex = builder.get_object("firstComplex", self.mainwindow)
         self.secondImaginary = builder.get_object("secondImaginary", self.mainwindow)
+        self.resultImaginary = builder.get_object("resultImaginary", self.mainwindow)
         self.graphFrame = builder.get_object('graphFrame', self.mainwindow)
-
+        self.f_stk = builder.get_object('f_stk', self.mainwindow)
+        self.s_stk = builder.get_object('s_stk', self.mainwindow)
     def run(self):
-
+        self.mainwindow.deiconify()
         self.mainwindow.mainloop()
 
     def group_down_clicked(self):
@@ -92,10 +95,33 @@ class EleanaMainApp:
         else:
             pass
         eleana.selections['first'] = index
+        update.selections_widgets(app)
+
         data_for_plot = eleana.dataset[index].get('first')
-        x = data_for_plot['x']
-        y = data_for_plot['y']
-        create_matplotlib_chart(x, y)
+        # x = data_for_plot['x']
+        # y = data_for_plot['y']
+        # create_matplotlib_chart(x, y)
+
+    def second_selected(self, value):
+        selected_value_text = app.sel_second.get()
+        numbered_names = []
+        for each in eleana.dataset:
+            numbered_names.append(each.name_nr)
+
+        if selected_value_text in numbered_names:
+            index = numbered_names.index(selected_value_text)
+
+        else:
+            pass
+        eleana.selections['second'] = index
+        update.selections_widgets(app)
+
+        data_for_plot = eleana.dataset[index].get('second')
+        # x = data_for_plot['x']
+        # y = data_for_plot['y']
+        # create_matplotlib_chart(x, y)
+
+
 
     def second_down_clicked(self):
         pass
@@ -160,12 +186,6 @@ class EleanaMainApp:
 
 # ----------------------- Start GUI  --------------------------------
 app = EleanaMainApp()
-# Hide widgets at application start
-app.resultFrame.grid_remove()
-app.firstStkFrame.grid_remove()
-app.secondStkFrame.grid_remove()
-app.firstImaginary.grid_remove()
-app.secondImaginary.grid_remove()
 
 # -----------------------Set geometry and icon ----------------------
 width = app.mainwindow.winfo_screenwidth()  # Get screen width
@@ -188,6 +208,10 @@ app.sel_second.configure(values=['None'])
 app.sel_second.set('None')
 app.sel_result.configure(values=['None', 'yes'])
 app.sel_result.set('None')
+
+# Hide widgets at application start
+update.selections_widgets(app)
+
 
 
 

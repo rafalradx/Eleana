@@ -5,7 +5,6 @@ from assets.general_eleana_methods import *
 
 test_file = '../../Example_data/Elexsys/cw.DSC'
 class Elexsys():
-
     def read(self, filename: str) -> object:
         elexsys_DTA = Path(filename[:-3]+'DTA')
         elexsys_DSC = Path(filename[:-3]+'DSC')
@@ -83,6 +82,11 @@ class Elexsys():
         # Now create object containing particular type of data
 
         filename = Path(filename).name
+        try:
+            val = dsc['EXPT']
+        except:
+            dsc['EXPT'] = 'none'
+
         if dsc['YTYP'] == 'NODATA' and dsc['EXPT'] == 'CW':
             # This will create single CW EPR spectrum
             cw_spectrum = Spectrum_CWEPR(filename[:-4], x_axis, dta, dsc)
@@ -90,10 +94,13 @@ class Elexsys():
 
         elif dsc['YTYP'] != 'NODATA' and dsc['EXPT'] == 'CW':
             cw_stack = Spectra_CWEPR_stack(filename[:-4], x_axis, dta, dsc, ygf)   # <-- This will create stacked CW EPR spectra
-
+            return cw_stack
 
         elif dsc['IKKF'] != 'REAL':
-            self.create_complex_EPR_data()
+            spectrum_complex = Spectrum_complex(filename[:-4], x_axis, dta, dsc)
+            return spectrum_complex
+
+
 
 if __name__ == "__main__":
     elexsys = Elexsys()
