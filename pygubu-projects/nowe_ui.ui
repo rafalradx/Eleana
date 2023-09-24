@@ -110,7 +110,8 @@
                                           <property type="col" id="0" name="weight">1</property>
                                         </containerlayout>
                                         <child>
-                                          <object class="customtkinter.CTkButton" id="ctkbutton42" named="True">
+                                          <object class="customtkinter.CTkButton" id="btn_group_up" named="True">
+                                            <property name="command" type="command" cbtype="simple">group_up_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#799da2</property>
                                             <property name="font">{Arial} 12 {bold}</property>
@@ -127,7 +128,8 @@
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkButton" id="ctkbutton43" named="True">
+                                          <object class="customtkinter.CTkButton" id="btn_group_down" named="True">
+                                            <property name="command" type="command" cbtype="simple">group_down_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#799da2</property>
                                             <property name="font">{Arial} 12 {bold}</property>
@@ -144,8 +146,8 @@
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkLabel" id="ctklabel23">
-                                            <property name="text" translatable="yes">Gropus</property>
+                                          <object class="ttk.Label" id="label1">
+                                            <property name="text" translatable="yes">Group</property>
                                             <layout manager="grid">
                                               <property name="column">0</property>
                                               <property name="row">0</property>
@@ -156,8 +158,9 @@
                                       </object>
                                     </child>
                                     <child>
-                                      <object class="customtkinter.CTkComboBox" id="ctkcombobox22" named="True">
+                                      <object class="customtkinter.CTkComboBox" id="sel_group" named="True">
                                         <property name="button_color">#799da2</property>
+                                        <property name="command" type="command" cbtype="simple">group_selected</property>
                                         <property name="corner_radius">0</property>
                                         <property name="dropdown_text_font">{Arial} 12 {}</property>
                                         <property name="font">{Arial} 12 {}</property>
@@ -204,7 +207,8 @@
                                           <property type="col" id="0" name="weight">1</property>
                                         </containerlayout>
                                         <child>
-                                          <object class="customtkinter.CTkButton" id="ctkbutton44" named="True">
+                                          <object class="customtkinter.CTkButton" id="btn_first_up" named="True">
+                                            <property name="command" type="command" cbtype="simple">first_up_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#c6484c</property>
                                             <property name="font">{Arial} 12 {bold}</property>
@@ -221,7 +225,8 @@
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkButton" id="ctkbutton45" named="True">
+                                          <object class="customtkinter.CTkButton" id="btn_first_down" named="True">
+                                            <property name="command" type="command" cbtype="simple">first_down_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#c6484c</property>
                                             <property name="font">{Arial} 12 {bold}</property>
@@ -238,8 +243,7 @@
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkLabel" id="ctklabel24">
-                                            <property name="fg_color">#DCDAD5</property>
+                                          <object class="ttk.Label" id="label2">
                                             <property name="text" translatable="yes">First</property>
                                             <layout manager="grid">
                                               <property name="column">0</property>
@@ -251,9 +255,10 @@
                                       </object>
                                     </child>
                                     <child>
-                                      <object class="customtkinter.CTkComboBox" id="ctkcombobox23" named="True">
+                                      <object class="customtkinter.CTkComboBox" id="sel_first" named="True">
                                         <property name="border_color">#c6484c</property>
                                         <property name="button_color">#c6484c</property>
+                                        <property name="command" type="command" cbtype="simple">first_selected</property>
                                         <property name="corner_radius">0</property>
                                         <property name="dropdown_text_font">{Arial} 12 {}</property>
                                         <property name="font">{Arial} 12 {}</property>
@@ -299,6 +304,7 @@
                                           <object class="customtkinter.CTkComboBox" id="ctkcombobox24">
                                             <property name="border_color">#c6484c</property>
                                             <property name="button_color">#c6484c</property>
+                                            <property name="command" type="command" cbtype="simple">f_stk_selected</property>
                                             <property name="corner_radius">0</property>
                                             <property name="dropdown_text_font">{Arial} 12 {}</property>
                                             <property name="font">{Arial} 12 {}</property>
@@ -419,7 +425,8 @@
                                           <property type="col" id="0" name="weight">1</property>
                                         </containerlayout>
                                         <child>
-                                          <object class="customtkinter.CTkButton" id="ctkbutton49" named="True">
+                                          <object class="customtkinter.CTkButton" id="btn_second_up" named="True">
+                                            <property name="command" type="command" cbtype="simple">second_up_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#20acdc</property>
                                             <property name="font">{Arial} 12 {bold}</property>
@@ -436,7 +443,8 @@
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkButton" id="ctkbutton50" named="True">
+                                          <object class="customtkinter.CTkButton" id="btn_second_down" named="True">
+                                            <property name="command" type="command" cbtype="simple">second_down_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#20acdc</property>
                                             <property name="font">{Arial} 12 {bold}</property>
@@ -453,8 +461,10 @@
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkLabel" id="ctklabel26">
-                                            <property name="fg_color">#DCDAD5</property>
+                                          <object class="ttk.Label" id="label3">
+                                            <property name="compound">right</property>
+                                            <property name="foreground">#000000</property>
+                                            <property name="state">disabled</property>
                                             <property name="text" translatable="yes">Second</property>
                                             <layout manager="grid">
                                               <property name="column">0</property>
@@ -466,9 +476,10 @@
                                       </object>
                                     </child>
                                     <child>
-                                      <object class="customtkinter.CTkComboBox" id="ctkcombobox25" named="True">
+                                      <object class="customtkinter.CTkComboBox" id="sel_second" named="True">
                                         <property name="border_color">#20acdc</property>
                                         <property name="button_color">#20acdc</property>
+                                        <property name="command" type="command" cbtype="simple">second_selected</property>
                                         <property name="corner_radius">0</property>
                                         <property name="dropdown_text_font">{Arial} 12 {}</property>
                                         <property name="font">{Arial} 12 {}</property>
@@ -512,9 +523,10 @@
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkComboBox" id="ctkcombobox26">
+                                          <object class="customtkinter.CTkComboBox" id="s_skt" named="True">
                                             <property name="border_color">#20acdc</property>
                                             <property name="button_color">#20acdc</property>
+                                            <property name="command" type="command" cbtype="simple">s_stk_selected</property>
                                             <property name="corner_radius">0</property>
                                             <property name="dropdown_text_font">{Arial} 12 {}</property>
                                             <property name="font">{Arial} 12 {}</property>
@@ -613,7 +625,8 @@
                                           <property type="col" id="0" name="weight">1</property>
                                         </containerlayout>
                                         <child>
-                                          <object class="customtkinter.CTkButton" id="ctkbutton53" named="True">
+                                          <object class="customtkinter.CTkButton" id="btn_result_up" named="True">
+                                            <property name="command" type="command" cbtype="simple">result_up_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#3c9b59</property>
                                             <property name="font">{Arial} 12 {}</property>
@@ -630,7 +643,8 @@
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkButton" id="ctkbutton54" named="True">
+                                          <object class="customtkinter.CTkButton" id="btn_result_down" named="True">
+                                            <property name="command" type="command" cbtype="simple">result_down_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#3c9b59</property>
                                             <property name="font">{Arial} 12 {}</property>
@@ -656,12 +670,23 @@
                                             </layout>
                                           </object>
                                         </child>
+                                        <child>
+                                          <object class="ttk.Label" id="label4">
+                                            <property name="text" translatable="yes">Result</property>
+                                            <layout manager="grid">
+                                              <property name="column">0</property>
+                                              <property name="row">0</property>
+                                              <property name="sticky">w</property>
+                                            </layout>
+                                          </object>
+                                        </child>
                                       </object>
                                     </child>
                                     <child>
-                                      <object class="customtkinter.CTkComboBox" id="ctkcombobox27" named="True">
+                                      <object class="customtkinter.CTkComboBox" id="sel_result" named="True">
                                         <property name="border_color">#3c9b59</property>
                                         <property name="button_color">#3c9b59</property>
+                                        <property name="command" type="command" cbtype="simple">result_selected</property>
                                         <property name="corner_radius">0</property>
                                         <property name="font">{Arial} 12 {}</property>
                                         <layout manager="grid">
@@ -704,9 +729,10 @@
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkComboBox" id="ctkcombobox28">
+                                          <object class="customtkinter.CTkComboBox" id="r_st" named="True">
                                             <property name="border_color">#3c9b59</property>
                                             <property name="button_color">#3c9b59</property>
+                                            <property name="command" type="command" cbtype="simple">r_stk_selected</property>
                                             <property name="corner_radius">0</property>
                                             <property name="font">{Arial} 12 {}</property>
                                             <layout manager="grid">
@@ -809,6 +835,38 @@
                 </child>
               </object>
             </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="tk.Menu" id="menu1">
+    <child>
+      <object class="tk.Menuitem.Submenu" id="menu_file" named="True">
+        <property name="label" translatable="yes">File</property>
+        <child>
+          <object class="tk.Menuitem.Submenu" id="menu_import" named="True">
+            <property name="label" translatable="yes">submenu2</property>
+            <child>
+              <object class="tk.Menuitem.Command" id="menu_import_elexsys" named="True">
+                <property name="command" type="command" cbtype="simple">import_elexsys</property>
+                <property name="label" translatable="yes">Bruker Elexsys</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="tk.Menuitem.Submenu" id="menu_edit" named="True">
+        <property name="label" translatable="yes">Edit</property>
+        <child>
+          <object class="tk.Menuitem.Command" id="menu_notes" named="True">
+            <property name="command" type="command" cbtype="simple">notes</property>
+            <property name="compound">right</property>
+            <property name="font">TkDefaultFont</property>
+            <property name="hidemargin">false</property>
+            <property name="label" translatable="yes">Notes</property>
           </object>
         </child>
       </object>

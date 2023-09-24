@@ -99,6 +99,7 @@ class Eleana():
         return file_content  #
 
 
+
 # --- DATA OBJECTS CONSTUCTORS ---
 class GeneralDataTemplate():
     name = ''

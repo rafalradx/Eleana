@@ -34,6 +34,7 @@ class EleanaMainApp:
         builder.add_from_file(PROJECT_UI)
         # Main widget
         self.mainwindow = builder.get_object("Eleana", master)
+
         # Main menu
         _main_menu = builder.get_object("mainmenu", self.mainwindow)
         self.mainwindow.configure(menu=_main_menu)
@@ -42,20 +43,26 @@ class EleanaMainApp:
         self.group_up = None
         self.group = None
         self.first_down = None
-        builder.import_variables(
-            self, ['group_down', 'group_up', 'group', 'first_down'])
-
         builder.connect_callbacks(self)
+        # END OF PYGUBU BUILDER
 
-        # Create references to Widgets
+
+        # Create references to Widgets and Frames
         self.sel_group = builder.get_object("sel_group", self.mainwindow)
         self.sel_first = builder.get_object("sel_first", self.mainwindow)
         self.sel_second = builder.get_object("sel_second", self.mainwindow)
         self.sel_result = builder.get_object("sel_result", self.mainwindow)
-        self.firstframe = builder.get_object("firstFrame", self.mainwindow)
+        self.firstFrame = builder.get_object("firstFrame", self.mainwindow)
+        self.resultFrame = builder.get_object("resultFrame", self.mainwindow)
 
+        self.firstStkFrame =  builder.get_object("firstStkFrame", self.mainwindow)
+        self.secondStkFrame = builder.get_object("secondStkFrame", self.mainwindow)
+        self.firstImaginary = builder.get_object("firstImaginary", self.mainwindow)
+        self.secondImaginary = builder.get_object("secondImaginary", self.mainwindow)
+        self.graphFrame = builder.get_object('graphFrame', self.mainwindow)
 
     def run(self):
+
         self.mainwindow.mainloop()
 
     def group_down_clicked(self):
@@ -152,16 +159,13 @@ class EleanaMainApp:
 
 
 # ----------------------- Start GUI  --------------------------------
-
 app = EleanaMainApp()
-
-# -----------------------Prepare references to elements -------------
-# Set references to particular ID in the tkinter interface
-# For example if there is element with id="mainFrame" then create app.menu_import using following command:
-# app.mainFrame = app.builder.get_object('graphFrame', app.mainwindow)
-
-app.graphFrame = app.builder.get_object('graphFrame', app.mainwindow)
-
+# Hide widgets at application start
+app.resultFrame.grid_remove()
+app.firstStkFrame.grid_remove()
+app.secondStkFrame.grid_remove()
+app.firstImaginary.grid_remove()
+app.secondImaginary.grid_remove()
 
 # -----------------------Set geometry and icon ----------------------
 width = app.mainwindow.winfo_screenwidth()  # Get screen width
@@ -171,6 +175,7 @@ app.mainwindow.geometry(str(width) + 'x' + str(height) + "+0+0")  # Set geometry
 top_window_icon = Path(eleana.paths['pixmaps'], "eleana_top_window.png")
 main_icon = tk.PhotoImage(file=top_window_icon)
 app.mainwindow.iconphoto(True, main_icon)
+app.mainwindow.title('Eleana')
 # Set color motive for GUI
 ctk.set_default_color_theme("dark-blue")
 
