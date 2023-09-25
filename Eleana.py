@@ -98,9 +98,9 @@ class EleanaMainApp:
         update.selections_widgets(app)
 
         data_for_plot = eleana.dataset[index].get('first')
-        # x = data_for_plot['x']
-        # y = data_for_plot['y']
-        # create_matplotlib_chart(x, y)
+        x = data_for_plot['x']
+        y = data_for_plot['re_y']
+        create_matplotlib_chart(x, y)
 
     def second_selected(self, value):
         selected_value_text = app.sel_second.get()

@@ -5,20 +5,20 @@ from pathlib import Path
 import tempfile
 
 class Eleana():
-
+    # Main attributes associated with data gathered in the programe
+    interpreter = sys.executable # <-- Python version for subprocesses
     dataset = []            # <-- This variable keeps all spectra available in Eleana. It is a list of objects
-    results_dataset = []         # <-- This keeps data containing results
+    results_dataset = []    # <-- This keeps data containing results
     assignmentToGroups = {} # <-- This keeps information about which data from dataset is assigned to particular group
     groupsHierarchy = {}    # <-- This store information about which group belongs to other
 
-    interpreter = sys.executable
-
+    # Attribute "notes" contains general notes edited by Edit --> Notes in RTF
     notes = {"content": "",
              "tags": {"bold": [], "italic": [], "code": [], "normal size": [], "larger size": [], "largest size": [],
                       "highlight": [], "highlight red": [], "highlight green": [], "highlight black": [],
                       "text white": [], "text grey": [], "text blue": [], "text green": [], "text red": []}}
 
-    # Set the most important directories for the program
+    # Attribute paths contains paths for different standard directories like user, tmp, last import directory etc.
     paths = {'program_dir': Path(__file__).resolve().parent,
              'home_dir': Path.home(),
              'tmp_dir': tempfile.gettempdir(),
@@ -27,17 +27,30 @@ class Eleana():
              'assets': Path(Path(__file__).resolve().parent, ""),
              'last_import_dir': '/home/marcin/PycharmProjects/Eleana/Example_data/Elexsys/'
              }
-    # Selections define what is the state of widgets that selsect spectra
-    # group: int --> number of selected group
-    # first, second, result: int --> number on combobox selector
-    # f_cpl, s_cpl, r_cpl: str (ONLY FOR COMPLEX) --> selection of what is shown in the graph:
-    #                                 empty or re - show real part
-    #                                 im -          show imaginary part
-    #                                 cpl -         show both re and im
-    #                                 magn -        show complex magnitude
-    # f_stk, s_stk, r_stk: int (ONLY FOR STACK) --> selects subspectra in the spectra stack
-    # f_dsp, s_dsp, r_dsp: bool --> if thrue then first, second and result appears in the graph, respectively
 
+    # Attribute selection is the basic storage of the settings obtainted from states in GUI
+    # Description:
+    # group  --> The name of selected group in Group combobox in object: app.sel_group
+    #
+    # first \
+    # second )-->  integer containing index in Eleana.dataset which is selected by comboboxes app.sel_first, app.sel_second, app.sel_result
+    # result/
+    #
+    # f_cpl\
+    # s_cpl )--> ONLY FOR COMPLEX DATA. Defines how complex data should be used for graph, calculation, etc.
+    # r_cpl/     Can be set to:
+    #                           empty or re - show real part
+    #                           im -          show imaginary part
+    #                           cpl -         show both re and im
+    #                           magn -        show complex magnitude
+
+    # f_stk\
+    # s_stk )--> (ONLY IF DATA IS A STACK). It is integer containing index of row for stack in y data
+    # r_stk/
+    #
+    # f_dsp\
+    # s_dsp )--> Can be True or False. If false then the spectrum selected is not displayed on graph by data is selected
+    # r_dsp/
     selections = {'group':'All',
                   'first':0, 'second':0, 'result':0,
                   'f_cpl':'','s_cpl':'', 'r_cpl':'',
@@ -45,8 +58,8 @@ class Eleana():
                   'f_dsp':True, 's_dsp':True ,'r_dsp':True
                   }
 
-    # Dictionaries for different par files to Eleana format
-    # Bruker Elexsys
+    # --- Dictionaries translation different par files to Eleana format ---
+    # Translation for DSC from Bruker Elexsys
     dsc2eleana = {'title': 'TITL',
                   'unit_x': 'XUNI',
                   'name_x': 'XNAM',
@@ -66,23 +79,24 @@ class Eleana():
                   'PowAtten': 'PowerAtten'
                   }
 
-    # Bruker EMX
+    # Translation for Bruker EMX
     parEMX2elena = {}
 
 
+
+
     # ----- METHODS ------
-    def add_numbers_to_dataset(self):
-        names = []
-        i = 0
-        for data in self.dataset:
-            name = str(i+1) + '. ' + data.name
-            self.dataset[i].name = name
-            i += 1
+    # def add_numbers_to_dataset(self):
+    #     names = []
+    #     i = 0
+    #     for data in self.dataset:
+    #         name = str(i+1) + '. ' + data.name
+    #         self.dataset[i].name = name
+    #         i += 1
 
 
 
-
-    # Method for saving temporary text file in file /tmp
+    # Write "content" to text file "filename" in temporary directory (/tmp)
     def create_tmp_file(self, filename: str, content=""):
         path_to_file = Path(Eleana.paths['tmp_dir'], filename)
         try:
@@ -91,7 +105,7 @@ class Eleana():
             return {"Error": False, 'desc': "" }
         except:
             return {"Error": True, 'desc': f"Cannot create {path_to_file}"}
-    # Method fo reading temporary text file in /tmp
+    # Reading temporary "filename" text file from /tmp
     def read_tmp_file(self, filename):
         path_to_file = Path(Eleana.paths['tmp_dir'], filename)
         with open(path_to_file) as file:
@@ -99,37 +113,77 @@ class Eleana():
         return file_content  #
 
 
-# --- DATA OBJECTS CONSTUCTORS ---
+# --- Classes for Construction Data Objects ---
 class GeneralDataTemplate():
     # Name of the data
     name = ''
+
     # The number and name ex. 2. CW-EPR_heme_bL
     name_nr = ''
+
     # Names of groups to which this data belongs
     groups = ['All']
+
     # If spectrum is complex numbers set to TRUE
     complex = False
+
     # This defines data type: '2D_stack'
     # Empty or 'single 2D'  - single 2D spectrum
     # 'stack 2D' - stack of 2D spectra
     type = ''
+
     # Optional - origin specifies how the spectrum was created: for example CWEPR
     origin = ''
+
     # Contains various comments
     comments = Eleana.notes
 
-    def get(self, which: str):
+    def get(self, first_second_or_results: str):
         selection = Eleana.selections
-        data = Eleana.dataset[selection[which]]
-        # Not complex
-        if data.complex:
-            # Utwórz dane complex
+        if first_second_or_results == 'first':
+            index_main = selection['first']     # Get index fro dataset
+            index_stk = selection['f_stk']      # Get index in stack if it is a stack
+            show_complex = selection['f_cpl']   # If complex then how it should be displayed
 
-            return x,y
+        elif first_second_or_results == 'second':
+            index_main = selection['second']
+            index_stk = selection['s_stk']
+            show_complex = selection['s_cpl']
+
+        elif first_second_or_results == 'result':
+            index_main = selection['result']
+            index_stk = selection['r_stk']
+            show_complex = selection['r_cpl']
+
+        else:
+            print("Wrong argument. Must be 'first', 'second' or 'result'")
+
+
+        data = Eleana.dataset[index_main]
+
+
+        # If data is complex
+        if data.complex:
+            x = data.x
+            if show_complex == 'im':
+                im_y = [value.imag for value in data.y]
+                re_y = np.array([])
+            elif show_complex == 'cpl':
+                re_y = [value.real for value in data.y]
+                im_y = [value.imag for value in data.y]
+            elif show_complex == 'magn':
+                re_y = data.y.abs()
+                im_y = np.array([])
+            else: # show_complex == 're' or ''
+                re_y = [value.real for value in data.y]
+                im_y = np.array([])
+            return {'x':x, 're_y':re_y, 'im_y':im_y, 'complex':True}
+
+        # Data is not complex
         else:
             x = data.x
             y = data.y
-        return {'x':x, 'y':y}
+        return {'x':x, 're_y':y, 'complex':False, 'im_y':np.array([])}
 
 
 class Spectrum_CWEPR(GeneralDataTemplate):     # Class constructor for single CW EPR data
@@ -316,7 +370,7 @@ class Update():
             pass
 
         # Update RESULT frame
-        if len(Eleana.dataset) == 0 or result.type != "stack 2D":
+        if len(Eleana.results_dataset) == 0 or result.type != "stack 2D":
             app.resultStkFrame.grid_remove()
             app.resultImaginary.grid_remove()
 
