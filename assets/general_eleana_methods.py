@@ -94,53 +94,18 @@ class Eleana():
     #         self.dataset[i].name = name
     #         i += 1
 
+    def index_of_selected_data(self, selected_value_text):
+        # This function returns index of Eleana.dataset which name_nr attribute is equal to argument: selected_value_text
+        numbered_names = []
+        for each in self.dataset:
+            numbered_names.append(each.name_nr)
+        if selected_value_text in numbered_names:
+            index = numbered_names.index(selected_value_text)
+            return index
 
-
-    # Write "content" to text file "filename" in temporary directory (/tmp)
-    def create_tmp_file(self, filename: str, content=""):
-        path_to_file = Path(Eleana.paths['tmp_dir'], filename)
-        try:
-            with open(path_to_file, "w") as file:
-                file.write(content)
-            return {"Error": False, 'desc': "" }
-        except:
-            return {"Error": True, 'desc': f"Cannot create {path_to_file}"}
-    # Reading temporary "filename" text file from /tmp
-    def read_tmp_file(self, filename):
-        path_to_file = Path(Eleana.paths['tmp_dir'], filename)
-        with open(path_to_file) as file:
-            file_content = file.read()
-        return file_content  #
-
-
-# --- Classes for Construction Data Objects ---
-class GeneralDataTemplate():
-    # Name of the data
-    name = ''
-
-    # The number and name ex. 2. CW-EPR_heme_bL
-    name_nr = ''
-
-    # Names of groups to which this data belongs
-    groups = ['All']
-
-    # If spectrum is complex numbers set to TRUE
-    complex = False
-
-    # This defines data type: '2D_stack'
-    # Empty or  'single 2D'  - single 2D spectrum
-    #           'stack 2D' - stack of 2D spectra
-    type = ''
-
-    # Optional - origin specifies how the spectrum was created: for example CWEPR
-    origin = ''
-
-    # Contains various comments
-    comments = Eleana.notes
-
-    def plotData(self, first_second_or_results: str):
-        # This method reurns X, reY, imY and boolean complex depending on values in eleana.selections
-        # Argument first_second_or_results is string 'first' for Sirst selection
+    def getDataFromSelection(self, first_second_or_results: str):
+        # This method returns X, reY, imY and boolean complex depending on values in eleana.selections
+        # Argument first_second_or_results is string 'first' for First selection
         #                                            'second' for Second selection
         #                                            'result' for Results selection
 
@@ -205,6 +170,48 @@ class GeneralDataTemplate():
                 y = data.y[index_stk]
         return {'x':x, 're_y':y, 'complex':False, 'im_y':np.array([])}
 
+
+    # Write "content" to text file "filename" in temporary directory (/tmp)
+    def create_tmp_file(self, filename: str, content=""):
+        path_to_file = Path(Eleana.paths['tmp_dir'], filename)
+        try:
+            with open(path_to_file, "w") as file:
+                file.write(content)
+            return {"Error": False, 'desc': "" }
+        except:
+            return {"Error": True, 'desc': f"Cannot create {path_to_file}"}
+    # Reading temporary "filename" text file from /tmp
+    def read_tmp_file(self, filename):
+        path_to_file = Path(Eleana.paths['tmp_dir'], filename)
+        with open(path_to_file) as file:
+            file_content = file.read()
+        return file_content  #
+
+
+# --- Classes for Construction Data Objects ---
+class GeneralDataTemplate():
+    # Name of the data
+    name = ''
+
+    # The number and name ex. 2. CW-EPR_heme_bL
+    name_nr = ''
+
+    # Names of groups to which this data belongs
+    groups = ['All']
+
+    # If spectrum is complex numbers set to TRUE
+    complex = False
+
+    # This defines data type: '2D_stack'
+    # Empty or  'single 2D'  - single 2D spectrum
+    #           'stack 2D' - stack of 2D spectra
+    type = ''
+
+    # Optional - origin specifies how the spectrum was created: for example CWEPR
+    origin = ''
+
+    # Contains various comments
+    comment = Eleana.notes
 
 class Spectrum_CWEPR(GeneralDataTemplate):     # Class constructor for single CW EPR data
 
@@ -311,8 +318,40 @@ class Spectrum_complex(GeneralDataTemplate):
 
         self.y = reY + 1j * imY
 
-
+# Update() contains methods for creating list in comboboxes
+# and adds the created lists to the ComboboxLists.entries
+# Arguments: app     <-- is the mani application object (=app)
+#            entries <-- list of elements that will added to the list
+# Example usage in main Eleana.py:
+#
+#   entries = ['1. FeS', '2. Heme_bL', '3. Spin_label']
+#   update.second(app, entries)
+#
+# This will create 3 positions in the list of Second combobox
 class Update():
+    def first(self, app: object, entries):
+        app.sel_first.configure(values=entries)
+        ComboboxLists.entries['sel_first'] = entries
+    def second(self, app, entries):
+        app.sel_second.configure(values=entries)
+        ComboboxLists.entries['sel_second'] = entries
+
+    def result(self, app, entries):
+        app.sel_result.configure(values=entries)
+        ComboboxLists.entries['sel_result'] = entries
+
+    def f_stk(self, app, entries):
+        app.f_stk.configure(values=entries)
+        ComboboxLists.entries['f_stk'] = entries
+
+    def s_stk(self, app, entries):
+        app.s_stk.configure(values=entries)
+        ComboboxLists.entries['s_stk'] = entries
+
+    def r_stk(self, app, entries):
+        app.r_stk.configure(values=entries)
+        ComboboxLists.entries['r_stk'] = entries
+
 
     def dataset_list(self) -> list:
         # This function is used to create list of data for all
@@ -433,6 +472,48 @@ class Update():
             self.assignToGroups[group_name] = spectra_numbers
         return self.assignToGroups
 
+# ComboboxesLists() contains attribute entries, which stores the current lists of
+# entries in comboboxes.
+# Methods:
+#       current_position <-- returns dict with text of current position,
+#                            index on the list, and the last item on the list
+# Example. If there is a combobox list = ['None', '1. FeS', '2. Heme_bL', '3. Spin_label'],
+# and selection is now on 2. Heme bL then in eleana:
+#       pozycja = comboboxLists.current_position(app, 'sel_first')
+# gives in pozycja = {'current: '2. Heme bL', 'index':2, 'last_index':3}
+class ComboboxLists():
+    # elements - this contains lists that are in comboboxes
+    entries = {'sel_first':[],
+              'f_stk':[],
+              'sel_second': [],
+              's_stk':[],
+              'sel_result':[],
+              'r_stk':[]
+              }
+
+    def ref_to_box(self, app: object, which_combobox: str):
+        if which_combobox == 'sel_first':
+            box = app.sel_first
+        elif which_combobox == 'sel_second':
+            box = app.sel_second
+        elif which_combobox == 'sel_result':
+            box = app.sel_result
+        elif which_combobox == 'f_stk':
+            box = app.f_stk
+        elif which_combobox == 's_stk':
+            box = app.s_stk
+        elif which_combobox == 'r_stk':
+            box = app.r_stk
+        return box
+
+    def current_position(self, app: object, which_combobox: str):
+        box = self.ref_to_box(app, which_combobox)
+        current_value = box.get()
+        if current_value in ComboboxLists.entries[which_combobox]:
+            index = self.entries[which_combobox].index(current_value)
+            return {'current':current_value, 'index':index, 'last_index':len(ComboboxLists.entries[which_combobox])-1}
+
+        return {}
 
     def firstComobox(self, selections: dict, groups: dict):
         pass

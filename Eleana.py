@@ -14,17 +14,17 @@ import json
 from json import loads, dumps
 
 # Import Eleana specific classes
-from assets.general_eleana_methods import Eleana
+from assets.general_eleana_methods import Eleana, Update, ComboboxLists
 from assets.gui_actions.menu_actions import MenuAction
-from assets.general_eleana_methods import Update
 from assets.subprogs.dialog_quit import QuitDialog
 
-
-# Create Eleana additional instances
+# Create main Eleana instances
 eleana = Eleana()
 menuAction = MenuAction()
 update = Update()
+comboboxLists = ComboboxLists()
 
+# ------------------
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "ui" / "Eleana_main.ui"
 
@@ -78,30 +78,27 @@ class EleanaMainApp:
         pass
 
     def first_down_clicked(self):
-        pass
-
+        pozycja = comboboxLists.current_position(app, 'sel_first')
+        print(pozycja)
     def first_up_clicked(self):
         pass
 
-    def first_selected(self):
-        selected_value_text = app.sel_first.get()
+    def first_selected(self, selected_value_text):
         if selected_value_text == 'None':
             return
-
-        # Find index in dataset as selected in app.sel_first
-        numbered_names = []
-        for each in eleana.dataset:
-            numbered_names.append(each.name_nr)
-        if selected_value_text in numbered_names:
-            index = numbered_names.index(selected_value_text)
-        else:
-            # Selected position in combobox was not found
-            return
-
+            # Get index of data selected in first in eleana.dataset
+        index = eleana.index_of_selected_data(selected_value_text)
+            # Set selections and write to selections attribute
         eleana.selections['first'] = index
+            # Update GUI buttons according to selections
         update.selections_widgets(app)
 
-        data_for_plot = eleana.dataset[index].plotData('first')
+        # Get data for plotting
+        data_for_plot = eleana.getDataFromSelection('first')
+        print(data_for_plot)
+
+
+            # Here will be fuction that generates graph
         x = data_for_plot['x']
         y = data_for_plot['re_y']
         create_matplotlib_chart(x, y)
@@ -110,24 +107,21 @@ class EleanaMainApp:
         print("Value")
 
     def second_selected(self, value):
-        selected_value_text = app.sel_second.get
-        numbered_names = []
-        for each in eleana.dataset:
-            numbered_names.append(each.name_nr)
+        def first_selected(self, selected_value_text):
+            if selected_value_text == 'None':
+                return
 
-        if selected_value_text in numbered_names:
-            index = numbered_names.index(selected_value_text)
+                # Get index of data selected in first in eleana.dataset
+            index = eleana.index_of_selected_data(selected_value_text)
+                # Set selections and write to selections attribute
+            eleana.selections['second'] = index
+                # Update GUI buttons according to selections
+            update.selections_widgets(app)
 
-        else:
-            pass
-        eleana.selections['second'] = index
-        update.selections_widgets(app)
-
-        data_for_plot = eleana.dataset[index].get
-        # x = data_for_plot['x']
-        # y = data_for_plot['y']
-        # create_matplotlib_chart(x, y)
-
+            data_for_plot = eleana.dataset[index].get
+            # x = data_for_plot['x']
+            # y = data_for_plot['y']
+            # create_matplotlib_chart(x, y)
 
 
     def second_down_clicked(self):
@@ -154,14 +148,23 @@ class EleanaMainApp:
             entries = ['None']
             for each in eleana.dataset:
                 entries.append(each.name_nr)
-            print(entries)
+
         # When there is different group selected then take names from this group
         else:
             entries = update.data_in_group_list()
-        # Update values in Comboboxes
-        app.sel_first.configure(values=entries)
-        app.sel_second.configure(values=entries)
 
+        # Update lists in first and second comboboxes
+        update.first(app,entries)
+        update.second(app,entries)
+        # Update values in Comboboxes
+        #app.sel_first.configure(values=entries)
+
+        # Add list in combobox to comboboxList.entries
+        #comboboxLists.entries['sel_first'] = entries
+        # Add list in combobox to comboboxList.entries
+
+        #app.sel_second.configure(values=entries)
+        #comboboxLists.entries['sel_second'] = entries
 
     # --- Quit (also window close by clicking on X)
     def close_application(self):
@@ -193,7 +196,9 @@ app = EleanaMainApp()
 # -----------------------Set geometry and icon ----------------------
 width = app.mainwindow.winfo_screenwidth()  # Get screen width
 height = app.mainwindow.winfo_screenheight()  # Get screen height
-app.mainwindow.geometry(str(width) + 'x' + str(height) + "+0+0")  # Set geometry to max
+#app.mainwindow.geometry(str(width) + 'x' + str(height) + "+0+0")  # Set geometry to max
+app.mainwindow.geometry('800x800')
+
 # Add icon to the top window bar form pixmaps folder
 top_window_icon = Path(eleana.paths['pixmaps'], "eleana_top_window.png")
 main_icon = tk.PhotoImage(file=top_window_icon)
