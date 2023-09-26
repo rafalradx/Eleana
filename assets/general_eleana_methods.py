@@ -128,8 +128,8 @@ class GeneralDataTemplate():
     complex = False
 
     # This defines data type: '2D_stack'
-    # Empty or 'single 2D'  - single 2D spectrum
-    # 'stack 2D' - stack of 2D spectra
+    # Empty or  'single 2D'  - single 2D spectrum
+    #           'stack 2D' - stack of 2D spectra
     type = ''
 
     # Optional - origin specifies how the spectrum was created: for example CWEPR
@@ -138,10 +138,15 @@ class GeneralDataTemplate():
     # Contains various comments
     comments = Eleana.notes
 
-    def get(self, first_second_or_results: str):
+    def plotData(self, first_second_or_results: str):
+        # This method reurns X, reY, imY and boolean complex depending on values in eleana.selections
+        # Argument first_second_or_results is string 'first' for Sirst selection
+        #                                            'second' for Second selection
+        #                                            'result' for Results selection
+
         selection = Eleana.selections
         if first_second_or_results == 'first':
-            index_main = selection['first']     # Get index fro dataset
+            index_main = selection['first']     # Get index from dataset
             index_stk = selection['f_stk']      # Get index in stack if it is a stack
             show_complex = selection['f_cpl']   # If complex then how it should be displayed
 
@@ -157,10 +162,13 @@ class GeneralDataTemplate():
 
         else:
             print("Wrong argument. Must be 'first', 'second' or 'result'")
-
+            return {}
 
         data = Eleana.dataset[index_main]
+        type = data.type
 
+        if type == 'stack 2D':
+            y = data.y[index_stk]
 
         # If data is complex
         if data.complex:
@@ -168,21 +176,33 @@ class GeneralDataTemplate():
             if show_complex == 'im':
                 im_y = [value.imag for value in data.y]
                 re_y = np.array([])
+                if type == 'stack 2D':
+                    im_y = im_y[index_stk]
             elif show_complex == 'cpl':
                 re_y = [value.real for value in data.y]
                 im_y = [value.imag for value in data.y]
+                if type == 'stack 2D':
+                    re_y = re_y[index_stk]
+                    im_y = im_y[index_stk]
+
             elif show_complex == 'magn':
                 re_y = data.y.abs()
                 im_y = np.array([])
+                if type == 'stack 2D':
+                   re_y = re_y[index_stk]
             else: # show_complex == 're' or ''
                 re_y = [value.real for value in data.y]
                 im_y = np.array([])
+                if type == 'stack 2D':
+                    re_y = re_y[index_stk]
             return {'x':x, 're_y':re_y, 'im_y':im_y, 'complex':True}
 
         # Data is not complex
         else:
             x = data.x
             y = data.y
+            if type == 'stack 2D':
+                y = data.y[index_stk]
         return {'x':x, 're_y':y, 'complex':False, 'im_y':np.array([])}
 
 
@@ -223,7 +243,7 @@ class Spectrum_CWEPR(GeneralDataTemplate):     # Class constructor for single CW
                 pass
 
         self.x = np.array(x_axis)
-        self.y = np.array(dta)
+        self.re_y = np.array(dta)
 
 class Spectra_CWEPR_stack(Spectrum_CWEPR):
 
@@ -269,6 +289,7 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         self.type = 'stack 2D'
         self.complex = False
         self.origin = 'CWEPR'
+
 
 class Spectrum_complex(GeneralDataTemplate):
     def __init__(self, name, x_axis: list, dta: list, dsc: dict):

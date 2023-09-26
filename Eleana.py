@@ -83,27 +83,34 @@ class EleanaMainApp:
     def first_up_clicked(self):
         pass
 
-    def first_selected(self, value):
+    def first_selected(self):
         selected_value_text = app.sel_first.get()
+        if selected_value_text == 'None':
+            return
+
+        # Find index in dataset as selected in app.sel_first
         numbered_names = []
         for each in eleana.dataset:
             numbered_names.append(each.name_nr)
-
         if selected_value_text in numbered_names:
             index = numbered_names.index(selected_value_text)
-
         else:
-            pass
+            # Selected position in combobox was not found
+            return
+
         eleana.selections['first'] = index
         update.selections_widgets(app)
 
-        data_for_plot = eleana.dataset[index].get('first')
+        data_for_plot = eleana.dataset[index].plotData('first')
         x = data_for_plot['x']
         y = data_for_plot['re_y']
         create_matplotlib_chart(x, y)
 
+    def f_stk_selected(self):
+        print("Value")
+
     def second_selected(self, value):
-        selected_value_text = app.sel_second.get()
+        selected_value_text = app.sel_second.get
         numbered_names = []
         for each in eleana.dataset:
             numbered_names.append(each.name_nr)
@@ -116,7 +123,7 @@ class EleanaMainApp:
         eleana.selections['second'] = index
         update.selections_widgets(app)
 
-        data_for_plot = eleana.dataset[index].get('second')
+        data_for_plot = eleana.dataset[index].get
         # x = data_for_plot['x']
         # y = data_for_plot['y']
         # create_matplotlib_chart(x, y)
@@ -155,10 +162,6 @@ class EleanaMainApp:
         app.sel_first.configure(values=entries)
         app.sel_second.configure(values=entries)
 
-        i = 0
-        while i < len(eleana.dataset):
-            eleana.dataset[i].name
-            i += 1
 
     # --- Quit (also window close by clicking on X)
     def close_application(self):
