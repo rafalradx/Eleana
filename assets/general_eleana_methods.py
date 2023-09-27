@@ -82,17 +82,7 @@ class Eleana():
     # Translation for Bruker EMX
     parEMX2elena = {}
 
-
-
-
     # ----- METHODS ------
-    # def add_numbers_to_dataset(self):
-    #     names = []
-    #     i = 0
-    #     for data in self.dataset:
-    #         name = str(i+1) + '. ' + data.name
-    #         self.dataset[i].name = name
-    #         i += 1
 
     def index_of_selected_data(self, selected_value_text):
         # This function returns index of Eleana.dataset which name_nr attribute is equal to argument: selected_value_text
@@ -297,7 +287,6 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         self.complex = False
         self.origin = 'CWEPR'
 
-
 class Spectrum_complex(GeneralDataTemplate):
     def __init__(self, name, x_axis: list, dta: list, dsc: dict):
         #super().__init__(name, x_axis, dta, dsc)
@@ -318,17 +307,26 @@ class Spectrum_complex(GeneralDataTemplate):
 
         self.y = reY + 1j * imY
 
-# Update() contains methods for creating list in comboboxes
-# and adds the created lists to the ComboboxLists.entries
-# Arguments: app     <-- is the mani application object (=app)
-#            entries <-- list of elements that will added to the list
-# Example usage in main Eleana.py:
-#
-#   entries = ['1. FeS', '2. Heme_bL', '3. Spin_label']
-#   update.second(app, entries)
-#
+
+
+
+
+'''
+Update class contains methods for creating list in comboboxes
+and adds the created lists to the ComboboxLists.entries
+Arguments: app     <-- is the mani application object (=app)
+           entries <-- list of elements that will added to the list
+Example usage in main Eleana.py:
+
+  entries = ['1. FeS', '2. Heme_bL', '3. Spin_label']
+  update.second(app, entries)
+
 # This will create 3 positions in the list of Second combobox
+
+'''
 class Update():
+
+    ''' Methods that put entries list to the widgets'''
     def first(self, app: object, entries):
         app.sel_first.configure(values=entries)
         ComboboxLists.entries['sel_first'] = entries
@@ -353,8 +351,13 @@ class Update():
         ComboboxLists.entries['r_stk'] = entries
 
 
+
+
+    ''' Generates and returns entries for the comboboxes 
+        The entries depend on selected group.
+    '''
     def dataset_list(self) -> list:
-        # This function is used to create list of data for all
+
         names_numbered = ['None']
         i = 0
         for data in Eleana.dataset:
@@ -367,7 +370,12 @@ class Update():
         while i < len(Eleana.dataset):
             Eleana.dataset[i].name_nr = names_numbered[i+1]
             i += 1
-        #return names_numbered
+        return names_numbered
+
+
+
+    ''' Show or hide First, Second or Result frames
+    '''
 
     def selections_widgets(self, app: object):
         selections = Eleana.selections
@@ -401,7 +409,7 @@ class Update():
         if len(Eleana.results_dataset) == 0:
             app.resultFrame.grid_remove()
 
-        # Upadte FIRST frame
+        # Update FIRST frame
         if len(Eleana.dataset) == 0 or first.type != "stack 2D":
             app.firstStkFrame.grid_remove()
             app.firstComplex.grid_remove()
@@ -472,15 +480,19 @@ class Update():
             self.assignToGroups[group_name] = spectra_numbers
         return self.assignToGroups
 
-# ComboboxesLists() contains attribute entries, which stores the current lists of
-# entries in comboboxes.
-# Methods:
-#       current_position <-- returns dict with text of current position,
-#                            index on the list, and the last item on the list
-# Example. If there is a combobox list = ['None', '1. FeS', '2. Heme_bL', '3. Spin_label'],
-# and selection is now on 2. Heme bL then in eleana:
-#       pozycja = comboboxLists.current_position(app, 'sel_first')
-# gives in pozycja = {'current: '2. Heme bL', 'index':2, 'last_index':3}
+
+
+'''
+ComboboxesLists() contains attribute entries, which stores the current lists of
+entries in comboboxes.
+Methods:
+      current_position <-- returns dict with text of current position,
+                           index on the list, and the last item on the list
+Example. If there is a combobox list = ['None', '1. FeS', '2. Heme_bL', '3. Spin_label'],
+and selection is now on 2. Heme bL then in eleana:
+      pozycja = comboboxLists.current_position(app, 'sel_first')
+gives in pozycja = {'current: '2. Heme bL', 'index':2, 'last_index':3}
+'''
 class ComboboxLists():
     # elements - this contains lists that are in comboboxes
     entries = {'sel_first':[],
@@ -515,9 +527,52 @@ class ComboboxLists():
 
         return {}
 
-    def firstComobox(self, selections: dict, groups: dict):
-        pass
+    def create_list(self, app, which_combobox):
+        box = self.ref_to_box(app, which_combobox)
+        # Create list for First, Second
+        if which_combobox == 'sel_first' or which_combobox == 'sel_second':
+            list_items = ['None']
 
+            if Eleana.selections['group'] == 'All':
+                # When Group is 'All'
+                for each in Eleana.dataset:
+                    list_items.append(each.name_nr)
+            else:
+                # When Group is different than 'All'
+                print("Utwórz metodę w ComboboxLists().create_list() do zrobienia listy widm na podstawie innej grupy niż All")
+                exit()
+
+        elif which_combobox == 'sel_result':
+            list_items = ['None']
+            for each in Eleana.results_dataset:
+                list_items.append(each.name_nr)
+
+        elif which_combobox == 'f_stk':
+            data = Eleana.dataset[Eleana.selections['first']]
+        elif which_combobox == 's_stk':
+            data = Eleana.dataset[Eleana.selections['second']]
+        elif which_combobox == 'r_stk':
+            data = Eleana.dataset[Eleana.selections['result']]
+        else:
+            return
+
+        try:
+            if data.type == 'stack 2D':
+                list_items = data.parameters['stk_names']
+            else:
+                return
+        except:
+            pass
+
+        # Finally put the list into widget
+        box.configure(values=list_items)
+
+    def create_all_lists(self, app):
+        ids = list(self.entries.keys())
+        for each in ids:
+            self.create_list(app, each)
+
+    ''' END OF COMBOBOXLISTS CLASS'''
 
 if __name__ == "__main__":
     eleana = Eleana()

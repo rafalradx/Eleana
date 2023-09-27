@@ -64,6 +64,7 @@ class EleanaMainApp:
         self.graphFrame = builder.get_object('graphFrame', self.mainwindow)
         self.f_stk = builder.get_object('f_stk', self.mainwindow)
         self.s_stk = builder.get_object('s_stk', self.mainwindow)
+        self.r_stk = builder.get_object('s_stk', self.mainwindow)
     def run(self):
         self.mainwindow.deiconify()
         self.mainwindow.mainloop()
@@ -139,19 +140,30 @@ class EleanaMainApp:
     # Functions triggered by Menu selections
     # FILE
     # --- Import EPR --> Bruker Elexsys
+
     def import_elexsys(self):
+        ''' Open window that loads the spectra '''
         menuAction.loadElexsys()
 
-        # When selected group is 'All' or 'all' (case insensitive) then get names of whole dataset (func. update.dataset_list)
-        if eleana.selections['group'] == 'All':
-            update.dataset_list()
-            entries = ['None']
-            for each in eleana.dataset:
-                entries.append(each.name_nr)
+        ''' When import is done and spectra in eleana.dataset[]
+            it is needed to:
+             
+             1. Get list of spectra to put in the combobox list
+                    entries = update.dataset_list()
+             
+             2. Create lists of coboboxes lists (not widgets)
+                    comboboxList.create_all_lists(app)
+             
+             3. Put the lists created in p. 2 into widgets:
+                    update.first(app, entries)
+                    update.second(app, entires)
+                                         
+        '''
 
-        # When there is different group selected then take names from this group
-        else:
-            entries = update.data_in_group_list()
+        # Będę musiał dodać funkcję sprawdzenia grupy wewnątrz update.dataset_list
+        if eleana.selections['group'] == 'All':
+            entries = update.dataset_list()
+            comboboxLists.create_all_lists(app)
 
         # Update lists in first and second comboboxes
         update.first(app,entries)
