@@ -160,7 +160,6 @@ class Eleana():
                 y = data.y[index_stk]
         return {'x':x, 're_y':y, 'complex':False, 'im_y':np.array([])}
 
-
     # Write "content" to text file "filename" in temporary directory (/tmp)
     def create_tmp_file(self, filename: str, content=""):
         path_to_file = Path(Eleana.paths['tmp_dir'], filename)
@@ -170,6 +169,7 @@ class Eleana():
             return {"Error": False, 'desc': "" }
         except:
             return {"Error": True, 'desc': f"Cannot create {path_to_file}"}
+
     # Reading temporary "filename" text file from /tmp
     def read_tmp_file(self, filename):
         path_to_file = Path(Eleana.paths['tmp_dir'], filename)
@@ -178,7 +178,9 @@ class Eleana():
         return file_content  #
 
 
-# --- Classes for Construction Data Objects ---
+'''Classes used for or Construction Data Objects
+    These objects are stored in Eleana.dataset list
+'''
 class GeneralDataTemplate():
     # Name of the data
     name = ''
@@ -310,7 +312,6 @@ class Spectrum_complex(GeneralDataTemplate):
 
 
 
-
 '''
 Update class contains methods for creating list in comboboxes
 and adds the created lists to the ComboboxLists.entries
@@ -325,33 +326,6 @@ Example usage in main Eleana.py:
 
 '''
 class Update():
-
-    ''' Methods that put entries list to the widgets'''
-    def first(self, app: object, entries):
-        app.sel_first.configure(values=entries)
-        ComboboxLists.entries['sel_first'] = entries
-    def second(self, app, entries):
-        app.sel_second.configure(values=entries)
-        ComboboxLists.entries['sel_second'] = entries
-
-    def result(self, app, entries):
-        app.sel_result.configure(values=entries)
-        ComboboxLists.entries['sel_result'] = entries
-
-    def f_stk(self, app, entries):
-        app.f_stk.configure(values=entries)
-        ComboboxLists.entries['f_stk'] = entries
-
-    def s_stk(self, app, entries):
-        app.s_stk.configure(values=entries)
-        ComboboxLists.entries['s_stk'] = entries
-
-    def r_stk(self, app, entries):
-        app.r_stk.configure(values=entries)
-        ComboboxLists.entries['r_stk'] = entries
-
-
-
 
     ''' Generates and returns entries for the comboboxes 
         The entries depend on selected group.
@@ -371,8 +345,6 @@ class Update():
             Eleana.dataset[i].name_nr = names_numbered[i+1]
             i += 1
         return names_numbered
-
-
 
     ''' Show or hide First, Second or Result frames
     '''
@@ -458,7 +430,6 @@ class Update():
             i += 1
         return names
 
-
     # Creating groups on basis of groups defined in Eleana.dataset
     def groups(self, dataset):
         found_groups = set()
@@ -480,6 +451,11 @@ class Update():
             self.assignToGroups[group_name] = spectra_numbers
         return self.assignToGroups
 
+    ''' Set position on 'entry' in combobox of id = which_combobox'''
+    def set_on_index(self, app, which_combobox: str, entry: str):
+        comboboxList = ComboboxLists()
+        box = comboboxList.ref_to_box(app, which_combobox)
+        box.set(entry)
 
 
 '''
@@ -564,13 +540,18 @@ class ComboboxLists():
         except:
             pass
 
-        # Finally put the list into widget
+        # Finally put the list into widget and to the ComboboxLists.entries
+        self.entries[which_combobox] = list_items
         box.configure(values=list_items)
 
     def create_all_lists(self, app):
         ids = list(self.entries.keys())
         for each in ids:
             self.create_list(app, each)
+
+    def set_on_index(self, app, which_combobox: str, entry: str):
+        box = self.ref_to_box(app, which_combobox)
+        box.set(entry)
 
     ''' END OF COMBOBOXLISTS CLASS'''
 

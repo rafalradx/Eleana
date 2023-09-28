@@ -79,24 +79,45 @@ class EleanaMainApp:
         pass
 
     def first_down_clicked(self):
-        pozycja = comboboxLists.current_position(app, 'sel_first')
-        print(pozycja)
+        current_entry_on_list = comboboxLists.current_position(app, 'sel_first')
+        current_index_on_list = current_entry_on_list['index']
+        if current_index_on_list == 0:
+            return
+        else:
+            new_index_on_list = current_index_on_list - 1
+            entries = comboboxLists.entries['sel_first']
+            entry = entries[new_index_on_list]
+            update.set_on_index(app, 'sel_first', entry)
+            self.first_selected(entry)
+
+
     def first_up_clicked(self):
+        current_entry_on_list = comboboxLists.current_position(app, 'sel_first')
+        current_index_on_list = current_entry_on_list['index']
+        last_index = current_entry_on_list['last_index']
+        if current_index_on_list == last_index:
+            return
+        else:
+            new_index_on_list = current_index_on_list + 1
+            entries = comboboxLists.entries['sel_first']
+            entry = entries[new_index_on_list]
+            update.set_on_index(app, 'sel_first', entry)
+            self.first_selected(entry)
         pass
 
-    def first_selected(self, selected_value_text):
+    def first_selected(self, selected_value_text: str):
         if selected_value_text == 'None':
             return
             # Get index of data selected in first in eleana.dataset
-        index = eleana.index_of_selected_data(selected_value_text)
-            # Set selections and write to selections attribute
+        current_position = comboboxLists.current_position(app, 'sel_first')
+        index = int(current_position['index']) -1
         eleana.selections['first'] = index
             # Update GUI buttons according to selections
         update.selections_widgets(app)
 
         # Get data for plotting
         data_for_plot = eleana.getDataFromSelection('first')
-        print(data_for_plot)
+
 
 
             # Here will be fuction that generates graph
@@ -107,28 +128,50 @@ class EleanaMainApp:
     def f_stk_selected(self):
         print("Value")
 
-    def second_selected(self, value):
-        def first_selected(self, selected_value_text):
-            if selected_value_text == 'None':
-                return
+    def second_selected(self, selected_value_text):
+        if selected_value_text == 'None':
+            return
+            # Get index of data selected in first in eleana.dataset
+        current_position = comboboxLists.current_position(app, 'sel_second')
+        index = int(current_position['index']) - 1
+        eleana.selections['second'] = index
+        # Update GUI buttons according to selections
+        update.selections_widgets(app)
 
-                # Get index of data selected in first in eleana.dataset
-            index = eleana.index_of_selected_data(selected_value_text)
-                # Set selections and write to selections attribute
-            eleana.selections['second'] = index
-                # Update GUI buttons according to selections
-            update.selections_widgets(app)
+        # Get data for plotting
+        data_for_plot = eleana.getDataFromSelection('second')
 
-            data_for_plot = eleana.dataset[index].get
+        data_for_plot = eleana.dataset[index].get
             # x = data_for_plot['x']
             # y = data_for_plot['y']
             # create_matplotlib_chart(x, y)
 
 
     def second_down_clicked(self):
+        current_entry_on_list = comboboxLists.current_position(app, 'sel_second')
+        current_index_on_list = current_entry_on_list['index']
+        if current_index_on_list == 0:
+            return
+        else:
+            new_index_on_list = current_index_on_list - 1
+            entries = comboboxLists.entries['sel_second']
+            entry = entries[new_index_on_list]
+            update.set_on_index(app, 'sel_second', entry)
+            self.second_selected(entry)
         pass
 
     def second_up_clicked(self):
+        current_entry_on_list = comboboxLists.current_position(app, 'sel_second')
+        current_index_on_list = current_entry_on_list['index']
+        last_index = current_entry_on_list['last_index']
+        if current_index_on_list == last_index:
+            return
+        else:
+            new_index_on_list = current_index_on_list + 1
+            entries = comboboxLists.entries['sel_second']
+            entry = entries[new_index_on_list]
+            update.set_on_index(app, 'sel_second', entry)
+            self.second_selected(entry)
         pass
 
     def results_down_clicked(self):
@@ -162,21 +205,8 @@ class EleanaMainApp:
 
         # Będę musiał dodać funkcję sprawdzenia grupy wewnątrz update.dataset_list
         if eleana.selections['group'] == 'All':
-            entries = update.dataset_list()
+            update.dataset_list()
             comboboxLists.create_all_lists(app)
-
-        # Update lists in first and second comboboxes
-        update.first(app,entries)
-        update.second(app,entries)
-        # Update values in Comboboxes
-        #app.sel_first.configure(values=entries)
-
-        # Add list in combobox to comboboxList.entries
-        #comboboxLists.entries['sel_first'] = entries
-        # Add list in combobox to comboboxList.entries
-
-        #app.sel_second.configure(values=entries)
-        #comboboxLists.entries['sel_second'] = entries
 
     # --- Quit (also window close by clicking on X)
     def close_application(self):
@@ -190,7 +220,6 @@ class EleanaMainApp:
         dialog_quit = QuitDialog(master=app.mainwindow)
         # Define function called after clicking quit_button
         dialog_quit.btn_quit.configure(command=quit_button_clicked)
-
     # EDIT Menu:
     #   Notes
     def notes(self):
@@ -202,7 +231,10 @@ class EleanaMainApp:
         Eleana.notes = json.loads(file_back)
 
 
-# ----------------------- Start GUI  --------------------------------
+
+
+'''Initialization of the App and GUI'''
+
 app = EleanaMainApp()
 
 # -----------------------Set geometry and icon ----------------------
@@ -276,18 +308,3 @@ app.mainwindow.protocol('WM_DELETE_WINDOW', app.close_application)
 # Run
 if __name__ == "__main__":
     app.run()
-
-# -----------------------------------------------------------------------
-# --------          DIFFERENT UNUSED COMMENTS               -------------
-# ------------------------------------------------------------------------
-
-# Przykład umieszczenia przycisku wewnątrz ramki graphFrame:
-# etykieta = ctk.CTkLabel(app.graphFrame, text="tekst") # Utwórz przycisk "etykieta" przez customtkinter
-# etykieta.grid(column=0, padx=2, pady=2, row=0) # Umieść w warstwie stosując metodę grid
-
-
-# Set comboboxes
-# def update_combobox_values(widget, new_values):
-#
-#    app.sel_first.configure(values=new_values)  # This is for CTkcombobox which is different than tkinter
-#    print(app.sel_first['values'])
