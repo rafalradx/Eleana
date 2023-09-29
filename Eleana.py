@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import ttk
 from pathlib import Path
 import customtkinter as ctk
+import numpy as np
 import pygubu
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
@@ -123,10 +124,14 @@ class EleanaMainApp:
             # Here will be fuction that generates graph
         x = data_for_plot['x']
         y = data_for_plot['re_y']
-        create_matplotlib_chart(x, y)
+        plotGraph(x, y)
 
-    def f_stk_selected(self):
-        print("Value")
+    def f_stk_selected(self, selected_value_text):
+        current_f_stk = comboboxLists.current_position(app, 'f_stk')
+        current_sel_first = comboboxLists.current_position(app, 'sel_first')
+        eleana.selections['f_stk'] = current_f_stk['index']
+        self.first_selected(current_sel_first['current'])
+
 
     def second_selected(self, selected_value_text):
         if selected_value_text == 'None':
@@ -141,7 +146,7 @@ class EleanaMainApp:
         # Get data for plotting
         data_for_plot = eleana.getDataFromSelection('second')
 
-        data_for_plot = eleana.dataset[index].get
+        #data_for_plot = eleana.dataset[index].get
             # x = data_for_plot['x']
             # y = data_for_plot['y']
             # create_matplotlib_chart(x, y)
@@ -264,13 +269,59 @@ app.sel_result.set('None')
 # Hide widgets at application start
 update.selections_widgets(app)
 
-
-
-
 # ----------- Examples and tests ------------------------
 
 # Umieszczenie matplotlib wykresu w app.graphframe
-def create_matplotlib_chart(x,y):
+def plotGraph(x,y):
+    first_x = np.array([])
+    first_re_y = np.array([])
+    first_im_y = np.array([])
+
+
+    # Get data from selections:
+    # FIRST
+    if not eleana.selections['f_dsp']:
+        print('Dane first niewyświetlane')
+        first_x = np.array([])
+        first_re_y = np.array([])
+        first_im_y = np.array([])
+
+        second_x = np.array([])
+        second_re_y = np.array([])
+        second_im_y = np.array([])
+
+        result_x = np.array([])
+        result_re_y = np.array([])
+        result_im_y = np.array([])
+
+        # If Show First checkbox in True then show data
+        if eleana.selections['f_dsp']:
+            data_for_plot = eleana.getDataFromSelection('first')
+            first_x = data_for_plot['x']
+            first_re_y = data_for_plot['re_y']
+            first_im_y = data_for_plot['im_y']
+        else:
+            pass
+
+        # If Show Second checkbox in True then show data
+        if eleana.selections['s_dsp']:
+            data_for_plot = eleana.getDataFromSelection('second')
+            first_x = data_for_plot['x']
+            first_re_y = data_for_plot['re_y']
+            first_im_y = data_for_plot['im_y']
+        else:
+            pass
+
+        # If Show Result checkbox in True then show data
+        if eleana.selections['r_dsp']:
+            data_for_plot = eleana.getDataFromSelection('result')
+            first_x = data_for_plot['x']
+            first_re_y = data_for_plot['re_y']
+            first_im_y = data_for_plot['im_y']
+        else:
+            pass
+
+
     fig = Figure(figsize=(5, 4), dpi=100)
     ax = fig.add_subplot(111)
 
@@ -292,7 +343,7 @@ x = [1, 2, 3, 4, 5]
 y = [10, 8, 6, 4, 2]
 
 
-create_matplotlib_chart(x,y)
+plotGraph(x,y)
 app.graphFrame.columnconfigure(0, weight=1)
 app.graphFrame.rowconfigure(0, weight=1)
 

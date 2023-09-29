@@ -392,8 +392,9 @@ class Update():
             app.firstStkFrame.grid(row=2, column=0)
             app.f_stk.configure(values=first.parameters['stk_names'])
             comboboxList = ComboboxLists()
-            entry = first.parameters['stk_names'][0]
-            comboboxList.set_on_index(app, 'f_stk', entry)
+            entry_index = int(Eleana.selections['f_stk'])
+            entry = first.parameters['stk_names'][entry_index]
+            comboboxList.set_on_value(app, 'f_stk', entry)
 
 
         try:
@@ -410,6 +411,10 @@ class Update():
         elif second.type == "stack 2D":
             app.secondStkFrame.grid(row=2, column=0)
             app.s_stk.configure(values=second.parameters['stk_names'])
+            comboboxList = ComboboxLists()
+            entry_index = int(Eleana.selections['s_stk'])
+            entry = first.parameters['stk_names'][entry_index]
+            comboboxList.set_on_value(app, 's_stk', entry)
         try:
             if second.complex:
                 app.secondImaginary.grid()
@@ -556,8 +561,21 @@ class ComboboxLists():
         for each in ids:
             self.create_list(app, each)
 
-    def set_on_index(self, app, which_combobox: str, entry: str):
+    def set_on_value(self, app, which_combobox: str, entry: str):
+        ''' Set the value in combobox defined in 'which_combobox'
+        on the value 'entry' which is a string name of the position on the combobox list
+        '''
         box = self.ref_to_box(app, which_combobox)
+        box.set(entry)
+
+    def set_on_index(self, app, which_combobox: str, index: int):
+        ''' Set the value in combobox defined in 'which_combobox'
+        on the position number defined by 'index'.
+        'index' argument is the number of the position in the combobox list
+        '''
+
+        box = self.ref_to_box(app, which_combobox)
+        print(which_combobox)
         box.set(entry)
 
     ''' END OF COMBOBOXLISTS CLASS'''
