@@ -4,6 +4,8 @@ import numpy as np
 from pathlib import Path
 import tempfile
 
+
+
 class Eleana():
     # Main attributes associated with data gathered in the programe
     interpreter = sys.executable # <-- Python version for subprocesses
@@ -389,6 +391,11 @@ class Update():
         elif first.type == "stack 2D":
             app.firstStkFrame.grid(row=2, column=0)
             app.f_stk.configure(values=first.parameters['stk_names'])
+            comboboxList = ComboboxLists()
+            entry = first.parameters['stk_names'][0]
+            comboboxList.set_on_index(app, 'f_stk', entry)
+
+
         try:
             if first.complex:
                 app.firstComplex.grid()
