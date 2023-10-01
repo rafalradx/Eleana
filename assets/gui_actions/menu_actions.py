@@ -14,7 +14,7 @@ eleana = Eleana()
 
 class MenuAction():
     # FILE
-    def load_project(self):
+    def load_project(self, eleana: object):
         filename =  askopenfilename(initialdir=eleana.paths['last_project_dir'],
                                  initialfile=eleana.paths['last_project'],
                                  defaultextension=".elp",
@@ -30,7 +30,6 @@ class MenuAction():
         except:
             return {"Error": True, 'desc': f"Cannot open {filename.name}"}
 
-
         eleana_dataset = Path(extract_dir, 'eleana_dataset')
         eleana_results_dataset = Path(extract_dir, 'eleana_results_dataset')
         eleana_assignmentsToGroups = Path(extract_dir, 'eleana_assignmentsToGroups')
@@ -39,22 +38,41 @@ class MenuAction():
         eleana_paths = Path(extract_dir, 'eleana_paths')
         eleana_selections = Path(extract_dir, 'eleana_selections')
 
-        file_to_read = open(eleana_dataset, "rb")
-        loaded_object = pickle.load(file_to_read)
-        eleana.dataset = loaded_object
-        file_to_read.close()
-
+        # Load selections
         file_to_read = open(eleana_selections, "rb")
         loaded_object = pickle.load(file_to_read)
         eleana.selections = loaded_object
         file_to_read.close()
 
-        print(loaded_object)
+        # Load paths
+        file_to_read = open(eleana_paths, "rb")
+        loaded_object = pickle.load(file_to_read)
+        eleana.paths = loaded_object
+        file_to_read.close()
 
+        # Load notes
+        file_to_read = open(eleana_notes, "rb")
+        loaded_object = pickle.load(file_to_read)
+        eleana.notes = loaded_object
+        file_to_read.close()
 
+        # Load groupsHierarchy
+        file_to_read = open(eleana_groupsHierarchy, "rb")
+        loaded_object = pickle.load(file_to_read)
+        eleana.groupsHierarchy = loaded_object
+        file_to_read.close()
 
+        # Load assignmentsToGroups
+        file_to_read = open(eleana_assignmentsToGroups, "rb")
+        loaded_object = pickle.load(file_to_read)
+        eleana.assignmentsToGroups = loaded_object
+        file_to_read.close()
 
-
+        # Load results_dataset
+        file_to_read = open(eleana_results_dataset, "rb")
+        loaded_object = pickle.load(file_to_read)
+        eleana.results_dataset = loaded_object
+        file_to_read.close()
 
 
 

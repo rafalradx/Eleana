@@ -191,9 +191,9 @@ class EleanaMainApp:
     # FILE
     # --- Load Project
     def load_project(self):
-        menuAction.load_project()
-        update.dataset_list()
-        comboboxLists.create_all_lists(app)
+        print(eleana.selections)
+        menuAction.load_project(eleana)
+        print(eleana.notes)
 
     # --- Save as
     def save_as(self):
