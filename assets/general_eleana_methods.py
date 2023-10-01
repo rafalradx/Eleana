@@ -27,7 +27,10 @@ class Eleana():
              'pixmaps': Path(Path(__file__).resolve().parent, "../pixmaps"),
              'ui': Path(Path(__file__).resolve().parent, "../pixmaps"),
              'assets': Path(Path(__file__).resolve().parent, ""),
-             'last_import_dir': '/home/marcin/PycharmProjects/Eleana/Example_data/Elexsys/'
+             'last_import_dir': '/home/marcin/PycharmProjects/Eleana/Example_data/Elexsys/',
+             'last_project_dir': '/home/marcin/PycharmProjects/Eleana/Example_data/Eleana_projects/',
+             'last_project': 'nowy_projekt.elp'
+
              }
 
     # Attribute selection is the basic storage of the settings obtainted from states in GUI
@@ -380,22 +383,24 @@ class Update():
             selections['r_stk'] = 0
 
         # Show or hide widgets
-        if len(Eleana.results_dataset) == 0:
-            app.resultFrame.grid_remove()
 
-        # Update FIRST frame
-        if len(Eleana.dataset) == 0 or first.type != "stack 2D":
+        comboboxList = ComboboxLists()
+        is_first_none = comboboxList.current_position(app, 'sel_first')
+        is_second_none = comboboxList.current_position(app, 'sel_second')
+        is_result_none = comboboxList.current_position(app, 'sel_result')
+
+        # FIRST frame
+        if len(Eleana.dataset) == 0 or first.type != "stack 2D" or is_first_none['index'] == 0:
             app.firstStkFrame.grid_remove()
             app.firstComplex.grid_remove()
 
         elif first.type == "stack 2D":
             app.firstStkFrame.grid(row=2, column=0)
             app.f_stk.configure(values=first.parameters['stk_names'])
-            comboboxList = ComboboxLists()
+            #comboboxList = ComboboxLists()
             entry_index = int(Eleana.selections['f_stk'])
             entry = first.parameters['stk_names'][entry_index]
             comboboxList.set_on_value(app, 'f_stk', entry)
-
 
         try:
             if first.complex:
@@ -404,14 +409,14 @@ class Update():
             pass
 
         # Update SECOND frame
-        if len(Eleana.dataset) == 0 or second.type != "stack 2D":
+        if len(Eleana.dataset) == 0 or second.type != "stack 2D" or is_second_none['index'] == 0:
             app.secondStkFrame.grid_remove()
             app.secondImaginary.grid_remove()
 
         elif second.type == "stack 2D":
             app.secondStkFrame.grid(row=2, column=0)
             app.s_stk.configure(values=second.parameters['stk_names'])
-            comboboxList = ComboboxLists()
+            #comboboxList = ComboboxLists()
             entry_index = int(Eleana.selections['s_stk'])
             entry = first.parameters['stk_names'][entry_index]
             comboboxList.set_on_value(app, 's_stk', entry)
@@ -422,16 +427,19 @@ class Update():
             pass
 
         # Update RESULT frame
-        if len(Eleana.results_dataset) == 0 or result.type != "stack 2D":
-            app.resultStkFrame.grid_remove()
-            app.resultImaginary.grid_remove()
+        if len(Eleana.results_dataset) == 0:
+            app.resultFrame.grid_remove()
+            return
 
-        elif second.type == "stack 2D":
+        if result.type != "stack 2D" or is_result_none['index'] == 0:
+            app.resultImaginary.grid_remove()
+            return
+        elif result.type == "stack 2D":
             app.resultStkFrame.grid(row=2, column=0)
             app.r_stk.configure(values=result.parameters['stk_names'])
             if result.complex:
                 app.resultImaginary.grid()
-
+            return
     def results_list(self, results):
         names = []
         i = 1

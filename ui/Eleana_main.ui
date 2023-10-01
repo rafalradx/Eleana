@@ -24,8 +24,7 @@
         </containerlayout>
         <child>
           <object class="customtkinter.CTkFrame" id="topFrame" named="True">
-            <property name="border_color">#888888</property>
-            <property name="border_width">1</property>
+            <property name="border_width">0</property>
             <property name="corner_radius">0</property>
             <property name="fg_color">#505050</property>
             <property name="height">30</property>
@@ -90,7 +89,7 @@
                                   <object class="customtkinter.CTkFrame" id="groupFrame" named="True">
                                     <property name="border_color">#888888</property>
                                     <property name="border_width">1</property>
-                                    <property name="corner_radius">0</property>
+                                    <property name="corner_radius">5</property>
                                     <property name="fg_color">#505050</property>
                                     <layout manager="grid">
                                       <property name="column">0</property>
@@ -194,7 +193,7 @@
                                   <object class="customtkinter.CTkFrame" id="firstFrame" named="True">
                                     <property name="border_color">#888888</property>
                                     <property name="border_width">1</property>
-                                    <property name="corner_radius">0</property>
+                                    <property name="corner_radius">5</property>
                                     <property name="fg_color">#505050</property>
                                     <layout manager="grid">
                                       <property name="column">0</property>
@@ -425,7 +424,7 @@
                                   <object class="customtkinter.CTkFrame" id="secondFrame" named="True">
                                     <property name="border_color">#888888</property>
                                     <property name="border_width">1</property>
-                                    <property name="corner_radius">0</property>
+                                    <property name="corner_radius">5</property>
                                     <property name="fg_color">#505050</property>
                                     <layout manager="grid">
                                       <property name="column">0</property>
@@ -630,7 +629,7 @@
                                   <object class="customtkinter.CTkFrame" id="resultFrame" named="True">
                                     <property name="border_color">#888888</property>
                                     <property name="border_width">1</property>
-                                    <property name="corner_radius">0</property>
+                                    <property name="corner_radius">5</property>
                                     <property name="fg_color">#505050</property>
                                     <layout manager="grid">
                                       <property name="column">0</property>
@@ -879,24 +878,47 @@
     </child>
   </object>
   <object class="tk.Menu" id="mainmenu" named="True">
+    <property name="background">#505050</property>
+    <property name="font">{Arial} 10 {}</property>
+    <property name="foreground">#bbbbbb</property>
+    <property name="relief">flat</property>
+    <property name="selectcolor">#eaeaea</property>
     <child>
       <object class="tk.Menuitem.Submenu" id="menu_file" named="True">
-        <property name="compound">center</property>
+        <property name="background">#505050</property>
+        <property name="compound">left</property>
+        <property name="foreground">#bbbbbb</property>
         <property name="hidemargin">false</property>
         <property name="label" translatable="yes">File</property>
+        <property name="tearoff">false</property>
+        <child>
+          <object class="tk.Menuitem.Command" id="menu_load_project" named="True">
+            <property name="command" type="command" cbtype="simple">load_project</property>
+            <property name="label" translatable="yes">Load project</property>
+          </object>
+        </child>
+        <child>
+          <object class="tk.Menuitem.Command" id="menu_save_as" named="True">
+            <property name="command" type="command" cbtype="simple">save_as</property>
+            <property name="label" translatable="yes">Save as</property>
+          </object>
+        </child>
         <child>
           <object class="tk.Menuitem.Submenu" id="menu_import" named="True">
-            <property name="columnbreak">true</property>
-            <property name="compound">top</property>
-            <property name="font">TkDefaultFont</property>
+            <property name="background">#505050</property>
+            <property name="foreground">#bbbbbb</property>
             <property name="label" translatable="yes">Import</property>
-            <property name="relief">raised</property>
-            <property name="state">normal</property>
             <property name="tearoff">false</property>
             <child>
-              <object class="tk.Menuitem.Command" id="menu_import_elexsys" named="True">
+              <object class="tk.Menuitem.Command" id="import_Elexsys" named="True">
                 <property name="command" type="command" cbtype="simple">import_elexsys</property>
                 <property name="label" translatable="yes">Bruker Elexsys</property>
+              </object>
+            </child>
+            <child>
+              <object class="tk.Menuitem.Command" id="import_emx" named="True">
+                <property name="command" type="command" cbtype="simple">import_elexsys</property>
+                <property name="label" translatable="yes">Bruker EMX</property>
               </object>
             </child>
           </object>

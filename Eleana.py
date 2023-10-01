@@ -2,15 +2,16 @@
 
 # Import Standard Python Modules
 import pathlib
-import subprocess
+
 import tkinter as tk
-from tkinter import ttk
+
 from pathlib import Path
 import customtkinter as ctk
 import numpy as np
 import pygubu
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+
 import json
 from json import loads, dumps
 
@@ -108,23 +109,20 @@ class EleanaMainApp:
 
     def first_selected(self, selected_value_text: str):
         if selected_value_text == 'None':
+            show_plots()
+            update.selections_widgets(app)
             return
-            # Get index of data selected in first in eleana.dataset
+
+        # Get index of data selected in first in eleana.dataset
         current_position = comboboxLists.current_position(app, 'sel_first')
         index = int(current_position['index']) -1
         eleana.selections['first'] = index
-            # Update GUI buttons according to selections
+
+        # Update GUI buttons according to selections
         update.selections_widgets(app)
 
-        # Get data for plotting
-        data_for_plot = eleana.getDataFromSelection('first')
-
-
-
-            # Here will be fuction that generates graph
-        x = data_for_plot['x']
-        y = data_for_plot['re_y']
-        plotGraph(x, y)
+        # Plot graph
+        show_plots()
 
     def f_stk_selected(self, selected_value_text):
         current_f_stk = comboboxLists.current_position(app, 'f_stk')
@@ -135,21 +133,18 @@ class EleanaMainApp:
 
     def second_selected(self, selected_value_text):
         if selected_value_text == 'None':
+            update.selections_widgets(app)
+            show_plots()
             return
-            # Get index of data selected in first in eleana.dataset
+        # Get index of data selected in first in eleana.dataset
         current_position = comboboxLists.current_position(app, 'sel_second')
         index = int(current_position['index']) - 1
         eleana.selections['second'] = index
         # Update GUI buttons according to selections
         update.selections_widgets(app)
 
-        # Get data for plotting
-        data_for_plot = eleana.getDataFromSelection('second')
-
-        #data_for_plot = eleana.dataset[index].get
-            # x = data_for_plot['x']
-            # y = data_for_plot['y']
-            # create_matplotlib_chart(x, y)
+        # Draw plot
+        show_plots()
 
 
     def second_down_clicked(self):
@@ -179,6 +174,13 @@ class EleanaMainApp:
             self.second_selected(entry)
         pass
 
+    def s_stk_selected(self, selected_value_text):
+        current_s_stk = comboboxLists.current_position(app, 's_stk')
+        current_sel_second = comboboxLists.current_position(app, 'sel_second')
+        eleana.selections['s_stk'] = current_s_stk['index']
+        self.second_selected(current_sel_second['current'])
+
+
     def results_down_clicked(self):
         pass
 
@@ -187,6 +189,17 @@ class EleanaMainApp:
 
     # Functions triggered by Menu selections
     # FILE
+    # --- Load Project
+    def load_project(self):
+        menuAction.load_project()
+        update.dataset_list()
+        comboboxLists.create_all_lists(app)
+
+    # --- Save as
+    def save_as(self):
+        menuAction.save_as(eleana)
+
+
     # --- Import EPR --> Bruker Elexsys
 
     def import_elexsys(self):
@@ -272,80 +285,191 @@ update.selections_widgets(app)
 # ----------- Examples and tests ------------------------
 
 # Umieszczenie matplotlib wykresu w app.graphframe
-def plotGraph(x,y):
-    first_x = np.array([])
-    first_re_y = np.array([])
-    first_im_y = np.array([])
 
+def show_plots():
+    '''Ta funkcja zbiera informacje o wszystkich wyborach i wyswietla odpowiednie
+    wartości na wykresie.
+    Funkcje trzeba rozbudowac o elementy, które sprawdzają czy mamy wyświetlić
+    część także część urojoną. Wtedy do wykresu dokładamy po jednej krzywej, np. przerywanej
+    do każdego wybor FIRST, SECOND itd.
 
-    # Get data from selections:
+    Ostatecznie funkcja zostanie przeniesiona do innego pliku
+    '''
+    fig = Figure(figsize=(5,4), dpi = 100)
+    ax = fig.add_subplot(111)
+
     # FIRST
-    if not eleana.selections['f_dsp']:
-        print('Dane first niewyświetlane')
+    index = comboboxLists.current_position(app, 'sel_first')['index']
+    if index != 0:
+        is_first_not_none = True
+    else:
+        is_first_not_none = False
+
+    if eleana.selections['f_dsp'] and is_first_not_none:
+        data_for_plot = eleana.getDataFromSelection('first')
+        data_index = eleana.selections['first']
+        first_x = data_for_plot['x']
+        first_re_y = data_for_plot['re_y']
+        first_im_y = data_for_plot['im_y']
+        first_legend_index = eleana.selections['first']
+        first_legend = eleana.dataset[first_legend_index].name
+
+        # Label for x axis
+        try:
+            label_x_title = eleana.dataset[data_index].parameters['name_x']
+        except:
+            label_x_title = ''
+        try:
+            label_x_unit = eleana.dataset[data_index].parameters['unit_x']
+        except:
+            label_x_unit = 'a.u.'
+        first_label_x = label_x_title + ' [' + label_x_unit + ']'
+
+        # Labels for y axis
+        try:
+            label_y_title = eleana.dataset[data_index].parameters['name_y']
+        except:
+            label_y_title = ''
+        try:
+            label_y_unit = eleana.dataset[data_index].parameters['unit_y']
+        except:
+            label_y_unit = 'a.u.'
+        first_label_y = label_y_title + ' [' + label_y_unit + ']'
+
+    else:
         first_x = np.array([])
         first_re_y = np.array([])
         first_im_y = np.array([])
+        first_legend = 'no plot'
+        first_label_x = ''
+        first_label_y = ''
 
+    # Add FIRST to plot
+    ax.set_ylabel(first_label_y)
+    ax.set_xlabel(first_label_x)
+    ax.plot(first_x, first_re_y, label=first_legend)
+
+    # SECOND
+    index = comboboxLists.current_position(app, 'sel_second')['index']
+    if index != 0:
+        is_second_not_none = True
+    else:
+        is_second_not_none = False
+
+    if eleana.selections['s_dsp'] and is_second_not_none:
+        data_for_plot = eleana.getDataFromSelection('second')
+        data_index = eleana.selections['second']
+        second_x = data_for_plot['x']
+        second_re_y = data_for_plot['re_y']
+        second_im_y = data_for_plot['im_y']
+        second_legend_index = eleana.selections['second']
+        second_legend = eleana.dataset[second_legend_index].name
+
+        # Label for x axis
+        try:
+            label_x_title = eleana.dataset[data_index].parameters['name_x']
+        except:
+            label_x_title = ''
+        try:
+            label_x_unit = eleana.dataset[data_index].parameters['unit_x']
+        except:
+            label_x_unit = 'a.u.'
+        second_label_x = label_x_title + ' [' + label_x_unit + ']'
+
+        # Labels for y axis
+        try:
+            label_y_title = eleana.dataset[data_index].parameters['name_y']
+        except:
+            label_y_title = ''
+        try:
+            label_y_unit = eleana.dataset[data_index].parameters['unit_y']
+        except:
+            label_y_unit = 'a.u.'
+        second_label_y = label_y_title + ' [' + label_y_unit + ']'
+
+    else:
         second_x = np.array([])
         second_re_y = np.array([])
         second_im_y = np.array([])
+        second_legend = 'no plot'
+        second_label_x = ''
+        second_label_y = ''
 
-        result_x = np.array([])
-        result_re_y = np.array([])
-        result_im_y = np.array([])
+    # Add SECOND to plot
+    if eleana.selections['f_dsp'] and is_first_not_none:
+        # If FIRST spectrum is on then do not change axes labels
+        pass
+    else:
+        # If FIRST spectrum is off or set tu None then change labels to those from SECOND
+        ax.set_ylabel(second_label_y)
+        ax.set_xlabel(second_label_x)
 
-        # If Show First checkbox in True then show data
-        if eleana.selections['f_dsp']:
-            data_for_plot = eleana.getDataFromSelection('first')
-            first_x = data_for_plot['x']
-            first_re_y = data_for_plot['re_y']
-            first_im_y = data_for_plot['im_y']
+    ax.plot(second_x, second_re_y, label=second_legend)
+
+    # RESULT
+    if len(eleana.results_dataset) != 0:
+        index = comboboxLists.current_position(app, 'sel_result')['index']
+        if index != 0:
+            is_result_not_none = True
         else:
-            pass
+            is_result_not_none = False
 
-        # If Show Second checkbox in True then show data
-        if eleana.selections['s_dsp']:
-            data_for_plot = eleana.getDataFromSelection('second')
-            first_x = data_for_plot['x']
-            first_re_y = data_for_plot['re_y']
-            first_im_y = data_for_plot['im_y']
-        else:
-            pass
-
-        # If Show Result checkbox in True then show data
-        if eleana.selections['r_dsp']:
+        if eleana.selections['s_dsp'] and is_result_not_none:
             data_for_plot = eleana.getDataFromSelection('result')
-            first_x = data_for_plot['x']
-            first_re_y = data_for_plot['re_y']
-            first_im_y = data_for_plot['im_y']
+            data_index = eleana.selections['result']
+            result_x = data_for_plot['x']
+            result_re_y = data_for_plot['re_y']
+            result_im_y = data_for_plot['im_y']
+            result_legend_index = eleana.selections['result']
+            result_legend = eleana.results_dataset[result_legend_index].name
+
+            # Label for x axis
+            try:
+                label_x_title = eleana.results_dataset[data_index].parameters['name_x']
+            except:
+                label_x_title = ''
+            try:
+                label_x_unit = eleana.results_dataset[data_index].parameters['unit_x']
+            except:
+                label_x_unit = 'a.u.'
+            result_label_x = label_x_title + ' [' + label_x_unit + ']'
+
+            # Labels for y axis
+            try:
+                label_y_title = eleana.results_dataset[data_index].parameters['name_y']
+            except:
+                label_y_title = ''
+            try:
+                label_y_unit = eleana.results_dataset[data_index].parameters['unit_y']
+            except:
+                label_y_unit = 'a.u.'
+            result_label_y = label_y_title + ' [' + label_y_unit + ']'
+
         else:
+            result_x = np.array([])
+            result_re_y = np.array([])
+            result_im_y = np.array([])
+            result_legend = 'no plot'
+            result_label_x = ''
+            result_label_y = ''
+
+        # Add SECOND to plot
+        if eleana.selections['f_dsp'] and eleana.selections['s_dsp'] and is_first_not_none and is_second_not_none:
             pass
+        else:
+            # If FIRST spectrum is off or set tu None then change labels to those from SECOND
+            ax.set_ylabel(result_label_y)
+            ax.set_xlabel(result_label_x)
 
+        ax.plot(result_x, result_re_y, label=result_legend)
 
-    fig = Figure(figsize=(5, 4), dpi=100)
-    ax = fig.add_subplot(111)
-
-    #x = [1, 2, 3, 4, 5]
-    #y = [10, 8, 6, 4, 2]
-
-    ax.plot(x, y, label="Przykładowe dane")
-    ax.set_xlabel('Oś x')
-    ax.set_ylabel('Os y')
+    # Put data on Graph
     ax.legend()
-
     canvas = FigureCanvasTkAgg(fig, master=app.graphFrame)
+    canvas.get_tk_widget().grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
     canvas.draw()
-    canvas.get_tk_widget().grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
-
-
-
-x = [1, 2, 3, 4, 5]
-y = [10, 8, 6, 4, 2]
-
-
-plotGraph(x,y)
-app.graphFrame.columnconfigure(0, weight=1)
-app.graphFrame.rowconfigure(0, weight=1)
+    app.graphFrame.columnconfigure(0, weight=1)
+    app.graphFrame.rowconfigure(0, weight=1)
 
 
 # Sposób na ukrycie
