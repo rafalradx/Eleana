@@ -228,6 +228,7 @@ class EleanaMainApp:
 
     # --- Quit (also window close by clicking on X)
     def close_application(self):
+
         # Display dialog window created in dialog_quit.py
         def quit_button_clicked():
             # This closes the pop-up window and then main application
@@ -238,6 +239,8 @@ class EleanaMainApp:
         dialog_quit = QuitDialog(master=app.mainwindow)
         # Define function called after clicking quit_button
         dialog_quit.btn_quit.configure(command=quit_button_clicked)
+
+
     # EDIT Menu:
     #   Notes
     def notes(self):

@@ -43,6 +43,9 @@ class MenuAction():
         loaded_object = pickle.load(file_to_read)
         eleana.selections = loaded_object
         file_to_read.close()
+        close_file = Path(file_to_read.name)
+        close_file.unlink()
+
 
         # Load paths
         file_to_read = open(eleana_paths, "rb")
@@ -89,21 +92,28 @@ class MenuAction():
         new_directory = Path(working_folder)
         new_directory.mkdir(parents=True, exist_ok=True)
 
-        elements_to_save = {'eleana_dataset':eleana.dataset,
-                            'eleana_results_dataset':eleana.results_dataset,
-                            'eleana_assignmentsToGroups':eleana.assignmentToGroups,
+        elements_to_save = {'eleana_assignmentsToGroups':eleana.assignmentToGroups,
                             'eleana_groupsHierarchy':eleana.groupsHierarchy,
                             'eleana_notes':eleana.notes,
                             'eleana_paths':eleana.paths,
                             'eleana_selections':eleana.selections
                             }
-        # Save the eleana atributes to separate files
+        # Save the eleana attributes to separate files
         # Names for files are taken form keys of element_to_save
         try:
             for each in elements_to_save.keys():
                 file_path = Path(new_directory, each)
                 with open(file_path, 'wb') as file:
                     pickle.dump(elements_to_save[each], file)
+
+
+            for each in eleana.dataset:
+                name = each.name_nr
+                name = name.replace(". ", "__")
+                data_file = Path(working_folder, name)
+                with open(data_file, 'wb') as file:
+                    pickle.dump(each, file)
+
 
             # Create zip file form the directory
             name_without_extension = filename.name[:-4]
@@ -114,7 +124,7 @@ class MenuAction():
             # Rename zip to elp
             zip_file.rename(new_name)
 
-            # Remove files in workin_dir
+            # Remove files in working_dir
             for file in new_directory.glob('*'):
                 file.unlink()
 

@@ -28,8 +28,6 @@ class QuitDialog:
         self.window = toplevel1
 
         self.choice = ""
-    #def run(self):
-    #    self.mainwindow.mainloop()
 
     def quit_appication(self):
         self.window.destroy()
