@@ -8,6 +8,7 @@ import tempfile
 
 class Eleana():
     # Main attributes associated with data gathered in the programe
+    version = 0.8
     interpreter = sys.executable # <-- Python version for subprocesses
     dataset = []            # <-- This variable keeps all spectra available in Eleana. It is a list of objects
     results_dataset = []    # <-- This keeps data containing results
@@ -29,7 +30,7 @@ class Eleana():
              'assets': Path(Path(__file__).resolve().parent, ""),
              'last_import_dir': '/home/marcin/PycharmProjects/Eleana/Example_data/Elexsys/',
              'last_project_dir': '/home/marcin/PycharmProjects/Eleana/Example_data/Eleana_projects/',
-             'last_project': 'nowy_projekt.elp'
+             'last_project': 'project'
 
              }
 
@@ -351,7 +352,8 @@ class Update():
             i += 1
         return names_numbered
 
-    ''' Show or hide First, Second or Result frames
+    ''' 
+    Show or hide First, Second or Result frames
     '''
 
     def selections_widgets(self, app: object):
@@ -397,7 +399,6 @@ class Update():
         elif first.type == "stack 2D":
             app.firstStkFrame.grid(row=2, column=0)
             app.f_stk.configure(values=first.parameters['stk_names'])
-            #comboboxList = ComboboxLists()
             entry_index = int(Eleana.selections['f_stk'])
             entry = first.parameters['stk_names'][entry_index]
             comboboxList.set_on_value(app, 'f_stk', entry)
