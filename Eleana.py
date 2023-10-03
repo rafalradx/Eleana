@@ -11,7 +11,7 @@ import numpy as np
 import pygubu
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-
+from CTkMessagebox import CTkMessagebox
 import json
 from json import loads, dumps
 
@@ -191,9 +191,10 @@ class EleanaMainApp:
     # FILE
     # --- Load Project
     def load_project(self):
-        print(eleana.selections)
-        menuAction.load_project(eleana)
-        print(eleana.notes)
+        dataset_from_project = menuAction.load_project(eleana)
+        eleana.dataset = dataset_from_project
+        update.dataset_list(eleana)
+        comboboxLists.create_all_lists(app)
 
     # --- Save as
     def save_as(self):
@@ -205,6 +206,8 @@ class EleanaMainApp:
     def import_elexsys(self):
         ''' Open window that loads the spectra '''
         menuAction.loadElexsys()
+        update.dataset_list(eleana)
+        comboboxLists.create_all_lists(app)
 
         ''' When import is done and spectra in eleana.dataset[]
             it is needed to:
@@ -223,23 +226,16 @@ class EleanaMainApp:
 
         # Będę musiał dodać funkcję sprawdzenia grupy wewnątrz update.dataset_list
         if eleana.selections['group'] == 'All':
-            update.dataset_list()
+            update.dataset_list(eleana)
             comboboxLists.create_all_lists(app)
 
     # --- Quit (also window close by clicking on X)
     def close_application(self):
-
-        # Display dialog window created in dialog_quit.py
-        def quit_button_clicked():
-            # This closes the pop-up window and then main application
-            dialog_quit.window.destroy()
+        quit_dialog = CTkMessagebox(title="Quit", message="Do you want to close the program?",
+                  icon="warning", option_1="No", option_2="Yes")
+        response = quit_dialog.get()
+        if response == "Yes":
             app.mainwindow.destroy()
-
-        # Create instance of the dialog window
-        dialog_quit = QuitDialog(master=app.mainwindow)
-        # Define function called after clicking quit_button
-        dialog_quit.btn_quit.configure(command=quit_button_clicked)
-
 
     # EDIT Menu:
     #   Notes

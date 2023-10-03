@@ -8,7 +8,7 @@ import tempfile
 
 class Eleana():
     # Main attributes associated with data gathered in the programe
-    version = 0.8
+    version = 1
     interpreter = sys.executable # <-- Python version for subprocesses
     dataset = []            # <-- This variable keeps all spectra available in Eleana. It is a list of objects
     results_dataset = []    # <-- This keeps data containing results
@@ -336,11 +336,11 @@ class Update():
     ''' Generates and returns entries for the comboboxes 
         The entries depend on selected group.
     '''
-    def dataset_list(self) -> list:
+    def dataset_list(self, eleana) -> list:
 
         names_numbered = ['None']
         i = 0
-        for data in Eleana.dataset:
+        for data in eleana.dataset:
             number = str(i+1)
             name_number = number + '. ' + data.name
             names_numbered.append(name_number)

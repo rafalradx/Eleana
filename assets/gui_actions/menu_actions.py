@@ -10,7 +10,7 @@ import random
 import shutil
 import tkinter as tk
 from tkinter import messagebox
-
+from CTkMessagebox import CTkMessagebox
 # Create instances
 elexsys = Elexsys()
 eleana = Eleana()
@@ -52,67 +52,85 @@ class MenuAction():
         eleana_results_dataset = Path(extract_dir, 'eleana_results_datset')
         eleana_project_details = Path(extract_dir, 'eleana_project_details')
 
+        try:
+            '''
+            3. Load eleana_project_details to check if its compatible with the current Eleana version
+            '''
+
+            file_to_read = open(eleana_project_details, "rb")
+            loaded_object = pickle.load(file_to_read)
+            eleana_project_details = loaded_object
+            file_to_read.close()
+
+            project_version = float(loaded_object['project version'])
+
+            if project_version > eleana.version:
+                info = CTkMessagebox(title="Project load", message='This project was created in newer Eleana version. Some errors in loaded content are possible')
+
+            '''
+            4. Load eleana_XXXXX files and store the content in temporary variables  
+            '''
+
+            # LOAD: eleana_selections
+            file_to_read = open(eleana_selections, "rb")
+            loaded_object = pickle.load(file_to_read)
+            eleana_selections = loaded_object
+            file_to_read.close()
+            close_file = Path(file_to_read.name)
+            close_file.unlink()
+
+            # LOAD eleana_paths
+            file_to_read = open(eleana_paths, "rb")
+            loaded_object = pickle.load(file_to_read)
+            eleana_paths = loaded_object
+            file_to_read.close()
+
+            # LOAD notes
+            file_to_read = open(eleana_notes, "rb")
+            loaded_object = pickle.load(file_to_read)
+            eleana_notes = loaded_object
+            file_to_read.close()
+
+            # LOAD groupsHierarchy
+            file_to_read = open(eleana_groupsHierarchy, "rb")
+            loaded_object = pickle.load(file_to_read)
+            eleana_groupsHierarchy = loaded_object
+            file_to_read.close()
+
+            # LOAD assignmentsToGroups
+            file_to_read = open(eleana_assignmentsToGroups, "rb")
+            loaded_object = pickle.load(file_to_read)
+            eleana_assignmentsToGroups = loaded_object
+            file_to_read.close()
+
+            '''
+            5. Load list of the objects to store in eleana.dataset
+            '''
+            # LOAD results_dataset
+            file_to_read = open(eleana_dataset_list, "rb")
+            loaded_object = pickle.load(file_to_read)
+            eleana_dataset_list = loaded_object
+            file_to_read.close()
+
+            eleana_dataset = []
+            for filenumber in eleana_dataset_list.keys():
+                filename = Path(extract_dir, filenumber)
+                file_to_read = open(filename, "rb")
+                loaded_object = pickle.load(file_to_read)
+                eleana_dataset.append(loaded_object)
+                file_to_read.close()
+        except:
+            return {"Error": True, 'desc': f"An error occured while loading the file"}
 
         '''
-        3. Load eleana_project_details to check if its compatible with the current Eleana version
+        6. Remove all files from extract_directory and then remove extract directory
         '''
-        file_to_read = open(eleana_project_details, "rb")
-        loaded_object = pickle.load(file_to_read)
-        eleana.selections = loaded_object
-        file_to_read.close()
+        for file in extract_dir.iterdir():
+            if file.is_file():
+                file.unlink()
 
-        project_version = float(loaded_object['project version'])
-
-        if project_version > eleana.version:
-            messagebox.showwarning(title="", message='The project was created in a newer version of the program and may not load properly')
-
-
-
-
-
-
-
-
-        # Load selections
-        file_to_read = open(eleana_selections, "rb")
-        loaded_object = pickle.load(file_to_read)
-        eleana.selections = loaded_object
-        file_to_read.close()
-        close_file = Path(file_to_read.name)
-        close_file.unlink()
-
-
-        # Load paths
-        file_to_read = open(eleana_paths, "rb")
-        loaded_object = pickle.load(file_to_read)
-        eleana.paths = loaded_object
-        file_to_read.close()
-
-        # Load notes
-        file_to_read = open(eleana_notes, "rb")
-        loaded_object = pickle.load(file_to_read)
-        eleana.notes = loaded_object
-        file_to_read.close()
-
-        # Load groupsHierarchy
-        file_to_read = open(eleana_groupsHierarchy, "rb")
-        loaded_object = pickle.load(file_to_read)
-        eleana.groupsHierarchy = loaded_object
-        file_to_read.close()
-
-        # Load assignmentsToGroups
-        file_to_read = open(eleana_assignmentsToGroups, "rb")
-        loaded_object = pickle.load(file_to_read)
-        eleana.assignmentsToGroups = loaded_object
-        file_to_read.close()
-
-        # Load results_dataset
-        file_to_read = open(eleana_results_dataset, "rb")
-        loaded_object = pickle.load(file_to_read)
-        eleana.results_dataset = loaded_object
-        file_to_read.close()
-
-
+        extract_dir.rmdir()
+        return eleana_dataset
 
 
     def save_as(self, eleana: object):
