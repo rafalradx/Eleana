@@ -110,7 +110,7 @@ class EleanaMainApp:
     def first_selected(self, selected_value_text: str):
         if selected_value_text == 'None':
             show_plots()
-            update.selections_widgets(app)
+            update.selections_widgets(app, eleana)
             return
 
         # Get index of data selected in first in eleana.dataset
@@ -119,7 +119,7 @@ class EleanaMainApp:
         eleana.selections['first'] = index
 
         # Update GUI buttons according to selections
-        update.selections_widgets(app)
+        update.selections_widgets(app, eleana)
 
         # Plot graph
         show_plots()
@@ -133,7 +133,7 @@ class EleanaMainApp:
 
     def second_selected(self, selected_value_text):
         if selected_value_text == 'None':
-            update.selections_widgets(app)
+            update.selections_widgets(app, eleana)
             show_plots()
             return
         # Get index of data selected in first in eleana.dataset
@@ -141,7 +141,7 @@ class EleanaMainApp:
         index = int(current_position['index']) - 1
         eleana.selections['second'] = index
         # Update GUI buttons according to selections
-        update.selections_widgets(app)
+        update.selections_widgets(app, eleana)
 
         # Draw plot
         show_plots()
@@ -193,8 +193,9 @@ class EleanaMainApp:
     def load_project(self):
         dataset_from_project = menuAction.load_project(eleana)
         eleana.dataset = dataset_from_project
+
         update.dataset_list(eleana)
-        comboboxLists.create_all_lists(app)
+        comboboxLists.create_all_lists(app,eleana)
 
     # --- Save as
     def save_as(self):
@@ -207,7 +208,7 @@ class EleanaMainApp:
         ''' Open window that loads the spectra '''
         menuAction.loadElexsys()
         update.dataset_list(eleana)
-        comboboxLists.create_all_lists(app)
+        comboboxLists.create_all_lists(app,eleana)
 
         ''' When import is done and spectra in eleana.dataset[]
             it is needed to:
@@ -227,7 +228,7 @@ class EleanaMainApp:
         # Będę musiał dodać funkcję sprawdzenia grupy wewnątrz update.dataset_list
         if eleana.selections['group'] == 'All':
             update.dataset_list(eleana)
-            comboboxLists.create_all_lists(app)
+            comboboxLists.create_all_lists(app, eleana)
 
     # --- Quit (also window close by clicking on X)
     def close_application(self):
@@ -279,7 +280,7 @@ app.sel_result.configure(values=['None', 'yes'])
 app.sel_result.set('None')
 
 # Hide widgets at application start
-update.selections_widgets(app)
+update.selections_widgets(app, eleana)
 
 # ----------- Examples and tests ------------------------
 
@@ -305,7 +306,7 @@ def show_plots():
         is_first_not_none = False
 
     if eleana.selections['f_dsp'] and is_first_not_none:
-        data_for_plot = eleana.getDataFromSelection('first')
+        data_for_plot = eleana.getDataFromSelection(eleana, 'first')
         data_index = eleana.selections['first']
         first_x = data_for_plot['x']
         first_re_y = data_for_plot['re_y']
@@ -356,7 +357,7 @@ def show_plots():
         is_second_not_none = False
 
     if eleana.selections['s_dsp'] and is_second_not_none:
-        data_for_plot = eleana.getDataFromSelection('second')
+        data_for_plot = eleana.getDataFromSelection(eleana, 'second')
         data_index = eleana.selections['second']
         second_x = data_for_plot['x']
         second_re_y = data_for_plot['re_y']
@@ -414,7 +415,7 @@ def show_plots():
             is_result_not_none = False
 
         if eleana.selections['s_dsp'] and is_result_not_none:
-            data_for_plot = eleana.getDataFromSelection('result')
+            data_for_plot = eleana.getDataFromSelection(eleana, 'result')
             data_index = eleana.selections['result']
             result_x = data_for_plot['x']
             result_re_y = data_for_plot['re_y']

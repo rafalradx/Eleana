@@ -99,13 +99,13 @@ class Eleana():
             index = numbered_names.index(selected_value_text)
             return index
 
-    def getDataFromSelection(self, first_second_or_results: str):
+    def getDataFromSelection(self, eleana: object, first_second_or_results: str):
         # This method returns X, reY, imY and boolean complex depending on values in eleana.selections
         # Argument first_second_or_results is string 'first' for First selection
         #                                            'second' for Second selection
         #                                            'result' for Results selection
 
-        selection = Eleana.selections
+        selection = eleana.selections
         if first_second_or_results == 'first':
             index_main = selection['first']     # Get index from dataset
             index_stk = selection['f_stk']      # Get index in stack if it is a stack
@@ -125,7 +125,7 @@ class Eleana():
             print("Wrong argument. Must be 'first', 'second' or 'result'")
             return {}
 
-        data = Eleana.dataset[index_main]
+        data = eleana.dataset[index_main]
         type = data.type
 
         if type == 'stack 2D':
@@ -168,7 +168,7 @@ class Eleana():
 
     # Write "content" to text file "filename" in temporary directory (/tmp)
     def create_tmp_file(self, filename: str, content=""):
-        path_to_file = Path(Eleana.paths['tmp_dir'], filename)
+        path_to_file = Path(eleana.paths['tmp_dir'], filename)
         try:
             with open(path_to_file, "w") as file:
                 file.write(content)
@@ -347,8 +347,8 @@ class Update():
             i += 1
 
         i = 0
-        while i < len(Eleana.dataset):
-            Eleana.dataset[i].name_nr = names_numbered[i+1]
+        while i < len(eleana.dataset):
+            eleana.dataset[i].name_nr = names_numbered[i+1]
             i += 1
         return names_numbered
 
@@ -356,11 +356,11 @@ class Update():
     Show or hide First, Second or Result frames
     '''
 
-    def selections_widgets(self, app: object):
-        selections = Eleana.selections
+    def selections_widgets(self, app: object, eleana):
+        selections = eleana.selections
         first_nr = selections['first']
         try:
-            first = Eleana.dataset[first_nr]
+            first = eleana.dataset[first_nr]
             f_stk = selections['f_stk']
         except IndexError:
             selections['first'] = 0
@@ -369,7 +369,7 @@ class Update():
 
         second_nr = selections['second']
         try:
-            second = Eleana.dataset[second_nr]
+            second = eleana.dataset[second_nr]
             s_stk = selections['s_stk']
         except IndexError:
             selections['second'] = 0
@@ -378,7 +378,7 @@ class Update():
 
         result_nr = selections['result']
         try:
-            result = Eleana.results_dataset[result_nr]
+            result = eleana.results_dataset[result_nr]
             r_stk = selections['r_stk']
         except IndexError:
             selections['result'] = 0
@@ -392,14 +392,14 @@ class Update():
         is_result_none = comboboxList.current_position(app, 'sel_result')
 
         # FIRST frame
-        if len(Eleana.dataset) == 0 or first.type != "stack 2D" or is_first_none['index'] == 0:
+        if len(eleana.dataset) == 0 or first.type != "stack 2D" or is_first_none['index'] == 0:
             app.firstStkFrame.grid_remove()
             app.firstComplex.grid_remove()
 
         elif first.type == "stack 2D":
             app.firstStkFrame.grid(row=2, column=0)
             app.f_stk.configure(values=first.parameters['stk_names'])
-            entry_index = int(Eleana.selections['f_stk'])
+            entry_index = int(eleana.selections['f_stk'])
             entry = first.parameters['stk_names'][entry_index]
             comboboxList.set_on_value(app, 'f_stk', entry)
 
@@ -410,7 +410,7 @@ class Update():
             pass
 
         # Update SECOND frame
-        if len(Eleana.dataset) == 0 or second.type != "stack 2D" or is_second_none['index'] == 0:
+        if len(eleana.dataset) == 0 or second.type != "stack 2D" or is_second_none['index'] == 0:
             app.secondStkFrame.grid_remove()
             app.secondImaginary.grid_remove()
 
@@ -418,7 +418,7 @@ class Update():
             app.secondStkFrame.grid(row=2, column=0)
             app.s_stk.configure(values=second.parameters['stk_names'])
             #comboboxList = ComboboxLists()
-            entry_index = int(Eleana.selections['s_stk'])
+            entry_index = int(eleana.selections['s_stk'])
             entry = first.parameters['stk_names'][entry_index]
             comboboxList.set_on_value(app, 's_stk', entry)
         try:
@@ -428,7 +428,7 @@ class Update():
             pass
 
         # Update RESULT frame
-        if len(Eleana.results_dataset) == 0:
+        if len(eleana.results_dataset) == 0:
             app.resultFrame.grid_remove()
             return
 
@@ -451,7 +451,7 @@ class Update():
             i += 1
         return names
 
-    # Creating groups on basis of groups defined in Eleana.dataset
+    # Creating groups on basis of groups defined in eleana.dataset
     def groups(self, dataset):
         found_groups = set()
         self.groups = []
@@ -524,15 +524,16 @@ class ComboboxLists():
 
         return {}
 
-    def create_list(self, app, which_combobox):
+    def create_list(self, app, eleana, which_combobox):
         box = self.ref_to_box(app, which_combobox)
         # Create list for First, Second
+        list_items = ['None']
         if which_combobox == 'sel_first' or which_combobox == 'sel_second':
             list_items = ['None']
 
-            if Eleana.selections['group'] == 'All':
+            if eleana.selections['group'] == 'All':
                 # When Group is 'All'
-                for each in Eleana.dataset:
+                for each in eleana.dataset:
                     list_items.append(each.name_nr)
             else:
                 # When Group is different than 'All'
@@ -541,15 +542,15 @@ class ComboboxLists():
 
         elif which_combobox == 'sel_result':
             list_items = ['None']
-            for each in Eleana.results_dataset:
+            for each in eleana.results_dataset:
                 list_items.append(each.name_nr)
 
         elif which_combobox == 'f_stk':
-            data = Eleana.dataset[Eleana.selections['first']]
+            data = eleana.dataset[eleana.selections['first']]
         elif which_combobox == 's_stk':
-            data = Eleana.dataset[Eleana.selections['second']]
+            data = eleana.dataset[eleana.selections['second']]
         elif which_combobox == 'r_stk':
-            data = Eleana.dataset[Eleana.selections['result']]
+            data = eleana.dataset[eleana.selections['result']]
         else:
             return
 
@@ -565,10 +566,10 @@ class ComboboxLists():
         self.entries[which_combobox] = list_items
         box.configure(values=list_items)
 
-    def create_all_lists(self, app):
+    def create_all_lists(self, app, eleana):
         ids = list(self.entries.keys())
         for each in ids:
-            self.create_list(app, each)
+            self.create_list(app, eleana, each)
 
     def set_on_value(self, app, which_combobox: str, entry: str):
         ''' Set the value in combobox defined in 'which_combobox'
