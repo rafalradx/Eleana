@@ -224,8 +224,7 @@ class GeneralDataTemplate():
                   'Power': '',
                   'PowerAtten': 'PowAtten'
                   }
-class Spectrum_CWEPR(GeneralDataTemplate):     # Class constructor for single CW EPR data
-
+class Spectrum_CWEPR(GeneralDataTemplate):
 
     def __init__(self, name, x_axis: list, dta: list, dsc: dict):
         self.x = x_axis
@@ -255,14 +254,8 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
 
     def __init__(self, name, x_axis: list, dta: list, dsc: dict, ygf):
         super().__init__(name, x_axis, dta, dsc)
-        self.name = name
-        self.x_axis = x_axis
-        self.dta = dta
-        self.dsc = dsc
-        self.ygf = ygf
+
         working_parameters = self.parameters
-        # working_parameters['name_z'] = ''
-        # working_parameters['unit_z'] = ''
         working_parameters['stk_names'] = []
 
         fill_missing_keys = ['name_z', 'unit_z']
@@ -289,7 +282,6 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         list_of_y_array = np.array(list_of_y)
 
         # Create in stack names:
-
         for each in ygf:
             name = working_parameters['name_z'] + ' ' + str(each) + ' ' + working_parameters['unit_z'] + ''
             working_parameters['stk_names'].append(name)
@@ -302,27 +294,21 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
 
 class Spectrum_complex(GeneralDataTemplate):
     def __init__(self, name, x_axis: list, dta: list, dsc: dict):
-        #super().__init__(name, x_axis, dta, dsc)
-        self.name = name
-        self.x_axis = x_axis
-        self.dta = dta
-        self.dsc = dsc
-
         length = len(dta)/2
-        reY = []
-        imY = []
 
+        y = np.array([])
         i = 0
         while i < length:
-            reY.append(dsc[i])
-            imY.append(dsc[i+1])
-            i += 1
+            complex_nr = np.complex(dta[i], dta[i+1])
+            y = np.append(y, complex_nr)
+            i += 2
 
-        self.y = reY + 1j * imY
-
-
-
-
+        self.y = y
+        self.x = x_axis
+        self.name = name
+        self.complex = True
+        self.type = 'single 2D'
+        self.origin = 'Pulse EPR'
 '''
 Update class contains methods for creating list in comboboxes
 and adds the created lists to the ComboboxLists.entries
