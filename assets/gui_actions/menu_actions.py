@@ -43,14 +43,14 @@ class MenuAction():
         2. Define filenames that will be loaded from unzipped project
         '''
         eleana_dataset_list = Path(extract_dir, 'eleana_dataset_list')
-        eleana_results_dataset = Path(extract_dir, 'eleana_results_dataset')
-        eleana_assignmentsToGroups = Path(extract_dir, 'eleana_assignmentsToGroups')
+        eleana_assignmentToGroups = Path(extract_dir, 'eleana_assignmentToGroups')
         eleana_groupsHierarchy = Path(extract_dir, 'eleana_groupsHierarchy')
         eleana_notes = Path(extract_dir, 'eleana_notes')
         eleana_paths = Path(extract_dir, 'eleana_paths')
         eleana_selections = Path(extract_dir, 'eleana_selections')
-        eleana_results_dataset = Path(extract_dir, 'eleana_results_datset')
+        eleana_results_dataset: Path = Path(extract_dir, 'eleana_results_dataset')
         eleana_project_details = Path(extract_dir, 'eleana_project_details')
+        eleana_dataset = Path(extract_dir, 'eleana_dataset')
 
         try:
             '''
@@ -72,45 +72,57 @@ class MenuAction():
             '''
 
             # LOAD: eleana_selections
+
             file_to_read = open(eleana_selections, "rb")
             loaded_object = pickle.load(file_to_read)
             eleana_selections = loaded_object
             file_to_read.close()
-            close_file = Path(file_to_read.name)
-            close_file.unlink()
 
             # LOAD eleana_paths
+
             file_to_read = open(eleana_paths, "rb")
             loaded_object = pickle.load(file_to_read)
             eleana_paths = loaded_object
             file_to_read.close()
 
             # LOAD notes
+
             file_to_read = open(eleana_notes, "rb")
             loaded_object = pickle.load(file_to_read)
             eleana_notes = loaded_object
             file_to_read.close()
 
             # LOAD groupsHierarchy
+
             file_to_read = open(eleana_groupsHierarchy, "rb")
             loaded_object = pickle.load(file_to_read)
             eleana_groupsHierarchy = loaded_object
             file_to_read.close()
 
             # LOAD assignmentsToGroups
-            file_to_read = open(eleana_assignmentsToGroups, "rb")
+
+            file_to_read = open(eleana_assignmentToGroups, "rb")
             loaded_object = pickle.load(file_to_read)
-            eleana_assignmentsToGroups = loaded_object
+            assignmentToGroups = loaded_object
             file_to_read.close()
 
             '''
             5. Load list of the objects to store in eleana.dataset
             '''
             # LOAD results_dataset
+
+            file_to_read = open(eleana_results_dataset, "rb")
+            loaded_object = pickle.load(file_to_read)
+            eleana_results_dataset = loaded_object
+            file_to_read.close()
+
+            # LOAD dataset
+
             file_to_read = open(eleana_dataset_list, "rb")
             loaded_object = pickle.load(file_to_read)
             eleana_dataset_list = loaded_object
             file_to_read.close()
+
 
             eleana_dataset = []
             for filenumber in eleana_dataset_list.keys():
@@ -119,18 +131,35 @@ class MenuAction():
                 loaded_object = pickle.load(file_to_read)
                 eleana_dataset.append(loaded_object)
                 file_to_read.close()
+
         except:
             return {"Error": True, 'desc': f"An error occured while loading the file"}
 
         '''
         6. Remove all files from extract_directory and then remove extract directory
         '''
-        for file in extract_dir.iterdir():
-            if file.is_file():
-                file.unlink()
+        try:
+            for file in extract_dir.iterdir():
+                if file.is_file():
+                    file.unlink()
+        except:
+            pass
 
-        extract_dir.rmdir()
-        return eleana_dataset
+        try:
+            extract_dir.rmdir()
+        except:
+            pass
+
+        return {'dataset':eleana_dataset,
+                'result_dataset':eleana_results_dataset,
+                'assignmentToGroups': eleana_assignmentToGroups,
+                'groupsHierarchy':eleana_groupsHierarchy,
+                'notes':eleana_notes,
+                'paths':eleana_paths,
+                'selections':eleana_selections,
+                'results_dataset':eleana_results_dataset
+                }
+
 
 
     def save_as(self, eleana: object):
@@ -172,13 +201,14 @@ class MenuAction():
         project_details = {'project version':'1.0'}
 
         elements_to_save = {
-                            'eleana_assignmentsToGroups':eleana.assignmentToGroups,
+                            'eleana_assignmentToGroups':eleana.assignmentToGroups,
                             'eleana_groupsHierarchy':eleana.groupsHierarchy,
                             'eleana_notes':eleana.notes,
                             'eleana_paths':eleana.paths,
                             'eleana_selections':eleana.selections,
                             'eleana_dataset_list':dataset_names,
                             'eleana_results_list':results_names,
+                            'eleana_results_dataset':eleana.results_dataset,
                             'eleana_project_details':project_details
                             }
 

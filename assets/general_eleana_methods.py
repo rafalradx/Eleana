@@ -5,7 +5,6 @@ from pathlib import Path
 import tempfile
 
 
-
 class Eleana():
     # Main attributes associated with data gathered in the programe
     version = 1
@@ -211,22 +210,23 @@ class GeneralDataTemplate():
     # Contains various comments
     comment = Eleana.notes
 
+    parameters = {'title': '',
+                  'unit_x': 'G',
+                  'name_x': 'Magnetic field',
+                  'name_y': 'Amplitude',
+                  'MwFreq': '',
+                  'ModAmp': '',
+                  'ModFreq': '',
+                  'ConvTime': '',
+                  'SweepTime': '',
+                  'TimeConst': '',
+                  'RESO': 'Resonator',
+                  'Power': '',
+                  'PowerAtten': 'PowAtten'
+                  }
 class Spectrum_CWEPR(GeneralDataTemplate):     # Class constructor for single CW EPR data
 
-    parameters = {'title':'',
-                'unit_x':'G',
-                'name_x':'Magnetic field',
-                'name_y':'Amplitude',
-                'MwFreq':'',
-                'ModAmp':'',
-                'ModFreq':'',
-                'ConvTime':'',
-                'SweepTime':'',
-                'TimeConst':'',
-                'RESO': 'Resonator',
-                'Power': '',
-                'PowerAtten': 'PowAtten'
-                }
+
     def __init__(self, name, x_axis: list, dta: list, dsc: dict):
         self.x = x_axis
         self.y = dta
@@ -236,6 +236,7 @@ class Spectrum_CWEPR(GeneralDataTemplate):     # Class constructor for single CW
         self.origin = 'CWEPR'
 
         fill_missing_keys =['title','MwFreq','ModAmp','ModFreq','SweepTime','ConvTime','TimeConst','Power','PowAtten']
+        working_par = self.parameters
         for key in fill_missing_keys:
             try:
                 bruker_key = Eleana.dsc2eleana[key]
@@ -243,10 +244,10 @@ class Spectrum_CWEPR(GeneralDataTemplate):     # Class constructor for single CW
                 value = value.split(' ')
                 value_txt = value[0]
                 value_txt = value_txt.replace("'", "")
-                self.parameters[key] = value_txt
+                working_par[key] = value_txt
             except:
                 pass
-
+        self.parameters = working_par
         self.x = np.array(x_axis)
         self.re_y = np.array(dta)
 
@@ -259,8 +260,10 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         self.dta = dta
         self.dsc = dsc
         self.ygf = ygf
-        parameters = self.parameters
-        parameters['stk_names'] = []
+        working_parameters = self.parameters
+        # working_parameters['name_z'] = ''
+        # working_parameters['unit_z'] = ''
+        working_parameters['stk_names'] = []
 
         fill_missing_keys = ['name_z', 'unit_z']
         for key in fill_missing_keys:
@@ -270,7 +273,7 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
                 value = value.split(' ')
                 value_txt = value[0]
                 value_txt = value_txt.replace("'", "")
-                parameters[key] = value_txt
+                working_parameters[key] = value_txt
             except:
                 pass
 
@@ -286,14 +289,16 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         list_of_y_array = np.array(list_of_y)
 
         # Create in stack names:
+
         for each in ygf:
-            name = parameters['name_z'] + ' ' + str(each) + ' ' + parameters['unit_z'] + ''
-            parameters['stk_names'].append(name)
+            name = working_parameters['name_z'] + ' ' + str(each) + ' ' + working_parameters['unit_z'] + ''
+            working_parameters['stk_names'].append(name)
 
         self.y = list_of_y_array
         self.type = 'stack 2D'
         self.complex = False
         self.origin = 'CWEPR'
+        self.parameters =working_parameters
 
 class Spectrum_complex(GeneralDataTemplate):
     def __init__(self, name, x_axis: list, dta: list, dsc: dict):

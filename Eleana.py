@@ -20,11 +20,6 @@ from assets.general_eleana_methods import Eleana, Update, ComboboxLists
 from assets.gui_actions.menu_actions import MenuAction
 from assets.subprogs.dialog_quit import QuitDialog
 
-# Create main Eleana instances
-eleana = Eleana()
-menuAction = MenuAction()
-update = Update()
-comboboxLists = ComboboxLists()
 
 # ------------------
 PROJECT_PATH = pathlib.Path(__file__).parent
@@ -191,8 +186,19 @@ class EleanaMainApp:
     # FILE
     # --- Load Project
     def load_project(self):
-        dataset_from_project = menuAction.load_project(eleana)
-        eleana.dataset = dataset_from_project
+
+        project = menuAction.load_project(eleana)
+
+
+
+        eleana.selections = project['selections']
+        eleana.dataset = project['dataset']
+        eleana.results_dataset = project['results_dataset']
+        eleana.assignmentToGroups = project['assignmentToGroups']
+        eleana.groupsHierarchy = project['groupsHierarchy']
+        eleana.notes = project['notes']
+        eleana.paths = project['paths']
+
 
         update.dataset_list(eleana)
         comboboxLists.create_all_lists(app,eleana)
@@ -242,11 +248,11 @@ class EleanaMainApp:
     #   Notes
     def notes(self):
         filename=menuAction.notes()
-        print(filename)
+        #print(filename)
         # Grab result
 
         file_back = eleana.read_tmp_file(filename)
-        Eleana.notes = json.loads(file_back)
+        eleana.notes = json.loads(file_back)
 
 
 
@@ -254,6 +260,10 @@ class EleanaMainApp:
 '''Initialization of the App and GUI'''
 
 app = EleanaMainApp()
+eleana = Eleana()
+menuAction = MenuAction()
+update = Update()
+comboboxLists = ComboboxLists()
 
 # -----------------------Set geometry and icon ----------------------
 width = app.mainwindow.winfo_screenwidth()  # Get screen width
@@ -482,4 +492,5 @@ app.mainwindow.protocol('WM_DELETE_WINDOW', app.close_application)
 
 # Run
 if __name__ == "__main__":
+
     app.run()
