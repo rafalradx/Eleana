@@ -58,7 +58,7 @@ class Eleana():
     # r_dsp/
     selections = {'group':'All',
                   'first':0, 'second':0, 'result':0,
-                  'f_cpl':'','s_cpl':'', 'r_cpl':'',
+                  'f_cpl':'re','s_cpl':'re', 'r_cpl':'re',
                   'f_stk':0, 's_stk':'', 'r_stk':'',
                   'f_dsp':True, 's_dsp':True ,'r_dsp':True
                   }
@@ -146,8 +146,13 @@ class Eleana():
                     im_y = im_y[index_stk]
 
             elif show_complex == 'magn':
-                re_y = data.y.abs()
+                re_y = np.real(data.y)
+                im_y = np.imag(data.y)
+                magnitude = (re_y**2+im_y**2)**0.5
+
                 im_y = np.array([])
+                re_y = np.array(magnitude)
+
                 if type == 'stack 2D':
                    re_y = re_y[index_stk]
             else: # show_complex == 're' or ''
@@ -258,7 +263,7 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         working_parameters = self.parameters
         working_parameters['stk_names'] = []
 
-        fill_missing_keys = ['name_z', 'unit_z']
+        fill_missing_keys = ['name_z', 'unit_z', 'name_x', 'unit_x', 'name_y', 'unit_y']
         for key in fill_missing_keys:
             try:
                 bruker_key = Eleana.dsc2eleana[key]
@@ -294,21 +299,35 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
 
 class Spectrum_complex(GeneralDataTemplate):
     def __init__(self, name, x_axis: list, dta: list, dsc: dict):
-        length = len(dta)/2
+        length = len(dta)
 
         y = np.array([])
         i = 0
         while i < length:
-            complex_nr = np.complex(dta[i], dta[i+1])
+            complex_nr = complex(dta[i], dta[i+1])
             y = np.append(y, complex_nr)
             i += 2
 
+        working_parameters = self.parameters
+        fill_missing_keys = ['name_z', 'unit_z', 'name_x', 'unit_x', 'name_y', 'unit_y']
+        for key in fill_missing_keys:
+            try:
+                bruker_key = Eleana.dsc2eleana[key]
+                value = dsc[bruker_key]
+                value = value.split(' ')
+                value_txt = value[0]
+                value_txt = value_txt.replace("'", "")
+                working_parameters[key] = value_txt
+            except:
+                pass
+        self.parameters = working_parameters
         self.y = y
         self.x = x_axis
         self.name = name
         self.complex = True
         self.type = 'single 2D'
         self.origin = 'Pulse EPR'
+
 '''
 Update class contains methods for creating list in comboboxes
 and adds the created lists to the ComboboxLists.entries
@@ -324,7 +343,7 @@ Example usage in main Eleana.py:
 '''
 class Update():
 
-    ''' Generates and returns entries for the comboboxes 
+    ''' Generates and returns entries for the comboboxes
         The entries depend on selected group.
     '''
     def dataset_list(self, eleana) -> list:
