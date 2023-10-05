@@ -76,7 +76,7 @@
                               <object class="customtkinter.CTkFrame" id="selectionsFrame" named="True">
                                 <property name="corner_radius">0</property>
                                 <property name="fg_color">#505050</property>
-                                <property name="width">100</property>
+                                <property name="width">80</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
                                   <property name="row">0</property>
@@ -123,7 +123,7 @@
                                             <property name="command" type="command" cbtype="simple">group_up_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#505050</property>
-                                            <property name="font">{Arial} 12 {}</property>
+                                            <property name="font">{Arial} 14 {bold}</property>
                                             <property name="height">20</property>
                                             <property name="text" translatable="yes">+</property>
                                             <property name="width">20</property>
@@ -141,7 +141,7 @@
                                             <property name="command" type="command" cbtype="simple">group_down_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#505050</property>
-                                            <property name="font">{Arial} 12 {}</property>
+                                            <property name="font">{Arial} 14 {bold}</property>
                                             <property name="height">20</property>
                                             <property name="text" translatable="yes">-</property>
                                             <property name="width">20</property>
@@ -178,6 +178,7 @@
                                         <property name="dropdown_text_font">{Arial} 20 {}</property>
                                         <property name="fg_color">#505050</property>
                                         <property name="font">{Arial} 12 {}</property>
+                                        <property name="text_color">#ced9d9</property>
                                         <layout manager="grid">
                                           <property name="column">0</property>
                                           <property name="columnspan">2</property>
@@ -226,7 +227,7 @@
                                             <property name="command" type="command" cbtype="simple">first_up_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#505050</property>
-                                            <property name="font">{Arial} 12 {bold}</property>
+                                            <property name="font">{Arial} 14 {bold}</property>
                                             <property name="height">20</property>
                                             <property name="text" translatable="yes">+</property>
                                             <property name="width">20</property>
@@ -244,7 +245,7 @@
                                             <property name="command" type="command" cbtype="simple">first_down_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#505050</property>
-                                            <property name="font">{Arial} 12 {bold}</property>
+                                            <property name="font">{Arial} 14 {bold}</property>
                                             <property name="height">20</property>
                                             <property name="text" translatable="yes">-</property>
                                             <property name="width">20</property>
@@ -331,6 +332,7 @@
                                             <property name="dropdown_text_font">{Arial} 12 {}</property>
                                             <property name="fg_color">#505050</property>
                                             <property name="font">{Arial} 12 {}</property>
+                                            <property name="text_color">#ced9d9</property>
                                             <layout manager="grid">
                                               <property name="column">1</property>
                                               <property name="row">0</property>
@@ -880,10 +882,35 @@
                                 <property name="fg_color">#505050</property>
                                 <property name="width">50</property>
                                 <layout manager="grid">
-                                  <property name="column">0</property>
+                                  <property name="column">1</property>
                                   <property name="row">0</property>
                                   <property name="sticky">nsew</property>
                                 </layout>
+                                <containerlayout manager="grid">
+                                  <property type="col" id="0" name="weight">1</property>
+                                  <property type="row" id="0" name="weight">1</property>
+                                </containerlayout>
+                                <child>
+                                  <object class="customtkinter.CTkFrame" id="legendFrame" named="True">
+                                    <property name="corner_radius">0</property>
+                                    <layout manager="grid">
+                                      <property name="column">0</property>
+                                      <property name="row">0</property>
+                                      <property name="sticky">nsew</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="customtkinter.CTkFrame" id="graphButtonsFrame" named="True">
+                                    <property name="corner_radius">0</property>
+                                    <property name="width">50</property>
+                                    <layout manager="grid">
+                                      <property name="column">1</property>
+                                      <property name="row">0</property>
+                                      <property name="sticky">nsew</property>
+                                    </layout>
+                                  </object>
+                                </child>
                               </object>
                             </child>
                           </object>

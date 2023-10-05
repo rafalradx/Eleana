@@ -186,10 +186,7 @@ class EleanaMainApp:
     # FILE
     # --- Load Project
     def load_project(self):
-
         project = menuAction.load_project(eleana)
-
-
 
         eleana.selections = project['selections']
         eleana.dataset = project['dataset']
@@ -199,14 +196,12 @@ class EleanaMainApp:
         eleana.notes = project['notes']
         eleana.paths = project['paths']
 
-
         update.dataset_list(eleana)
         comboboxLists.create_all_lists(app,eleana)
 
     # --- Save as
     def save_as(self):
         menuAction.save_as(eleana)
-
 
     # --- Import EPR --> Bruker Elexsys
 
@@ -248,9 +243,7 @@ class EleanaMainApp:
     #   Notes
     def notes(self):
         filename=menuAction.notes()
-        #print(filename)
         # Grab result
-
         file_back = eleana.read_tmp_file(filename)
         eleana.notes = json.loads(file_back)
 
