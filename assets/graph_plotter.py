@@ -22,18 +22,17 @@ def plotter(app: object, eleana: object, comboboxLists: object):
     color_result_re = "#108d3d"
     color_result_im = "#32ab5d"
 
+    first_complex = False
+    second_complex = False
+    result_complex = False
 
     fig = Figure(figsize=(8, 4), dpi=100)
     ax = fig.add_subplot(111)
 
     # FIRST
-    index = comboboxLists.current_position(app, 'sel_first')['index']
-    if index != 0:
-        is_first_not_none = True
-    else:
-        is_first_not_none = False
+    index = eleana.selections['first']
 
-    if eleana.selections['f_dsp'] and is_first_not_none:
+    if eleana.selections['f_dsp'] and index >= 0:
         data_for_plot = eleana.getDataFromSelection(eleana, 'first')
         data_index = eleana.selections['first']
         first_x = data_for_plot['x']
@@ -42,7 +41,7 @@ def plotter(app: object, eleana: object, comboboxLists: object):
         first_im_y = data_for_plot['im_y']
         first_legend_index = eleana.selections['first']
         first_legend = eleana.dataset[first_legend_index].name
-
+        print(first_re_y)
         # Label for x axis
         try:
             label_x_title = eleana.dataset[data_index].parameters['name_x']
@@ -95,13 +94,9 @@ def plotter(app: object, eleana: object, comboboxLists: object):
         ax.plot(first_x, first_re_y, label=first_legend, color=color_first_re)
 
     # SECOND
-    index = comboboxLists.current_position(app, 'sel_second')['index']
-    if index != 0:
-        is_second_not_none = True
-    else:
-        is_second_not_none = False
+    index = eleana.selections['second']
 
-    if eleana.selections['s_dsp'] and is_second_not_none:
+    if eleana.selections['s_dsp'] and index >=0:
         data_for_plot = eleana.getDataFromSelection(eleana, 'second')
         data_index = eleana.selections['second']
         second_x = data_for_plot['x']
@@ -141,7 +136,7 @@ def plotter(app: object, eleana: object, comboboxLists: object):
         second_label_y = ''
 
     # Add SECOND to plot
-    if eleana.selections['f_dsp'] and is_first_not_none:
+    if eleana.selections['f_dsp'] and index >=0:
         # If FIRST spectrum is on then do not change axes labels
         pass
     else:

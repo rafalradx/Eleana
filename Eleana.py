@@ -73,7 +73,7 @@ class EleanaMainApp:
 
     def first_down_clicked(self):
         current_entry_on_list = comboboxLists.current_position(app, 'sel_first')
-        current_index_on_list = current_entry_on_list['index']
+        current_index_on_list = current_entry_on_list['index_on_list']
         if current_index_on_list == 0:
             return
         else:
@@ -85,7 +85,7 @@ class EleanaMainApp:
 
     def first_up_clicked(self):
         current_entry_on_list = comboboxLists.current_position(app, 'sel_first')
-        current_index_on_list = current_entry_on_list['index']
+        current_index_on_list = current_entry_on_list['index_on_list']
         last_index = current_entry_on_list['last_index']
         if current_index_on_list == last_index:
             return
@@ -111,17 +111,14 @@ class EleanaMainApp:
 
     def first_selected(self, selected_value_text: str):
         if selected_value_text == 'None':
-            plotter(app, eleana, comboboxLists)
-            update.selections_widgets(app, eleana)
-            return
+            eleana.selections['first'] = -1
 
         # Get index of data selected in first in eleana.dataset
-        current_position = comboboxLists.current_position(app, 'sel_first')
-        index = int(current_position['index']) - 1
-        eleana.selections['first'] = index
+        index_in_dataset = comboboxLists.current_position(app, 'sel_first')['index']
+        eleana.selections['first'] = index_in_dataset
 
         # Update GUI buttons according to selections
-        update.selections_widgets(app, eleana)
+        update.selections_widgets(app, eleana, comboboxLists)
 
         # Plot graph
         plotter(app, eleana, comboboxLists)
@@ -134,22 +131,22 @@ class EleanaMainApp:
 
     def second_selected(self, selected_value_text):
         if selected_value_text == 'None':
-            update.selections_widgets(app, eleana)
-            plotter(app, eleana, comboboxLists)
-            return
-        # Get index of data selected in first in eleana.dataset
-        current_position = comboboxLists.current_position(app, 'sel_second')
-        index = int(current_position['index']) - 1
-        eleana.selections['second'] = index
-        # Update GUI buttons according to selections
-        update.selections_widgets(app, eleana)
+            eleana.selections['second'] = -1
 
-        # Draw plot
+        # Get index of data selected in first in eleana.dataset
+        index_in_dataset = comboboxLists.current_position(app, 'sel_second')['index']
+        eleana.selections['second'] = index_in_dataset
+
+        # Update GUI buttons according to selections
+        update.selections_widgets(app, eleana, comboboxLists)
+
+        # Plot graph
         plotter(app, eleana, comboboxLists)
+
 
     def second_down_clicked(self):
         current_entry_on_list = comboboxLists.current_position(app, 'sel_second')
-        current_index_on_list = current_entry_on_list['index']
+        current_index_on_list = current_entry_on_list['index_on_list']
         if current_index_on_list == 0:
             return
         else:
@@ -162,7 +159,7 @@ class EleanaMainApp:
 
     def second_up_clicked(self):
         current_entry_on_list = comboboxLists.current_position(app, 'sel_second')
-        current_index_on_list = current_entry_on_list['index']
+        current_index_on_list = current_entry_on_list['index_on_list']
         last_index = current_entry_on_list['last_index']
         if current_index_on_list == last_index:
             return
@@ -271,10 +268,11 @@ init = Init()
 
 # Set geometry, icon and default combobox values
 init.main_window(app, eleana)
+
 init.folders(eleana)
 
 
-update.selections_widgets(app, eleana)
+update.selections_widgets(app, eleana, comboboxLists)
 
 # Run
 if __name__ == "__main__":

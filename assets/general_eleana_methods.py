@@ -57,11 +57,13 @@ class Eleana():
     # s_dsp )--> Can be True or False. If false then the spectrum selected is not displayed on graph by data is selected
     # r_dsp/
     selections = {'group':'All',
-                  'first':0, 'second':0, 'result':0,
+                  'first':-1, 'second':-1, 'result':-1,
                   'f_cpl':'re','s_cpl':'re', 'r_cpl':'re',
-                  'f_stk':0, 's_stk':'', 'r_stk':'',
+                  'f_stk':0, 's_stk':0, 'r_stk':0,
                   'f_dsp':True, 's_dsp':True ,'r_dsp':True
                   }
+
+    last_projects = ['.home/marcin/project.ele']
 
     # --- Dictionaries translation different par files to Eleana format ---
     # Translation for DSC from Bruker Elexsys
@@ -366,45 +368,45 @@ class Update():
     Show or hide First, Second or Result frames
     '''
 
-    def selections_widgets(self, app: object, eleana):
-        selections = eleana.selections
-        first_nr = selections['first']
+    def selections_widgets(self, app: object, eleana, comboboxList):
+        #selections = eleana.selections
+        first_nr = eleana.selections['first']
+        second_nr = eleana.selections['second']
+        result_nr = eleana.selections['result']
+
+        f_stk = eleana.selections['f_stk']
+        s_stk = eleana.selections['s_stk']
+        r_stk = eleana.selections['r_stk']
+
         try:
             first = eleana.dataset[first_nr]
-            f_stk = selections['f_stk']
+            f_stk = eleana.selections['f_stk']
         except IndexError:
-            selections['first'] = 0
-            selections['f_stk'] = 0
-            f_stk = selections['f_stk']
+            pass
 
-        second_nr = selections['second']
         try:
             second = eleana.dataset[second_nr]
-            s_stk = selections['s_stk']
+            s_stk = eleana.selections['s_stk']
         except IndexError:
-            selections['second'] = 0
-            selections['s_stk'] = 0
-            s_stk = selections['s_stk']
+            pass
 
-        result_nr = selections['result']
         try:
             result = eleana.results_dataset[result_nr]
             r_stk = selections['r_stk']
         except IndexError:
-            selections['result'] = 0
-            selections['r_stk'] = 0
+            pass
 
         # Show or hide widgets
 
-        comboboxList = ComboboxLists()
-        is_first_none = comboboxList.current_position(app, 'sel_first')
-        is_second_none = comboboxList.current_position(app, 'sel_second')
-        is_result_none = comboboxList.current_position(app, 'sel_result')
+        is_first_none = True if eleana.selections['first'] < 0 else False
+        is_second_none = True if eleana.selections['second'] < 0 else False
+        is_result_none = True if eleana.selections['result'] < 0 else False
 
         # FIRST frame
-        if len(eleana.dataset) == 0 or first.type != "stack 2D" or is_first_none['index'] == 0:
+        if len(eleana.dataset) == 0 or first.type != "stack 2D" or is_first_none:
             app.firstStkFrame.grid_remove()
             app.firstComplex.grid_remove()
+
 
         elif first.type == "stack 2D":
             app.firstStkFrame.grid(row=2, column=0)
@@ -414,13 +416,13 @@ class Update():
             comboboxList.set_on_value(app, 'f_stk', entry)
 
         try:
-            if first.complex:
+            if first.complex and first_nr >= 0:
                 app.firstComplex.grid()
         except:
             pass
 
         # Update SECOND frame
-        if len(eleana.dataset) == 0 or second.type != "stack 2D" or is_second_none['index'] == 0:
+        if len(eleana.dataset) == 0 or second.type != "stack 2D" or is_second_none:
             app.secondStkFrame.grid_remove()
             app.secondImaginary.grid_remove()
 
@@ -442,9 +444,10 @@ class Update():
             app.resultFrame.grid_remove()
             return
 
-        if result.type != "stack 2D" or is_result_none['index'] == 0:
+        if result.type != "stack 2D":
             app.resultImaginary.grid_remove()
             return
+
         elif result.type == "stack 2D":
             app.resultStkFrame.grid(row=2, column=0)
             app.r_stk.configure(values=result.parameters['stk_names'])
@@ -529,8 +532,9 @@ class ComboboxLists():
         box = self.ref_to_box(app, which_combobox)
         current_value = box.get()
         if current_value in ComboboxLists.entries[which_combobox]:
-            index = self.entries[which_combobox].index(current_value)
-            return {'current':current_value, 'index':index, 'last_index':len(ComboboxLists.entries[which_combobox])-1}
+            index = self.entries[which_combobox].index(current_value)-1
+            index_on_list = index + 1
+            return {'current':current_value, 'index':index, 'index_on_list':index_on_list, 'last_index':len(ComboboxLists.entries[which_combobox])-1}
 
         return {}
 

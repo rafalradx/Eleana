@@ -33,6 +33,7 @@ class Init():
 
         app.mainwindow.protocol('WM_DELETE_WINDOW', app.close_application)
 
+
     def folders(self, eleana):
         '''This method creates standard Eleana folder in user directory.
             If the folder does not exist it will be created.'''
@@ -45,12 +46,14 @@ class Init():
             except:
                 return {"Error": True, 'desc': f"Cannot create working Eleana folder in your home directory."}
 
-        print('Plik initialization.py - def folders')
-        exit()
 
         try:
-            with open(path_to_file, "w") as file:
-                file.write(content)
+            self.create_first_default_files(eleana, eleana_user_dir)
         except:
             return {"Error": False, 'desc': ""}
 
+    def create_first_default_files(self, eleana, eleana_user_dir):
+        filePath = Path(eleana_user_dir, 'last_projects.json')
+        content = eleana.last_projects
+        with open(filePath, 'w') as f:
+            f.write(dumps(document))
