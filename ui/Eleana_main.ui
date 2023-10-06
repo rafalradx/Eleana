@@ -157,7 +157,7 @@
                                         <child>
                                           <object class="ttk.Label" id="label1">
                                             <property name="background">#505050</property>
-                                            <property name="font">{Arial} 9 {}</property>
+                                            <property name="font">{Arial} 10 {bold}</property>
                                             <property name="foreground">#eeeeee</property>
                                             <property name="text" translatable="yes">Group</property>
                                             <layout manager="grid">
@@ -174,7 +174,7 @@
                                         <property name="border_color">#799da2</property>
                                         <property name="button_color">#799da2</property>
                                         <property name="command" type="command" cbtype="simple">group_selected</property>
-                                        <property name="corner_radius">0</property>
+                                        <property name="corner_radius">5</property>
                                         <property name="dropdown_text_font">{Arial} 20 {}</property>
                                         <property name="fg_color">#505050</property>
                                         <property name="font">{Arial} 12 {}</property>
@@ -261,8 +261,8 @@
                                         <child>
                                           <object class="ttk.Label" id="label2">
                                             <property name="background">#505050</property>
-                                            <property name="font">{Arial} 9 {}</property>
-                                            <property name="foreground">#eeeeee</property>
+                                            <property name="font">{Arial} 10 {bold}</property>
+                                            <property name="foreground">#eaeaea</property>
                                             <property name="text" translatable="yes">First</property>
                                             <layout manager="grid">
                                               <property name="column">0</property>
@@ -278,11 +278,12 @@
                                         <property name="border_color">#c6484c</property>
                                         <property name="button_color">#c6484c</property>
                                         <property name="command" type="command" cbtype="simple">first_selected</property>
-                                        <property name="corner_radius">0</property>
+                                        <property name="corner_radius">5</property>
                                         <property name="dropdown_text_font">{Arial} 12 {}</property>
                                         <property name="fg_color">#505050</property>
                                         <property name="font">{Arial} 12 {}</property>
                                         <property name="text_color">#ced9d9</property>
+                                        <property name="width">200</property>
                                         <layout manager="grid">
                                           <property name="column">0</property>
                                           <property name="columnspan">2</property>
@@ -305,29 +306,94 @@
                                           <property name="sticky">nsew</property>
                                         </layout>
                                         <containerlayout manager="grid">
-                                          <property type="col" id="1" name="weight">1</property>
+                                          <property type="col" id="0" name="weight">1</property>
                                         </containerlayout>
                                         <child>
                                           <object class="customtkinter.CTkComboBox" id="f_stk" named="True">
                                             <property name="border_color">#c6484c</property>
                                             <property name="button_color">#c6484c</property>
                                             <property name="command" type="command" cbtype="simple">f_stk_selected</property>
-                                            <property name="corner_radius">0</property>
+                                            <property name="corner_radius">5</property>
                                             <property name="dropdown_text_font">{Arial} 12 {}</property>
                                             <property name="fg_color">#505050</property>
                                             <property name="font">{Arial} 12 {}</property>
                                             <property name="text_color">#ced9d9</property>
                                             <layout manager="grid">
-                                              <property name="column">1</property>
-                                              <property name="row">0</property>
+                                              <property name="column">0</property>
+                                              <property name="row">1</property>
                                               <property name="sticky">ew</property>
                                             </layout>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="customtkinter.CTkFrame" id="ctkframe1">
+                                            <property name="corner_radius">0</property>
+                                            <property name="fg_color">#505050</property>
+                                            <layout manager="grid">
+                                              <property name="column">0</property>
+                                              <property name="padx">4</property>
+                                              <property name="pady">4</property>
+                                              <property name="row">0</property>
+                                              <property name="sticky">nsew</property>
+                                            </layout>
+                                            <containerlayout manager="grid">
+                                              <property type="col" id="0" name="weight">1</property>
+                                            </containerlayout>
+                                            <child>
+                                              <object class="customtkinter.CTkButton" id="f_stk_up" named="True">
+                                                <property name="command" type="command" cbtype="simple">f_stk_up_clicked</property>
+                                                <property name="corner_radius">0</property>
+                                                <property name="fg_color">#505050</property>
+                                                <property name="font">{Arial} 14 {bold}</property>
+                                                <property name="height">20</property>
+                                                <property name="text" translatable="yes">+</property>
+                                                <property name="width">20</property>
+                                                <layout manager="grid">
+                                                  <property name="column">0</property>
+                                                  <property name="padx">2</property>
+                                                  <property name="pady">2</property>
+                                                  <property name="row">0</property>
+                                                  <property name="sticky">e</property>
+                                                </layout>
+                                              </object>
+                                            </child>
+                                            <child>
+                                              <object class="customtkinter.CTkButton" id="f_stk_down" named="True">
+                                                <property name="command" type="command" cbtype="simple">f_stk_down_clicked</property>
+                                                <property name="corner_radius">0</property>
+                                                <property name="fg_color">#505050</property>
+                                                <property name="font">{Arial} 14 {bold}</property>
+                                                <property name="height">20</property>
+                                                <property name="text" translatable="yes">-</property>
+                                                <property name="width">20</property>
+                                                <layout manager="grid">
+                                                  <property name="column">1</property>
+                                                  <property name="padx">2</property>
+                                                  <property name="pady">2</property>
+                                                  <property name="row">0</property>
+                                                  <property name="sticky">e</property>
+                                                </layout>
+                                              </object>
+                                            </child>
+                                            <child>
+                                              <object class="ttk.Label" id="label8">
+                                                <property name="background">#505050</property>
+                                                <property name="font">{Arial} 9 {}</property>
+                                                <property name="foreground">#eeeeee</property>
+                                                <property name="text" translatable="yes">Position in stack</property>
+                                                <layout manager="grid">
+                                                  <property name="column">0</property>
+                                                  <property name="row">0</property>
+                                                  <property name="sticky">w</property>
+                                                </layout>
+                                              </object>
+                                            </child>
                                           </object>
                                         </child>
                                       </object>
                                     </child>
                                     <child>
-                                      <object class="customtkinter.CTkFrame" id="ctkframe69">
+                                      <object class="customtkinter.CTkFrame" id="firstComplexFrame" named="True">
                                         <property name="corner_radius">0</property>
                                         <property name="fg_color">#505050</property>
                                         <layout manager="grid">
@@ -344,7 +410,8 @@
                                             <property name="command" type="command" cbtype="simple">first_complex_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#505050</property>
-                                            <property name="font">{Arila} 12 {}</property>
+                                            <property name="font">{Arial} 12 {}</property>
+                                            <property name="state">normal</property>
                                             <property name="values">["re","im","cpl","magn"]</property>
                                             <layout manager="grid">
                                               <property name="column">0</property>
@@ -362,6 +429,7 @@
                                             <property name="width">60</property>
                                             <layout manager="grid">
                                               <property name="column">1</property>
+                                              <property name="padx">2</property>
                                               <property name="row">0</property>
                                             </layout>
                                           </object>
@@ -376,6 +444,7 @@
                                             <property name="width">60</property>
                                             <layout manager="grid">
                                               <property name="column">2</property>
+                                              <property name="padx">2</property>
                                               <property name="row">0</property>
                                             </layout>
                                           </object>
@@ -391,7 +460,7 @@
                                       <property name="row">2</property>
                                     </layout>
                                     <child>
-                                      <object class="customtkinter.CTkButton" id="ctkbutton48">
+                                      <object class="customtkinter.CTkButton" id="btn_swap" named="True">
                                         <property name="border_color">#424242</property>
                                         <property name="border_width">1</property>
                                         <property name="corner_radius">0</property>
@@ -438,11 +507,27 @@
                                           <property type="col" id="0" name="weight">1</property>
                                         </containerlayout>
                                         <child>
+                                          <object class="ttk.Label" id="label3">
+                                            <property name="anchor">center</property>
+                                            <property name="background">#505050</property>
+                                            <property name="compound">right</property>
+                                            <property name="font">{Arial} 10 {bold}</property>
+                                            <property name="foreground">#eeeeee</property>
+                                            <property name="state">disabled</property>
+                                            <property name="text" translatable="yes">Second</property>
+                                            <layout manager="grid">
+                                              <property name="column">0</property>
+                                              <property name="row">0</property>
+                                              <property name="sticky">w</property>
+                                            </layout>
+                                          </object>
+                                        </child>
+                                        <child>
                                           <object class="customtkinter.CTkButton" id="btn_second_up" named="True">
                                             <property name="command" type="command" cbtype="simple">second_up_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#505050</property>
-                                            <property name="font">{Arial} 12 {bold}</property>
+                                            <property name="font">{Arial} 14 {bold}</property>
                                             <property name="height">20</property>
                                             <property name="text" translatable="yes">+</property>
                                             <property name="width">20</property>
@@ -460,7 +545,7 @@
                                             <property name="command" type="command" cbtype="simple">second_down_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#505050</property>
-                                            <property name="font">{Arial} 12 {bold}</property>
+                                            <property name="font">{Arial} 14 {bold}</property>
                                             <property name="height">20</property>
                                             <property name="text" translatable="yes">-</property>
                                             <property name="width">20</property>
@@ -473,22 +558,6 @@
                                             </layout>
                                           </object>
                                         </child>
-                                        <child>
-                                          <object class="ttk.Label" id="label3">
-                                            <property name="anchor">center</property>
-                                            <property name="background">#505050</property>
-                                            <property name="compound">right</property>
-                                            <property name="font">{Arial} 9 {}</property>
-                                            <property name="foreground">#eeeeee</property>
-                                            <property name="state">disabled</property>
-                                            <property name="text" translatable="yes">Second</property>
-                                            <layout manager="grid">
-                                              <property name="column">0</property>
-                                              <property name="row">0</property>
-                                              <property name="sticky">w</property>
-                                            </layout>
-                                          </object>
-                                        </child>
                                       </object>
                                     </child>
                                     <child>
@@ -496,9 +565,9 @@
                                         <property name="border_color">#20acdc</property>
                                         <property name="button_color">#20acdc</property>
                                         <property name="command" type="command" cbtype="simple">second_selected</property>
-                                        <property name="corner_radius">0</property>
+                                        <property name="corner_radius">5</property>
                                         <property name="dropdown_text_font">{Arial} 12 {}</property>
-                                        <property name="fg_color">#20acdc</property>
+                                        <property name="fg_color">#505050</property>
                                         <property name="font">{Arial} 12 {}</property>
                                         <property name="text_color">#ced9d9</property>
                                         <layout manager="grid">
@@ -517,12 +586,13 @@
                                         <property name="fg_color">#505050</property>
                                         <layout manager="grid">
                                           <property name="column">0</property>
-                                          <property name="padx">4</property>
-                                          <property name="pady">4</property>
+                                          <property name="padx">2</property>
+                                          <property name="pady">2</property>
                                           <property name="row">2</property>
                                           <property name="sticky">nsew</property>
                                         </layout>
                                         <containerlayout manager="grid">
+                                          <property type="col" id="0" name="weight">1</property>
                                           <property type="col" id="1" name="weight">1</property>
                                         </containerlayout>
                                         <child>
@@ -530,39 +600,20 @@
                                             <property name="background">#505050</property>
                                             <property name="font">{Arial} 9 {}</property>
                                             <property name="foreground">#eeeeee</property>
-                                            <property name="text" translatable="yes">In Stack</property>
+                                            <property name="text" translatable="yes">Position in stack</property>
                                             <layout manager="grid">
                                               <property name="column">0</property>
                                               <property name="row">0</property>
-                                            </layout>
-                                          </object>
-                                        </child>
-                                        <child>
-                                          <object class="customtkinter.CTkComboBox" id="s_stk" named="True">
-                                            <property name="border_color">#20acdc</property>
-                                            <property name="button_color">#20acdc</property>
-                                            <property name="command" type="command" cbtype="simple">s_stk_selected</property>
-                                            <property name="corner_radius">0</property>
-                                            <property name="dropdown_text_font">{Arial} 12 {}</property>
-                                            <property name="fg_color">#20acdc</property>
-                                            <property name="font">{Arial} 12 {}</property>
-                                            <property name="text_color">#ced9d9</property>
-                                            <layout manager="grid">
-                                              <property name="column">1</property>
-                                              <property name="columnspan">2</property>
-                                              <property name="padx">4</property>
-                                              <property name="pady">4</property>
-                                              <property name="row">1</property>
-                                              <property name="sticky">ew</property>
+                                              <property name="sticky">w</property>
                                             </layout>
                                           </object>
                                         </child>
                                         <child>
                                           <object class="customtkinter.CTkButton" id="ctkbutton1" named="True">
-                                            <property name="command" type="command" cbtype="simple">f_stk_up_clicked</property>
+                                            <property name="command" type="command" cbtype="simple">s_stk_up_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#505050</property>
-                                            <property name="font">{Arial} 12 {bold}</property>
+                                            <property name="font">{Arial} 14 {bold}</property>
                                             <property name="height">20</property>
                                             <property name="text" translatable="yes">+</property>
                                             <property name="width">20</property>
@@ -577,10 +628,10 @@
                                         </child>
                                         <child>
                                           <object class="customtkinter.CTkButton" id="ctkbutton2" named="True">
-                                            <property name="command" type="command" cbtype="simple">f_stk_down_clicked</property>
+                                            <property name="command" type="command" cbtype="simple">s_stk_down_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#505050</property>
-                                            <property name="font">{Arial} 12 {bold}</property>
+                                            <property name="font">{Arial} 14 {bold}</property>
                                             <property name="height">20</property>
                                             <property name="text" translatable="yes">-</property>
                                             <property name="width">20</property>
@@ -593,35 +644,57 @@
                                             </layout>
                                           </object>
                                         </child>
+                                        <child>
+                                          <object class="customtkinter.CTkComboBox" id="s_stk" named="True">
+                                            <property name="border_color">#20acdc</property>
+                                            <property name="button_color">#20acdc</property>
+                                            <property name="command" type="command" cbtype="simple">s_stk_selected</property>
+                                            <property name="corner_radius">5</property>
+                                            <property name="dropdown_text_font">{Arial} 12 {}</property>
+                                            <property name="fg_color">#505050</property>
+                                            <property name="font">{Arial} 12 {}</property>
+                                            <property name="text_color">#ced9d9</property>
+                                            <layout manager="grid">
+                                              <property name="column">0</property>
+                                              <property name="columnspan">3</property>
+                                              <property name="padx">4</property>
+                                              <property name="pady">4</property>
+                                              <property name="row">1</property>
+                                              <property name="sticky">ew</property>
+                                            </layout>
+                                          </object>
+                                        </child>
                                       </object>
                                     </child>
                                     <child>
-                                      <object class="customtkinter.CTkFrame" id="ctkframe74">
+                                      <object class="customtkinter.CTkFrame" id="secondImaginary" named="True">
                                         <property name="corner_radius">0</property>
                                         <property name="fg_color">#505050</property>
                                         <layout manager="grid">
                                           <property name="column">0</property>
                                           <property name="padx">4</property>
-                                          <property name="row">3</property>
+                                          <property name="row">4</property>
                                           <property name="sticky">nsew</property>
                                         </layout>
                                         <containerlayout manager="grid">
                                           <property type="col" id="1" name="weight">1</property>
                                         </containerlayout>
                                         <child>
-                                          <object class="ttk.Checkbutton" id="secondImaginary" named="True">
-                                            <property name="offvalue">Re</property>
-                                            <property name="onvalue">Im</property>
-                                            <property name="text" translatable="yes">Re</property>
+                                          <object class="customtkinter.CTkSegmentedButton" id="ctksegmentedbutton1" named="True">
+                                            <property name="command" type="command" cbtype="simple">first_complex_clicked</property>
+                                            <property name="corner_radius">0</property>
+                                            <property name="fg_color">#505050</property>
+                                            <property name="font">{Arial} 12 {}</property>
+                                            <property name="state">normal</property>
+                                            <property name="values">["re","im","cpl","magn"]</property>
                                             <layout manager="grid">
                                               <property name="column">0</property>
                                               <property name="row">0</property>
-                                              <property name="sticky">w</property>
                                             </layout>
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkButton" id="ctkbutton51">
+                                          <object class="customtkinter.CTkButton" id="ctkbutton5">
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#20acdc</property>
                                             <property name="font">{Arial} 12 {bold}</property>
@@ -630,20 +703,22 @@
                                             <property name="width">60</property>
                                             <layout manager="grid">
                                               <property name="column">1</property>
+                                              <property name="padx">2</property>
                                               <property name="row">0</property>
                                             </layout>
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkButton" id="ctkbutton52">
+                                          <object class="customtkinter.CTkButton" id="ctkbutton6">
                                             <property name="corner_radius">0</property>
-                                            <property name="fg_color">#18aada</property>
+                                            <property name="fg_color">#20acdc</property>
                                             <property name="font">{Arial} 12 {bold}</property>
                                             <property name="height">20</property>
                                             <property name="text" translatable="yes">To results</property>
                                             <property name="width">60</property>
                                             <layout manager="grid">
                                               <property name="column">2</property>
+                                              <property name="padx">2</property>
                                               <property name="row">0</property>
                                             </layout>
                                           </object>
@@ -687,7 +762,7 @@
                                           <object class="customtkinter.CTkButton" id="btn_result_up" named="True">
                                             <property name="command" type="command" cbtype="simple">result_up_clicked</property>
                                             <property name="corner_radius">0</property>
-                                            <property name="fg_color">#3c9b59</property>
+                                            <property name="fg_color">#505050</property>
                                             <property name="font">{Arial} 12 {}</property>
                                             <property name="height">20</property>
                                             <property name="text" translatable="yes">+</property>
@@ -705,7 +780,7 @@
                                           <object class="customtkinter.CTkButton" id="btn_result_down" named="True">
                                             <property name="command" type="command" cbtype="simple">result_down_clicked</property>
                                             <property name="corner_radius">0</property>
-                                            <property name="fg_color">#3c9b59</property>
+                                            <property name="fg_color">#505050</property>
                                             <property name="font">{Arial} 12 {}</property>
                                             <property name="height">20</property>
                                             <property name="text" translatable="yes">-</property>
