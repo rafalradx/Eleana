@@ -283,6 +283,7 @@
                                         <property name="fg_color">#505050</property>
                                         <property name="font">{Arial} 12 {}</property>
                                         <property name="text_color">#ced9d9</property>
+                                        <property name="values">['None']</property>
                                         <property name="width">200</property>
                                         <layout manager="grid">
                                           <property name="column">0</property>
@@ -318,6 +319,7 @@
                                             <property name="fg_color">#505050</property>
                                             <property name="font">{Arial} 12 {}</property>
                                             <property name="text_color">#ced9d9</property>
+                                            <property name="values">['None']</property>
                                             <layout manager="grid">
                                               <property name="column">0</property>
                                               <property name="row">1</property>
@@ -667,7 +669,7 @@
                                       </object>
                                     </child>
                                     <child>
-                                      <object class="customtkinter.CTkFrame" id="secondImaginary" named="True">
+                                      <object class="customtkinter.CTkFrame" id="secondComplexFrame" named="True">
                                         <property name="corner_radius">0</property>
                                         <property name="fg_color">#505050</property>
                                         <layout manager="grid">
@@ -680,8 +682,8 @@
                                           <property type="col" id="1" name="weight">1</property>
                                         </containerlayout>
                                         <child>
-                                          <object class="customtkinter.CTkSegmentedButton" id="ctksegmentedbutton1" named="True">
-                                            <property name="command" type="command" cbtype="simple">first_complex_clicked</property>
+                                          <object class="customtkinter.CTkSegmentedButton" id="secondComplex" named="True">
+                                            <property name="command" type="command" cbtype="simple">second_complex_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#505050</property>
                                             <property name="font">{Arial} 12 {}</property>
@@ -896,7 +898,7 @@
                                           <property type="col" id="1" name="weight">1</property>
                                         </containerlayout>
                                         <child>
-                                          <object class="ttk.Checkbutton" id="resultImaginary" named="True">
+                                          <object class="ttk.Checkbutton" id="resultComplex" named="True">
                                             <property name="offvalue">Re</property>
                                             <property name="onvalue">Im</property>
                                             <property name="text" translatable="yes">Re</property>
@@ -917,12 +919,12 @@
                         </child>
                         <child>
                           <object class="ttk.Panedwindow.Pane" id="pane10">
-                            <property name="weight">1</property>
+                            <property name="weight">4</property>
                             <child>
                               <object class="customtkinter.CTkFrame" id="graphFrame" named="True">
                                 <property name="border_color">#444444</property>
                                 <property name="corner_radius">0</property>
-                                <property name="fg_color">#ffffff</property>
+                                <property name="fg_color">#505050</property>
                                 <property name="width">500</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
@@ -953,17 +955,29 @@
                                 <child>
                                   <object class="customtkinter.CTkFrame" id="legendFrame" named="True">
                                     <property name="corner_radius">0</property>
+                                    <property name="fg_color">#505050</property>
+                                    <property name="width">110</property>
                                     <layout manager="grid">
                                       <property name="column">0</property>
                                       <property name="row">0</property>
                                       <property name="sticky">nsew</property>
                                     </layout>
+                                    <child>
+                                      <object class="ttk.Label" id="legendLabel" named="True">
+                                        <property name="text" translatable="yes">Plot legend</property>
+                                        <layout manager="grid">
+                                          <property name="column">0</property>
+                                          <property name="row">0</property>
+                                          <property name="sticky">nsew</property>
+                                        </layout>
+                                      </object>
+                                    </child>
                                   </object>
                                 </child>
                                 <child>
                                   <object class="customtkinter.CTkFrame" id="graphButtonsFrame" named="True">
                                     <property name="corner_radius">0</property>
-                                    <property name="width">50</property>
+                                    <property name="width">100</property>
                                     <layout manager="grid">
                                       <property name="column">1</property>
                                       <property name="row">0</property>

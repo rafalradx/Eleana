@@ -63,6 +63,15 @@ class Eleana():
                   'f_dsp':True, 's_dsp':True ,'r_dsp':True
                   }
 
+    # Attribute combobox_lists contains list of elements available in all comboboxes seletors
+    combobox_lists =   {'sel_first':[],
+                        'f_stk':[],
+                        'sel_second': [],
+                        's_stk':[],
+                        'sel_result':[],
+                        'r_stk':[]
+                        }
+
     last_projects = ['.home/marcin/project.ele']
 
     # --- Dictionaries translation different par files to Eleana format ---
@@ -91,7 +100,7 @@ class Eleana():
 
     # ----- METHODS ------
 
-    def index_of_selected_data(self, selected_value_text):
+    def name_nr_to_index(self, selected_value_text):
         # This function returns index of Eleana.dataset which name_nr attribute is equal to argument: selected_value_text
         numbered_names = []
         for each in self.dataset:
@@ -349,7 +358,7 @@ class Update():
         The entries depend on selected group.
     '''
     def dataset_list(self, eleana) -> list:
-
+        # Create numbered names in the eleana.dataset[X].names_nr
         names_numbered = ['None']
         i = 0
         for data in eleana.dataset:
@@ -363,12 +372,97 @@ class Update():
             eleana.dataset[i].name_nr = names_numbered[i+1]
             i += 1
         return names_numbered
+    ''' Methods to create combobox lists'''
+    def ref_to_combobox(self, app: object, which_combobox: str):
+        if which_combobox == 'sel_first':
+            box = app.sel_first
+        elif which_combobox == 'sel_second':
+            box = app.sel_second
+        elif which_combobox == 'sel_result':
+            box = app.sel_result
+        elif which_combobox == 'f_stk':
+            box = app.f_stk
+        elif which_combobox == 's_stk':
+            box = app.s_stk
+        elif which_combobox == 'r_stk':
+            box = app.r_stk
+        return box
+
+    def combobox_create_list(self, app, eleana, which_combobox):
+        box = self.ref_to_combobox(app, which_combobox)
+
+        # Main list
+        list_items = ['None']
+        # List for stack
+        stk_list = []
+
+        ''' This part is performed when Group is set to All.
+            Therefore combobox lists will be created for 
+            all elements in the eleana.dataset 
+        '''
+        # Take all names from dataset when Group is set to All
+        if eleana.selections['group'] == 'All':
+            for each in eleana.dataset:
+                list_items.append(each.name_nr)
+
+            # Create list for the FIRST list to eleana.combobox_lists
+            if which_combobox == 'sel_first':
+                eleana.combobox_lists['sel_first'] = list_items
+                first_index = eleana.selections['first']
+                if first_index >=0:
+                    try:
+                        stk_list = eleana.dataset[first_index]
+                    except:
+                        stk_list = []
+                    eleana.combobox_lists['f_stk'] = stk_list
+                return
+
+            # Create list for the SECOND to eleana.combobox_lists
+            elif which_combobox == 'sel_second':
+                eleana.combobox_lists['sel_second'] = list_items
+                second_index = eleana.selections['second']
+                if second_index >= 0:
+                    try:
+                        stk_list = eleana.dataset[second_index]
+                    except:
+                        stk_list = []
+                    eleana.combobox_lists['f_stk'] = stk_list
+                return
+            # Create list for RESULTS
+            elif which_combobox == 'sel_result':
+                list_items = []
+                for each in eleana.results_dataset:
+                    list_items.append(each.name_nr)
+                eleana.combobox_lists['sel_result'] = list_items
+                result_index = eleana.selections['result']
+                if result_index >=0:
+                    try:
+                        stk_list = eleana.result_dataset[result_index]
+                    except:
+                        stk_list = []
+                    eleana.combobox_lists['r_stk'] = stk_list
+                return
+        else:
+            print("Utwórz metodę w ComboboxLists().create_list() do zrobienia listy widm na podstawie innej grupy niż All")
+            exit()
+
+        ''' This part is performed when Group is not All.
+            Then the lists will be created according to  
+            which element is present in assignmentToGroups 
+            
+            TO DO
+        '''
+
+    def combobox_all_lists(self, app, eleana):
+        ids = list(eleana.combobox_lists.keys())
+        for each in ids:
+            self.combobox_create_list(app, eleana, each)
 
     ''' 
     Show or hide First, Second or Result frames
     '''
 
-    def selections_widgets(self, app: object, eleana, comboboxList):
+    def gui_widgets(self, app: object, eleana, comboboxes):
         #selections = eleana.selections
         first_nr = eleana.selections['first']
         second_nr = eleana.selections['second']
@@ -377,6 +471,7 @@ class Update():
         f_stk = eleana.selections['f_stk']
         s_stk = eleana.selections['s_stk']
         r_stk = eleana.selections['r_stk']
+
 
         try:
             first = eleana.dataset[first_nr]
@@ -392,7 +487,7 @@ class Update():
 
         try:
             result = eleana.results_dataset[result_nr]
-            r_stk = selections['r_stk']
+            r_stk = eleana.selections['r_stk']
         except IndexError:
             pass
 
@@ -413,7 +508,7 @@ class Update():
             app.f_stk.configure(values=first.parameters['stk_names'])
             entry_index = int(eleana.selections['f_stk'])
             entry = first.parameters['stk_names'][entry_index]
-            comboboxList.set_on_value(app, 'f_stk', entry)
+            app.f_stk.set(value = entry)
 
         try:
             if first.complex and first_nr >= 0:
@@ -424,18 +519,18 @@ class Update():
         # Update SECOND frame
         if len(eleana.dataset) == 0 or second.type != "stack 2D" or is_second_none:
             app.secondStkFrame.grid_remove()
-            app.secondImaginary.grid_remove()
+            app.secondComplex.grid_remove()
 
         elif second.type == "stack 2D":
             app.secondStkFrame.grid(row=2, column=0)
             app.s_stk.configure(values=second.parameters['stk_names'])
             #comboboxList = ComboboxLists()
             entry_index = int(eleana.selections['s_stk'])
-            entry = first.parameters['stk_names'][entry_index]
-            comboboxList.set_on_value(app, 's_stk', entry)
+            entry = second.parameters['stk_names'][entry_index]
+            app.s_stk.set(value=entry)
         try:
             if second.complex:
-                app.secondImaginary.grid()
+                app.secondComplex.grid()
         except:
             pass
 
@@ -445,14 +540,14 @@ class Update():
             return
 
         if result.type != "stack 2D":
-            app.resultImaginary.grid_remove()
+            app.resultComplex.grid_remove()
             return
 
         elif result.type == "stack 2D":
             app.resultStkFrame.grid(row=2, column=0)
             app.r_stk.configure(values=result.parameters['stk_names'])
             if result.complex:
-                app.resultImaginary.grid()
+                app.resultComplex.grid()
             return
     def results_list(self, results):
         names = []
@@ -486,10 +581,7 @@ class Update():
         return self.assignToGroups
 
     ''' Set position on 'entry' in combobox of id = which_combobox'''
-    def set_on_index(self, app, which_combobox: str, entry: str):
-        comboboxList = ComboboxLists()
-        box = comboboxList.ref_to_box(app, which_combobox)
-        box.set(entry)
+
 
 
 '''
@@ -503,17 +595,8 @@ and selection is now on 2. Heme bL then in eleana:
       pozycja = comboboxLists.current_position(app, 'sel_first')
 gives in pozycja = {'current: '2. Heme bL', 'index':2, 'last_index':3}
 '''
-class ComboboxLists():
-    # elements - this contains lists that are in comboboxes
-    entries = {'sel_first':[],
-              'f_stk':[],
-              'sel_second': [],
-              's_stk':[],
-              'sel_result':[],
-              'r_stk':[]
-              }
-
-    def ref_to_box(self, app: object, which_combobox: str):
+class Comboboxes():
+    def select_combobox(self, app: object, which_combobox: str):
         if which_combobox == 'sel_first':
             box = app.sel_first
         elif which_combobox == 'sel_second':
@@ -528,81 +611,88 @@ class ComboboxLists():
             box = app.r_stk
         return box
 
-    def current_position(self, app: object, which_combobox: str):
-        box = self.ref_to_box(app, which_combobox)
+    def get_current_position(self, app: object, eleana: object, which_combobox: str):
+        box = self.select_combobox(app, which_combobox)
         current_value = box.get()
-        if current_value in ComboboxLists.entries[which_combobox]:
-            index = self.entries[which_combobox].index(current_value)-1
-            index_on_list = index + 1
-            return {'current':current_value, 'index':index, 'index_on_list':index_on_list, 'last_index':len(ComboboxLists.entries[which_combobox])-1}
-
+        if current_value in eleana.combobox_lists[which_combobox]:
+            index_list = eleana.combobox_lists[which_combobox].index(current_value)
+            index_dataset = index_list - 1
+            return {'value':current_value, 'index_dataset':index_dataset, 'index_on_list':index_list, 'last_index_on_list':len(eleana.combobox_lists[which_combobox])-1}
         return {}
 
-    def create_list(self, app, eleana, which_combobox):
-        box = self.ref_to_box(app, which_combobox)
-        # Create list for First, Second
-        list_items = ['None']
-        if which_combobox == 'sel_first' or which_combobox == 'sel_second':
-            list_items = ['None']
-
-            if eleana.selections['group'] == 'All':
-                # When Group is 'All'
-                for each in eleana.dataset:
-                    list_items.append(each.name_nr)
-            else:
-                # When Group is different than 'All'
-                print("Utwórz metodę w ComboboxLists().create_list() do zrobienia listy widm na podstawie innej grupy niż All")
-                exit()
-
-        elif which_combobox == 'sel_result':
-            list_items = ['None']
-            for each in eleana.results_dataset:
-                list_items.append(each.name_nr)
-
-        elif which_combobox == 'f_stk':
-            data = eleana.dataset[eleana.selections['first']]
-        elif which_combobox == 's_stk':
-            data = eleana.dataset[eleana.selections['second']]
-        elif which_combobox == 'r_stk':
-            data = eleana.dataset[eleana.selections['result']]
-        else:
-            return
-
-        try:
-            if data.type == 'stack 2D':
-                list_items = data.parameters['stk_names']
-            else:
-                return
-        except:
-            pass
-
-        # Finally put the list into widget and to the ComboboxLists.entries
-        self.entries[which_combobox] = list_items
-        box.configure(values=list_items)
-
-    def create_all_lists(self, app, eleana):
-        ids = list(self.entries.keys())
-        for each in ids:
-            self.create_list(app, eleana, each)
-
-    def set_on_value(self, app, which_combobox: str, entry: str):
-        ''' Set the value in combobox defined in 'which_combobox'
+    def set_on_position_value(self, app, eleana, which_combobox: str, entry: str):
+        ''' Set the value in combobox defined in 'which_combobox
         on the value 'entry' which is a string name of the position on the combobox list
         '''
-        box = self.ref_to_box(app, which_combobox)
-        box.set(entry)
+        if which_combobox != 'sel_result':
+            # Set value in eleana.selections
 
-    def set_on_index(self, app, which_combobox: str, index: int):
+            if entry == 'None':
+                box = self.select_combobox(app, which_combobox)
+                box.set(entry)
+                return
+
+            names = []
+
+            for each in eleana.dataset:
+                names.append(each.name_nr)
+
+            if entry in names:
+                index = names.index(entry)
+                value = eleana.dataset[index].name_nr
+                box = self.select_combobox(app, which_combobox)
+                box.set(value)
+        else:
+            print("Należy stworzyć odpowiednią metodę w set_on_position_value")
+            exit()
+
+
+    def set_on_position_index(self, app: object, eleana: object, which_combobox: str, index: int):
         ''' Set the value in combobox defined in 'which_combobox'
         on the position number defined by 'index'.
         'index' argument is the number of the position in the combobox list
         '''
+        list_in_combobox = eleana.combobox_lists[which_combobox]
+        try:
+            new_val = list_in_combobox[index]
+            self.set_on_position_value(app, eleana, which_combobox, new_val)
 
-        box = self.ref_to_box(app, which_combobox)
-        print(which_combobox)
-        box.set(entry)
+        except:
+            pass
 
-    ''' END OF COMBOBOXLISTS CLASS'''
+
+
+    def populate_lists(self, app, eleana):
+        # Save FIRST list
+        box = app.sel_first
+        box_list = eleana.combobox_lists['sel_first']
+        box.configure(values=box_list)
+
+        # Save FIRST stk_list
+        box = app.f_stk
+        box_list = eleana.combobox_lists['f_stk']
+        box.configure(values=box_list)
+
+        # Save SECOND list
+        box = app.sel_second
+        box_list = eleana.combobox_lists['sel_second']
+        box.configure(values=box_list)
+
+        # Save SECOND stk_list
+        box = app.f_stk
+        box_list = eleana.combobox_lists['s_stk']
+        box.configure(values=box_list)
+
+        # Save RESULT list
+        box = app.sel_result
+        box_list = eleana.combobox_lists['sel_result']
+        box.configure(values=box_list)
+
+        # Save RESULT stk_list
+        box = app.r_stk
+        box_list = eleana.combobox_lists['r_stk']
+        box.configure(values=box_list)
+
 
 if __name__ == "__main__":
     eleana = Eleana()
