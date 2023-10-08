@@ -111,15 +111,7 @@ class EleanaMainApp:
 
     def first_complex_clicked(self, value):
             eleana.selections['f_cpl'] = value
-            # current_position = comboboxLists.current_position(app, 'sel_first')
-            # index = int(current_position['index']) - 1
-            # eleana.selections['first'] = index
-
-            # Update GUI buttons according to selections
-            # update.selections_widgets(app, eleana)
-
-            # Plot graph
-            #plotter(app, eleana, comboboxLists)
+            after_selection('first')
 
     def first_selected(self, selected_value_text: str):
         ''' POPRAWIONE '''
@@ -167,11 +159,10 @@ class EleanaMainApp:
         ''' POPRAWIONE '''
         if selected_value_text == 'None':
             eleana.selections['second'] = -1
-
         after_selection('second')
 
     def second_down_clicked(self):
-        ''' POPRAWIONE '''
+
         current_val = comboboxes.get_current_position(app, eleana, 'sel_second')
         new_index = current_val['index_on_list'] - 1
         if new_index <= 0:
@@ -188,7 +179,7 @@ class EleanaMainApp:
         after_selection('second')
 
     def second_up_clicked(self):
-        ''' POPRAWIONE '''
+
         current_val = comboboxes.get_current_position(app, eleana, 'sel_second')
         new_index = current_val['index_on_list'] + 1
 
@@ -233,6 +224,9 @@ class EleanaMainApp:
 
         after_selection('second')
 
+    def second_complex_clicked(self, value):
+            eleana.selections['s_cpl'] = value
+            after_selection('second')
     def swap_first_second(self):
         first, first_stk, f_cpl = eleana.selections['first'], eleana.selections['f_stk'], eleana.selections['f_cpl']
         second, second_stk, s_cpl = eleana.selections['second'], eleana.selections['s_stk'], eleana.selections['s_cpl']
@@ -244,8 +238,7 @@ class EleanaMainApp:
         eleana.selections['second'] = first
         eleana.selections['s_stk'] = first_stk
         eleana.selections['s_cpl'] = f_cpl
-        # if DEVEL:
-        #     print(eleana.selections)
+
 
         pos_first = comboboxes.get_current_position(app, eleana, 'sel_first')
         pos_first_stk = comboboxes.get_current_position(app, eleana, 'f_stk')
@@ -306,18 +299,15 @@ class EleanaMainApp:
         if selected_value_text == 'None':
             eleana.selections['result'] = -1
         try:
-            #print(eleana.selections)
-            #current = comboboxes.get_current_position(app, eleana, 'sel_result')
 
-            #eleana.selections['result'] = current['index_dataset']
             comboboxes.set_on_position_value(app, eleana, 'sel_result', selected_value_text)
             current = comboboxes.get_current_position(app,eleana, 'sel_result')
-            #print(current)
+
             eleana.selections['result'] = current['index_dataset']
         except:
             pass
         update.gui_widgets(app, eleana, comboboxes)
-        print(eleana.selections)
+
 
 
     def result_up_clicked(self):
@@ -359,7 +349,7 @@ class EleanaMainApp:
         eleana.paths = project['paths']
 
         update.dataset_list(eleana)
-        comboboxLists.create_all_lists(app, eleana)
+        after_import(app, eleana)
 
     # --- Save as
     def save_as(self):
@@ -408,8 +398,6 @@ class EleanaMainApp:
         file_back = eleana.read_tmp_file(filename)
         eleana.notes = json.loads(file_back)
 
-
-
 # --- GENERAL BATCH METHODS ---
 def after_import(app, eleana):
     # Update dataset
@@ -420,26 +408,6 @@ def after_import(app, eleana):
 
     # Write list from eleana.comboboxlists to GUI widgets
     comboboxes.populate_lists(app, eleana)
-
-# def after_result_selection():
-#     index = eleana.selections['r_stk']
-#
-#     # 1. Display neccessary widgets and hide unused
-#     update.gui_widgets(app, eleana, comboboxes)
-#     # 2. Create list that will be pushed to combobox widgets
-#     update.combobox_create_list(app, eleana, 'sel_result')
-#     # 3. Put list into widgets
-#     comboboxes.populate_lists(app, eleana)
-#
-#     # 4. Set combobox result to index:
-#     comboboxes.set_on_position_index(app, eleana, 'sel_result', index + 1)
-#
-#     # 5. Check if STK Names should be added
-#     if eleana.results_dataset[index].type == 'stack 2D':
-#         update.combobox_create_list(app, eleana, 'r_stk')
-#         comboboxes.populate_lists(app, eleana)
-#         comboboxes.set_on_position_index(app, eleana, 'r_stk', 0)
-#
 
 def after_selection(which):
     # Create references to widgets id in GUI
@@ -474,10 +442,6 @@ def after_selection(which):
             update.combobox_create_list(app, eleana, 'r_stk')
             comboboxes.populate_lists(app, eleana)
             comboboxes.set_on_position_index(app, eleana, 'r_stk', 0)
-
-
-
-
         return
     else:
         print('Wrong parameter "which" in after_selection(which)')
@@ -497,11 +461,8 @@ def after_selection(which):
     # Update GUI buttons according to selections
     update.gui_widgets(app, eleana, comboboxes)
 
-    if DEVEL:
-        print(eleana.selections)
-
-    # # Plot graph
-    # plotter(app, eleana, comboboxLists)
+    #  Plot graph
+    plotter(app, eleana, comboboxes)
 
 
 '''Create main instances 
@@ -529,7 +490,8 @@ init.folders(eleana)
 
 
 update.gui_widgets(app, eleana, comboboxes)
-
+#dialog = customtkinter.CTkInputDialog(text="Type in a number:", title="Test")
+#print(dialog.get_input())
 # Run
 if __name__ == "__main__":
     app.run()
