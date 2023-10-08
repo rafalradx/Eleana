@@ -175,7 +175,6 @@
                                         <property name="button_color">#799da2</property>
                                         <property name="command" type="command" cbtype="simple">group_selected</property>
                                         <property name="corner_radius">5</property>
-                                        <property name="dropdown_text_font">{Arial} 20 {}</property>
                                         <property name="fg_color">#505050</property>
                                         <property name="font">{Arial} 12 {}</property>
                                         <property name="text_color">#ced9d9</property>
@@ -243,6 +242,7 @@
                                         <child>
                                           <object class="customtkinter.CTkButton" id="btn_first_down" named="True">
                                             <property name="command" type="command" cbtype="simple">first_down_clicked</property>
+                                            <property name="compound">none</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#505050</property>
                                             <property name="font">{Arial} 14 {bold}</property>
@@ -279,7 +279,6 @@
                                         <property name="button_color">#c6484c</property>
                                         <property name="command" type="command" cbtype="simple">first_selected</property>
                                         <property name="corner_radius">5</property>
-                                        <property name="dropdown_text_font">{Arial} 12 {}</property>
                                         <property name="fg_color">#505050</property>
                                         <property name="font">{Arial} 12 {}</property>
                                         <property name="text_color">#ced9d9</property>
@@ -315,7 +314,6 @@
                                             <property name="button_color">#c6484c</property>
                                             <property name="command" type="command" cbtype="simple">f_stk_selected</property>
                                             <property name="corner_radius">5</property>
-                                            <property name="dropdown_text_font">{Arial} 12 {}</property>
                                             <property name="fg_color">#505050</property>
                                             <property name="font">{Arial} 12 {}</property>
                                             <property name="text_color">#ced9d9</property>
@@ -409,11 +407,8 @@
                                         </containerlayout>
                                         <child>
                                           <object class="customtkinter.CTkSegmentedButton" id="firstComplex" named="True">
-                                            <property name="bg_color">#505050</property>
-                                            <property name="border_color">#505050</property>
                                             <property name="command" type="command" cbtype="simple">first_complex_clicked</property>
                                             <property name="corner_radius">5</property>
-                                            <property name="fg_color">#505050</property>
                                             <property name="font">{Arial} 12 {}</property>
                                             <property name="state">normal</property>
                                             <property name="values">["re","im","cpl","magn"]</property>
@@ -573,7 +568,6 @@
                                         <property name="button_color">#20acdc</property>
                                         <property name="command" type="command" cbtype="simple">second_selected</property>
                                         <property name="corner_radius">5</property>
-                                        <property name="dropdown_text_font">{Arial} 12 {}</property>
                                         <property name="fg_color">#505050</property>
                                         <property name="font">{Arial} 12 {}</property>
                                         <property name="text_color">#ced9d9</property>
@@ -657,7 +651,6 @@
                                             <property name="button_color">#20acdc</property>
                                             <property name="command" type="command" cbtype="simple">s_stk_selected</property>
                                             <property name="corner_radius">5</property>
-                                            <property name="dropdown_text_font">{Arial} 12 {}</property>
                                             <property name="fg_color">#505050</property>
                                             <property name="font">{Arial} 12 {}</property>
                                             <property name="text_color">#ced9d9</property>
@@ -688,11 +681,8 @@
                                         </containerlayout>
                                         <child>
                                           <object class="customtkinter.CTkSegmentedButton" id="secondComplex" named="True">
-                                            <property name="bg_color">#505050</property>
-                                            <property name="border_color">#505050</property>
                                             <property name="command" type="command" cbtype="simple">second_complex_clicked</property>
                                             <property name="corner_radius">5</property>
-                                            <property name="fg_color">#505050</property>
                                             <property name="font">{Arial} 12 {}</property>
                                             <property name="state">normal</property>
                                             <property name="values">["re","im","cpl","magn"]</property>
@@ -870,7 +860,6 @@
                                             <property name="button_color">#3c9b59</property>
                                             <property name="command" type="command" cbtype="simple">f_stk_selected</property>
                                             <property name="corner_radius">5</property>
-                                            <property name="dropdown_text_font">{Arial} 12 {}</property>
                                             <property name="fg_color">#505050</property>
                                             <property name="font">{Arial} 12 {}</property>
                                             <property name="text_color">#ced9d9</property>
@@ -964,11 +953,8 @@
                                         </containerlayout>
                                         <child>
                                           <object class="customtkinter.CTkSegmentedButton" id="resultComplex" named="True">
-                                            <property name="bg_color">#505050</property>
-                                            <property name="border_color">#505050</property>
                                             <property name="command" type="command" cbtype="simple">first_complex_clicked</property>
                                             <property name="corner_radius">5</property>
-                                            <property name="fg_color">#505050</property>
                                             <property name="font">{Arial} 12 {}</property>
                                             <property name="state">normal</property>
                                             <property name="values">["re","im","cpl","magn"]</property>

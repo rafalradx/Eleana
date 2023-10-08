@@ -148,7 +148,9 @@ def plotter(app: object, eleana: object, comboboxLists: object):
 
     # RESULT
     if len(eleana.results_dataset) != 0:
-        index = comboboxLists.current_position(app, 'sel_result')['index']
+        #index = comboboxLists.current_position(app, 'sel_result')['index']
+        index = eleana.selections['first']
+
         if index != 0:
             is_result_not_none = True
         else:

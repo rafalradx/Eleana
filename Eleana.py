@@ -81,6 +81,8 @@ class EleanaMainApp:
         if new_index <= 0:
             eleana.selections['first'] = -1
             comboboxes.set_on_position_value(app, eleana, 'sel_first', 'None')
+            update.gui_widgets(app, eleana, comboboxes)
+            plotter(app, eleana, comboboxes)
             return
         elif new_index > current_val['last_index_on_list']:
             return
@@ -168,6 +170,8 @@ class EleanaMainApp:
         if new_index <= 0:
             eleana.selections['second'] = -1
             comboboxes.set_on_position_value(app, eleana, 'sel_second', 'None')
+            update.gui_widgets(app, eleana, comboboxes)
+            plotter(app, eleana, comboboxes)
             return
         elif new_index > current_val['last_index_on_list']:
             return
@@ -264,11 +268,29 @@ class EleanaMainApp:
 
 
     def first_to_result(self):
+        '''
 
+        Tu jest problem, że po kliknieciu to reults przestaja działać przyciski first_up i first_down
+
+
+
+        :return:
+        '''
         index = eleana.selections['first']
         if index == -1:
             return
         first = eleana.dataset[index]
+        first.name_nr = first.name
+        if first.name_nr in eleana.combobox_lists['sel_result']:
+            dialog = customtkinter.CTkInputDialog(text="There is data with the same name. Please enter a different name.", title="Enter new name")
+            input = dialog.get_input()
+
+            if type(input) == str:
+                name = input
+            else:
+                return
+        #
+        # first.name_nr = input
         eleana.results_dataset.append(first)
         index = len(eleana.results_dataset) - 1
         eleana.selections['result'] = index
