@@ -428,20 +428,26 @@ class Update():
                         stk_list = []
                     eleana.combobox_lists['f_stk'] = stk_list
                 return
+
             # Create list for RESULTS
             elif which_combobox == 'sel_result':
-                list_items = []
+                list_items = ['None']
                 for each in eleana.results_dataset:
                     list_items.append(each.name_nr)
+
+
                 eleana.combobox_lists['sel_result'] = list_items
                 result_index = eleana.selections['result']
-                if result_index >=0:
-                    try:
-                        stk_list = eleana.result_dataset[result_index]
-                    except:
-                        stk_list = []
+
+                try:
+                    stk_list = eleana.results_dataset[result_index].parameters['stk_names']
                     eleana.combobox_lists['r_stk'] = stk_list
+                except:
+                    pass
+
                 return
+
+
         else:
             print("Utwórz metodę w ComboboxLists().create_list() do zrobienia listy widm na podstawie innej grupy niż All")
             exit()
@@ -524,12 +530,11 @@ class Update():
         elif second.type == "stack 2D":
             app.secondStkFrame.grid(row=2, column=0)
             app.s_stk.configure(values=second.parameters['stk_names'])
-            #comboboxList = ComboboxLists()
             entry_index = int(eleana.selections['s_stk'])
             entry = second.parameters['stk_names'][entry_index]
             app.s_stk.set(value=entry)
         try:
-            if second.complex:
+            if second.complex and second_nr >= 0:
                 app.secondComplex.grid()
         except:
             pass
@@ -538,17 +543,21 @@ class Update():
         if len(eleana.results_dataset) == 0:
             app.resultFrame.grid_remove()
             return
+        else:
+            app.resultFrame.grid()
 
-        if result.type != "stack 2D":
-            app.resultComplex.grid_remove()
-            return
+        if result.type != "stack 2D" or is_result_none:
+            app.resultStkFrame.grid_remove()
+
 
         elif result.type == "stack 2D":
             app.resultStkFrame.grid(row=2, column=0)
             app.r_stk.configure(values=result.parameters['stk_names'])
-            if result.complex:
-                app.resultComplex.grid()
-            return
+
+        if result.complex:
+            app.resultComplex.grid()
+        else:
+            app.resultComplex.grid_remove()
     def results_list(self, results):
         names = []
         i = 1
@@ -624,6 +633,12 @@ class Comboboxes():
         ''' Set the value in combobox defined in 'which_combobox
         on the value 'entry' which is a string name of the position on the combobox list
         '''
+
+        if which_combobox == 'r_stk':
+            box = self.select_combobox(app, which_combobox)
+            box.set(entry)
+            return
+
         if which_combobox != 'sel_result':
             # Set value in eleana.selections
 
@@ -643,8 +658,8 @@ class Comboboxes():
                 box = self.select_combobox(app, which_combobox)
                 box.set(value)
         else:
-            print("Należy stworzyć odpowiednią metodę w set_on_position_value")
-            exit()
+            box = self.select_combobox(app, which_combobox)
+            box.set(entry)
 
 
     def set_on_position_index(self, app: object, eleana: object, which_combobox: str, index: int):
@@ -656,7 +671,6 @@ class Comboboxes():
         try:
             new_val = list_in_combobox[index]
             self.set_on_position_value(app, eleana, which_combobox, new_val)
-
         except:
             pass
 
