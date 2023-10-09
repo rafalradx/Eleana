@@ -8,10 +8,13 @@ import pygubu
 from CTkMessagebox import CTkMessagebox
 
 # Import Eleana specific classes
-from assets.general_eleana_methods import Eleana, Update, Comboboxes
+from assets.general_eleana_methods import Eleana
 from assets.gui_actions.menu_actions import MenuAction
 from assets.initialization import Init
 from assets.graph_plotter import plotter
+from assets.update_methods import Update
+from assets.comboboxes_methods import Comboboxes
+
 # ------------------
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "ui" / "Eleana_main.ui"
@@ -276,6 +279,9 @@ class EleanaMainApp:
 
         :return:
         '''
+        print('Tu jest problem. Po kliknięciu przestają działać przyciski up i down')
+        exit()
+
         index = eleana.selections['first']
         if index == -1:
             return

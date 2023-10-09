@@ -3,7 +3,8 @@ from pathlib import Path, PurePath
 import re
 from assets.general_eleana_methods import *
 
-test_file = '../../Example_data/Elexsys/cw.DSC'
+
+
 class Elexsys():
     def read(self, filename: str) -> object:
         elexsys_DTA = Path(filename[:-3]+'DTA')
