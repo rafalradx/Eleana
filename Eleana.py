@@ -6,18 +6,22 @@ import pathlib
 import customtkinter
 import pygubu
 from CTkMessagebox import CTkMessagebox
+import sys
+
 
 # Import Eleana specific classes
 from assets.general_eleana_methods import Eleana
-from assets.gui_actions.menu_actions import MenuAction
+from assets.menuActions import MenuAction
 from assets.initialization import Init
 from assets.graph_plotter import plotter
 from assets.update_methods import Update
 from assets.comboboxes_methods import Comboboxes
 
-# ------------------
+# -----GLOBAL VARIABLEs-------------
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "ui" / "Eleana_main.ui"
+VERSION = 1
+INTERPRETER = sys.executable  # <-- Python version for subprocesses
 
 DEVEL = True
 
@@ -80,6 +84,7 @@ class EleanaMainApp:
     def first_down_clicked(self):
         ''' POPRAWIONE '''
         current_val = comboboxes.get_current_position(app, eleana, 'sel_first')
+
         new_index = current_val['index_on_list'] - 1
         if new_index <= 0:
             eleana.selections['first'] = -1
@@ -96,10 +101,18 @@ class EleanaMainApp:
             eleana.selections['first'] = index_in_eleana
         after_selection('first')
 
+        '''-----------------------------
+        DISPLAY INFORMATION FOR DEBUG
+        --------------------------------'''
+        if DEVEL:
+            test_variables()
+        '''-----------------------------'''
+
+
     def first_up_clicked(self):
         ''' POPRAWIONE '''
         current_val = comboboxes.get_current_position(app, eleana, 'sel_first')
-        print(current_val)
+
         new_index = current_val['index_on_list'] + 1
         # if new_index == 0:
         #     eleana.selections['first'] = -1
@@ -114,8 +127,15 @@ class EleanaMainApp:
 
         after_selection('first')
 
+        '''-----------------------------
+        DISPLAY INFORMATION FOR DEBUG
+        --------------------------------'''
+        if DEVEL:
+            test_variables()
+        '''-----------------------------'''
 
-    def first_complex_clicked(self, value):
+
+        def first_complex_clicked(self, value):
             eleana.selections['f_cpl'] = value
             after_selection('first')
 
@@ -341,7 +361,7 @@ class EleanaMainApp:
         for each in eleana.results_dataset:
             names_in_result_dataset.append(each.name)
 
-        # Check if the same nas as in FIRST exists in dataset
+        #Check if the same nas as in FIRST exists in dataset
         if data_in_first.name in names_in_result_dataset:
             dialog = customtkinter.CTkInputDialog(
                 text="There is data with the same name. Please enter a different name.", title="Enter new name")
@@ -352,14 +372,24 @@ class EleanaMainApp:
             else:
                 return
 
+        print(app.sel_first["values"])
         # Write the same name to name_nr (without number)
         data_in_first.name_nr = data_in_first.name
 
-        # Add to eleana.results_dataset
-        eleana.results_dataset.append(data_in_first)
+        after_selection('first')
+        after_selection('second')
 
-        update.combobox_all_lists(app, eleana)
-        comboboxes.populate_lists(app, eleana)
+        '''-----------------------------
+        DISPLAY INFORMATION FOR DEBUG
+        --------------------------------'''
+        if DEVEL:
+            test_variables()
+        '''-----------------------------'''
+        # Add to eleana.results_dataset
+        #eleana.results_dataset.append(data_in_first)
+
+        #update.combobox_all_lists(app, eleana)
+        #comboboxes.populate_lists(app, eleana)
 
 
         # self.result_selected(data_in_first.name_nr)
@@ -408,8 +438,14 @@ class EleanaMainApp:
 
     def import_elexsys(self):
         ''' Open window that loads the spectra '''
-        menuAction.loadElexsys()
-        after_import(app, eleana)
+        path = eleana.paths['last_import_dir']
+        spectra = menuAction.loadElexsys(path)
+        dataset = eleana.dataset
+        dataset.extend(spectra)
+
+
+
+        #after_import(app, eleana)
 
         ''' When import is done and spectra in eleana.dataset[]
             it is needed to:
@@ -536,6 +572,12 @@ init = Init()
 init.main_window(app, eleana)
 
 init.folders(eleana)
+
+def test_variables():
+    print('-------------SELECTIONS-----------------')
+    print(eleana.selections)
+    print('--------------COMBO_LISTS---------------')
+    print(eleana.combobox_lists)
 
 
 update.gui_widgets(app, eleana, comboboxes)

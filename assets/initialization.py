@@ -10,7 +10,8 @@ class Init():
 
         width = app.mainwindow.winfo_screenwidth()  # Get screen width
         height = app.mainwindow.winfo_screenheight()  # Get screen height
-        app.mainwindow.geometry(str(width) + 'x' + str(height) + "+0+0")  # Set geometry to max
+        app.mainwindow.geometry('800x800')
+        #app.mainwindow.geometry(str(width) + 'x' + str(height) + "+0+0")  # Set geometry to max
 
 
         # Add icon to the top window bar form pixmaps folder

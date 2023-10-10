@@ -1,20 +1,18 @@
 from pathlib import Path
+import pathlib
 import json
 import subprocess
 from customtkinter import filedialog
-from assets.general_eleana_methods import Eleana
-from assets.modules.bruker_elexsys import Elexsys
+#from assets.general_eleana_methods import Eleana
+
 import pickle
 from tkinter.filedialog import asksaveasfile, askopenfilename
 import random
 import shutil
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import filedialog
 from CTkMessagebox import CTkMessagebox
-
-# Create instances
-elexsys = Elexsys()
-eleana = Eleana()
+from assets.dataClasses import createFromElexsys
 
 class MenuAction():
     # FILE
@@ -265,19 +263,20 @@ class MenuAction():
 
 
     # Import EPR
-    def loadElexsys(self) -> object:
+    def loadElexsys(self, path) -> object:
         filetypes = (
             ('Elexsys', '*.DSC'),
             ('All files', '*.*')
             )
-        filenames = filedialog.askopenfilenames(initialdir=eleana.paths['last_import_dir'], filetypes=filetypes)
+        filenames = filedialog.askopenfilenames(initialdir=path, filetypes=filetypes)
         if len(filenames) == 0:
             return
 
+        spectra = []
         for file in filenames:
-            spectrum = elexsys.read(file)
-            eleana.dataset.append(spectrum)
-        return eleana.dataset
+            spectrum = createFromElexsys(file)
+            spectra.append(spectrum)
+        return spectra
 
     # EDIT
     #       Notes
