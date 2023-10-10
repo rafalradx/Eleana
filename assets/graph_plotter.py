@@ -41,7 +41,7 @@ def plotter(app: object, eleana: object, comboboxLists: object):
         first_im_y = data_for_plot['im_y']
         first_legend_index = eleana.selections['first']
         first_legend = eleana.dataset[first_legend_index].name
-        print(first_re_y)
+
         # Label for x axis
         try:
             label_x_title = eleana.dataset[data_index].parameters['name_x']

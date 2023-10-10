@@ -99,6 +99,7 @@ class EleanaMainApp:
     def first_up_clicked(self):
         ''' POPRAWIONE '''
         current_val = comboboxes.get_current_position(app, eleana, 'sel_first')
+        print(current_val)
         new_index = current_val['index_on_list'] + 1
         # if new_index == 0:
         #     eleana.selections['first'] = -1
@@ -270,42 +271,6 @@ class EleanaMainApp:
         after_selection('second')
 
 
-    def first_to_result(self):
-        '''
-
-        Tu jest problem, że po kliknieciu to reults przestaja działać przyciski first_up i first_down
-
-
-
-        :return:
-        '''
-        print('Tu jest problem. Po kliknięciu przestają działać przyciski up i down')
-        exit()
-
-        index = eleana.selections['first']
-        if index == -1:
-            return
-        first = eleana.dataset[index]
-        first.name_nr = first.name
-        if first.name_nr in eleana.combobox_lists['sel_result']:
-            dialog = customtkinter.CTkInputDialog(text="There is data with the same name. Please enter a different name.", title="Enter new name")
-            input = dialog.get_input()
-
-            if type(input) == str:
-                name = input
-            else:
-                return
-        #
-        # first.name_nr = input
-        eleana.results_dataset.append(first)
-        index = len(eleana.results_dataset) - 1
-        eleana.selections['result'] = index
-        eleana.selections['r_stk'] = 0
-
-        after_selection('result')
-        new_position = eleana.combobox_lists['sel_result']
-        new_val = new_position[-1]
-        comboboxes.set_on_position_value(app, eleana, 'sel_result', new_val)
 
     def second_to_result(self):
         index = eleana.selections['second']
@@ -361,6 +326,62 @@ class EleanaMainApp:
         comboboxes.set_on_position_index(app, eleana, 'sel_result', current+1)
         update.gui_widgets(app, eleana, comboboxes)
 
+    def first_to_result(self):
+
+        # If FIRST is set to none then return
+        if eleana.selections['first'] < 0:
+            return
+
+        # Copy current data to data_to_result
+        data_in_first = eleana.dataset[eleana.selections['first']]
+
+        # Get all names from results dataset
+        names_in_result_dataset = []
+
+        for each in eleana.results_dataset:
+            names_in_result_dataset.append(each.name)
+
+        # Check if the same nas as in FIRST exists in dataset
+        if data_in_first.name in names_in_result_dataset:
+            dialog = customtkinter.CTkInputDialog(
+                text="There is data with the same name. Please enter a different name.", title="Enter new name")
+            input = dialog.get_input()
+
+            if type(input) == str:
+                data_in_first.name = input
+            else:
+                return
+
+        # Write the same name to name_nr (without number)
+        data_in_first.name_nr = data_in_first.name
+
+        # Add to eleana.results_dataset
+        eleana.results_dataset.append(data_in_first)
+
+        update.combobox_all_lists(app, eleana)
+        comboboxes.populate_lists(app, eleana)
+
+
+        # self.result_selected(data_in_first.name_nr)
+        # if data_in_first.type == 'stack 2D':
+        #     comboboxes.set_on_position_index(app, eleana, 'r_stk', 0)
+        #
+        # after_selection('first')
+        # after_selection('second')
+        # after_selection('result')
+
+        # comboboxes.set_on_position_value(app, eleana,'sel_result',data_in_first.name_nr)
+        # #
+        # # first.name_nr = input
+        # eleana.results_dataset.append(first)
+        # index = len(eleana.results_dataset) - 1
+        # eleana.selections['result'] = index
+        # eleana.selections['r_stk'] = 0
+        #
+        # after_selection('result')
+        # new_position = eleana.combobox_lists['sel_result']
+        # new_val = new_position[-1]
+        # comboboxes.set_on_position_value(app, eleana, 'sel_result', new_val)
 
     # Functions triggered by Menu selections
     # FILE
