@@ -70,9 +70,11 @@ class Spectrum_CWEPR(GeneralDataTemplate):
         self.x = x_axis
         self.y = dta
         self.name = name
+        self.name_nr = ''
         self.complex = False
         self.type = 'single 2D'
         self.origin = 'CWEPR'
+        self.stk_names = []
 
         fill_missing_keys =['title','MwFreq','ModAmp','ModFreq','SweepTime','ConvTime','TimeConst','Power','PowAtten']
         working_par = self.parameters
@@ -96,12 +98,11 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         super().__init__(name, x_axis, dta, dsc)
 
         working_parameters = self.parameters
-        working_parameters['stk_names'] = []
 
         fill_missing_keys = ['name_z', 'unit_z', 'name_x', 'unit_x', 'name_y', 'unit_y']
         for key in fill_missing_keys:
             try:
-                bruker_key = Eleana.dsc2eleana[key]
+                bruker_key = GeneralDataTemplate.dsc2eleana[key]
                 value = dsc[bruker_key]
                 value = value.split(' ')
                 value_txt = value[0]
@@ -120,17 +121,18 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
             i += 1
 
         list_of_y_array = np.array(list_of_y)
-
+        working_stk_names = []
         # Create in stack names:
         for each in ygf:
             name = working_parameters['name_z'] + ' ' + str(each) + ' ' + working_parameters['unit_z'] + ''
-            working_parameters['stk_names'].append(name)
+            working_stk_names.append(name)
 
+        self.stk_names = working_stk_names
         self.y = list_of_y_array
         self.type = 'stack 2D'
         self.complex = False
         self.origin = 'CWEPR'
-        self.parameters =working_parameters
+        self.parameters = working_parameters
 
 class Spectrum_complex(GeneralDataTemplate):
     def __init__(self, name, x_axis: list, dta: list, dsc: dict):
@@ -147,7 +149,7 @@ class Spectrum_complex(GeneralDataTemplate):
         fill_missing_keys = ['name_z', 'unit_z', 'name_x', 'unit_x', 'name_y', 'unit_y']
         for key in fill_missing_keys:
             try:
-                bruker_key = Eleana.dsc2eleana[key]
+                bruker_key = GeneralDataTemplate.dsc2eleana[key]
                 value = dsc[bruker_key]
                 value = value.split(' ')
                 value_txt = value[0]

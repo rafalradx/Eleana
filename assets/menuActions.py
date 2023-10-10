@@ -263,7 +263,7 @@ class MenuAction():
 
 
     # Import EPR
-    def loadElexsys(self, path) -> object:
+    def loadElexsys(self, dataset, path) -> object:
         filetypes = (
             ('Elexsys', '*.DSC'),
             ('All files', '*.*')
@@ -276,7 +276,8 @@ class MenuAction():
         for file in filenames:
             spectrum = createFromElexsys(file)
             spectra.append(spectrum)
-        return spectra
+        dataset.extend(spectra)
+        return dataset
 
     # EDIT
     #       Notes
