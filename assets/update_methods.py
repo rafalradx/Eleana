@@ -79,28 +79,43 @@ class Update():
         elif comboboxID == 'f_stk':
             index = eleana.selections['first']
             if index < 0:
+                app.firstStkFrame.grid_remove()
                 return
             if eleana.dataset[index].type == 'stack 2D':
                 stk_list = eleana.dataset[index].stk_names
                 box.configure(values=stk_list)
+                app.firstStkFrame.grid()
+                box.set(stk_list[0])
+            else:
+                app.firstStkFrame.grid_remove()
             return
 
         elif comboboxID == 's_stk':
             index = eleana.selections['second']
             if index < 0:
+                app.secondStkFrame.grid_remove()
                 return
             if eleana.dataset[index].type == 'stack 2D':
                 stk_list = eleana.dataset[index].stk_names
                 box.configure(values=stk_list)
+                app.secondStkFrame.grid()
+                box.set(stk_list[0])
+            else:
+                app.secondStkFrame.grid_remove()
             return
 
         elif comboboxID == 'r_stk':
             index = eleana.selections['result']
             if index < 0:
+                app.resultStkFrame.grid_remove()
                 return
             if eleana.results_dataset[index].type == 'stack 2D':
                 stk_list = eleana.results_dataset[index].stk_names
                 box.configure(values=stk_list)
+                app.resultStkFrame.grid()
+                box.set(stk_list[0])
+            else:
+                app.resultStkFrame.grid_remove()
             return
 
     def all_lists(self, app, eleana):

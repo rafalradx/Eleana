@@ -86,24 +86,22 @@ class EleanaMainApp:
         pass
 
     def first_down_clicked(self):
-        ''' POPRAWIONE '''
-        current_val = comboboxes.get_current_position(app, eleana, 'sel_first')
-
-        new_index = current_val['index_on_list'] - 1
-        if new_index <= 0:
-            eleana.selections['first'] = -1
-            comboboxes.set_on_position_value(app, eleana, 'sel_first', 'None')
-            update.gui_widgets(app, eleana, comboboxes)
-            plotter(app, eleana, comboboxes)
+        current_position = app.sel_first.get()
+        list_of_items = app.sel_first._values
+        if current_position == 'None':
             return
-        elif new_index > current_val['last_index_on_list']:
-            return
+        if current_position in list_of_items:
+            index = list_of_items.index(current_position)
         else:
-            comboboxes.set_on_position_index(app, eleana, 'sel_first', new_index)
-            new_value = comboboxes.get_current_position(app, eleana, 'sel_first')
-            index_in_eleana = eleana.name_nr_to_index(new_value['value'])
-            eleana.selections['first'] = index_in_eleana
-        after_selection('first')
+            print('Cannot switch spectrum to higher')
+            return
+
+        try:
+            new_position = list_of_items[index - 1]
+            app.sel_first.set(new_position)
+            self.first_selected(new_position)
+        except IndexError:
+            return
 
 
 
@@ -118,16 +116,20 @@ class EleanaMainApp:
             print('Cannot switch spectrum to higher')
             return
 
-        new_position = list_of_items[index+1]
-        app.sel_first.set(new_position)
+        try:
+            new_position = list_of_items[index+1]
+            app.sel_first.set(new_position)
+            self.first_selected(new_position)
+        except IndexError:
+            return
+
+
 
         def first_complex_clicked(self, value):
             eleana.selections['f_cpl'] = value
             after_selection('first')
 
     def first_selected(self, selected_value_text: str):
-        ''' POPRAWIONE '''
-
         if selected_value_text == 'None':
             eleana.selections['first'] = -1
 
@@ -143,37 +145,45 @@ class EleanaMainApp:
 
 
     def f_stk_selected(self, selected_value_text):
-        ''' POPRAWIONE '''
-        comboboxes.set_on_position_value(app, eleana, 'f_stk', selected_value_text)
-        current_value = comboboxes.get_current_position(app, eleana, 'f_stk')
-        eleana.selections['f_stk'] = current_value['index_on_list']
+        if selected_value_text in app.f_stk._values:
+            index = app.f_stk._values.index(selected_value_text)
 
-
+        eleana.selections['f_stk'] = index
 
     def f_stk_up_clicked(self):
-        ''' POPRAWIONE '''
-        current_val = comboboxes.get_current_position(app, eleana, 'f_stk')
-        new_index = current_val['index_on_list'] + 1
-        if new_index > current_val['last_index_on_list']:
-            return
-        else:
-            comboboxes.set_on_position_index(app, eleana, 'f_stk', new_index)
-            eleana.selections['f_stk'] = new_index
+        current_position = app.f_stk.get()
+        list_of_items = app.f_stk._values
 
-        after_selection('first')
+        if current_position in list_of_items:
+            index = list_of_items.index(current_position)
+        else:
+            print('Cannot switch spectrum to higher')
+            return
+
+        try:
+            new_position = list_of_items[index + 1]
+            app.f_stk.set(new_position)
+            eleana.selections['f_stk'] = index +1
+        except IndexError:
+            return
 
     def f_stk_down_clicked(self):
-        # ''' POPRAWIONE '''
-        current_val = comboboxes.get_current_position(app, eleana, 'f_stk')
-        new_index = current_val['index_on_list'] - 1
-        if new_index < 0:
-            return
+        current_position = app.f_stk.get()
+        list_of_items = app.f_stk._values
+
+        if current_position in list_of_items:
+            index = list_of_items.index(current_position)
         else:
-            comboboxes.set_on_position_index(app, eleana, 'f_stk', new_index)
-            eleana.selections['f_stk'] = new_index
-
-        after_selection('first')
-
+            print('Cannot switch spectrum to higher')
+            return
+        if index == 0:
+            return
+        try:
+            new_position = list_of_items[index - 1]
+            app.f_stk.set(new_position)
+            eleana.selections['f_stk'] = index - 1
+        except IndexError:
+            return
 
 
     def second_selected(self, selected_value_text):
@@ -188,47 +198,51 @@ class EleanaMainApp:
                 break
             i += 1
 
+        update.all_lists(app, eleana)
 
     def second_down_clicked(self):
+        current_position = app.sel_second.get()
+        list_of_items = app.sel_second._values
 
-        current_val = comboboxes.get_current_position(app, eleana, 'sel_second')
-        new_index = current_val['index_on_list'] - 1
-        if new_index <= 0:
-            eleana.selections['second'] = -1
-            comboboxes.set_on_position_value(app, eleana, 'sel_second', 'None')
-            update.gui_widgets(app, eleana, comboboxes)
-            plotter(app, eleana, comboboxes)
-            return
-        elif new_index > current_val['last_index_on_list']:
-            return
+        if current_position in list_of_items:
+            index = list_of_items.index(current_position)
         else:
-            comboboxes.set_on_position_index(app, eleana, 'sel_second', new_index)
-            new_value = comboboxes.get_current_position(app, eleana, 'sel_second')
-            index_in_eleana = eleana.name_nr_to_index(new_value['value'])
-            eleana.selections['second'] = index_in_eleana
-        after_selection('second')
+            print('Cannot switch spectrum to higher')
+            return
+
+        if index <= 0:
+            return
+
+        try:
+            new_position = list_of_items[index - 1]
+            app.sel_second.set(new_position)
+            self.second_selected(new_position)
+        except IndexError:
+            return
+
 
     def second_up_clicked(self):
+        current_position = app.sel_second.get()
+        list_of_items = app.sel_second._values
 
-        current_val = comboboxes.get_current_position(app, eleana, 'sel_second')
-        new_index = current_val['index_on_list'] + 1
-
-        if new_index > current_val['last_index_on_list']:
-            return
+        if current_position in list_of_items:
+            index = list_of_items.index(current_position)
         else:
-            comboboxes.set_on_position_index(app, eleana, 'sel_second', new_index)
-            new_value = comboboxes.get_current_position(app, eleana, 'sel_second')
-            index_in_eleana = eleana.name_nr_to_index(new_value['value'])
-            eleana.selections['second'] = index_in_eleana
+            print('Cannot switch spectrum to higher')
+            return
 
-        after_selection('second')
+        try:
+            new_position = list_of_items[index + 1]
+            app.sel_second.set(new_position)
+            self.second_selected(new_position)
+        except IndexError:
+            return
 
     def s_stk_selected(self, selected_value_text):
-        comboboxes.set_on_position_value(app, eleana, 's_stk', selected_value_text)
-        current_value = comboboxes.get_current_position(app, eleana, 's_stk')
-        eleana.selections['s_stk'] = current_value['index_on_list']
+        if selected_value_text in app.s_stk._values:
+            index = app.s_stk._values.index(selected_value_text)
 
-        after_selection('second')
+        eleana.selections['s_stk'] = index
 
     def s_stk_up_clicked(self):
         ''' POPRAWIONE '''
