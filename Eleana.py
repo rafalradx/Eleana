@@ -139,7 +139,7 @@ class EleanaMainApp:
                 break
             i += 1
 
-        print(eleana.selections['first'])
+        update.all_lists(app,eleana)
 
 
     def f_stk_selected(self, selected_value_text):
@@ -148,7 +148,7 @@ class EleanaMainApp:
         current_value = comboboxes.get_current_position(app, eleana, 'f_stk')
         eleana.selections['f_stk'] = current_value['index_on_list']
 
-        after_selection('first')
+
 
     def f_stk_up_clicked(self):
         ''' POPRAWIONE '''
@@ -356,8 +356,8 @@ class EleanaMainApp:
         ''' Open window that loads the spectra '''
         menuAction.loadElexsys(eleana)
 
-        print(eleana)
-        after_import(app, eleana)
+        update.dataset_list(eleana)
+        update.all_lists(app, eleana)
 
     # --- Quit (also window close by clicking on X)
     def close_application(self):

@@ -12,7 +12,7 @@ This will create 3 positions in the list of Second combobox
 '''
 class Update():
 
-    def dataset_list(self, eleana) -> list:
+    def dataset_list(self, eleana):
 
         # Create numbered names in the eleana.dataset[X].names_nr
         i = 0
@@ -80,7 +80,7 @@ class Update():
             index = eleana.selections['first']
             if index < 0:
                 return
-            if index.type == 'stack 2D':
+            if eleana.dataset[index].type == 'stack 2D':
                 stk_list = eleana.dataset[index].stk_names
                 box.configure(values=stk_list)
             return
@@ -89,7 +89,7 @@ class Update():
             index = eleana.selections['second']
             if index < 0:
                 return
-            if index.type == 'stack 2D':
+            if eleana.dataset[index].type == 'stack 2D':
                 stk_list = eleana.dataset[index].stk_names
                 box.configure(values=stk_list)
             return
@@ -98,7 +98,7 @@ class Update():
             index = eleana.selections['result']
             if index < 0:
                 return
-            if index.type == 'stack 2D':
+            if eleana.results_dataset[index].type == 'stack 2D':
                 stk_list = eleana.results_dataset[index].stk_names
                 box.configure(values=stk_list)
             return

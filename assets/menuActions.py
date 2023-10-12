@@ -263,7 +263,8 @@ class MenuAction():
 
 
     # Import EPR
-    def loadElexsys(self, path) -> object:
+    def loadElexsys(self, eleana) -> object:
+        path = eleana.paths['last_import_dir']
         filetypes = (
             ('Elexsys', '*.DSC'),
             ('All files', '*.*')
@@ -272,11 +273,11 @@ class MenuAction():
         if len(filenames) == 0:
             return
 
-        spectra = []
         for file in filenames:
             spectrum = createFromElexsys(file)
-            spectra.append(spectrum)
-        return spectra
+            eleana.dataset.append(spectrum)
+        return
+
 
     # EDIT
     #       Notes
