@@ -26,29 +26,6 @@ class GeneralDataTemplate():
     # Translation for Bruker EMX
     parEMX2elena = {}
 
-    # Name of the data
-    name = ''
-
-    # The number and name ex. 2. CW-EPR_heme_bL
-    name_nr = ''
-
-    # Names of groups to which this data belongs
-    groups = ['All']
-
-    # If spectrum is complex numbers set to TRUE
-    complex = False
-
-    # This defines data type: '2D_stack'
-    # Empty or  'single 2D'  - single 2D spectrum
-    #           'stack 2D' - stack of 2D spectra
-    type = ''
-
-    # Optional - origin specifies how the spectrum was created: for example CWEPR
-    origin = ''
-
-    # Contains various comments
-    comment = ''
-
     parameters = {'title': '',
                   'unit_x': 'G',
                   'name_x': 'Magnetic field',
@@ -64,9 +41,12 @@ class GeneralDataTemplate():
                   'PowerAtten': 'PowAtten',
                   'stk_names': []
                   }
+
+
 class Spectrum_CWEPR(GeneralDataTemplate):
 
     def __init__(self, name, x_axis: list, dta: list, dsc: dict):
+        self.groups = []
         self.x = x_axis
         self.y = dta
         self.name = name
@@ -134,6 +114,7 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         self.origin = 'CWEPR'
         self.parameters = working_parameters
 
+
 class Spectrum_complex(GeneralDataTemplate):
     def __init__(self, name, x_axis: list, dta: list, dsc: dict):
         length = len(dta)
@@ -164,7 +145,8 @@ class Spectrum_complex(GeneralDataTemplate):
         self.complex = True
         self.type = 'single 2D'
         self.origin = 'Pulse EPR'
-
+        self.name_nr = ''
+        self.groups = ['All']
 # Functions to import data
 
 def createFromElexsys(filename: str) -> object:

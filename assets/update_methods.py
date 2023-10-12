@@ -12,36 +12,117 @@ This will create 3 positions in the list of Second combobox
 '''
 class Update():
 
-    def dataset_list(self, eleana) -> list:
-        # Create numbered names in the eleana.dataset[X].names_nr
-        names_numbered = ['None']
-        i = 0
-        for data in eleana.dataset:
-            number = str(i + 1)
-            name_number = number + '. ' + data.name
-            names_numbered.append(name_number)
-            i += 1
+    def dataset_list(self, eleana):
 
+        # Create numbered names in the eleana.dataset[X].names_nr
         i = 0
         while i < len(eleana.dataset):
-            eleana.dataset[i].name_nr = names_numbered[i + 1]
+            eleana.dataset[i].name_nr = str(i+1) + '. ' + eleana.dataset[i].name
             i += 1
-        return names_numbered
+        # ----- END OF CREATING NUMBERED NAMES IN DATASET ----
 
-    ''' Methods to create combobox lists'''
 
-    def ref_to_combobox(self, app: object, which_combobox: str):
-        if which_combobox == 'sel_first':
+        # Search for groups to which particular spectrum belong and create list of the group
+        collection_of_groups = []
+        i = 0
+        while i < len(eleana.dataset):
+            groups = eleana.dataset[i].groups
+            if len(groups) == 0:
+                groups = ['All']
+                eleana.dataset[i].groups = groups
+            collection_of_groups.extend(groups)
+            i += 1
+        # ----- END OF GENERATING LIST OF GROUPS -------
+
+        # Prepare list of groups for assignments
+        assignment_to_groups = {}
+        groups = set(collection_of_groups)
+        for each in groups:
+            assignment_to_groups[each] = []
+
+        for key in assignment_to_groups:
+            i = 0
+            while i < len(eleana.dataset)-1:
+                if key in eleana.dataset[i].groups:
+                   assignment_to_groups[key].append(i)
+                i += 1
+        eleana.assignmentToGroups = assignment_to_groups
+        # ------------ END OF ASSIGNMENT TO GROUPS ----------
+
+    def list_in_combobox(self, app, eleana, comboboxID):
+        box = self.ref_to_combobox(app, comboboxID)
+        comboboxList = ['None']
+
+        # Fill list in FIRST or SECOND
+        if comboboxID == 'sel_first' or comboboxID == 'sel_second':
+            currentGroup = eleana.selections['group']
+            if currentGroup == 'All':
+                for each in eleana.dataset:
+                    comboboxList.append(each.name_nr)
+
+            else:
+                list_from_group = eleana.assignmentToGroups[currentGroup]
+                for each in list_from_group:
+                    item = eleana.dataset[each].name_nr
+                    comboboxList.append(item)
+            box.configure(values=comboboxList)
+            return
+
+        # Fill list in RESULT
+        elif comboboxID == 'sel_result':
+            for each in eleana.results_dataset:
+                comboboxList.append(each.name)
+            box.configure(values=comboboxList)
+            return
+
+        # Fill list in f_stk if the data is type of stack
+        elif comboboxID == 'f_stk':
+            index = eleana.selections['first']
+            if index < 0:
+                return
+            if eleana.dataset[index].type == 'stack 2D':
+                stk_list = eleana.dataset[index].stk_names
+                box.configure(values=stk_list)
+            return
+
+        elif comboboxID == 's_stk':
+            index = eleana.selections['second']
+            if index < 0:
+                return
+            if eleana.dataset[index].type == 'stack 2D':
+                stk_list = eleana.dataset[index].stk_names
+                box.configure(values=stk_list)
+            return
+
+        elif comboboxID == 'r_stk':
+            index = eleana.selections['result']
+            if index < 0:
+                return
+            if eleana.results_dataset[index].type == 'stack 2D':
+                stk_list = eleana.results_dataset[index].stk_names
+                box.configure(values=stk_list)
+            return
+
+    def all_lists(self, app, eleana):
+        self.list_in_combobox(app, eleana, 'sel_first')
+        self.list_in_combobox(app, eleana, 'sel_second')
+        self.list_in_combobox(app, eleana, 'sel_result')
+        self.list_in_combobox(app, eleana, 'f_stk')
+        self.list_in_combobox(app, eleana, 's_stk')
+        self.list_in_combobox(app, eleana, 'r_stk')
+
+    def ref_to_combobox(self, app: object, comboboxID: str):
+        if comboboxID == 'sel_first':
             box = app.sel_first
-        elif which_combobox == 'sel_second':
+        elif comboboxID == 'sel_second':
             box = app.sel_second
-        elif which_combobox == 'sel_result':
+        elif comboboxID == 'sel_result':
             box = app.sel_result
-        elif which_combobox == 'f_stk':
+        elif comboboxID == 'f_stk':
             box = app.f_stk
-        elif which_combobox == 's_stk':
+        elif comboboxID == 's_stk':
             box = app.s_stk
-        elif which_combobox == 'r_stk':
+        elif comboboxID == 'r_stk':
             box = app.r_stk
         return box
 
