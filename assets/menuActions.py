@@ -63,7 +63,7 @@ class MenuAction():
 
             project_version = float(loaded_object['project version'])
 
-            if project_version > eleana.version:
+            if float(project_version) > float(eleana.version):
                 info = CTkMessagebox(title="Project load", message='This project was created in newer Eleana version. Some errors in loaded content are possible')
 
             '''

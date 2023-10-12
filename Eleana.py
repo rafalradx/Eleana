@@ -36,6 +36,7 @@ class EleanaMainApp:
         builder.add_from_file(PROJECT_UI)
         # Main widget
         self.mainwindow = builder.get_object("Eleana", master)
+        self.mainwindow.iconify()
         self.mainwindow.withdraw()
 
         # Main menu
@@ -70,6 +71,7 @@ class EleanaMainApp:
         # Set default values
         self.firstComplex.set(value="re")
         self.secondComplex.set(value="re")
+        self.resultComplex.set(value="re")
         self.legendFrame = builder.get_object('legendFrame', self.mainwindow)
         
     def run(self):
@@ -93,7 +95,7 @@ class EleanaMainApp:
         if current_position in list_of_items:
             index = list_of_items.index(current_position)
         else:
-            print('Cannot switch spectrum to higher')
+            print('Index in sel_first not found')
             return
 
         try:
@@ -105,7 +107,6 @@ class EleanaMainApp:
 
 
 
-
     def first_up_clicked(self):
         current_position = app.sel_first.get()
         list_of_items = app.sel_first._values
@@ -113,7 +114,7 @@ class EleanaMainApp:
         if current_position in list_of_items:
             index = list_of_items.index(current_position)
         else:
-            print('Cannot switch spectrum to higher')
+            print('Index in sel_first not found.')
             return
 
         try:
@@ -125,14 +126,16 @@ class EleanaMainApp:
 
 
 
-        def first_complex_clicked(self, value):
+    def first_complex_clicked(self, value):
             eleana.selections['f_cpl'] = value
             after_selection('first')
 
     def first_selected(self, selected_value_text: str):
         if selected_value_text == 'None':
             eleana.selections['first'] = -1
-
+            app.firstComplex.grid_remove()
+            app.firstStkFrame.grid_remove()
+            return
         i = 0
         while i < len(eleana.dataset):
             name = eleana.dataset[i].name_nr
@@ -141,9 +144,13 @@ class EleanaMainApp:
                 break
             i += 1
 
-        update.all_lists(app,eleana)
+        update.list_in_combobox(app, eleana, 'sel_first')
+        update.list_in_combobox(app, eleana, 'f_stk')
 
-
+        if eleana.dataset[eleana.selections['first']].complex:
+            app.firstComplex.grid()
+        else:
+            app.firstComplex.grid_remove()
     def f_stk_selected(self, selected_value_text):
         if selected_value_text in app.f_stk._values:
             index = app.f_stk._values.index(selected_value_text)
@@ -157,7 +164,7 @@ class EleanaMainApp:
         if current_position in list_of_items:
             index = list_of_items.index(current_position)
         else:
-            print('Cannot switch spectrum to higher')
+            print('Index in f_stk not found.')
             return
 
         try:
@@ -174,7 +181,7 @@ class EleanaMainApp:
         if current_position in list_of_items:
             index = list_of_items.index(current_position)
         else:
-            print('Cannot switch spectrum to higher')
+            print('Index in f_stk not found.')
             return
         if index == 0:
             return
@@ -185,11 +192,12 @@ class EleanaMainApp:
         except IndexError:
             return
 
-
     def second_selected(self, selected_value_text):
         if selected_value_text == 'None':
             eleana.selections['second'] = -1
-
+            app.secondComplex.grid_remove()
+            app.secondStkFrame.grid_remove()
+            return
         i = 0
         while i < len(eleana.dataset):
             name = eleana.dataset[i].name_nr
@@ -198,8 +206,13 @@ class EleanaMainApp:
                 break
             i += 1
 
-        update.all_lists(app, eleana)
+        update.list_in_combobox(app, eleana, 'sel_second')
+        update.list_in_combobox(app, eleana, 's_stk')
 
+        if eleana.dataset[eleana.selections['second']].complex:
+            app.secondComplex.grid()
+        else:
+            app.secondComplex.grid_remove()
     def second_down_clicked(self):
         current_position = app.sel_second.get()
         list_of_items = app.sel_second._values
@@ -207,7 +220,7 @@ class EleanaMainApp:
         if current_position in list_of_items:
             index = list_of_items.index(current_position)
         else:
-            print('Cannot switch spectrum to higher')
+            print('Index in sel_second not found.')
             return
 
         if index <= 0:
@@ -228,7 +241,7 @@ class EleanaMainApp:
         if current_position in list_of_items:
             index = list_of_items.index(current_position)
         else:
-            print('Cannot switch spectrum to higher')
+            print('Index in sel_second not found.')
             return
 
         try:
@@ -245,34 +258,69 @@ class EleanaMainApp:
         eleana.selections['s_stk'] = index
 
     def s_stk_up_clicked(self):
-        ''' POPRAWIONE '''
-        current_val = comboboxes.get_current_position(app, eleana, 's_stk')
-        new_index = current_val['index_on_list'] + 1
-        if new_index > current_val['last_index_on_list']:
-            return
-        else:
-            comboboxes.set_on_position_index(app, eleana, 's_stk', new_index)
-            eleana.selections['s_stk'] = new_index
+        current_position = app.s_stk.get()
+        list_of_items = app.s_stk._values
 
-        after_selection('second')
+        if current_position in list_of_items:
+            index = list_of_items.index(current_position)
+        else:
+            print('Index in s_stk not found.')
+            return
+
+        try:
+            new_position = list_of_items[index + 1]
+            app.s_stk.set(new_position)
+            eleana.selections['s_stk'] = index +1
+        except IndexError:
+            return
 
     def s_stk_down_clicked(self):
-         # ''' POPRAWIONE '''
-        current_val = comboboxes.get_current_position(app, eleana, 's_stk')
-        new_index = current_val['index_on_list'] - 1
-        if new_index < 0:
-            return
-        else:
-            comboboxes.set_on_position_index(app, eleana, 's_stk', new_index)
-            eleana.selections['s_stk'] = new_index
+        current_position = app.s_stk.get()
+        list_of_items = app.s_stk._values
 
-        after_selection('second')
+        if current_position in list_of_items:
+            index = list_of_items.index(current_position)
+        else:
+            print('Index in s_stk not found.')
+            return
+        if index == 0:
+            return
+        try:
+            new_position = list_of_items[index - 1]
+            app.s_stk.set(new_position)
+            eleana.selections['s_stk'] = index - 1
+        except IndexError:
+            return
+
 
     def second_complex_clicked(self, value):
             eleana.selections['s_cpl'] = value
             after_selection('second')
     def swap_first_second(self):
-        pass
+        first_pos = app.sel_first.get()
+        second_pos = app.sel_second.get()
+        first_stk = app.f_stk.get()
+        second_stk = app.s_stk.get()
+
+        if first_pos == 'None':
+            app.firstComplex.grid_remove()
+
+        if first_pos == 'None':
+            app.secondComplex.grid_remove()
+
+
+        app.sel_first.set(second_pos)
+        app.sel_second.set(first_pos)
+
+        self.first_selected(second_pos)
+        self.second_selected(first_pos)
+
+        app.f_stk.set(second_stk)
+        app.s_stk.set(first_stk)
+
+        self.f_stk_selected(second_stk)
+        self.s_stk_selected(first_stk)
+
 
     def second_to_result(self):
         index = eleana.selections['second']
@@ -293,54 +341,93 @@ class EleanaMainApp:
     def result_selected(self, selected_value_text):
         if selected_value_text == 'None':
             eleana.selections['result'] = -1
-        try:
+            app.resultComplex.grid_remove()
+            app.resultStkFrame.grid_remove()
+            return
 
-            comboboxes.set_on_position_value(app, eleana, 'sel_result', selected_value_text)
-            current = comboboxes.get_current_position(app,eleana, 'sel_result')
+        i = 0
+        while i < len(eleana.results_dataset):
+            name = eleana.results_dataset[i].name
+            if name == selected_value_text:
+                eleana.selections['result'] = i
+                break
+            i += 1
 
-            eleana.selections['result'] = current['index_dataset']
-        except:
-            pass
-        update.gui_widgets(app, eleana, comboboxes)
+        update.list_in_combobox(app, eleana, 'sel_result')
+        update.list_in_combobox(app, eleana, 'r_stk')
 
+        if eleana.results_dataset[eleana.selections['result']].complex:
+            app.resultComplex.grid()
+        else:
+            app.resultComplex.grid_remove()
 
 
     def result_up_clicked(self):
-        current = eleana.selections['result']
-        current += 1
-        if current == 0:
-            current += 1
-        if current > len(eleana.results_dataset):
+        current_position = app.sel_result.get()
+        list_of_items = app.sel_result._values
+
+        if current_position in list_of_items:
+            index = list_of_items.index(current_position)
+        else:
+            print('Index in sel_result not found.')
             return
 
-        eleana.selections['result'] = current
-        comboboxes.set_on_position_index(app, eleana, 'sel_result', current+1)
-        update.gui_widgets(app, eleana, comboboxes)
+        try:
+            new_position = list_of_items[index + 1]
+            app.sel_result.set(new_position)
+            self.result_selected(new_position)
+        except IndexError:
+            return
 
     def result_down_clicked(self):
-        current = eleana.selections['result']
-        if current == -1:
-            current = -1
+        current_position = app.sel_result.get()
+        list_of_items = app.sel_result._values
+        if current_position == 'None':
+            return
+        if current_position in list_of_items:
+            index = list_of_items.index(current_position)
         else:
-            current = current -1
+            print('Index in sel_first not found')
+            return
 
-        eleana.selections['result'] = current
-        comboboxes.set_on_position_index(app, eleana, 'sel_result', current+1)
-        update.gui_widgets(app, eleana, comboboxes)
+        try:
+            new_position = list_of_items[index - 1]
+            app.sel_result.set(new_position)
+            self.result_selected(new_position)
+        except IndexError:
+            return
+
 
     def first_to_result(self):
-
-
-        #Check if the same nas as in FIRST exists in dataset
-        if data_in_first.name in names_in_result_dataset:
-            dialog = customtkinter.CTkInputDialog(
-                text="There is data with the same name. Please enter a different name.", title="Enter new name")
-            input = dialog.get_input()
-
-            if type(input) == str:
-                data_in_first.name = input
-            else:
+            current = app.sel_first.get()
+            if current == 'None':
                 return
+            index = get_index_by_name(current)
+            spectrum = eleana.dataset[index]
+
+            # Check the name if the same already exists in eleana.result_dataset
+            list_of_results = []
+            for each in eleana.results_dataset:
+                list_of_results.append(each.name)
+
+            if spectrum.name in list_of_results:
+                dialog = customtkinter.CTkInputDialog(text="There is data with the same name. Please enter a different name.", title="Enter new name")
+                input = dialog.get_input()
+                if type(input) == str and spectrum.name != input:
+                    spectrum.name = input
+                else:
+                    return
+
+            # Send to result and update lists
+            eleana.results_dataset.append(spectrum)
+            update.list_in_combobox(app, eleana, 'sel_result')
+            update.list_in_combobox(app, eleana, 'r_stk')
+
+            # Set the position to the last added item
+            list = app.sel_result._values
+            position = list[-1]
+            app.sel_result.set(position)
+
 
 
     # Functions triggered by Menu selections
@@ -358,7 +445,7 @@ class EleanaMainApp:
         eleana.paths = project['paths']
 
         update.dataset_list(eleana)
-        after_import(app, eleana)
+        update.all_lists(app, eleana)
 
     # --- Save as
     def save_as(self):
@@ -379,6 +466,7 @@ class EleanaMainApp:
                                     icon="warning", option_1="No", option_2="Yes")
         response = quit_dialog.get()
         if response == "Yes":
+            app.mainwindow.iconify()
             app.mainwindow.destroy()
 
     # EDIT Menu:
@@ -400,21 +488,15 @@ def after_import(app, eleana):
     # Update combobox lists
     update.all_lists(app, eleana)
 
-def after_selection(which):
-    # Create references to widgets id in GUI
-    if which == 'first':
-        combobox_main = 'sel_first'
-        combobox_stk = 'f_stk'
-    elif which == 'second':
-        combobox_main = 'sel_second'
-        combobox_stk = 's_stk'
-    elif which == 'result' or which=='r_stk':
-        combobox_main = 'sel_result'
-
-
-
-    #  Plot graph
-    plotter(app, eleana, comboboxes)
+def get_index_by_name(selected_value_text):
+    ''' Function returns index in dataset of spectrum
+        having the name_nr '''
+    i = 0
+    while i < len(eleana.dataset):
+        name = eleana.dataset[i].name_nr
+        if name == selected_value_text:
+            return i
+        i += 1
 
 
 '''Create main instances 

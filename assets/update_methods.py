@@ -70,6 +70,10 @@ class Update():
 
         # Fill list in RESULT
         elif comboboxID == 'sel_result':
+            if len(eleana.results_dataset) == 0:
+                app.resultFrame.grid_remove()
+                return
+            app.resultFrame.grid()
             for each in eleana.results_dataset:
                 comboboxList.append(each.name)
             box.configure(values=comboboxList)
@@ -105,6 +109,7 @@ class Update():
             return
 
         elif comboboxID == 'r_stk':
+
             index = eleana.selections['result']
             if index < 0:
                 app.resultStkFrame.grid_remove()

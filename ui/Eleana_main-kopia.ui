@@ -27,6 +27,7 @@
           <object class="customtkinter.CTkFrame" id="topFrame" named="True">
             <property name="border_width">0</property>
             <property name="corner_radius">0</property>
+            <property name="fg_color">#505050</property>
             <property name="height">30</property>
             <layout manager="grid">
               <property name="column">0</property>
@@ -1007,7 +1008,9 @@
                             <property name="weight">4</property>
                             <child>
                               <object class="customtkinter.CTkFrame" id="graphFrame" named="True">
+                                <property name="border_color">#444444</property>
                                 <property name="corner_radius">0</property>
+                                <property name="fg_color">#505050</property>
                                 <property name="width">500</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
@@ -1038,6 +1041,7 @@
                                 <child>
                                   <object class="customtkinter.CTkFrame" id="legendFrame" named="True">
                                     <property name="corner_radius">0</property>
+                                    <property name="fg_color">#505050</property>
                                     <property name="width">110</property>
                                     <layout manager="grid">
                                       <property name="column">0</property>
@@ -1081,6 +1085,7 @@
                     <child>
                       <object class="customtkinter.CTkTextbox" id="consoleBox" named="True">
                         <property name="corner_radius">0</property>
+                        <property name="fg_color">#505050</property>
                         <property name="height">60</property>
                         <property name="text" translatable="yes">Info box</property>
                         <property name="text_color">#CDD0D6</property>
