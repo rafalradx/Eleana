@@ -7,7 +7,7 @@ import customtkinter
 import pygubu
 from CTkMessagebox import CTkMessagebox
 import sys
-
+import customtkinter as ctk
 
 # Import Eleana specific classes
 from assets.general_eleana_methods import Eleana
@@ -67,6 +67,7 @@ class EleanaMainApp:
         self.f_stk = builder.get_object('f_stk', self.mainwindow)
         self.s_stk = builder.get_object('s_stk', self.mainwindow)
         self.r_stk = builder.get_object('r_stk', self.mainwindow)
+        self.btn_clear_results = builder.get_object('btn_clear_results', self.mainwindow)
 
         # Set default values
         self.firstComplex.set(value="re")
@@ -323,19 +324,35 @@ class EleanaMainApp:
 
 
     def second_to_result(self):
-        index = eleana.selections['second']
-        if index == -1:
+        current = app.sel_second.get()
+        if current == 'None':
             return
-        first = eleana.dataset[index]
-        eleana.results_dataset.append(first)
-        index = len(eleana.results_dataset) - 1
-        eleana.selections['result'] = index
-        eleana.selections['r_stk'] = 0
+        index = get_index_by_name(current)
+        spectrum = eleana.dataset[index]
 
-        after_selection('result')
-        new_position = eleana.combobox_lists['sel_result']
-        new_val = new_position[-1]
-        comboboxes.set_on_position_value(app, eleana, 'sel_result', new_val)
+        # Check the name if the same already exists in eleana.result_dataset
+        list_of_results = []
+        for each in eleana.results_dataset:
+            list_of_results.append(each.name)
+
+        if spectrum.name in list_of_results:
+            dialog = customtkinter.CTkInputDialog(
+                text="There is data with the same name. Please enter a different name.", title="Enter new name")
+            input = dialog.get_input()
+            if type(input) == str and spectrum.name != input:
+                spectrum.name = input
+            else:
+                return
+
+        # Send to result and update lists
+        eleana.results_dataset.append(spectrum)
+        update.list_in_combobox(app, eleana, 'sel_result')
+        update.list_in_combobox(app, eleana, 'r_stk')
+
+        # Set the position to the last added item
+        list = app.sel_result._values
+        position = list[-1]
+        app.sel_result.set(position)
 
 
     def result_selected(self, selected_value_text):
@@ -397,6 +414,42 @@ class EleanaMainApp:
         except IndexError:
             return
 
+    def r_stk_up_clicked(self):
+        current_position = app.r_stk.get()
+        list_of_items = app.r_stk._values
+
+        if current_position in list_of_items:
+            index = list_of_items.index(current_position)
+        else:
+            print('Index in r_stk not found.')
+            return
+
+        try:
+            new_position = list_of_items[index + 1]
+            app.r_stk.set(new_position)
+            eleana.selections['r_stk'] = index + 1
+        except IndexError:
+            return
+
+
+    def r_stk_down_clicked(self):
+        current_position = app.r_stk.get()
+        list_of_items = app.r_stk._values
+
+        if current_position in list_of_items:
+            index = list_of_items.index(current_position)
+        else:
+            print('Index in r_stk not found.')
+            return
+        if index == 0:
+            return
+        try:
+            new_position = list_of_items[index - 1]
+            app.r_stk.set(new_position)
+            eleana.selections['r_stk'] = index - 1
+        except IndexError:
+            return
+
 
     def first_to_result(self):
             current = app.sel_first.get()
@@ -411,7 +464,7 @@ class EleanaMainApp:
                 list_of_results.append(each.name)
 
             if spectrum.name in list_of_results:
-                dialog = customtkinter.CTkInputDialog(text="There is data with the same name. Please enter a different name.", title="Enter new name")
+                dialog = ctk.CTkInputDialog(text="There is data with the same name. Please enter a different name.", title="Enter new name")
                 input = dialog.get_input()
                 if type(input) == str and spectrum.name != input:
                     spectrum.name = input
@@ -427,10 +480,39 @@ class EleanaMainApp:
             list = app.sel_result._values
             position = list[-1]
             app.sel_result.set(position)
+            if spectrum.complex:
+                app.resultComplex.grid()
+            else:
+                app.resultComplex.grid_remove()
+
+    def clear_results(self):
+        quit_dialog = CTkMessagebox(title="Clear results", message="Are you sure you want to clear the entire dataset in the results?",
+                                    icon="warning", option_1="No", option_2="Yes")
+        response = quit_dialog.get()
+        if response == "Yes":
+            eleana.results_dataset = []
+            app.sel_result.configure(values = ['None'])
+            app.r_stk.configure(values = [])
+            app.resultFrame.grid_remove()
+
+    def clear_dataset(self):
+        quit_dialog = CTkMessagebox(title="Clear dataset",
+                                    message="Are you sure you want to clear the entire dataset?",
+                                    icon="warning", option_1="No", option_2="Yes")
+        response = quit_dialog.get()
+        if response == "Yes":
+            init.main_window(app, eleana)
+            app.resultFrame.grid_remove()
+            app.firstComplex.grid_remove()
+            app.firstStkFrame.grid_remove()
+            app.secondComplex.grid_remove()
+            app.secondStkFrame.grid_remove()
 
 
+    ''' 
+    FUNCTIONS ACTIVATED BY MAIN MENU SELECTION
+    '''
 
-    # Functions triggered by Menu selections
     # FILE
     # --- Load Project
     def load_project(self):
@@ -446,6 +528,18 @@ class EleanaMainApp:
 
         update.dataset_list(eleana)
         update.all_lists(app, eleana)
+
+        selected_value_text = eleana.dataset[eleana.selections['first']].name_nr
+        self.first_selected(selected_value_text)
+        app.sel_first.set(selected_value_text)
+
+        selected_value_text = eleana.dataset[eleana.selections['second']].name_nr
+        self.second_selected(selected_value_text)
+        app.sel_second.set(selected_value_text)
+
+        selected_value_text = eleana.dataset[eleana.selections['result']].name_nr
+        self.result_selected(selected_value_text)
+        app.sel_result.set(selected_value_text)
 
     # --- Save as
     def save_as(self):
@@ -509,7 +603,7 @@ comboboxLists - methods for creating list, picking, setting items etc. They do n
 init    - object that is used to initialize program on start 
 '''
 
-customtkinter.set_appearance_mode("dark")
+ctk.set_appearance_mode("dark")
 
 eleana = Eleana()
 app = EleanaMainApp(eleana)

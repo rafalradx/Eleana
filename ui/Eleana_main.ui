@@ -25,6 +25,7 @@
         </containerlayout>
         <child>
           <object class="customtkinter.CTkFrame" id="topFrame" named="True">
+            <property name="bg_color">#252525</property>
             <property name="border_width">0</property>
             <property name="corner_radius">0</property>
             <property name="height">30</property>
@@ -74,7 +75,6 @@
                             <child>
                               <object class="customtkinter.CTkFrame" id="selectionsFrame" named="True">
                                 <property name="corner_radius">0</property>
-                                <property name="fg_color">#505050</property>
                                 <property name="width">80</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
@@ -105,6 +105,7 @@
                                     </containerlayout>
                                     <child>
                                       <object class="customtkinter.CTkFrame" id="ctkframe65">
+                                        <property name="bg_color">#505050</property>
                                         <property name="corner_radius">0</property>
                                         <property name="fg_color">#505050</property>
                                         <layout manager="grid">
@@ -460,8 +461,6 @@
                                     </layout>
                                     <child>
                                       <object class="customtkinter.CTkButton" id="btn_swap" named="True">
-                                        <property name="bg_color">#505050</property>
-                                        <property name="border_color">#424242</property>
                                         <property name="border_width">1</property>
                                         <property name="command" type="command" cbtype="simple">swap_first_second</property>
                                         <property name="corner_radius">5</property>
@@ -964,7 +963,8 @@
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkButton" id="btn_clear_result" named="True">
+                                          <object class="customtkinter.CTkButton" id="btn_clear_results" named="True">
+                                            <property name="command" type="command" cbtype="simple">clear_results</property>
                                             <property name="corner_radius">5</property>
                                             <property name="fg_color">#3c9b59</property>
                                             <property name="font">{Arial} 12 {bold}</property>
@@ -1081,9 +1081,11 @@
                     <child>
                       <object class="customtkinter.CTkTextbox" id="consoleBox" named="True">
                         <property name="corner_radius">0</property>
-                        <property name="height">60</property>
+                        <property name="height">50</property>
+                        <property name="maxundo">20</property>
                         <property name="text" translatable="yes">Info box</property>
                         <property name="text_color">#CDD0D6</property>
+                        <property name="undo">true</property>
                         <layout manager="grid">
                           <property name="column">0</property>
                           <property name="row">0</property>
@@ -1101,14 +1103,18 @@
     </child>
   </object>
   <object class="tk.Menu" id="mainmenu" named="True">
-    <property name="background">#505050</property>
+    <property name="background">#252525</property>
     <property name="font">{Arial} 10 {}</property>
     <property name="foreground">#bbbbbb</property>
     <property name="relief">flat</property>
     <property name="selectcolor">#eaeaea</property>
     <child>
       <object class="tk.Menuitem.Submenu" id="menu_file" named="True">
-        <property name="background">#505050</property>
+        <property name="activebackground">#2e436e</property>
+        <property name="activeborderwidth">0</property>
+        <property name="activeforeground">#bbbbbb</property>
+        <property name="background">#252525</property>
+        <property name="borderwidth">0</property>
         <property name="compound">left</property>
         <property name="foreground">#bbbbbb</property>
         <property name="hidemargin">false</property>
@@ -1121,6 +1127,17 @@
           </object>
         </child>
         <child>
+          <object class="tk.Menuitem.Submenu" id="menu_recent" named="True">
+            <property name="label" translatable="yes">submenu2</property>
+            <child>
+              <object class="tk.Menuitem.Command" id="menu_last1" named="True">
+                <property name="command" type="command" cbtype="simple">last_project</property>
+                <property name="label" translatable="yes">command3</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
           <object class="tk.Menuitem.Command" id="menu_save_as" named="True">
             <property name="command" type="command" cbtype="simple">save_as</property>
             <property name="label" translatable="yes">Save as</property>
@@ -1128,7 +1145,9 @@
         </child>
         <child>
           <object class="tk.Menuitem.Submenu" id="menu_import" named="True">
-            <property name="background">#505050</property>
+            <property name="activebackground">#2e436e</property>
+            <property name="activeforeground">#bbbbbb</property>
+            <property name="background">#252525</property>
             <property name="foreground">#bbbbbb</property>
             <property name="label" translatable="yes">Import</property>
             <property name="tearoff">false</property>
@@ -1147,6 +1166,9 @@
           </object>
         </child>
         <child>
+          <object class="tk.Menuitem.Separator" id="separator3" />
+        </child>
+        <child>
           <object class="tk.Menuitem.Command" id="menu_quit" named="True">
             <property name="command" type="command" cbtype="simple">close_application</property>
             <property name="label" translatable="yes">Quit</property>
@@ -1156,6 +1178,11 @@
     </child>
     <child>
       <object class="tk.Menuitem.Submenu" id="menu_edit" named="True">
+        <property name="activebackground">#2e436e</property>
+        <property name="activeforeground">#bbbbbb</property>
+        <property name="background">#252525</property>
+        <property name="borderwidth">0</property>
+        <property name="foreground">#bbbbbb</property>
         <property name="label" translatable="yes">Edit</property>
         <property name="tearoff">false</property>
         <child>
@@ -1165,6 +1192,29 @@
             <property name="font">TkDefaultFont</property>
             <property name="hidemargin">false</property>
             <property name="label" translatable="yes">Notes</property>
+          </object>
+        </child>
+        <child>
+          <object class="tk.Menuitem.Submenu" id="menu_clear" named="True">
+            <property name="activebackground">#2e436e</property>
+            <property name="activeforeground">#bbbbbb</property>
+            <property name="background">#252525</property>
+            <property name="borderwidth">0</property>
+            <property name="foreground">#bbbbbb</property>
+            <property name="label" translatable="yes">Clear</property>
+            <property name="tearoff">false</property>
+            <child>
+              <object class="tk.Menuitem.Command" id="menu_clear_results" named="True">
+                <property name="command" type="command" cbtype="simple">clear_results</property>
+                <property name="label" translatable="yes">Results</property>
+              </object>
+            </child>
+            <child>
+              <object class="tk.Menuitem.Command" id="menu_clear_dataset" named="True">
+                <property name="command" type="command" cbtype="simple">clear_dataset</property>
+                <property name="label" translatable="yes">Whole dataset</property>
+              </object>
+            </child>
           </object>
         </child>
       </object>
