@@ -14,9 +14,9 @@ from tkinter import filedialog
 from CTkMessagebox import CTkMessagebox
 from assets.dataClasses import createFromElexsys
 
-class MenuAction():
-    # FILE
+class MenuAction:
 
+    # FILE
     def load_project(self, eleana: object):
         ''' This method loads projects created by Eleana'''
 
@@ -162,11 +162,19 @@ class MenuAction():
 
 
     def save_as(self, eleana: object):
-        filename = asksaveasfile(initialdir=eleana.paths['last_project_dir'],
-                                 initialfile=eleana.paths['last_project'],
+        try:
+            initialfile = eleana.paths['last_projects'][0]
+        except IndexError:
+            initialfile = ''
+        try:
+            filename = asksaveasfile(initialdir=eleana.paths['last_project_dir'],
+                                 initialfile=initialfile,
                                  defaultextension=".ele",
                                  filetypes=[("All Files", "*.*"),
                                             ("Eleana project", "*.ele")])
+        except:
+            return {'error': True, 'desc': f'Could not save the project file. Try to save in different location.'}
+
         file_path = Path(filename.name)
         file_path.unlink()
 
@@ -176,7 +184,7 @@ class MenuAction():
         try:
             new_directory.mkdir(parents=True, exist_ok=True)
         except:
-            return {"Error": True, 'desc': f"Could not create working dir while saving {filename.name}"}
+            return {"error": True, 'desc': f"Could not create working dir while saving {filename.name}"}
 
         '''
         Create list of names for eleana.dataset
@@ -258,8 +266,9 @@ class MenuAction():
 
             # Remove working dir
             new_directory.rmdir()
+            return {"error": False, 'desc':'', 'return':filename}
         except:
-            return {"Error": True, 'desc': f"Error while saving {filename.name}"}
+            return {"error": True, 'desc': f"Error while saving {filename.name}"}
 
 
     # Import EPR

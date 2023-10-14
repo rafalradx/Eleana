@@ -43,6 +43,9 @@ class EleanaMainApp:
         _main_menu = builder.get_object("mainmenu", self.mainwindow)
         self.mainwindow.configure(menu=_main_menu)
 
+
+
+
         self.group_down = None
         self.group_up = None
         self.group = None
@@ -543,7 +546,23 @@ class EleanaMainApp:
 
     # --- Save as
     def save_as(self):
-        menuAction.save_as(eleana)
+        report = menuAction.save_as(eleana)
+
+        if report['error']:
+            CTkMessagebox(title="Error", message=report['desc'], icon="cancel")
+        else:
+            last_projects = eleana.paths['last_projects']
+            last_projects.insert(0, report['return'].name)
+
+        # Remove duplications and limit the list to 10 items
+        last_projects= list(set(last_projects))
+        last_projects = [element for i, element in enumerate(last_projects) if i <= 10]
+
+        # Write the list to eleana.paths
+        eleana.paths['last'] = last_projects
+
+        # Perform uprade to place the item into menu
+        update.last_projects_menu(app, eleana)
 
     # --- Import EPR --> Bruker Elexsys
 
@@ -612,12 +631,12 @@ app = EleanaMainApp(eleana)
 menuAction = MenuAction()
 update = Update()
 comboboxes = Comboboxes()
-init = Init()
+init = Init(app, eleana)
 
 # Set geometry, icon and default combobox values
 init.main_window(app, eleana)
 
-init.folders(eleana)
+init.folders()
 
 
 

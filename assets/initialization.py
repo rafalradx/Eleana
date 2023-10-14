@@ -4,12 +4,17 @@ import tkinter as tk
 import customtkinter as ctk
 from json import loads, dumps
 
-class Init():
+class Init:
+
+    def __init__(self, app, eleana):
+        self.app = app
+        self.eleana = eleana
+
     def main_window(self, app, eleana):
         '''This method sets properties of the main window'''
 
-        width = app.mainwindow.winfo_screenwidth()  # Get screen width
-        height = app.mainwindow.winfo_screenheight()  # Get screen height
+        width = self.app.mainwindow.winfo_screenwidth()  # Get screen width
+        height = self.app.mainwindow.winfo_screenheight()  # Get screen height
         app.mainwindow.geometry('800x800')
         #app.mainwindow.geometry(str(width) + 'x' + str(height) + "+0+0")  # Set geometry to max
 
@@ -35,11 +40,11 @@ class Init():
         app.mainwindow.protocol('WM_DELETE_WINDOW', app.close_application)
 
 
-    def folders(self, eleana):
+    def folders(self):
         '''This method creates standard Eleana folder in user directory.
             If the folder does not exist it will be created.'''
 
-        home_dir = eleana.paths['home_dir']
+        home_dir = self.eleana.paths['home_dir']
         eleana_user_dir = Path(home_dir, '.EleanaPy' )
         if not eleana_user_dir.exists():
             try:
@@ -49,11 +54,11 @@ class Init():
 
 
         try:
-            self.create_first_default_files(eleana, eleana_user_dir)
+            self.create_first_default_files(eleana_user_dir)
         except:
             return {"Error": False, 'desc': ""}
 
-    def create_first_default_files(self, eleana, eleana_user_dir):
+    def create_inital_default_files(self, eleana, eleana_user_dir):
         filePath = Path(eleana_user_dir, 'last_projects.json')
         content = eleana.last_projects
         with open(filePath, 'w') as f:

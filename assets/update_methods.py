@@ -1,3 +1,5 @@
+from pathlib import Path
+
 '''
 Update class contains methods for creating list in comboboxes
 and adds the created lists to the ComboboxLists.entries
@@ -10,8 +12,25 @@ Example usage in main Eleana.py:
 
 This will create 3 positions in the list of Second combobox
 '''
-class Update():
+class Update:
 
+    def last_projects_menu(self, app, eleana):
+        ''' Updates list of last loaded or saved projects and adds the list to the main menu'''
+        list_for_menu = []
+        i = 1
+        for each in eleana.paths['last_projects']:
+            item = Path(each)
+            item = str(i) + '. ' + item.name
+            list_for_menu.append(item)
+            i += 1
+        print(list_for_menu)
+
+        app._main_menu.add_command(label="Opcja 1", command=self.funkcja_do_wywolania_1)
+
+        app._mainmenu.menu_recent.add(
+            "command",
+            command=load_recent_project,
+            label='Project1')
     def dataset_list(self, eleana):
 
         # Create numbered names in the eleana.dataset[X].names_nr

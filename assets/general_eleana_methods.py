@@ -5,7 +5,7 @@ from pathlib import Path
 import tempfile
 
 
-class Eleana():
+class Eleana:
 
     # Main attributes associated with data gathered in the programe
     def __init__(self):
@@ -30,7 +30,7 @@ class Eleana():
              'assets': Path(Path(__file__).resolve().parent, ""),
              'last_import_dir': '/home/marcin/PycharmProjects/Eleana/Example_data/Elexsys/',
              'last_project_dir': '/home/marcin/PycharmProjects/Eleana/Example_data/Eleana_projects/',
-             'last_project': 'project'
+             'last_projects': []
 
              }
 
