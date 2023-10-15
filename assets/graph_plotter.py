@@ -1,14 +1,8 @@
-import numpy as np
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
-import tkinter
 
-from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg, NavigationToolbar2Tk)
-# Implement the default Matplotlib key bindings.
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
-
+import matplotlib.pyplot
 import numpy as np
 
 def plotter(app: object, eleana: object):
@@ -20,6 +14,8 @@ def plotter(app: object, eleana: object):
 
     Ostatecznie funkcja zostanie przeniesiona do innego pliku
     '''
+    matplotlib.pyplot.style.use('Solarize_Light2')
+    #matplotlib.pyplot.style.use('ggplot')
 
     # Set colors for series in graph
     color_first_re = "#d53339"
@@ -49,7 +45,7 @@ def plotter(app: object, eleana: object):
         first_re_y = data_for_plot['re_y']
         first_im_y = data_for_plot['im_y']
         first_legend_index = eleana.selections['first']
-        first_legend = eleana.dataset[first_legend_index].name
+        first_legend = eleana.dataset[first_legend_index].name_nr
 
         # Label for x axis
         try:
@@ -112,7 +108,7 @@ def plotter(app: object, eleana: object):
         second_re_y = data_for_plot['re_y']
         second_im_y = data_for_plot['im_y']
         second_legend_index = eleana.selections['second']
-        second_legend = eleana.dataset[second_legend_index].name
+        second_legend = eleana.dataset[second_legend_index].name_nr
 
         # Label for x axis
         try:
@@ -157,7 +153,6 @@ def plotter(app: object, eleana: object):
 
     # RESULT
     if len(eleana.results_dataset) != 0:
-        #index = comboboxLists.current_position(app, 'sel_result')['index']
         index = eleana.selections['first']
 
         if index != 0:
@@ -172,7 +167,7 @@ def plotter(app: object, eleana: object):
             result_re_y = data_for_plot['re_y']
             result_im_y = data_for_plot['im_y']
             result_legend_index = eleana.selections['result']
-            result_legend = eleana.results_dataset[result_legend_index].name
+            result_legend = eleana.results_dataset[result_legend_index].name_nr
 
             # Label for x axis
             try:
@@ -215,10 +210,18 @@ def plotter(app: object, eleana: object):
         ax.plot(result_x, result_re_y, label=result_legend, color=color_result_re)
 
     # Put data on Graph
-    ax.legend()
-    canvas = FigureCanvasTkAgg(fig, master=app.graphFrame)
-    canvas.get_tk_widget().grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
-    canvas.draw()
-    app.graphFrame.columnconfigure(0, weight=1)
-    app.graphFrame.rowconfigure(0, weight=1)
+    ax.legend(loc='upper center', bbox_to_anchor=(0.15, 1.1),
+              fancybox=False, shadow=False, ncol=5)
 
+    canvas = FigureCanvasTkAgg(fig, master=app.graphFrame)
+    canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+
+    toolbar = NavigationToolbar2Tk(canvas, app.graphFrame, pack_toolbar=False)
+    toolbar.update()
+    toolbar.grid(row=1, column=0, sticky="ew")
+
+    def on_key_press(event):
+        print("you pressed {}".format(event.key))
+        key_press_handler(event, canvas, toolbar)
+
+    canvas.mpl_connect("key_press_event", on_key_press)

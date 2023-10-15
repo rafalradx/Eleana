@@ -680,94 +680,38 @@ def get_index_by_name(selected_value_text):
             return i
         i += 1
 
+# ---- END OF FUNCTIONS FOR HANDLING GUI ACTIONS ---
 
-'''Create main instances 
-app     - object of the main window containing GUI and tkinter and ctk widgets
-eleana  - object containing base variables that store all information and dataset 
-          that are available everywhere in the application.
-menuAction - object containing methods to handle selections of items in the program menu
-update  - object containing methods for refreshing GUI, creating lists in comboboxes etc
-comboboxLists - methods for creating list, picking, setting items etc. They do not change GUI elements.
-init    - object that is used to initialize program on start 
-'''
-def nowy_akcja():
-    pass
+
+
+''' Starting application'''
+# Set default color appearance
 ctk.set_appearance_mode("dark")
 
-eleana = Eleana()
-app = EleanaMainApp(eleana)
+# Create general main instances for the program
+eleana = Eleana()                # This contains all data, settings and selections etc.
+app = EleanaMainApp(eleana)      # This is GUI
 
-
-#nowy_menu = app.builder.get_object("menu_recent", app.mainwindow)
-#nowy_menu.add_command(label="Nowy", command=nowy_akcja)
-
-
-
-
-# DODAWANIE DO GŁÓWNEGO MENU
-# main_menu = app.builder.get_object("mainmenu", app.mainwindow)
-# nowy_menu = tk.Menu(main_menu, tearoff=0)
-# nowy_menu.add_command(label="Nowy", command=nowy_akcja)
-# main_menu.add_cascade(label="Nowy", menu=nowy_menu)
-# app.mainwindow.configure(menu=main_menu)
-# -------------------
-
-
-menuAction = MenuAction(eleana)
-update = Update()
-comboboxes = Comboboxes()
-init = Init(app, eleana)
+menuAction = MenuAction(eleana)  # Methods for menu selections
+update = Update()                # This contains methods for update things like lists, settings, gui, groups etc.
+comboboxes = Comboboxes()        # Methods for handle with FIRST, SECOND and RESULT comboboxes
+init = Init(app, eleana)         # Methods for initialize program
+# ------------
 
 # Set geometry, icon and default combobox values
 init.main_window(app, eleana)
 init.paths(app, eleana, update)
 init.folders(app, eleana)
 
+# Hide or show widgets in GUI
 update.gui_widgets(app, eleana, comboboxes)
 
+# Initialize Plot
+plotter(app,eleana)
 
-# Matplotlib
-fig = Figure(figsize=(5, 4), dpi=100)
-t = np.arange(0, 3, .01)
-fig.add_subplot(111).plot(t, 2 * np.sin(2 * np.pi * t))
-
-# canvas = FigureCanvasTkAgg(fig, master=app.graphFrame)  # A tk.DrawingArea.
-# canvas.draw()
-# #canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
-# #canvas.get_tk_widget().grig(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
-# canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
-#
-# toolbar = NavigationToolbar2Tk(canvas, app.graphFrame)
-# toolbar.update()
-# canvas.get_tk_widget().grid(row=1, column=0)
-#
-
-
-canvas = FigureCanvasTkAgg(fig, master=app.graphFrame)
-canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")  # Ustaw grid() na canvas widget
-
-# toolbar = NavigationToolbar2Tk(canvas, app.graphFrame)
-# toolbar.update()
-# toolbar.grid(row=1, column=0, sticky="ew")  # Ustaw grid() na toolbar widget
-
-# Konfiguracja kolumn i wierszy ramki app.graphFrame, aby rozciągnęła się poprawnie
+# Set graph Frame scalable
 app.graphFrame.columnconfigure(0, weight=1)
 app.graphFrame.rowconfigure(0, weight=1)
-
-
-
-
-
-
-
-def on_key_press(event):
-     print("you pressed {}".format(event.key))
-     key_press_handler(event, canvas, toolbar)
-
-
-canvas.mpl_connect("key_press_event", on_key_press)
-
-
 
 # Run
 if __name__ == "__main__":
