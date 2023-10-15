@@ -1,13 +1,24 @@
 #!/usr/bin/python3
 
-import json
+
 # Import Standard Python Modules
+import json
+import pickle
 import pathlib
+from pathlib import Path
 import customtkinter
 import pygubu
 from CTkMessagebox import CTkMessagebox
 import sys
 import customtkinter as ctk
+import tkinter
+from matplotlib.backends.backend_tkagg import (
+    FigureCanvasTkAgg, NavigationToolbar2Tk)
+# Implement the default Matplotlib key bindings.
+from matplotlib.backend_bases import key_press_handler
+from matplotlib.figure import Figure
+import numpy as np
+
 
 # Import Eleana specific classes
 from assets.general_eleana_methods import Eleana
@@ -40,10 +51,8 @@ class EleanaMainApp:
         self.mainwindow.withdraw()
 
         # Main menu
-        _main_menu = builder.get_object("mainmenu", self.mainwindow)
-        self.mainwindow.configure(menu=_main_menu)
-
-
+        main_menu = builder.get_object("mainmenu", self.mainwindow)
+        self.mainwindow.configure(menu=main_menu)
 
 
         self.group_down = None
@@ -109,8 +118,6 @@ class EleanaMainApp:
         except IndexError:
             return
 
-
-
     def first_up_clicked(self):
         current_position = app.sel_first.get()
         list_of_items = app.sel_first._values
@@ -129,10 +136,9 @@ class EleanaMainApp:
             return
 
 
-
     def first_complex_clicked(self, value):
             eleana.selections['f_cpl'] = value
-            after_selection('first')
+            plotter(app, eleana)
 
     def first_selected(self, selected_value_text: str):
         if selected_value_text == 'None':
@@ -155,12 +161,15 @@ class EleanaMainApp:
             app.firstComplex.grid()
         else:
             app.firstComplex.grid_remove()
+
+        plotter(app, eleana)
     def f_stk_selected(self, selected_value_text):
         if selected_value_text in app.f_stk._values:
             index = app.f_stk._values.index(selected_value_text)
-
-        eleana.selections['f_stk'] = index
-
+            eleana.selections['f_stk'] = index
+            plotter(app, eleana)
+        else:
+            return
     def f_stk_up_clicked(self):
         current_position = app.f_stk.get()
         list_of_items = app.f_stk._values
@@ -177,6 +186,8 @@ class EleanaMainApp:
             eleana.selections['f_stk'] = index +1
         except IndexError:
             return
+
+        plotter(app, eleana)
 
     def f_stk_down_clicked(self):
         current_position = app.f_stk.get()
@@ -195,6 +206,8 @@ class EleanaMainApp:
             eleana.selections['f_stk'] = index - 1
         except IndexError:
             return
+
+        plotter(app, eleana)
 
     def second_selected(self, selected_value_text):
         if selected_value_text == 'None':
@@ -217,6 +230,8 @@ class EleanaMainApp:
             app.secondComplex.grid()
         else:
             app.secondComplex.grid_remove()
+
+        plotter(app, eleana)
     def second_down_clicked(self):
         current_position = app.sel_second.get()
         list_of_items = app.sel_second._values
@@ -237,6 +252,7 @@ class EleanaMainApp:
         except IndexError:
             return
 
+        plotter(app, eleana)
 
     def second_up_clicked(self):
         current_position = app.sel_second.get()
@@ -255,11 +271,16 @@ class EleanaMainApp:
         except IndexError:
             return
 
+        plotter(app, eleana)
     def s_stk_selected(self, selected_value_text):
         if selected_value_text in app.s_stk._values:
             index = app.s_stk._values.index(selected_value_text)
-
-        eleana.selections['s_stk'] = index
+            eleana.selections['s_stk'] = index
+            plotter(app, eleana)
+        else:
+            return
+        #eleana.selections['s_stk'] = index
+        #plotter(app, eleana)
 
     def s_stk_up_clicked(self):
         current_position = app.s_stk.get()
@@ -278,6 +299,7 @@ class EleanaMainApp:
         except IndexError:
             return
 
+        plotter(app, eleana)
     def s_stk_down_clicked(self):
         current_position = app.s_stk.get()
         list_of_items = app.s_stk._values
@@ -296,10 +318,11 @@ class EleanaMainApp:
         except IndexError:
             return
 
-
+        plotter(app, eleana)
     def second_complex_clicked(self, value):
             eleana.selections['s_cpl'] = value
-            after_selection('second')
+            plotter(app, eleana)
+
     def swap_first_second(self):
         first_pos = app.sel_first.get()
         second_pos = app.sel_second.get()
@@ -325,6 +348,7 @@ class EleanaMainApp:
         self.f_stk_selected(second_stk)
         self.s_stk_selected(first_stk)
 
+        plotter(app, eleana)
 
     def second_to_result(self):
         current = app.sel_second.get()
@@ -357,6 +381,7 @@ class EleanaMainApp:
         position = list[-1]
         app.sel_result.set(position)
 
+        plotter(app, eleana)
 
     def result_selected(self, selected_value_text):
         if selected_value_text == 'None':
@@ -381,6 +406,7 @@ class EleanaMainApp:
         else:
             app.resultComplex.grid_remove()
 
+        plotter(app, eleana)
 
     def result_up_clicked(self):
         current_position = app.sel_result.get()
@@ -399,6 +425,7 @@ class EleanaMainApp:
         except IndexError:
             return
 
+        plotter(app, eleana)
     def result_down_clicked(self):
         current_position = app.sel_result.get()
         list_of_items = app.sel_result._values
@@ -417,6 +444,7 @@ class EleanaMainApp:
         except IndexError:
             return
 
+        plotter(app, eleana)
     def r_stk_up_clicked(self):
         current_position = app.r_stk.get()
         list_of_items = app.r_stk._values
@@ -434,7 +462,7 @@ class EleanaMainApp:
         except IndexError:
             return
 
-
+        plotter(app, eleana)
     def r_stk_down_clicked(self):
         current_position = app.r_stk.get()
         list_of_items = app.r_stk._values
@@ -453,7 +481,7 @@ class EleanaMainApp:
         except IndexError:
             return
 
-
+        plotter(app, eleana)
     def first_to_result(self):
             current = app.sel_first.get()
             if current == 'None':
@@ -488,6 +516,7 @@ class EleanaMainApp:
             else:
                 app.resultComplex.grid_remove()
 
+            plotter(app, eleana)
     def clear_results(self):
         quit_dialog = CTkMessagebox(title="Clear results", message="Are you sure you want to clear the entire dataset in the results?",
                                     icon="warning", option_1="No", option_2="Yes")
@@ -497,6 +526,7 @@ class EleanaMainApp:
             app.sel_result.configure(values = ['None'])
             app.r_stk.configure(values = [])
             app.resultFrame.grid_remove()
+            plotter(app, eleana)
 
     def clear_dataset(self):
         quit_dialog = CTkMessagebox(title="Clear dataset",
@@ -511,6 +541,9 @@ class EleanaMainApp:
             app.secondComplex.grid_remove()
             app.secondStkFrame.grid_remove()
 
+            init.eleana_variables(eleana)
+            plotter(app, eleana)
+
 
     ''' 
     FUNCTIONS ACTIVATED BY MAIN MENU SELECTION
@@ -518,8 +551,9 @@ class EleanaMainApp:
 
     # FILE
     # --- Load Project
-    def load_project(self):
-        project = menuAction.load_project(eleana)
+    def load_project(self, recent=None):
+
+        project = menuAction.load_project(recent)
 
         eleana.selections = project['selections']
         eleana.dataset = project['dataset']
@@ -527,26 +561,47 @@ class EleanaMainApp:
         eleana.assignmentToGroups = project['assignmentToGroups']
         eleana.groupsHierarchy = project['groupsHierarchy']
         eleana.notes = project['notes']
-        eleana.paths = project['paths']
+        #eleana.paths = project['paths']
 
         update.dataset_list(eleana)
         update.all_lists(app, eleana)
 
-        selected_value_text = eleana.dataset[eleana.selections['first']].name_nr
-        self.first_selected(selected_value_text)
-        app.sel_first.set(selected_value_text)
+        try:
+            selected_value_text = eleana.dataset[eleana.selections['first']].name_nr
+            self.first_selected(selected_value_text)
+            app.sel_first.set(selected_value_text)
+        except:
+            pass
 
-        selected_value_text = eleana.dataset[eleana.selections['second']].name_nr
-        self.second_selected(selected_value_text)
-        app.sel_second.set(selected_value_text)
+        try:
+            selected_value_text = eleana.dataset[eleana.selections['second']].name_nr
+            self.second_selected(selected_value_text)
+            app.sel_second.set(selected_value_text)
+        except:
+            pass
 
-        selected_value_text = eleana.dataset[eleana.selections['result']].name_nr
-        self.result_selected(selected_value_text)
-        app.sel_result.set(selected_value_text)
+        try:
+            selected_value_text = eleana.dataset[eleana.selections['result']].name_nr
+            self.result_selected(selected_value_text)
+            app.sel_result.set(selected_value_text)
+        except:
+            pass
+
+        plotter(app, eleana)
+    def load_recent(self, selected_value_text):
+        index = selected_value_text.split('. ')
+        index = int(index[0])
+        index = index - 1
+
+        print(eleana.paths['last_projects'])
+        recent = eleana.paths['last_projects'][index]
+        self.load_project(recent)
+        eleana.paths['last_project_dir'] = Path(recent).parent
+        plotter(app, eleana)
 
     # --- Save as
     def save_as(self):
-        report = menuAction.save_as(eleana)
+        report = menuAction.save_as()
 
         if report['error']:
             CTkMessagebox(title="Error", message=report['desc'], icon="cancel")
@@ -555,13 +610,18 @@ class EleanaMainApp:
             last_projects.insert(0, report['return'].name)
 
         # Remove duplications and limit the list to 10 items
-        last_projects= list(set(last_projects))
-        last_projects = [element for i, element in enumerate(last_projects) if i <= 10]
+        last_projects = list(set(last_projects))
+        # i = 1
+        # for each in projects:
+        #     name = str(i) + '. ' + each
+        #     last_projects.append(name)
+        #     i += 1
 
         # Write the list to eleana.paths
-        eleana.paths['last'] = last_projects
+        eleana.paths['last_projects'] = last_projects
+        eleana.paths['last_project_dir'] = Path(last_projects[0]).parent
 
-        # Perform uprade to place the item into menu
+        # Perform update to place the item into menu
         update.last_projects_menu(app, eleana)
 
     # --- Import EPR --> Bruker Elexsys
@@ -569,6 +629,7 @@ class EleanaMainApp:
     def import_elexsys(self):
         ''' Open window that loads the spectra '''
         menuAction.loadElexsys(eleana)
+
 
         update.dataset_list(eleana)
         update.all_lists(app, eleana)
@@ -579,6 +640,14 @@ class EleanaMainApp:
                                     icon="warning", option_1="No", option_2="Yes")
         response = quit_dialog.get()
         if response == "Yes":
+
+            # Save current settings:
+            filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
+            content = eleana.paths
+
+            with open(filename, 'wb') as file:
+                pickle.dump(content, file)
+
             app.mainwindow.iconify()
             app.mainwindow.destroy()
 
@@ -621,28 +690,85 @@ update  - object containing methods for refreshing GUI, creating lists in combob
 comboboxLists - methods for creating list, picking, setting items etc. They do not change GUI elements.
 init    - object that is used to initialize program on start 
 '''
-
+def nowy_akcja():
+    pass
 ctk.set_appearance_mode("dark")
 
 eleana = Eleana()
 app = EleanaMainApp(eleana)
 
 
-menuAction = MenuAction()
+#nowy_menu = app.builder.get_object("menu_recent", app.mainwindow)
+#nowy_menu.add_command(label="Nowy", command=nowy_akcja)
+
+
+
+
+# DODAWANIE DO GŁÓWNEGO MENU
+# main_menu = app.builder.get_object("mainmenu", app.mainwindow)
+# nowy_menu = tk.Menu(main_menu, tearoff=0)
+# nowy_menu.add_command(label="Nowy", command=nowy_akcja)
+# main_menu.add_cascade(label="Nowy", menu=nowy_menu)
+# app.mainwindow.configure(menu=main_menu)
+# -------------------
+
+
+menuAction = MenuAction(eleana)
 update = Update()
 comboboxes = Comboboxes()
 init = Init(app, eleana)
 
 # Set geometry, icon and default combobox values
 init.main_window(app, eleana)
-
-init.folders()
-
-
+init.paths(app, eleana, update)
+init.folders(app, eleana)
 
 update.gui_widgets(app, eleana, comboboxes)
-#dialog = customtkinter.CTkInputDialog(text="Type in a number:", title="Test")
-#print(dialog.get_input())
+
+
+# Matplotlib
+fig = Figure(figsize=(5, 4), dpi=100)
+t = np.arange(0, 3, .01)
+fig.add_subplot(111).plot(t, 2 * np.sin(2 * np.pi * t))
+
+# canvas = FigureCanvasTkAgg(fig, master=app.graphFrame)  # A tk.DrawingArea.
+# canvas.draw()
+# #canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
+# #canvas.get_tk_widget().grig(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
+# canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+#
+# toolbar = NavigationToolbar2Tk(canvas, app.graphFrame)
+# toolbar.update()
+# canvas.get_tk_widget().grid(row=1, column=0)
+#
+
+
+canvas = FigureCanvasTkAgg(fig, master=app.graphFrame)
+canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")  # Ustaw grid() na canvas widget
+
+# toolbar = NavigationToolbar2Tk(canvas, app.graphFrame)
+# toolbar.update()
+# toolbar.grid(row=1, column=0, sticky="ew")  # Ustaw grid() na toolbar widget
+
+# Konfiguracja kolumn i wierszy ramki app.graphFrame, aby rozciągnęła się poprawnie
+app.graphFrame.columnconfigure(0, weight=1)
+app.graphFrame.rowconfigure(0, weight=1)
+
+
+
+
+
+
+
+def on_key_press(event):
+     print("you pressed {}".format(event.key))
+     key_press_handler(event, canvas, toolbar)
+
+
+canvas.mpl_connect("key_press_event", on_key_press)
+
+
+
 # Run
 if __name__ == "__main__":
     app.run()

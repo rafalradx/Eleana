@@ -28,8 +28,8 @@ class Eleana:
              'pixmaps': Path(Path(__file__).resolve().parent, "../pixmaps"),
              'ui': Path(Path(__file__).resolve().parent, "../pixmaps"),
              'assets': Path(Path(__file__).resolve().parent, ""),
-             'last_import_dir': '/home/marcin/PycharmProjects/Eleana/Example_data/Elexsys/',
-             'last_project_dir': '/home/marcin/PycharmProjects/Eleana/Example_data/Eleana_projects/',
+             'last_import_dir': '',
+             'last_project_dir': '',
              'last_projects': []
 
              }

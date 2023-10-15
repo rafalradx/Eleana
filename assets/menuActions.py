@@ -16,15 +16,29 @@ from assets.dataClasses import createFromElexsys
 
 class MenuAction:
 
+    def __init__(self, eleana_instance, master=None):
+        # Initialize eleana
+        self.eleana = eleana_instance
     # FILE
-    def load_project(self, eleana: object):
+    def load_project(self, recent=None):
         ''' This method loads projects created by Eleana'''
+        eleana = self.eleana
+        init_dir = Path(eleana.paths['last_project_dir'])
+        try:
+            init_file = Path(eleana.paths['last_projects'][0])
+            init_file = init_file.name
+        except IndexError:
+            init_dir = Path(eleana.paths['home_dir'])
+            init_file = ''
 
-        filename =  askopenfilename(initialdir=eleana.paths['last_project_dir'],
-                                     initialfile=eleana.paths['last_project'],
+        if recent == None:
+            filename =  askopenfilename(initialdir=init_dir,
+                                     initialfile=init_file,
                                      defaultextension=".ele",
                                      filetypes=[("Eleana project", "*.ele"),
                                                 ("All Files", "*.*")])
+        else:
+            filename = Path(recent)
 
         '''
         1. Extract project into temporary directory /tmp/eleana_extracted_project 
@@ -35,7 +49,7 @@ class MenuAction:
         try:
             shutil.unpack_archive(filename, extract_dir, archive_format)
         except:
-            return {"Error": True, 'desc': f"Cannot open {filename.name}"}
+            return {"Error": True, 'desc': f"Cannot open the file"}
 
 
         ''' 
@@ -161,14 +175,17 @@ class MenuAction:
 
 
 
-    def save_as(self, eleana: object):
+    def save_as(self):
+        eleana =self.eleana
         try:
-            initialfile = eleana.paths['last_projects'][0]
+            init_dir = Path(eleana.paths['last_project_dir'])
+            init_file = ''
         except IndexError:
-            initialfile = ''
+            init_dir = Path(eleana.paths['home_dir'])
+
         try:
-            filename = asksaveasfile(initialdir=eleana.paths['last_project_dir'],
-                                 initialfile=initialfile,
+            filename = asksaveasfile(initialdir=init_dir,
+                                 initialfile=init_file,
                                  defaultextension=".ele",
                                  filetypes=[("All Files", "*.*"),
                                             ("Eleana project", "*.ele")])
@@ -285,6 +302,9 @@ class MenuAction:
         for file in filenames:
             spectrum = createFromElexsys(file)
             eleana.dataset.append(spectrum)
+
+        last_import_dir = Path(filenames[-1]).parent
+        eleana.paths['last_import_dir'] = last_import_dir
         return
 
 

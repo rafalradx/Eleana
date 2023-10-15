@@ -1,8 +1,17 @@
 import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+import tkinter
 
-def plotter(app: object, eleana: object, comboboxLists: object):
+from matplotlib.backends.backend_tkagg import (
+    FigureCanvasTkAgg, NavigationToolbar2Tk)
+# Implement the default Matplotlib key bindings.
+from matplotlib.backend_bases import key_press_handler
+from matplotlib.figure import Figure
+
+import numpy as np
+
+def plotter(app: object, eleana: object):
     '''Ta funkcja zbiera informacje o wszystkich wyborach i wyswietla odpowiednie
     wartości na wykresie.
     Funkcje trzeba rozbudowac o elementy, które sprawdzają czy mamy wyświetlić

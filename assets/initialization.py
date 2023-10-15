@@ -3,6 +3,7 @@ from pathlib import Path
 import tkinter as tk
 import customtkinter as ctk
 from json import loads, dumps
+import pickle
 
 class Init:
 
@@ -40,7 +41,7 @@ class Init:
         app.mainwindow.protocol('WM_DELETE_WINDOW', app.close_application)
 
 
-    def folders(self):
+    def folders(self, app, eleana):
         '''This method creates standard Eleana folder in user directory.
             If the folder does not exist it will be created.'''
 
@@ -52,14 +53,43 @@ class Init:
             except:
                 return {"Error": True, 'desc': f"Cannot create working Eleana folder in your home directory."}
 
-
+    def paths(self, app, eleana, update):
         try:
-            self.create_first_default_files(eleana_user_dir)
-        except:
-            return {"Error": False, 'desc': ""}
+            filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
 
-    def create_inital_default_files(self, eleana, eleana_user_dir):
-        filePath = Path(eleana_user_dir, 'last_projects.json')
-        content = eleana.last_projects
-        with open(filePath, 'w') as f:
-            f.write(dumps(document))
+            # Read paths.pic
+            file_to_read = open(filename, "rb")
+            paths = pickle.load(file_to_read)
+            eleana.paths = paths
+            file_to_read.close()
+
+            # Create last project list in the main menu
+            last_projects = eleana.paths['last_projects']
+            last_projects = [element for i, element in enumerate(last_projects) if i <= 10]
+
+            # Write the list to eleana.paths
+            eleana.paths['last_projects'] = last_projects
+
+            # Perform update to place the item into menu
+            update.last_projects_menu(app, eleana)
+        except:
+            pass
+
+    def eleana_variables(self, eleana):
+        eleana.selections = {'group': 'All',
+                      'first': -1, 'second': -1, 'result': -1,
+                      'f_cpl': 're', 's_cpl': 're', 'r_cpl': 're',
+                      'f_stk': 0, 's_stk': 0, 'r_stk': 0,
+                      'f_dsp': True, 's_dsp': True, 'r_dsp': True
+                      }
+
+        eleana.notes = {"content": "",
+                 "tags": {"bold": [], "italic": [], "code": [], "normal size": [], "larger size": [],
+                          "largest size": [],
+                          "highlight": [], "highlight red": [], "highlight green": [], "highlight black": [],
+                          "text white": [], "text grey": [], "text blue": [], "text green": [], "text red": []}}
+
+        eleana.dataset = []
+        eleana.results_dataset = []
+        eleana.assignmentToGroups = {}
+        eleana.groupsHierarchy = {}

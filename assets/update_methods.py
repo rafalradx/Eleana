@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import tkinter as tk
 '''
 Update class contains methods for creating list in comboboxes
 and adds the created lists to the ComboboxLists.entries
@@ -14,6 +14,8 @@ This will create 3 positions in the list of Second combobox
 '''
 class Update:
 
+
+
     def last_projects_menu(self, app, eleana):
         ''' Updates list of last loaded or saved projects and adds the list to the main menu'''
         list_for_menu = []
@@ -23,14 +25,16 @@ class Update:
             item = str(i) + '. ' + item.name
             list_for_menu.append(item)
             i += 1
-        print(list_for_menu)
 
-        app._main_menu.add_command(label="Opcja 1", command=self.funkcja_do_wywolania_1)
+        recent_menu = app.builder.get_object("menu_recent", app.mainwindow)
+        recent_menu.delete(0, tk.END)
+        for label in list_for_menu:
+            def create_command(l):
+                return lambda: app.load_recent(l)
 
-        app._mainmenu.menu_recent.add(
-            "command",
-            command=load_recent_project,
-            label='Project1')
+            recent_menu.add_command(label=label, command=create_command(label))
+
+
     def dataset_list(self, eleana):
 
         # Create numbered names in the eleana.dataset[X].names_nr
