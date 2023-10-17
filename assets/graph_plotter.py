@@ -14,6 +14,32 @@ def plotter(app: object, eleana: object):
 
     Ostatecznie funkcja zostanie przeniesiona do innego pliku
     '''
+
+
+    # ----- TEST VALUES ---------------
+    f = eleana.selections['first']
+    s = eleana.selections['second']
+    r = eleana.selections['result']
+    try:
+        fn = eleana.dataset[f].name_nr
+        sn = eleana.dataset[s].name_nr
+    except:
+        fn = ""
+        sn = ""
+        print('Błąd, nie znaleziono pozycji dataset')
+    try:
+        rn = eleana.results_dataset[r].name_nr
+    except:
+        rn = 'Results puste'
+    print('FIRST = ' + str(f))
+    print('SECOND = ' + str(s))
+    print('RESULT = ' + str(r))
+    print('-------')
+    print('')
+
+    # ---- END OF TEST -----------
+
+
     matplotlib.pyplot.style.use('Solarize_Light2')
     #matplotlib.pyplot.style.use('ggplot')
 

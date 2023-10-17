@@ -121,7 +121,6 @@ class EleanaMainApp:
     def first_up_clicked(self):
         current_position = app.sel_first.get()
         list_of_items = app.sel_first._values
-
         if current_position in list_of_items:
             index = list_of_items.index(current_position)
         else:
@@ -129,22 +128,24 @@ class EleanaMainApp:
             return
 
         try:
-            new_position = list_of_items[index+1]
+            new_position = list_of_items[index + 1]
             app.sel_first.set(new_position)
             self.first_selected(new_position)
         except IndexError:
             return
 
-
     def first_complex_clicked(self, value):
             eleana.selections['f_cpl'] = value
             plotter(app, eleana)
 
-    def first_selected(self, selected_value_text: str):
+
+    def first_selected(self, selected_value_text):
         if selected_value_text == 'None':
             eleana.selections['first'] = -1
             app.firstComplex.grid_remove()
             app.firstStkFrame.grid_remove()
+            print("'oooooooo"+str(eleana.selections['first']))
+            plotter(app, eleana)
             return
         i = 0
         while i < len(eleana.dataset):
@@ -153,23 +154,24 @@ class EleanaMainApp:
                 eleana.selections['first'] = i
                 break
             i += 1
-
         update.list_in_combobox(app, eleana, 'sel_first')
         update.list_in_combobox(app, eleana, 'f_stk')
-
         if eleana.dataset[eleana.selections['first']].complex:
             app.firstComplex.grid()
         else:
             app.firstComplex.grid_remove()
-
         plotter(app, eleana)
+
+
     def f_stk_selected(self, selected_value_text):
         if selected_value_text in app.f_stk._values:
             index = app.f_stk._values.index(selected_value_text)
             eleana.selections['f_stk'] = index
-            plotter(app, eleana)
         else:
             return
+        plotter(app, eleana)
+
+
     def f_stk_up_clicked(self):
         current_position = app.f_stk.get()
         list_of_items = app.f_stk._values
@@ -179,20 +181,18 @@ class EleanaMainApp:
         else:
             print('Index in f_stk not found.')
             return
-
         try:
             new_position = list_of_items[index + 1]
             app.f_stk.set(new_position)
-            eleana.selections['f_stk'] = index +1
+            eleana.selections['f_stk'] = index + 1
         except IndexError:
             return
-
         plotter(app, eleana)
+
 
     def f_stk_down_clicked(self):
         current_position = app.f_stk.get()
         list_of_items = app.f_stk._values
-
         if current_position in list_of_items:
             index = list_of_items.index(current_position)
         else:
@@ -206,8 +206,8 @@ class EleanaMainApp:
             eleana.selections['f_stk'] = index - 1
         except IndexError:
             return
-
         plotter(app, eleana)
+
 
     def second_selected(self, selected_value_text):
         if selected_value_text == 'None':
@@ -231,19 +231,18 @@ class EleanaMainApp:
             app.secondComplex.grid()
         else:
             app.secondComplex.grid_remove()
-
         plotter(app, eleana)
+
+
     def second_down_clicked(self):
         current_position = app.sel_second.get()
         list_of_items = app.sel_second._values
-
+        if current_position == 'None':
+            return
         if current_position in list_of_items:
             index = list_of_items.index(current_position)
         else:
             print('Index in sel_second not found.')
-            return
-
-        if index <= 0:
             return
 
         try:
@@ -253,18 +252,15 @@ class EleanaMainApp:
         except IndexError:
             return
 
-        plotter(app, eleana)
 
     def second_up_clicked(self):
         current_position = app.sel_second.get()
         list_of_items = app.sel_second._values
-
         if current_position in list_of_items:
             index = list_of_items.index(current_position)
         else:
             print('Index in sel_second not found.')
             return
-
         try:
             new_position = list_of_items[index + 1]
             app.sel_second.set(new_position)
@@ -272,16 +268,16 @@ class EleanaMainApp:
         except IndexError:
             return
 
-        plotter(app, eleana)
+
     def s_stk_selected(self, selected_value_text):
         if selected_value_text in app.s_stk._values:
             index = app.s_stk._values.index(selected_value_text)
             eleana.selections['s_stk'] = index
-            plotter(app, eleana)
         else:
             return
-        #eleana.selections['s_stk'] = index
-        #plotter(app, eleana)
+        plotter(app, eleana)
+
+
 
     def s_stk_up_clicked(self):
         current_position = app.s_stk.get()
@@ -292,19 +288,18 @@ class EleanaMainApp:
         else:
             print('Index in s_stk not found.')
             return
-
         try:
             new_position = list_of_items[index + 1]
             app.s_stk.set(new_position)
-            eleana.selections['s_stk'] = index +1
+            eleana.selections['s_stk'] = index + 1
         except IndexError:
             return
-
         plotter(app, eleana)
+
+
     def s_stk_down_clicked(self):
         current_position = app.s_stk.get()
         list_of_items = app.s_stk._values
-
         if current_position in list_of_items:
             index = list_of_items.index(current_position)
         else:
@@ -318,8 +313,9 @@ class EleanaMainApp:
             eleana.selections['s_stk'] = index - 1
         except IndexError:
             return
-
         plotter(app, eleana)
+
+
     def second_complex_clicked(self, value):
             eleana.selections['s_cpl'] = value
             plotter(app, eleana)
@@ -335,7 +331,6 @@ class EleanaMainApp:
 
         if first_pos == 'None':
             app.secondComplex.grid_remove()
-
 
         app.sel_first.set(second_pos)
         app.sel_second.set(first_pos)
@@ -360,8 +355,11 @@ class EleanaMainApp:
 
         # Check the name if the same already exists in eleana.result_dataset
         list_of_results = []
-        for each in eleana.results_dataset:
-            list_of_results.append(each.name)
+        try:
+            for each in eleana.results_dataset:
+                list_of_results.append(each.name)
+        except:
+            pass
 
         if spectrum.name in list_of_results:
             dialog = customtkinter.CTkInputDialog(
@@ -378,17 +376,18 @@ class EleanaMainApp:
         update.list_in_combobox(app, eleana, 'r_stk')
 
         # Set the position to the last added item
-        list = app.sel_result._values
-        position = list[-1]
+        list_of_results = app.sel_result._values
+        position = list_of_results[-1]
         app.sel_result.set(position)
+        self.result_selected(position)
 
-        plotter(app, eleana)
 
     def result_selected(self, selected_value_text):
         if selected_value_text == 'None':
             eleana.selections['result'] = -1
             app.resultComplex.grid_remove()
             app.resultStkFrame.grid_remove()
+            plotter(app, eleana)
             return
 
         i = 0
@@ -515,24 +514,16 @@ class EleanaMainApp:
             list_of_results = app.sel_result._values
             position = list_of_results[-1]
             app.sel_result.set(position)
-
-            if position in list_of_results:
-                index_result = list_of_results.index(position)
-                eleana.selections['result'] = index_result -1
-
-            if spectrum.complex:
-                app.resultComplex.grid()
-            else:
-                app.resultComplex.grid_remove()
+            self.result_selected(position)
 
 
-            plotter(app, eleana)
     def clear_results(self):
         quit_dialog = CTkMessagebox(title="Clear results", message="Are you sure you want to clear the entire dataset in the results?",
                                     icon="warning", option_1="No", option_2="Yes")
         response = quit_dialog.get()
         if response == "Yes":
             eleana.results_dataset = []
+            eleana.selections['result'] = -1
             app.sel_result.configure(values = ['None'])
             app.r_stk.configure(values = [])
             app.resultFrame.grid_remove()
@@ -722,6 +713,27 @@ plotter(app,eleana)
 # Set graph Frame scalable
 app.graphFrame.columnconfigure(0, weight=1)
 app.graphFrame.rowconfigure(0, weight=1)
+
+
+def podglad(eleana):
+    f = eleana(eleana.selections['first'])
+    s = eleana(eleana.selections['second'])
+    r = eleana(eleana.selections['result'])
+    try:
+        fn = eleana.dataset[f].name_nr
+        sn = eleana.dataset[s].name_nr
+    except:
+        print('Błąd, nie znaleziono pozycji dataset')
+    try:
+        rn = eleana.results_dataset[r].name_nr
+    except:
+        rn = 'Results puste'
+
+    print('FIRST = ' + fn + ' - INDEX = ' + str(f))
+    print('SECOND = ' + sn + ' - INDEX = ' + str(s))
+    print('RESULT = ' + rn + ' - INDEX = ' + str(r))
+    print('-------')
+    print(' ')
 
 # Run
 if __name__ == "__main__":
