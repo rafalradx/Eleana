@@ -36,6 +36,7 @@ def plotter(app: object, eleana: object):
 
     # FIRST
     index = eleana.selections['first']
+    is_first_not_none = [True if index >=0 else False]
 
     if eleana.selections['f_dsp'] and index >= 0:
         data_for_plot = eleana.getDataFromSelection(eleana, 'first')
@@ -100,7 +101,7 @@ def plotter(app: object, eleana: object):
 
     # SECOND
     index = eleana.selections['second']
-
+    is_second_not_none = [True if index >= 0 else False]
     if eleana.selections['s_dsp'] and index >=0:
         data_for_plot = eleana.getDataFromSelection(eleana, 'second')
         data_index = eleana.selections['second']
@@ -155,7 +156,7 @@ def plotter(app: object, eleana: object):
     if len(eleana.results_dataset) != 0:
         index = eleana.selections['first']
 
-        if index != 0:
+        if index >= 0:
             is_result_not_none = True
         else:
             is_result_not_none = False

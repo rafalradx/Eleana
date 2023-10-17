@@ -214,6 +214,7 @@ class EleanaMainApp:
             eleana.selections['second'] = -1
             app.secondComplex.grid_remove()
             app.secondStkFrame.grid_remove()
+            plotter(app, eleana)
             return
         i = 0
         while i < len(eleana.dataset):
@@ -485,14 +486,17 @@ class EleanaMainApp:
     def first_to_result(self):
             current = app.sel_first.get()
             if current == 'None':
-                return
+                 return
             index = get_index_by_name(current)
             spectrum = eleana.dataset[index]
 
             # Check the name if the same already exists in eleana.result_dataset
             list_of_results = []
-            for each in eleana.results_dataset:
-                list_of_results.append(each.name)
+            try:
+                for each in eleana.results_dataset:
+                    list_of_results.append(each.name)
+            except:
+                pass
 
             if spectrum.name in list_of_results:
                 dialog = ctk.CTkInputDialog(text="There is data with the same name. Please enter a different name.", title="Enter new name")
@@ -508,13 +512,19 @@ class EleanaMainApp:
             update.list_in_combobox(app, eleana, 'r_stk')
 
             # Set the position to the last added item
-            list = app.sel_result._values
-            position = list[-1]
+            list_of_results = app.sel_result._values
+            position = list_of_results[-1]
             app.sel_result.set(position)
+
+            if position in list_of_results:
+                index_result = list_of_results.index(position)
+                eleana.selections['result'] = index_result -1
+
             if spectrum.complex:
                 app.resultComplex.grid()
             else:
                 app.resultComplex.grid_remove()
+
 
             plotter(app, eleana)
     def clear_results(self):
