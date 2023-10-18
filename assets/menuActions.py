@@ -174,7 +174,6 @@ class MenuAction:
                 }
 
 
-
     def save_as(self):
         eleana =self.eleana
         try:
@@ -324,3 +323,6 @@ class MenuAction:
         notes = subprocess.run([eleana.interpreter, subprocess_path], capture_output=True, text=True)
 
         return filename
+
+    def create_new_group(self):
+        print("Crearte group")

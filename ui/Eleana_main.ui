@@ -1219,6 +1219,18 @@
             </child>
           </object>
         </child>
+        <child>
+          <object class="tk.Menuitem.Submenu" id="menu_groups" named="True">
+            <property name="label" translatable="yes">Groups</property>
+            <property name="tearoff">false</property>
+            <child>
+              <object class="tk.Menuitem.Command" id="menu_group_create" named="True">
+                <property name="command" type="command" cbtype="simple">create_new_group</property>
+                <property name="label" translatable="yes">Create new gorup</property>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
     </child>
   </object>

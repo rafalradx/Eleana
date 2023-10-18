@@ -11,13 +11,7 @@ import pygubu
 from CTkMessagebox import CTkMessagebox
 import sys
 import customtkinter as ctk
-import tkinter
-from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg, NavigationToolbar2Tk)
 # Implement the default Matplotlib key bindings.
-from matplotlib.backend_bases import key_press_handler
-from matplotlib.figure import Figure
-import numpy as np
 
 
 # Import Eleana specific classes
@@ -27,7 +21,7 @@ from assets.initialization import Init
 from assets.graph_plotter import plotter
 from assets.update_methods import Update
 from assets.comboboxes_methods import Comboboxes
-
+from assets.subprogs.group_editor.group_editor import Groupeditor
 # -----GLOBAL VARIABLEs-------------
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "ui" / "Eleana_main.ui"
@@ -652,6 +646,11 @@ class EleanaMainApp:
             app.mainwindow.iconify()
             app.mainwindow.destroy()
 
+    def create_new_group(self):
+        g_editor = Groupeditor(eleana, app.mainwindow)
+        response = g_editor.get()
+        print(response)
+
     # EDIT Menu:
     #   Notes
     def notes(self):
@@ -715,25 +714,25 @@ app.graphFrame.columnconfigure(0, weight=1)
 app.graphFrame.rowconfigure(0, weight=1)
 
 
-def podglad(eleana):
-    f = eleana(eleana.selections['first'])
-    s = eleana(eleana.selections['second'])
-    r = eleana(eleana.selections['result'])
-    try:
-        fn = eleana.dataset[f].name_nr
-        sn = eleana.dataset[s].name_nr
-    except:
-        print('Błąd, nie znaleziono pozycji dataset')
-    try:
-        rn = eleana.results_dataset[r].name_nr
-    except:
-        rn = 'Results puste'
-
-    print('FIRST = ' + fn + ' - INDEX = ' + str(f))
-    print('SECOND = ' + sn + ' - INDEX = ' + str(s))
-    print('RESULT = ' + rn + ' - INDEX = ' + str(r))
-    print('-------')
-    print(' ')
+# def podglad(eleana):
+#     f = eleana(eleana.selections['first'])
+#     s = eleana(eleana.selections['second'])
+#     r = eleana(eleana.selections['result'])
+#     try:
+#         fn = eleana.dataset[f].name_nr
+#         sn = eleana.dataset[s].name_nr
+#     except:
+#         print('Błąd, nie znaleziono pozycji dataset')
+#     try:
+#         rn = eleana.results_dataset[r].name_nr
+#     except:
+#         rn = 'Results puste'
+#
+#     print('FIRST = ' + fn + ' - INDEX = ' + str(f))
+#     print('SECOND = ' + sn + ' - INDEX = ' + str(s))
+#     print('RESULT = ' + rn + ' - INDEX = ' + str(r))
+#     print('-------')
+#     print(' ')
 
 # Run
 if __name__ == "__main__":
