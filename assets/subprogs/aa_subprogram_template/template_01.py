@@ -4,7 +4,7 @@ import pygubu
 PROJECT_PATH = pathlib.Path(__file__).parent
 
 # Adjust the name of the file with UI
-PROJECT_UI = PROJECT_PATH / "group_editor.ui"
+PROJECT_UI = PROJECT_PATH / "template_01.ui"
 
 
 class Groupeditor:
