@@ -11,6 +11,10 @@ import pygubu
 from CTkMessagebox import CTkMessagebox
 import sys
 import customtkinter as ctk
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.backend_bases import key_press_handler
+from matplotlib.figure import Figure
+import matplotlib.pyplot
 # Implement the default Matplotlib key bindings.
 
 
@@ -21,7 +25,7 @@ from assets.initialization import Init
 from assets.graph_plotter import plotter
 from assets.update_methods import Update
 from assets.comboboxes_methods import Comboboxes
-from assets.subprogs.group_editor.group_editor import Groupeditor
+from subprogs.group_edit.add_group import Groupeditor
 # -----GLOBAL VARIABLEs-------------
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "ui" / "Eleana_main.ui"
@@ -154,7 +158,7 @@ class EleanaMainApp:
             app.firstComplex.grid()
         else:
             app.firstComplex.grid_remove()
-        plotter(app, eleana)
+        plotter(app, eleana, canvas)
 
 
     def f_stk_selected(self, selected_value_text):
@@ -707,13 +711,16 @@ init.folders(app, eleana)
 update.gui_widgets(app, eleana, comboboxes)
 
 # Initialize Plot
-plotter(app,eleana)
+
 
 # Set graph Frame scalable
 app.graphFrame.columnconfigure(0, weight=1)
 app.graphFrame.rowconfigure(0, weight=1)
+fig = Figure(figsize=(8, 4), dpi=100)
+canvas = FigureCanvasTkAgg(fig, master=app.graphFrame)
+#canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
 
-
+plotter(app,eleana, canvas)
 # def podglad(eleana):
 #     f = eleana(eleana.selections['first'])
 #     s = eleana(eleana.selections['second'])

@@ -5,7 +5,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot
 import numpy as np
 
-def plotter(app: object, eleana: object):
+def plotter(app: object, eleana: object, canvas):
     '''Ta funkcja zbiera informacje o wszystkich wyborach i wyswietla odpowiednie
     wartości na wykresie.
     Funkcje trzeba rozbudowac o elementy, które sprawdzają czy mamy wyświetlić
@@ -14,7 +14,6 @@ def plotter(app: object, eleana: object):
 
     Ostatecznie funkcja zostanie przeniesiona do innego pliku
     '''
-
 
     # ----- TEST VALUES ---------------
     f = eleana.selections['first']
@@ -242,6 +241,8 @@ def plotter(app: object, eleana: object):
 
     canvas = FigureCanvasTkAgg(fig, master=app.graphFrame)
     canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+    canvas.draw()
+
 
     toolbar = NavigationToolbar2Tk(canvas, app.graphFrame, pack_toolbar=False)
     toolbar.update()
