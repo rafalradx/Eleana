@@ -12,7 +12,7 @@ class Eleana:
         self.version = 1.0
         self.dataset = []            # <-- This variable keeps all spectra available in Eleana. It is a list of objects
         self.results_dataset = []    # <-- This keeps data containing results
-        self.assignmentToGroups = {} # <-- This keeps information about which data from dataset is assigned to particular group
+        self.assignmentToGroups = {'All': []} # <-- This keeps information about which data from dataset is assigned to particular group
         self.groupsHierarchy = {}    # <-- This store information about which group belongs to other
 
         # Attribute "notes" contains general notes edited by Edit --> Notes in RTF

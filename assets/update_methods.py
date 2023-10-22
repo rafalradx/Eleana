@@ -15,7 +15,6 @@ This will create 3 positions in the list of Second combobox
 class Update:
 
 
-
     def last_projects_menu(self, app, eleana):
         ''' Updates list of last loaded or saved projects and adds the list to the main menu'''
         list_for_menu = []
@@ -33,7 +32,6 @@ class Update:
                 return lambda: app.load_recent(l)
 
             recent_menu.add_command(label=label, command=create_command(label))
-
 
     def dataset_list(self, eleana):
 
@@ -75,6 +73,11 @@ class Update:
     def list_in_combobox(self, app, eleana, comboboxID):
         box = self.ref_to_combobox(app, comboboxID)
         comboboxList = ['None']
+
+        if comboboxID == 'sel_group':
+            list_of_groups = list(eleana.assignmentToGroups.keys())
+            box.configure(values = list_of_groups)
+            return
 
         # Fill list in FIRST or SECOND
         if comboboxID == 'sel_first' or comboboxID == 'sel_second':
@@ -153,6 +156,7 @@ class Update:
         self.list_in_combobox(app, eleana, 'f_stk')
         self.list_in_combobox(app, eleana, 's_stk')
         self.list_in_combobox(app, eleana, 'r_stk')
+        self.list_in_combobox(app, eleana, 'sel_group')
 
     def ref_to_combobox(self, app: object, comboboxID: str):
         if comboboxID == 'sel_first':
@@ -167,13 +171,9 @@ class Update:
             box = app.s_stk
         elif comboboxID == 'r_stk':
             box = app.r_stk
+        elif comboboxID == 'sel_group':
+            box = app.sel_group
         return box
-
-
-
-    ''' 
-    Show or hide First, Second or Result frames
-    '''
 
     def gui_widgets(self, app: object, eleana, comboboxes):
         # selections = eleana.selections
@@ -295,21 +295,6 @@ class Update:
                 i += 1
             self.assignToGroups[group_name] = spectra_numbers
         return self.assignToGroups
-
-    ''' Set position on 'entry' in combobox of id = which_combobox'''
-
-
-'''
-ComboboxesLists() contains attribute entries, which stores the current lists of
-entries in comboboxes.
-Methods:
-      current_position <-- returns dict with text of current position,
-                           index on the list, and the last item on the list
-Example. If there is a combobox list = ['None', '1. FeS', '2. Heme_bL', '3. Spin_label'],
-and selection is now on 2. Heme bL then in eleana:
-      pozycja = comboboxLists.current_position(app, 'sel_first')
-gives in pozycja = {'current: '2. Heme bL', 'index':2, 'last_index':3}
-'''
 
 
 class Comboboxes():

@@ -1,14 +1,14 @@
 #!/usr/bin/python3
 import pathlib
 import pygubu
+from CTkMessagebox import CTkMessagebox
 PROJECT_PATH = pathlib.Path(__file__).parent
 
 # Adjust the name of the file with UI
 PROJECT_UI = PROJECT_PATH / "add_group.ui"
 
-
-class Groupeditor:
-    def __init__(self, eleana_instance = None, master=None):
+class Groupcreate:
+    def __init__(self, master = None, eleana_instance = None):
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)
@@ -21,17 +21,18 @@ class Groupeditor:
         self.response = None
         ''' Do not modify the code until this part'''
 
-
         # Set the window properties to modal mode
         self.mainwindow.grab_set()  # Set as modal
         self.mainwindow.attributes('-topmost', True)  # Always on top
         self.mainwindow.title('Add new group')
-        #self.mainwindow.geometry('300x300')
 
         # Define references to objects in the window
         # --- example: self.text_box contains textbox widget object
         self.group_name = builder.get_object("ctkentry2", self.mainwindow)
         self.description = builder.get_object("ctkentry3", self.mainwindow)
+        self.btn_create = builder.get_object("btn_create", self.mainwindow)
+
+        self.mainwindow.bind('<Return>', lambda event: self.btn_create.invoke())
 
     ''' DO NOT REMOVE GET AND RUN FUNCTIONS'''
     def get(self):
@@ -44,11 +45,18 @@ class Groupeditor:
     ''' END OF MANDATORY METHODS '''
 
     def create_group(self):
-        groups = []
+        groups = list(self.eleana.assignmentToGroups.keys())
+        new_group = self.group_name.get()
+        if new_group not in groups:
+            self.eleana.assignmentToGroups[new_group] = []
+            self.group_name.delete(0, "end")
+            self.description.delete(0, "end")
+            info = "Group named '" + new_group + "' has been created."
+            CTkMessagebox(title="", message=info)
 
-        groups = self.eleana.assignmentToGroups.keys()
-        print(groups)
-        print(self.group_name.get())
+        else:
+            info = "The group '" + new_group + "' already exists! Please choose different name."
+            CTkMessagebox(title="", message=info, icon = "cancel")
 
     def cancel(self):
         self.mainwindow.destroy()
@@ -59,6 +67,6 @@ class Groupeditor:
     #     pass
 
 if __name__ == "__main__":
-    app = Groupeditor()
+    app = Groupcreate()
     app.run()
 

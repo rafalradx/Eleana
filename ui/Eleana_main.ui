@@ -1229,6 +1229,18 @@
                 <property name="label" translatable="yes">Create new gorup</property>
               </object>
             </child>
+            <child>
+              <object class="tk.Menuitem.Command" id="menu_f_to_group" named="True">
+                <property name="command" type="command" cbtype="simple">first_to_group</property>
+                <property name="label" translatable="yes">Assgin first to group</property>
+              </object>
+            </child>
+            <child>
+              <object class="tk.Menuitem.Command" id="menu_s_to_group" named="True">
+                <property name="command" type="command" cbtype="simple">second_to_group</property>
+                <property name="label" translatable="yes">Assgin second to group</property>
+              </object>
+            </child>
           </object>
         </child>
       </object>

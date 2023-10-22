@@ -11,10 +11,6 @@ import pygubu
 from CTkMessagebox import CTkMessagebox
 import sys
 import customtkinter as ctk
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
-from matplotlib.backend_bases import key_press_handler
-from matplotlib.figure import Figure
-import matplotlib.pyplot
 # Implement the default Matplotlib key bindings.
 
 
@@ -25,7 +21,10 @@ from assets.initialization import Init
 from assets.graph_plotter import plotter
 from assets.update_methods import Update
 from assets.comboboxes_methods import Comboboxes
-from subprogs.group_edit.add_group import Groupeditor
+from subprogs.group_edit.add_group import Groupcreate
+from subprogs.group_edit.assign_to_group import Groupassign
+
+
 # -----GLOBAL VARIABLEs-------------
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "ui" / "Eleana_main.ui"
@@ -158,7 +157,7 @@ class EleanaMainApp:
             app.firstComplex.grid()
         else:
             app.firstComplex.grid_remove()
-        plotter(app, eleana, canvas)
+        plotter(app, eleana)
 
 
     def f_stk_selected(self, selected_value_text):
@@ -274,8 +273,6 @@ class EleanaMainApp:
         else:
             return
         plotter(app, eleana)
-
-
 
     def s_stk_up_clicked(self):
         current_position = app.s_stk.get()
@@ -650,11 +647,6 @@ class EleanaMainApp:
             app.mainwindow.iconify()
             app.mainwindow.destroy()
 
-    def create_new_group(self):
-        g_editor = Groupeditor(eleana, app.mainwindow)
-        response = g_editor.get()
-        print(response)
-
     # EDIT Menu:
     #   Notes
     def notes(self):
@@ -663,9 +655,17 @@ class EleanaMainApp:
         file_back = eleana.read_tmp_file(filename)
         eleana.notes = json.loads(file_back)
 
+    def create_new_group(self):
+        group_create = Groupcreate(app.mainwindow, eleana)
+        response = group_create.get()
+        update.list_in_combobox(app, eleana, 'sel_group')
+
+    def first_to_group(self):
+        group_assign = Groupassign(app, eleana, 'first')
+        response = group_assign.get()
+        print('Assign to group')
+
 # --- GENERAL BATCH METHODS ---
-
-
 
 def after_import(app, eleana):
     # Update dataset (names, groups and groups assignment)
@@ -709,18 +709,16 @@ init.folders(app, eleana)
 
 # Hide or show widgets in GUI
 update.gui_widgets(app, eleana, comboboxes)
+update.all_lists(app, eleana)
 
 # Initialize Plot
-
+plotter(app,eleana)
 
 # Set graph Frame scalable
 app.graphFrame.columnconfigure(0, weight=1)
 app.graphFrame.rowconfigure(0, weight=1)
-fig = Figure(figsize=(8, 4), dpi=100)
-canvas = FigureCanvasTkAgg(fig, master=app.graphFrame)
-#canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
 
-plotter(app,eleana, canvas)
+
 # def podglad(eleana):
 #     f = eleana(eleana.selections['first'])
 #     s = eleana(eleana.selections['second'])

@@ -116,7 +116,7 @@ class MenuAction:
 
             file_to_read = open(eleana_assignmentToGroups, "rb")
             loaded_object = pickle.load(file_to_read)
-            assignmentToGroups = loaded_object
+            eleana_assignmentToGroups = loaded_object
             file_to_read.close()
 
             '''
@@ -175,7 +175,7 @@ class MenuAction:
 
 
     def save_as(self):
-        eleana =self.eleana
+        eleana = self.eleana
         try:
             init_dir = Path(eleana.paths['last_project_dir'])
             init_file = ''

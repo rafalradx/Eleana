@@ -5,7 +5,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot
 import numpy as np
 
-def plotter(app: object, eleana: object, canvas):
+def plotter(app: object, eleana: object):
     '''Ta funkcja zbiera informacje o wszystkich wyborach i wyswietla odpowiednie
     wartości na wykresie.
     Funkcje trzeba rozbudowac o elementy, które sprawdzają czy mamy wyświetlić
