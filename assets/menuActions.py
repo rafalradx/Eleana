@@ -14,6 +14,7 @@ from tkinter import filedialog
 from CTkMessagebox import CTkMessagebox
 from assets.dataClasses import createFromElexsys
 
+
 class MenuAction:
 
     def __init__(self, eleana_instance, master=None):
@@ -116,7 +117,10 @@ class MenuAction:
 
             file_to_read = open(eleana_assignmentToGroups, "rb")
             loaded_object = pickle.load(file_to_read)
-            eleana_assignmentToGroups = loaded_object
+            eleana_assignmentToGroups = {}
+            for each in loaded_object:
+                group, value = list(each.items())[0]
+                eleana_assignmentToGroups[group] = value
             file_to_read.close()
 
             '''
@@ -223,8 +227,12 @@ class MenuAction:
 
         project_details = {'project version':'1.0'}
 
+        ordered_groups = []
+        for group, spectra in eleana.assignmentToGroups.items():
+            ordered_groups.append({group: spectra})
+
         elements_to_save = {
-                            'eleana_assignmentToGroups':eleana.assignmentToGroups,
+                            'eleana_assignmentToGroups':ordered_groups,
                             'eleana_groupsHierarchy':eleana.groupsHierarchy,
                             'eleana_notes':eleana.notes,
                             'eleana_paths':eleana.paths,

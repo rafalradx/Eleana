@@ -44,7 +44,7 @@ class Update:
 
 
         # Search for groups to which particular spectrum belong and create list of the group
-        collection_of_groups = []
+        collection_of_groups = list(eleana.assignmentToGroups.keys())
         i = 0
         while i < len(eleana.dataset):
             groups = eleana.dataset[i].groups
@@ -57,9 +57,9 @@ class Update:
 
         # Prepare list of groups for assignments
         assignment_to_groups = {}
-        groups = set(collection_of_groups)
-        for each in groups:
-            assignment_to_groups[each] = []
+        for group in collection_of_groups:
+            if group not in assignment_to_groups:
+                assignment_to_groups[group] = []
 
         for key in assignment_to_groups:
             i = 0

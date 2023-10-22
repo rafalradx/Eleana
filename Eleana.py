@@ -11,6 +11,9 @@ import pygubu
 from CTkMessagebox import CTkMessagebox
 import sys
 import customtkinter as ctk
+import io
+import sys
+
 # Implement the default Matplotlib key bindings.
 
 
@@ -78,12 +81,30 @@ class EleanaMainApp:
         self.r_stk = builder.get_object('r_stk', self.mainwindow)
         self.btn_clear_results = builder.get_object('btn_clear_results', self.mainwindow)
 
+        self.command_line = builder.get_object('command_line', self.mainwindow)
+        self.command_line.bind("<Return>", self.execute_command)
+        self.command_line.bind("<Up>", self.execute_command)
+        self.command_line.bind("<Down>", self.execute_command)
+
+        self.panedwindow2 = builder.get_object('panedwindow2', self.mainwindow)
+        self.pane4 = builder.get_object('pane4', self.mainwindow)
+        self.pane5 = builder.get_object('pane5', self.mainwindow)
+        #self.pane4.configure(minsize=90)
+        #self.pane5.configure(minsize=10)
+        self.panedwindow2.configure(self.pane4, minsize=90)
+        self.panedwindow2.configure(self.pane5, minsize=10)
+
+        self.log_field = builder.get_object('log_field', self.mainwindow)
         # Set default values
         self.firstComplex.set(value="re")
         self.secondComplex.set(value="re")
         self.resultComplex.set(value="re")
         self.legendFrame = builder.get_object('legendFrame', self.mainwindow)
-        
+
+        self.command_history = {'index':0, 'lines':[]}
+
+        #self.panedwindow2.configure(self.pane4, minsize=70)
+        #self.panedwindow2.configure(self.pane5, minsize=30)
     def run(self):
         self.mainwindow.deiconify()
         self.mainwindow.mainloop()
@@ -548,48 +569,40 @@ class EleanaMainApp:
     # FILE
     # --- Load Project
     def load_project(self, recent=None):
-
         project = menuAction.load_project(recent)
-
+        print(project['assignmentToGroups'])
         eleana.selections = project['selections']
         eleana.dataset = project['dataset']
         eleana.results_dataset = project['results_dataset']
         eleana.assignmentToGroups = project['assignmentToGroups']
         eleana.groupsHierarchy = project['groupsHierarchy']
         eleana.notes = project['notes']
-        #eleana.paths = project['paths']
-
         update.dataset_list(eleana)
         update.all_lists(app, eleana)
-
         try:
             selected_value_text = eleana.dataset[eleana.selections['first']].name_nr
             self.first_selected(selected_value_text)
             app.sel_first.set(selected_value_text)
         except:
             pass
-
         try:
             selected_value_text = eleana.dataset[eleana.selections['second']].name_nr
             self.second_selected(selected_value_text)
             app.sel_second.set(selected_value_text)
         except:
             pass
-
         try:
             selected_value_text = eleana.dataset[eleana.selections['result']].name_nr
             self.result_selected(selected_value_text)
             app.sel_result.set(selected_value_text)
         except:
             pass
-
         plotter(app, eleana)
+
     def load_recent(self, selected_value_text):
         index = selected_value_text.split('. ')
         index = int(index[0])
         index = index - 1
-
-        print(eleana.paths['last_projects'])
         recent = eleana.paths['last_projects'][index]
         self.load_project(recent)
         eleana.paths['last_project_dir'] = Path(recent).parent
@@ -598,7 +611,6 @@ class EleanaMainApp:
     # --- Save as
     def save_as(self):
         report = menuAction.save_as()
-
         if report['error']:
             CTkMessagebox(title="Error", message=report['desc'], icon="cancel")
         else:
@@ -607,11 +619,6 @@ class EleanaMainApp:
 
         # Remove duplications and limit the list to 10 items
         last_projects = list(set(last_projects))
-        # i = 1
-        # for each in projects:
-        #     name = str(i) + '. ' + each
-        #     last_projects.append(name)
-        #     i += 1
 
         # Write the list to eleana.paths
         eleana.paths['last_projects'] = last_projects
@@ -625,8 +632,6 @@ class EleanaMainApp:
     def import_elexsys(self):
         ''' Open window that loads the spectra '''
         menuAction.loadElexsys(eleana)
-
-
         update.dataset_list(eleana)
         update.all_lists(app, eleana)
 
@@ -661,9 +666,63 @@ class EleanaMainApp:
         update.list_in_combobox(app, eleana, 'sel_group')
 
     def first_to_group(self):
+        if eleana.selections['first'] < 0:
+            return
         group_assign = Groupassign(app, eleana, 'first')
         response = group_assign.get()
-        print('Assign to group')
+
+    def second_to_group(self):
+        if eleana.selections['second'] < 0:
+            return
+        group_assign = Groupassign(app, eleana, 'second')
+        response = group_assign.get()
+
+    def execute_command(self,event):
+        if event.keysym == "Up":
+            try:
+                previous = self.command_history['index'] - 1
+                self.command_history['index'] = previous
+                previous_command = self.command_history['lines'][previous]
+                self.command_line.delete(0, "end")
+                self.command_line.insert(0, previous_command)
+            except:
+                pass
+            return
+        if event.keysym == "Down":
+            try:
+                previous = self.command_history['index'] + 1
+                self.command_history['index'] = previous
+                previous_command = self.command_history['lines'][previous]
+                self.command_line.delete(0, "end")
+                self.command_line.insert(0, previous_command)
+            except:
+                pass
+            return
+
+        if event.keysym == "Return":
+            command = self.command_line.get()
+            self.command_history['lines'].append(command)
+            self.command_history['index'] = len(self.command_history['lines']) - 1
+
+            new_log = '\n>>> ' + command
+            app.log_field.insert("end", new_log)
+            app.command_line.delete(0, "end")
+
+            stdout_backup = sys.stdout
+            sys.stdout = io.StringIO()
+
+            try:
+                #exec(command, globals(), locals())
+                eval(command, globals(), locals())
+                output = sys.stdout.getvalue()
+            except Exception as e:
+                output = f"Error: {e}"
+            finally:
+                sys.stdout = stdout_backup
+
+            new_log = '\n' + output
+            app.log_field.insert("end", new_log)
+            return output
 
 # --- GENERAL BATCH METHODS ---
 

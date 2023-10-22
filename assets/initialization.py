@@ -7,9 +7,9 @@ import pickle
 
 class Init:
 
-    def __init__(self, app, eleana):
+    def __init__(self, app, eleana_instance):
         self.app = app
-        self.eleana = eleana
+        self.eleana = eleana_instance
 
     def main_window(self, app, eleana):
         '''This method sets properties of the main window'''

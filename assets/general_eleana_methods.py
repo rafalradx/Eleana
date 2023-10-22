@@ -6,7 +6,6 @@ import tempfile
 
 
 class Eleana:
-
     # Main attributes associated with data gathered in the programe
     def __init__(self):
         self.version = 1.0

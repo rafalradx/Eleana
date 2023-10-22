@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import pathlib
+from tkinter import Event
 import pygubu
 from CTkMessagebox import CTkMessagebox
 PROJECT_PATH = pathlib.Path(__file__).parent
@@ -21,6 +22,7 @@ class Groupcreate:
         self.response = None
         ''' Do not modify the code until this part'''
 
+
         # Set the window properties to modal mode
         self.mainwindow.grab_set()  # Set as modal
         self.mainwindow.attributes('-topmost', True)  # Always on top
@@ -32,17 +34,19 @@ class Groupcreate:
         self.description = builder.get_object("ctkentry3", self.mainwindow)
         self.btn_create = builder.get_object("btn_create", self.mainwindow)
 
+        # Define keyboard bindings
         self.mainwindow.bind('<Return>', lambda event: self.btn_create.invoke())
+        self.mainwindow.bind("<Escape>", self.cancel)
 
     ''' DO NOT REMOVE GET AND RUN FUNCTIONS'''
     def get(self):
         if self.mainwindow.winfo_exists():
            self.master.wait_window(self.mainwindow)
         return self.response
-
     def run(self):
         self.mainwindow.mainloop()
     ''' END OF MANDATORY METHODS '''
+
 
     def create_group(self):
         groups = list(self.eleana.assignmentToGroups.keys())
@@ -53,18 +57,13 @@ class Groupcreate:
             self.description.delete(0, "end")
             info = "Group named '" + new_group + "' has been created."
             CTkMessagebox(title="", message=info)
-
         else:
             info = "The group '" + new_group + "' already exists! Please choose different name."
             CTkMessagebox(title="", message=info, icon = "cancel")
+        self.response = new_group
 
-    def cancel(self):
+    def cancel(self, event: Event = None):
         self.mainwindow.destroy()
-    # def ok_clicked(self):
-    #     # Set the response to the text in the textbox and close the modal window
-    #     self.response = self.text_box.get("1.0", "end-1c")  #
-    #     self.mainwindow.destroy()
-    #     pass
 
 if __name__ == "__main__":
     app = Groupcreate()

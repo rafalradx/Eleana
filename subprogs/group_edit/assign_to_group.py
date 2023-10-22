@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import pathlib
 import pygubu
+from tkinter import Event
 from CTkMessagebox import CTkMessagebox
 from subprogs.group_edit.add_group import Groupcreate
 PROJECT_PATH = pathlib.Path(__file__).parent
@@ -13,21 +14,14 @@ class Groupassign:
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)
-
         self.master = master.mainwindow
         self.eleana = eleana_instance
         self.response = None
         self.app = master
-
-        #if self.eleana != None:
-        #     if self.eleana.selections['first'] < 0:
-        #         exit()
-
-                # Main widget
+        # Main widget
         self.mainwindow = builder.get_object("toplevel1", self.master)
         builder.connect_callbacks(self)
         # Reference to master window and eleana instance and response variable
-
         ''' Do not modify the code until this part'''
 
 
@@ -36,7 +30,6 @@ class Groupassign:
         self.mainwindow.attributes('-topmost', True)  # Always on top
         self.mainwindow.title('Add new group')
 
-
         # Define references to objects in the window
         # --- example: self.text_box contains textbox widget object
         self.btn_to_existing = builder.get_object("btn_to_existing", self.mainwindow)
@@ -44,15 +37,18 @@ class Groupassign:
         self.btn_cancel = builder.get_object("btn_cancel", self.mainwindow)
         self.sel_group = builder.get_object("sel_group", self.mainwindow)
         self.name_label = builder.get_object('ctklabel1', self.mainwindow)
+        self.group_field = builder.get_object('group_field', self.mainwindow)
+        self.which = which
 
-        first_list = self.app.sel_first._values
-        label_text = 'Assign:   ' + self.app.sel_first.get()
-        self.name_label.configure(text = label_text)
+        # Check if
+        self.index = self.eleana.selections[self.which]
 
         groups = list(self.eleana.assignmentToGroups.keys())
         self.sel_group.configure(values = groups)
         self.sel_group.set('All')
-        #self.mainwindow.bind('<Return>', lambda event: self.btn_create.invoke())
+
+        self.mainwindow.bind("<Escape>", self.cancel)
+        self.display_data_groups()
 
     ''' DO NOT REMOVE GET AND RUN FUNCTIONS'''
     def get(self):
@@ -61,24 +57,43 @@ class Groupassign:
         return self.response
 
     def run(self):
+        self.display_data_groups('<init label text>')
         self.mainwindow.mainloop()
     ''' END OF MANDATORY METHODS '''
 
-    def assing_to_existing(self):
-        pass
+    def assign_to_existing(self):
+        new_group = self.sel_group.get()
+        self.write_assignment_to_data(new_group)
+
     def assign_to_new(self):
         group_create = Groupcreate(self.mainwindow, self.eleana)
-        response = group_create.get()
-        print('Wykonano okienko')
+        new_group = group_create.get()
+        self.write_assignment_to_data(new_group)
 
-    def cancel(self):
+    def cancel(self, event: Event = None):
         self.mainwindow.destroy()
-    # def ok_clicked(self):
-    #     # Set the response to the text in the textbox and close the modal window
-    #     self.response = self.text_box.get("1.0", "end-1c")  #
-    #     self.mainwindow.destroy()
-    #     pass
 
+    def write_assignment_to_data(self, new_group):
+        index = self.eleana.selections[self.which]
+        groups = self.eleana.dataset[index].groups
+        if new_group in groups:
+            info = "'" + str(self.eleana.dataset[index].name_nr) + "'" + ' already belongs to ' + new_group
+            CTkMessagebox(title="", message=info)
+            return
+        self.eleana.dataset[index].groups.append(new_group)
+        self.display_data_groups()
+    def display_data_groups(self):
+        data_name = self.eleana.dataset[self.index].name_nr
+        groups = self.eleana.dataset[self.index].groups
+        self.eleana.dataset[self.index].groups = groups
+        groups = ', '.join(self.eleana.dataset[self.index].groups)
+        text = "NAME: " + data_name
+        self.name_label.configure(text=text)
+        text = groups
+        self.group_field.configure(state="normal")
+        self.group_field.delete("0.0", "end")
+        self.group_field.insert("0.0",  text)
+        self.group_field.configure(state="disabled")
 if __name__ == "__main__":
     app = Groupassign()
     app.run()
