@@ -47,7 +47,6 @@ class Groupcreate:
         self.mainwindow.mainloop()
     ''' END OF MANDATORY METHODS '''
 
-
     def create_group(self):
         groups = list(self.eleana.assignmentToGroups.keys())
         new_group = self.group_name.get()
@@ -55,8 +54,9 @@ class Groupcreate:
             self.eleana.assignmentToGroups[new_group] = []
             self.group_name.delete(0, "end")
             self.description.delete(0, "end")
-            info = "Group named '" + new_group + "' has been created."
-            CTkMessagebox(title="", message=info)
+            #info = "Group named '" + new_group + "' has been created."
+            #CTkMessagebox(title="", message=info)
+            self.cancel(None)
         else:
             info = "The group '" + new_group + "' already exists! Please choose different name."
             CTkMessagebox(title="", message=info, icon = "cancel")

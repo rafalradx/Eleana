@@ -16,9 +16,7 @@ from assets.dataClasses import createFromElexsys
 
 
 class MenuAction:
-
     def __init__(self, eleana_instance, master=None):
-        # Initialize eleana
         self.eleana = eleana_instance
     # FILE
     def load_project(self, recent=None):

@@ -96,7 +96,7 @@
         <child>
           <object class="customtkinter.CTkButton" id="btn_to_existing" named="True">
             <property name="command" type="command" cbtype="simple">assign_to_existing</property>
-            <property name="text" translatable="yes">Assign to group</property>
+            <property name="text" translatable="yes">Add</property>
             <layout manager="grid">
               <property name="column">0</property>
               <property name="padx">10</property>
@@ -108,7 +108,7 @@
         <child>
           <object class="customtkinter.CTkButton" id="btn_new" named="True">
             <property name="command" type="command" cbtype="simple">assign_to_new</property>
-            <property name="text" translatable="yes">Create new group</property>
+            <property name="text" translatable="yes">Add to new</property>
             <layout manager="grid">
               <property name="column">1</property>
               <property name="padx">10</property>
@@ -120,7 +120,7 @@
         <child>
           <object class="customtkinter.CTkButton" id="btn_cancel" named="True">
             <property name="command" type="command" cbtype="simple">cancel</property>
-            <property name="text" translatable="yes">Cancel</property>
+            <property name="text" translatable="yes">Quit</property>
             <layout manager="grid">
               <property name="column">2</property>
               <property name="padx">10</property>

@@ -43,7 +43,9 @@ class Groupassign:
         # Check if
         self.index = self.eleana.selections[self.which]
 
-        groups = list(self.eleana.assignmentToGroups.keys())
+        asToGr = self.eleana.assignmentToGroups
+        del asToGr['<group-list/>']
+        groups = list(asToGr.keys())
         self.sel_group.configure(values = groups)
         self.sel_group.set('All')
 
@@ -70,6 +72,7 @@ class Groupassign:
         new_group = group_create.get()
         self.write_assignment_to_data(new_group)
 
+
     def cancel(self, event: Event = None):
         self.mainwindow.destroy()
 
@@ -85,6 +88,8 @@ class Groupassign:
     def display_data_groups(self):
         data_name = self.eleana.dataset[self.index].name_nr
         groups = self.eleana.dataset[self.index].groups
+        if len(groups) == 0:
+            groups = ['All']
         self.eleana.dataset[self.index].groups = groups
         groups = ', '.join(self.eleana.dataset[self.index].groups)
         text = "NAME: " + data_name
@@ -94,6 +99,7 @@ class Groupassign:
         self.group_field.delete("0.0", "end")
         self.group_field.insert("0.0",  text)
         self.group_field.configure(state="disabled")
+
 if __name__ == "__main__":
     app = Groupassign()
     app.run()

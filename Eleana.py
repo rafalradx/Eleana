@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-
 # Import Standard Python Modules
 import json
 import pickle
@@ -14,9 +13,6 @@ import customtkinter as ctk
 import io
 import sys
 
-# Implement the default Matplotlib key bindings.
-
-
 # Import Eleana specific classes
 from assets.general_eleana_methods import Eleana
 from assets.menuActions import MenuAction
@@ -27,8 +23,6 @@ from assets.comboboxes_methods import Comboboxes
 from subprogs.group_edit.add_group import Groupcreate
 from subprogs.group_edit.assign_to_group import Groupassign
 
-
-# -----GLOBAL VARIABLEs-------------
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "ui" / "Eleana_main.ui"
 VERSION = 1
@@ -53,7 +47,6 @@ class EleanaMainApp:
         # Main menu
         main_menu = builder.get_object("mainmenu", self.mainwindow)
         self.mainwindow.configure(menu=main_menu)
-
 
         self.group_down = None
         self.group_up = None
@@ -89,10 +82,6 @@ class EleanaMainApp:
         self.panedwindow2 = builder.get_object('panedwindow2', self.mainwindow)
         self.pane4 = builder.get_object('pane4', self.mainwindow)
         self.pane5 = builder.get_object('pane5', self.mainwindow)
-        #self.pane4.configure(minsize=90)
-        #self.pane5.configure(minsize=10)
-        self.panedwindow2.configure(self.pane4, minsize=90)
-        self.panedwindow2.configure(self.pane5, minsize=10)
 
         self.log_field = builder.get_object('log_field', self.mainwindow)
         # Set default values
@@ -103,8 +92,7 @@ class EleanaMainApp:
 
         self.command_history = {'index':0, 'lines':[]}
 
-        #self.panedwindow2.configure(self.pane4, minsize=70)
-        #self.panedwindow2.configure(self.pane5, minsize=30)
+
     def run(self):
         self.mainwindow.deiconify()
         self.mainwindow.mainloop()
@@ -532,7 +520,6 @@ class EleanaMainApp:
             app.sel_result.set(position)
             self.result_selected(position)
 
-
     def clear_results(self):
         quit_dialog = CTkMessagebox(title="Clear results", message="Are you sure you want to clear the entire dataset in the results?",
                                     icon="warning", option_1="No", option_2="Yes")
@@ -670,6 +657,9 @@ class EleanaMainApp:
             return
         group_assign = Groupassign(app, eleana, 'first')
         response = group_assign.get()
+        update.group_list(eleana)
+        update.all_lists(app, eleana)
+        print(eleana.assignmentToGroups)
 
     def second_to_group(self):
         if eleana.selections['second'] < 0:

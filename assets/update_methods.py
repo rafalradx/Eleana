@@ -14,9 +14,8 @@ This will create 3 positions in the list of Second combobox
 '''
 class Update:
 
-
     def last_projects_menu(self, app, eleana):
-        ''' Updates list of last loaded or saved projects and adds the list to the main menu'''
+        ''' Updates list of the recently loaded or saved projects and adds the list to the main menu'''
         list_for_menu = []
         i = 1
         for each in eleana.paths['last_projects']:
@@ -33,49 +32,91 @@ class Update:
 
             recent_menu.add_command(label=label, command=create_command(label))
 
-    def dataset_list(self, eleana):
+    def group_list(self, eleana):
+        ''' This scans for groups and creates assingments in eleana.assignmentToGroups'''
+        # 1. Scan each dataset and append index to the assignment
+        assignments = {'<group-list/>': [], 'All': []}
+        i = 0
+        while i < len(eleana.dataset):
+            groups = eleana.dataset[i].groups
+            for group in groups:
+                assignments[group] = []
+            i += 1
 
-        # Create numbered names in the eleana.dataset[X].names_nr
+        for key in assignments.keys():
+            indexes = list(assignments[key])
+            indexes.sort()
+            assignments[key] = indexes
+
+        i = 0
+        while i < len(eleana.dataset):
+            groups_in_dataset = eleana.dataset[i].groups  # Poberz nazwy grup z każdego spectrum
+            if len(groups_in_dataset) == 0:  # Jesli grupa jest pusta
+                assignments['All'].append(i)  # To dopisz widmo do grupy All
+            else:  # Jeśli cos jest w grupie
+                for each in groups_in_dataset:  # To przejdź po kazdej nazwie grupy w groups_in_dataset
+                    assignments[each].append(i)  # I do klucza tej grupy dopisz numer widma
+            i += 1
+
+        # 2. Remove duplications in assignments values and sort
+        # for key in assignments.keys():
+        #     indexes = list(assignments[key])
+        #     indexes.sort()
+        #     assignments[key] = indexes
+
+        # 3. Create list of groups in ascending order and save to eleana.assignmentToGroups
+        list_of_groups = assignments
+        del list_of_groups['<group-list/>']
+        list_of_groups = assignments.keys()
+        list_of_groups = list(list_of_groups)
+        list_of_groups.sort()
+        assignments['<group-list/>'] = list_of_groups
+        eleana.assignmentToGroups = assignments
+
+    def dataset_list(self, eleana):
+        ''' It scans the whole dataset, create numbered names, collects groups and assigns to groups'''
+
+        # 1. Create numbered names for data in eleana.dataset[X].names_nr and collect groups
         i = 0
         while i < len(eleana.dataset):
             eleana.dataset[i].name_nr = str(i+1) + '. ' + eleana.dataset[i].name
             i += 1
-        # ----- END OF CREATING NUMBERED NAMES IN DATASET ----
+
+        # # 2. Scan each dataset and append index to the assignment
+        # assignments = {'<groups-list/>':[], 'All': []}
+        # i = 0
+        # while i < len(eleana.dataset):
+        #     groups_in_dataset = eleana.dataset[i].groups   # Poberz nazwy grup z każdego spectrum
+        #     if len(groups_in_dataset) == 0:                # Jesli grupa jest pusta
+        #         assignments['All'].append(i)            # To dopisz widmo do grupy All
+        #     else:                                           # Jeśli cos jest w grupie
+        #         for each in groups_in_dataset:                  # To przejdź po kazdej nazwie grupy w groups_in_dataset
+        #             assignments[each].append(i)   # I do klucza tej grupy dopisz numer widma
+        #     i += 1
+        #
+        # # 3. Remove duplications in assignments values and sort
+        # for key in assignments.keys():
+        #     indexes = list(assignments[key])
+        #     indexes.sort()
+        #     assignments[key] = indexes
+        #
+        # # 4. Create list of groups in ascending order and save to eleana.assignmentToGroups
+        # list_of_groups = assignments
+        # del list_of_groups['<groups-list/>']
+        # list_of_groups = assignments.keys()
+        # list_of_groups = list(list_of_groups)
+        # list_of_groups.sort()
+        # assignments['<groups-list/>'] = list_of_groups
+        # eleana.assignmentToGroups = assignments
 
 
-        # Search for groups to which particular spectrum belong and create list of the group
-        collection_of_groups = list(eleana.assignmentToGroups.keys())
-        i = 0
-        while i < len(eleana.dataset):
-            groups = eleana.dataset[i].groups
-            if len(groups) == 0:
-                groups = ['All']
-                eleana.dataset[i].groups = groups
-            collection_of_groups.extend(groups)
-            i += 1
-        # ----- END OF GENERATING LIST OF GROUPS -------
-
-        # Prepare list of groups for assignments
-        assignment_to_groups = {}
-        for group in collection_of_groups:
-            if group not in assignment_to_groups:
-                assignment_to_groups[group] = []
-
-        for key in assignment_to_groups:
-            i = 0
-            while i < len(eleana.dataset)-1:
-                if key in eleana.dataset[i].groups:
-                   assignment_to_groups[key].append(i)
-                i += 1
-        eleana.assignmentToGroups = assignment_to_groups
-        # ------------ END OF ASSIGNMENT TO GROUPS ----------
 
     def list_in_combobox(self, app, eleana, comboboxID):
         box = self.ref_to_combobox(app, comboboxID)
         comboboxList = ['None']
 
         if comboboxID == 'sel_group':
-            list_of_groups = list(eleana.assignmentToGroups.keys())
+            list_of_groups = eleana.assignmentToGroups['<group-list/>']
             box.configure(values = list_of_groups)
             return
 
@@ -85,7 +126,6 @@ class Update:
             if currentGroup == 'All':
                 for each in eleana.dataset:
                     comboboxList.append(each.name_nr)
-
             else:
                 list_from_group = eleana.assignmentToGroups[currentGroup]
                 for each in list_from_group:
