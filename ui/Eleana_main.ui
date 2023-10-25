@@ -13,7 +13,7 @@
     </containerlayout>
     <child>
       <object class="customtkinter.CTkFrame" id="windowFrame" named="True">
-        <property name="height">60</property>
+        <property name="height">900</property>
         <layout manager="grid">
           <property name="column">0</property>
           <property name="row">0</property>
@@ -77,7 +77,7 @@
                               <object class="customtkinter.CTkFrame" id="selectionsFrame" named="True">
                                 <property name="bg_color">#fdf6e3</property>
                                 <property name="corner_radius">0</property>
-                                <property name="width">80</property>
+                                <property name="width">400</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
                                   <property name="row">0</property>
@@ -944,11 +944,12 @@
                                         <property name="fg_color">#505050</property>
                                         <layout manager="grid">
                                           <property name="column">0</property>
-                                          <property name="padx">4</property>
+                                          <property name="padx">0</property>
                                           <property name="row">4</property>
                                           <property name="sticky">nsew</property>
                                         </layout>
                                         <containerlayout manager="grid">
+                                          <property type="col" id="0" name="weight">1</property>
                                           <property type="col" id="1" name="weight">1</property>
                                         </containerlayout>
                                         <child>
@@ -960,40 +961,95 @@
                                             <property name="values">["re","im","cpl","magn"]</property>
                                             <layout manager="grid">
                                               <property name="column">0</property>
+                                              <property name="padx">5</property>
                                               <property name="row">0</property>
+                                              <property name="sticky">w</property>
                                             </layout>
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkButton" id="btn_clear_results" named="True">
-                                            <property name="command" type="command" cbtype="simple">clear_results</property>
-                                            <property name="corner_radius">5</property>
-                                            <property name="fg_color">#3c9b59</property>
-                                            <property name="font">{Arial} 12 {bold}</property>
-                                            <property name="height">20</property>
-                                            <property name="text" translatable="yes">Clear</property>
-                                            <property name="width">60</property>
+                                          <object class="customtkinter.CTkFrame" id="ctkframe4">
+                                            <property name="fg_color">#505050</property>
                                             <layout manager="grid">
-                                              <property name="column">1</property>
-                                              <property name="padx">2</property>
-                                              <property name="row">0</property>
+                                              <property name="column">0</property>
+                                              <property name="columnspan">2</property>
+                                              <property name="pady">10</property>
+                                              <property name="row">1</property>
+                                              <property name="sticky">nsew</property>
                                             </layout>
-                                          </object>
-                                        </child>
-                                        <child>
-                                          <object class="customtkinter.CTkButton" id="btn_result_to_main" named="True">
-                                            <property name="command" type="command" cbtype="simple">result_to_main</property>
-                                            <property name="corner_radius">5</property>
-                                            <property name="fg_color">#3c9b59</property>
-                                            <property name="font">{Arial} 12 {bold}</property>
-                                            <property name="height">20</property>
-                                            <property name="text" translatable="yes">To main</property>
-                                            <property name="width">60</property>
-                                            <layout manager="grid">
-                                              <property name="column">2</property>
-                                              <property name="padx">2</property>
-                                              <property name="row">0</property>
-                                            </layout>
+                                            <containerlayout manager="grid">
+                                              <property type="col" id="0" name="weight">1</property>
+                                              <property type="col" id="1" name="weight">1</property>
+                                              <property type="col" id="2" name="weight">1</property>
+                                              <property type="col" id="3" name="weight">1</property>
+                                              <property type="col" id="4" name="weight">1</property>
+                                            </containerlayout>
+                                            <child>
+                                              <object class="customtkinter.CTkButton" id="btn_clear_results" named="True">
+                                                <property name="command" type="command" cbtype="simple">clear_results</property>
+                                                <property name="corner_radius">5</property>
+                                                <property name="fg_color">#3c9b59</property>
+                                                <property name="font">{Arial} 12 {bold}</property>
+                                                <property name="height">20</property>
+                                                <property name="text" translatable="yes">Clear</property>
+                                                <property name="width">60</property>
+                                                <layout manager="grid">
+                                                  <property name="column">1</property>
+                                                  <property name="padx">2</property>
+                                                  <property name="row">0</property>
+                                                  <property name="sticky">w</property>
+                                                </layout>
+                                              </object>
+                                            </child>
+                                            <child>
+                                              <object class="customtkinter.CTkButton" id="btn_result_to_main" named="True">
+                                                <property name="command" type="command" cbtype="simple">result_to_main</property>
+                                                <property name="corner_radius">5</property>
+                                                <property name="fg_color">#3c9b59</property>
+                                                <property name="font">{Arial} 12 {bold}</property>
+                                                <property name="height">20</property>
+                                                <property name="text" translatable="yes">Add to group</property>
+                                                <property name="width">60</property>
+                                                <layout manager="grid">
+                                                  <property name="column">2</property>
+                                                  <property name="padx">2</property>
+                                                  <property name="row">0</property>
+                                                </layout>
+                                              </object>
+                                            </child>
+                                            <child>
+                                              <object class="customtkinter.CTkButton" id="btn_all_to_results" named="True">
+                                                <property name="command" type="command" cbtype="simple">all_results_to_main</property>
+                                                <property name="corner_radius">5</property>
+                                                <property name="fg_color">#3c9b59</property>
+                                                <property name="font">{Arial} 12 {bold}</property>
+                                                <property name="height">20</property>
+                                                <property name="text" translatable="yes">All to group</property>
+                                                <property name="width">60</property>
+                                                <layout manager="grid">
+                                                  <property name="column">3</property>
+                                                  <property name="padx">2</property>
+                                                  <property name="row">0</property>
+                                                </layout>
+                                              </object>
+                                            </child>
+                                            <child>
+                                              <object class="customtkinter.CTkButton" id="btn_delete_sel_result" named="True">
+                                                <property name="command" type="command" cbtype="simple">delete_sel_result</property>
+                                                <property name="corner_radius">5</property>
+                                                <property name="fg_color">#3c9b59</property>
+                                                <property name="font">{Arial} 12 {bold}</property>
+                                                <property name="height">20</property>
+                                                <property name="text" translatable="yes">Delete</property>
+                                                <property name="width">60</property>
+                                                <layout manager="grid">
+                                                  <property name="column">4</property>
+                                                  <property name="padx">4</property>
+                                                  <property name="row">0</property>
+                                                  <property name="sticky">e</property>
+                                                </layout>
+                                              </object>
+                                            </child>
                                           </object>
                                         </child>
                                       </object>
@@ -1095,7 +1151,6 @@
                         <child>
                           <object class="customtkinter.CTkTextbox" id="log_field" named="True">
                             <property name="corner_radius">0</property>
-                            <property name="font">{Arial} 12 {}</property>
                             <property name="text" translatable="yes">Welcome to Eleana.</property>
                             <layout manager="grid">
                               <property name="column">0</property>
@@ -1107,7 +1162,6 @@
                         </child>
                         <child>
                           <object class="customtkinter.CTkEntry" id="command_line" named="True">
-                            <property name="font">{Arial} 12 {}</property>
                             <layout manager="grid">
                               <property name="column">0</property>
                               <property name="row">1</property>
@@ -1245,12 +1299,6 @@
           <object class="tk.Menuitem.Submenu" id="menu_groups" named="True">
             <property name="label" translatable="yes">Groups</property>
             <property name="tearoff">false</property>
-            <child>
-              <object class="tk.Menuitem.Command" id="menu_group_create" named="True">
-                <property name="command" type="command" cbtype="simple">create_new_group</property>
-                <property name="label" translatable="yes">Create new gorup</property>
-              </object>
-            </child>
             <child>
               <object class="tk.Menuitem.Command" id="menu_f_to_group" named="True">
                 <property name="command" type="command" cbtype="simple">first_to_group</property>

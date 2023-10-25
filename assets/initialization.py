@@ -2,11 +2,12 @@ import json
 from pathlib import Path
 import tkinter as tk
 import customtkinter as ctk
-from json import loads, dumps
+import numpy as np
 import pickle
-
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 class Init:
-
     def __init__(self, app, eleana_instance):
         self.app = app
         self.eleana = eleana_instance
@@ -93,3 +94,23 @@ class Init:
         eleana.results_dataset = []
         eleana.assignmentToGroups = {}
         eleana.groupsHierarchy = {}
+
+    def graph_canvas(self, app):
+        fig = plt.Figure(figsize=(8, 4), dpi=100)
+        ax = fig.add_subplot(111)
+
+        # Generowanie danych dla funkcji sinc(x)
+        x = np.linspace(-10, 10, 400)
+        y = np.sinc(x)
+
+        # Rysowanie wykresu funkcji sinc(x)
+        ax.plot(x, y, color='b', linewidth=2)
+
+        graph_canvas = FigureCanvasTkAgg(fig, master=app.graphFrame)
+        graph_canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+        graph_canvas.draw()
+
+        graph_toolbar = NavigationToolbar2Tk(graph_canvas, app.graphFrame, pack_toolbar=False)
+        graph_toolbar.update()
+        graph_toolbar.grid(row=1, column=0, sticky="ew")
+        return graph_canvas

@@ -74,13 +74,13 @@ class Eleana:
             index = numbered_names.index(selected_value_text)
             return index
 
-    def getDataFromSelection(self, eleana: object, first_second_or_results: str):
+    def getDataFromSelection(self, first_second_or_results: str):
         # This method returns X, reY, imY and boolean complex depending on values in eleana.selections
         # Argument first_second_or_results is string 'first' for First selection
         #                                            'second' for Second selection
         #                                            'result' for Results selection
 
-        selection = eleana.selections
+        selection = self.selections
         if first_second_or_results == 'first':
             index_main = selection['first']     # Get index from dataset
             index_stk = selection['f_stk']      # Get index in stack if it is a stack
@@ -97,10 +97,9 @@ class Eleana:
             show_complex = selection['r_cpl']
 
         else:
-            print("Wrong argument. Must be 'first', 'second' or 'result'")
             return {}
 
-        data = eleana.dataset[index_main]
+        data = self.dataset[index_main]
         type = data.type
 
         if type == 'stack 2D':
@@ -131,7 +130,7 @@ class Eleana:
 
                 if type == 'stack 2D':
                    re_y = re_y[index_stk]
-            else: # show_complex == 're' or ''
+            else:
                 re_y = [value.real for value in data.y]
                 im_y = np.array([])
                 if type == 'stack 2D':
@@ -145,6 +144,8 @@ class Eleana:
             if type == 'stack 2D':
                 y = data.y[index_stk]
         return {'x':x, 're_y':y, 'complex':False, 'im_y':np.array([])}
+
+
 
     # Write "content" to text file "filename" in temporary directory (/tmp)
     def create_tmp_file(self, filename: str, content=""):

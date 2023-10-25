@@ -17,7 +17,7 @@ import sys
 from assets.general_eleana_methods import Eleana
 from assets.menuActions import MenuAction
 from assets.initialization import Init
-from assets.graph_plotter import plotter
+from assets.graph_plotter import Grapher
 from assets.update_methods import Update
 from assets.comboboxes_methods import Comboboxes
 from subprogs.group_edit.add_group import Groupcreate
@@ -92,18 +92,48 @@ class EleanaMainApp:
 
         self.command_history = {'index':0, 'lines':[]}
 
+    def set_pane_height(self):
+        desired_height = 10
+        #app.panedwindow2.place_configure(height=800)
+        #app.pane5.place_configure(height=50, width=800)
+        #app.pane4.place_configure(height=600, width=800)
+        #app.pane5.place_configure(height=90, width=800)
+        return
 
     def run(self):
-        self.mainwindow.deiconify()
-        self.mainwindow.mainloop()
+            self.mainwindow.deiconify()
+            self.mainwindow.after(100, self.set_pane_height)
+            self.mainwindow.mainloop()
+
 
     def group_down_clicked(self):
-        pass
+        current_group = app.sel_group.get()
+        group_list = app.sel_group._values
+        index = group_list.index(current_group)
+        print(index)
+        if index == 0:
+            return
+        index -= 1
+        new_group = group_list[index]
+        app.sel_group.set(new_group)
+        self.group_selected(new_group)
 
     def group_up_clicked(self):
+        current_group = app.sel_group.get()
+        group_list = app.sel_group._values
+        index = group_list.index(current_group)
+        print(index)
+        if index == len(group_list) - 1:
+            return
+        index += 1
+        new_group = group_list[index]
+        app.sel_group.set(new_group)
+        self.group_selected(new_group)
         pass
 
     def group_selected(self, value):
+        eleana.selections['group'] = value
+        update.all_lists(app, eleana)
         pass
 
     def first_down_clicked(self):
@@ -116,7 +146,6 @@ class EleanaMainApp:
         else:
             print('Index in sel_first not found')
             return
-
         try:
             new_position = list_of_items[index - 1]
             app.sel_first.set(new_position)
@@ -132,7 +161,6 @@ class EleanaMainApp:
         else:
             print('Index in sel_first not found.')
             return
-
         try:
             new_position = list_of_items[index + 1]
             app.sel_first.set(new_position)
@@ -142,7 +170,7 @@ class EleanaMainApp:
 
     def first_complex_clicked(self, value):
             eleana.selections['f_cpl'] = value
-            plotter(app, eleana)
+            grapher.plot_graph()
 
 
     def first_selected(self, selected_value_text):
@@ -150,8 +178,8 @@ class EleanaMainApp:
             eleana.selections['first'] = -1
             app.firstComplex.grid_remove()
             app.firstStkFrame.grid_remove()
-            print("'oooooooo"+str(eleana.selections['first']))
-            plotter(app, eleana)
+
+            grapher.plot_graph()
             return
         i = 0
         while i < len(eleana.dataset):
@@ -166,7 +194,7 @@ class EleanaMainApp:
             app.firstComplex.grid()
         else:
             app.firstComplex.grid_remove()
-        plotter(app, eleana)
+        grapher.plot_graph()
 
 
     def f_stk_selected(self, selected_value_text):
@@ -175,7 +203,7 @@ class EleanaMainApp:
             eleana.selections['f_stk'] = index
         else:
             return
-        plotter(app, eleana)
+        grapher.plot_graph()
 
 
     def f_stk_up_clicked(self):
@@ -193,7 +221,7 @@ class EleanaMainApp:
             eleana.selections['f_stk'] = index + 1
         except IndexError:
             return
-        plotter(app, eleana)
+        grapher.plot_graph()
 
 
     def f_stk_down_clicked(self):
@@ -212,7 +240,7 @@ class EleanaMainApp:
             eleana.selections['f_stk'] = index - 1
         except IndexError:
             return
-        plotter(app, eleana)
+        grapher.plot_graph()
 
 
     def second_selected(self, selected_value_text):
@@ -220,7 +248,7 @@ class EleanaMainApp:
             eleana.selections['second'] = -1
             app.secondComplex.grid_remove()
             app.secondStkFrame.grid_remove()
-            plotter(app, eleana)
+            grapher.plot_graph()
             return
         i = 0
         while i < len(eleana.dataset):
@@ -237,7 +265,7 @@ class EleanaMainApp:
             app.secondComplex.grid()
         else:
             app.secondComplex.grid_remove()
-        plotter(app, eleana)
+        grapher.plot_graph()
 
 
     def second_down_clicked(self):
@@ -281,7 +309,7 @@ class EleanaMainApp:
             eleana.selections['s_stk'] = index
         else:
             return
-        plotter(app, eleana)
+        grapher.plot_graph()
 
     def s_stk_up_clicked(self):
         current_position = app.s_stk.get()
@@ -298,7 +326,7 @@ class EleanaMainApp:
             eleana.selections['s_stk'] = index + 1
         except IndexError:
             return
-        plotter(app, eleana)
+        grapher.plot_graph()
 
 
     def s_stk_down_clicked(self):
@@ -317,12 +345,12 @@ class EleanaMainApp:
             eleana.selections['s_stk'] = index - 1
         except IndexError:
             return
-        plotter(app, eleana)
+        grapher.plot_graph()
 
 
     def second_complex_clicked(self, value):
             eleana.selections['s_cpl'] = value
-            plotter(app, eleana)
+            grapher.plot_graph()
 
     def swap_first_second(self):
         first_pos = app.sel_first.get()
@@ -348,7 +376,7 @@ class EleanaMainApp:
         self.f_stk_selected(second_stk)
         self.s_stk_selected(first_stk)
 
-        plotter(app, eleana)
+        grapher.plot_graph()
 
     def second_to_result(self):
         current = app.sel_second.get()
@@ -391,7 +419,7 @@ class EleanaMainApp:
             eleana.selections['result'] = -1
             app.resultComplex.grid_remove()
             app.resultStkFrame.grid_remove()
-            plotter(app, eleana)
+            grapher.plot_graph()
             return
 
         i = 0
@@ -410,7 +438,7 @@ class EleanaMainApp:
         else:
             app.resultComplex.grid_remove()
 
-        plotter(app, eleana)
+        grapher.plot_graph()
 
     def result_up_clicked(self):
         current_position = app.sel_result.get()
@@ -429,7 +457,7 @@ class EleanaMainApp:
         except IndexError:
             return
 
-        plotter(app, eleana)
+        grapher.plot_graph()
     def result_down_clicked(self):
         current_position = app.sel_result.get()
         list_of_items = app.sel_result._values
@@ -448,7 +476,7 @@ class EleanaMainApp:
         except IndexError:
             return
 
-        plotter(app, eleana)
+        grapher.plot_graph()
     def r_stk_up_clicked(self):
         current_position = app.r_stk.get()
         list_of_items = app.r_stk._values
@@ -466,7 +494,7 @@ class EleanaMainApp:
         except IndexError:
             return
 
-        plotter(app, eleana)
+        grapher.plot_graph()
     def r_stk_down_clicked(self):
         current_position = app.r_stk.get()
         list_of_items = app.r_stk._values
@@ -485,7 +513,7 @@ class EleanaMainApp:
         except IndexError:
             return
 
-        plotter(app, eleana)
+        grapher.plot_graph()
     def first_to_result(self):
             current = app.sel_first.get()
             if current == 'None':
@@ -530,7 +558,7 @@ class EleanaMainApp:
             app.sel_result.configure(values = ['None'])
             app.r_stk.configure(values = [])
             app.resultFrame.grid_remove()
-            plotter(app, eleana)
+            grapher.plot_graph()
 
     def clear_dataset(self):
         quit_dialog = CTkMessagebox(title="Clear dataset",
@@ -546,7 +574,7 @@ class EleanaMainApp:
             app.secondStkFrame.grid_remove()
 
             init.eleana_variables(eleana)
-            plotter(app, eleana)
+            grapher.plot_graph()
 
 
     ''' 
@@ -584,7 +612,7 @@ class EleanaMainApp:
             app.sel_result.set(selected_value_text)
         except:
             pass
-        plotter(app, eleana)
+        grapher.plot_graph()
 
     def load_recent(self, selected_value_text):
         index = selected_value_text.split('. ')
@@ -593,7 +621,7 @@ class EleanaMainApp:
         recent = eleana.paths['last_projects'][index]
         self.load_project(recent)
         eleana.paths['last_project_dir'] = Path(recent).parent
-        plotter(app, eleana)
+        grapher.plot_graph()
 
     # --- Save as
     def save_as(self):
@@ -736,7 +764,6 @@ def get_index_by_name(selected_value_text):
 # ---- END OF FUNCTIONS FOR HANDLING GUI ACTIONS ---
 
 
-
 ''' Starting application'''
 # Set default color appearance
 ctk.set_appearance_mode("dark")
@@ -749,19 +776,21 @@ menuAction = MenuAction(eleana)  # Methods for menu selections
 update = Update()                # This contains methods for update things like lists, settings, gui, groups etc.
 comboboxes = Comboboxes()        # Methods for handle with FIRST, SECOND and RESULT comboboxes
 init = Init(app, eleana)         # Methods for initialize program
-# ------------
+grapher = Grapher(app, eleana)
+grapher.plot_graph()
 
-# Set geometry, icon and default combobox values
+# Set geometry, icon and default combobox values and graph canvas
 init.main_window(app, eleana)
 init.paths(app, eleana, update)
 init.folders(app, eleana)
+#graph_canvas = init.graph_canvas(app)
 
 # Hide or show widgets in GUI
 update.gui_widgets(app, eleana, comboboxes)
 update.all_lists(app, eleana)
 
 # Initialize Plot
-plotter(app,eleana)
+#plotter(app,eleana)
 
 # Set graph Frame scalable
 app.graphFrame.columnconfigure(0, weight=1)
