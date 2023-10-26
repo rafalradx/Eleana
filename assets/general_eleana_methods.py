@@ -66,7 +66,7 @@ class Eleana:
 
     # ----- METHODS ------
     def name_nr_to_index(self, selected_value_text):
-        # This function returns index of Eleana.dataset which name_nr attribute is equal to argument: selected_value_text
+        ''' Returns index of Eleana.dataset which name_nr attribute is equal to argument: selected_value_text'''
         numbered_names = []
         for each in self.dataset:
             numbered_names.append(each.name_nr)
