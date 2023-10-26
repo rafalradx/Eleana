@@ -98,6 +98,8 @@ class EleanaMainApp:
         #app.pane5.place_configure(height=50, width=800)
         #app.pane4.place_configure(height=600, width=800)
         #app.pane5.place_configure(height=90, width=800)
+        app.panedwindow2.sashpos(0, 700)
+
         return
 
     def run(self):
