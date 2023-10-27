@@ -17,11 +17,11 @@ import sys
 from assets.general_eleana_methods import Eleana
 from assets.menuActions import MenuAction
 from assets.initialization import Init
-from assets.graph_plotter import Grapher
+from assets.grapher import Grapher
 from assets.update_methods import Update
-from assets.comboboxes_methods import Comboboxes
 from subprogs.group_edit.add_group import Groupcreate
 from subprogs.group_edit.assign_to_group import Groupassign
+
 
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "ui" / "Eleana_main.ui"
@@ -111,7 +111,6 @@ class EleanaMainApp:
             self.mainwindow.after(100, self.set_pane_height)
             self.mainwindow.mainloop()
 
-
     def group_down_clicked(self):
         current_group = self.sel_group.get()
         group_list = self.sel_group._values
@@ -136,8 +135,7 @@ class EleanaMainApp:
 
     def group_selected(self, value):
         eleana.selections['group'] = value
-        update.all_lists(app, eleana)
-
+        update.all_lists()
 
     def first_show(self):
         eleana.selections['f_dsp'] = bool(self.check_first_show.get())
@@ -419,8 +417,8 @@ class EleanaMainApp:
 
         # Send to result and update lists
         eleana.results_dataset.append(spectrum)
-        update.list_in_combobox(app, eleana, 'sel_result')
-        update.list_in_combobox(app, eleana, 'r_stk')
+        update.list_in_combobox('sel_result')
+        update.list_in_combobox('r_stk')
 
         # Set the position to the last added item
         list_of_results = self.sel_result._values
@@ -451,8 +449,8 @@ class EleanaMainApp:
                 break
             i += 1
 
-        update.list_in_combobox(app, eleana, 'sel_result')
-        update.list_in_combobox(app, eleana, 'r_stk')
+        update.list_in_combobox('sel_result')
+        update.list_in_combobox('r_stk')
 
         if eleana.results_dataset[eleana.selections['result']].complex:
             self.resultComplex.grid()
@@ -560,8 +558,8 @@ class EleanaMainApp:
 
             # Send to result and update lists
             eleana.results_dataset.append(spectrum)
-            update.list_in_combobox(app, eleana, 'sel_result')
-            update.list_in_combobox(app, eleana, 'r_stk')
+            update.list_in_combobox('sel_result')
+            update.list_in_combobox('r_stk')
 
             # Set the position to the last added item
             list_of_results = self.sel_result._values
@@ -613,8 +611,8 @@ class EleanaMainApp:
         eleana.assignmentToGroups = project['assignmentToGroups']
         eleana.groupsHierarchy = project['groupsHierarchy']
         eleana.notes = project['notes']
-        update.dataset_list(eleana)
-        update.all_lists(app, eleana)
+        update.dataset_list()
+        update.all_lists()
         try:
             selected_value_text = eleana.dataset[eleana.selections['first']].name_nr
             self.first_selected(selected_value_text)
@@ -661,7 +659,7 @@ class EleanaMainApp:
         eleana.paths['last_project_dir'] = Path(last_projects[0]).parent
 
         # Perform update to place the item into menu
-        update.last_projects_menu(app, eleana)
+        update.last_projects_menu()
 
     # --- Import EPR --> Bruker Elexsys
 
@@ -699,15 +697,15 @@ class EleanaMainApp:
     def create_new_group(self):
         group_create = Groupcreate(self.mainwindow, eleana)
         response = group_create.get()
-        update.list_in_combobox(app, eleana, 'sel_group')
+        update.list_in_combobox('sel_group')
 
     def first_to_group(self):
         if eleana.selections['first'] < 0:
             return
         group_assign = Groupassign(app, eleana, 'first')
         response = group_assign.get()
-        update.group_list(eleana)
-        update.all_lists(app, eleana)
+        update.group_list()
+        update.all_lists()
         print(eleana.assignmentToGroups)
 
     def second_to_group(self):
@@ -763,14 +761,12 @@ class EleanaMainApp:
             self.log_field.insert("end", new_log)
             return output
 
+
+
+
+
+
 # --- GENERAL BATCH METHODS ---
-
-def after_import(app, eleana):
-    # Update dataset (names, groups and groups assignment)
-    update.dataset_list(eleana)
-
-    # Update combobox lists
-    update.all_lists(app, eleana)
 
 def get_index_by_name(selected_value_text):
     ''' Function returns index in dataset of spectrum
@@ -782,8 +778,6 @@ def get_index_by_name(selected_value_text):
             return i
         i += 1
 
-# ---- END OF FUNCTIONS FOR HANDLING GUI ACTIONS ---
-
 
 ''' Starting application'''
 # Set default color appearance
@@ -794,24 +788,20 @@ eleana = Eleana()                # This contains all data, settings and selectio
 app = EleanaMainApp(eleana)      # This is GUI
 
 menuAction = MenuAction(eleana)  # Methods for menu selections
-update = Update(app, eleana)                # This contains methods for update things like lists, settings, gui, groups etc.
-comboboxes = Comboboxes()        # Methods for handle with FIRST, SECOND and RESULT comboboxes
+update = Update(app, eleana)     # This contains methods for update things like lists, settings, gui, groups etc.
+
 init = Init(app, eleana)         # Methods for initialize program
 grapher = Grapher(app, eleana)
 grapher.plot_graph()
 
 # Set geometry, icon and default combobox values and graph canvas
-init.main_window(app, eleana)
-init.paths(app, eleana, update)
-init.folders(app, eleana)
-
+init.main_window()
+init.paths(update)
+init.folders()
 
 # Hide or show widgets in GUI
-update.gui_widgets(comboboxes)
+update.gui_widgets()
 update.all_lists()
-
-# Initialize Plot
-#plotter(app,eleana)
 
 # Set graph Frame scalable
 app.graphFrame.columnconfigure(0, weight=1)

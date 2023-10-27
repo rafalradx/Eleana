@@ -183,7 +183,7 @@ class Update:
             box = self.app.sel_group
         return box
 
-    def gui_widgets(self, comboboxes):
+    def gui_widgets(self):
         first_nr = self.eleana.selections['first']
         second_nr = self.eleana.selections['second']
         result_nr = self.eleana.selections['result']
