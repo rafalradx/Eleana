@@ -14,11 +14,12 @@ import io
 import sys
 
 # Import Eleana specific classes
-from assets.general_eleana_methods import Eleana
-from assets.menuActions import MenuAction
-from assets.initialization import Init
-from assets.grapher import Grapher
-from assets.update_methods import Update
+from assets.GeneralEleana import Eleana
+from assets.LoadSave import Load
+from assets.LoadSave import Save
+from assets.Initialization import Init
+from assets.Grapher import Grapher
+from assets.Update import Update
 from subprogs.group_edit.add_group import Groupcreate
 from subprogs.group_edit.assign_to_group import Groupassign
 
@@ -596,14 +597,10 @@ class EleanaMainApp:
             grapher.plot_graph()
 
 
-    ''' 
-    FUNCTIONS ACTIVATED BY MAIN MENU SELECTION
-    '''
-
     # FILE
     # --- Load Project
     def load_project(self, recent=None):
-        project = menuAction.load_project(recent)
+        project = load.load_project(recent)
         print(project['assignmentToGroups'])
         eleana.selections = project['selections']
         eleana.dataset = project['dataset']
@@ -644,7 +641,7 @@ class EleanaMainApp:
 
     # --- Save as
     def save_as(self):
-        report = menuAction.save_as()
+        report = save.save_project()
         if report['error']:
             CTkMessagebox(title="Error", message=report['desc'], icon="cancel")
         else:
@@ -665,7 +662,7 @@ class EleanaMainApp:
 
     def import_elexsys(self):
         ''' Open window that loads the spectra '''
-        menuAction.loadElexsys(eleana)
+        load.loadElexsys()
         update.dataset_list()
         update.all_lists()
 
@@ -786,26 +783,27 @@ ctk.set_appearance_mode("dark")
 # Create general main instances for the program
 eleana = Eleana()                # This contains all data, settings and selections etc.
 app = EleanaMainApp(eleana)      # This is GUI
-
-menuAction = MenuAction(eleana)  # Methods for menu selections
 update = Update(app, eleana)     # This contains methods for update things like lists, settings, gui, groups etc.
-
-init = Init(app, eleana)         # Methods for initialize program
+load = Load(eleana)
+save = Save(eleana)
 grapher = Grapher(app, eleana)
-grapher.plot_graph()
+init = Init(app, eleana)         # Methods for initialize program
+# -------------
+
 
 # Set geometry, icon and default combobox values and graph canvas
 init.main_window()
 init.paths(update)
 init.folders()
-
+# Create Graph canvas
+grapher.plot_graph()
 # Hide or show widgets in GUI
 update.gui_widgets()
 update.all_lists()
-
 # Set graph Frame scalable
 app.graphFrame.columnconfigure(0, weight=1)
 app.graphFrame.rowconfigure(0, weight=1)
+
 
 # Run
 if __name__ == "__main__":

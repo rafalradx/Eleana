@@ -12,22 +12,22 @@ import shutil
 import tkinter as tk
 from tkinter import filedialog
 from CTkMessagebox import CTkMessagebox
-from assets.dataClasses import createFromElexsys
+from assets.DataClasses import createFromElexsys
 
 
-class MenuAction:
-    def __init__(self, eleana_instance, master=None):
+class Load:
+    def __init__(self, eleana_instance):
         self.eleana = eleana_instance
     # FILE
     def load_project(self, recent=None):
         ''' This method loads projects created by Eleana'''
-        eleana = self.eleana
-        init_dir = Path(eleana.paths['last_project_dir'])
+
+        init_dir = Path(self.eleana.paths['last_project_dir'])
         try:
-            init_file = Path(eleana.paths['last_projects'][0])
+            init_file = Path(self.eleana.paths['last_projects'][0])
             init_file = init_file.name
         except IndexError:
-            init_dir = Path(eleana.paths['home_dir'])
+            init_dir = Path(self.eleana.paths['home_dir'])
             init_file = ''
 
         if recent == None:
@@ -43,7 +43,7 @@ class MenuAction:
         1. Extract project into temporary directory /tmp/eleana_extracted_project 
         '''
         tmp_folder = 'eleana_extracted_project'
-        extract_dir = Path(eleana.paths['tmp_dir'], tmp_folder)
+        extract_dir = Path(self.eleana.paths['tmp_dir'], tmp_folder)
         archive_format = 'zip'
         try:
             shutil.unpack_archive(filename, extract_dir, archive_format)
@@ -76,7 +76,7 @@ class MenuAction:
 
             project_version = float(loaded_object['project version'])
 
-            if float(project_version) > float(eleana.version):
+            if float(project_version) > float(self.eleana.version):
                 info = CTkMessagebox(title="Project load", message='This project was created in newer Eleana version. Some errors in loaded content are possible')
 
             '''
@@ -138,7 +138,6 @@ class MenuAction:
             eleana_dataset_list = loaded_object
             file_to_read.close()
 
-
             eleana_dataset = []
             for filenumber in eleana_dataset_list.keys():
                 filename = Path(extract_dir, filenumber)
@@ -146,10 +145,8 @@ class MenuAction:
                 loaded_object = pickle.load(file_to_read)
                 eleana_dataset.append(loaded_object)
                 file_to_read.close()
-
         except:
             return {"Error": True, 'desc': f"An error occured while loading the file"}
-
         '''
         6. Remove all files from extract_directory and then remove extract directory
         '''
@@ -159,12 +156,10 @@ class MenuAction:
                     file.unlink()
         except:
             pass
-
         try:
             extract_dir.rmdir()
         except:
             pass
-
         return {'dataset':eleana_dataset,
                 'result_dataset':eleana_results_dataset,
                 'assignmentToGroups': eleana_assignmentToGroups,
@@ -175,14 +170,32 @@ class MenuAction:
                 'results_dataset':eleana_results_dataset
                 }
 
+    # Import EPR
+    def loadElexsys(self) -> object:
+        path = self.eleana.paths['last_import_dir']
+        filetypes = (
+            ('Elexsys', '*.DSC'),
+            ('All files', '*.*')
+            )
+        filenames = filedialog.askopenfilenames(initialdir=path, filetypes=filetypes)
+        if len(filenames) == 0:
+            return
+        for file in filenames:
+            spectrum = createFromElexsys(file)
+            self.eleana.dataset.append(spectrum)
+        last_import_dir = Path(filenames[-1]).parent
+        self.eleana.paths['last_import_dir'] = last_import_dir
+        return
 
-    def save_as(self):
-        eleana = self.eleana
+class Save:
+    def __init__(self, eleana_instance):
+        self.eleana = eleana_instance
+    def save_project(self):
         try:
-            init_dir = Path(eleana.paths['last_project_dir'])
+            init_dir = Path(self.eleana.paths['last_project_dir'])
             init_file = ''
         except IndexError:
-            init_dir = Path(eleana.paths['home_dir'])
+            init_dir = Path(self.eleana.paths['home_dir'])
 
         try:
             filename = asksaveasfile(initialdir=init_dir,
@@ -209,7 +222,7 @@ class MenuAction:
         '''
         dataset_names = {}
         i = 0
-        for each in eleana.dataset:
+        for each in self.eleana.dataset:
             name = each.name_nr
             name = name.replace('. ', '_=_')
             dataset_names[str(i)] = name
@@ -217,7 +230,7 @@ class MenuAction:
 
         results_names = {}
         i = 0
-        for each in eleana.results_dataset:
+        for each in self.eleana.results_dataset:
             name = each.name_nr
             name = name.replace('. ', '_=_')
             results_names[str(i)] = name
@@ -226,18 +239,18 @@ class MenuAction:
         project_details = {'project version':'1.0'}
 
         ordered_groups = []
-        for group, spectra in eleana.assignmentToGroups.items():
+        for group, spectra in self.eleana.assignmentToGroups.items():
             ordered_groups.append({group: spectra})
 
         elements_to_save = {
                             'eleana_assignmentToGroups':ordered_groups,
-                            'eleana_groupsHierarchy':eleana.groupsHierarchy,
-                            'eleana_notes':eleana.notes,
-                            'eleana_paths':eleana.paths,
-                            'eleana_selections':eleana.selections,
+                            'eleana_groupsHierarchy':self.eleana.groupsHierarchy,
+                            'eleana_notes':self.eleana.notes,
+                            'eleana_paths':self.eleana.paths,
+                            'eleana_selections':self.eleana.selections,
                             'eleana_dataset_list':dataset_names,
                             'eleana_results_list':results_names,
-                            'eleana_results_dataset':eleana.results_dataset,
+                            'eleana_results_dataset':self.eleana.results_dataset,
                             'eleana_project_details':project_details
                             }
 
@@ -259,18 +272,18 @@ class MenuAction:
             for name in dataset_names.keys():
                 data_file = Path(working_folder, str(i))
                 with open(data_file, 'wb') as file:
-                    pickle.dump(eleana.dataset[i], file)
+                    pickle.dump(self.eleana.dataset[i], file)
                 i += 1
 
             ''' 
             Save result dataset
             '''
             i = 0
-            for each in eleana.results_dataset:
+            for each in self.eleana.results_dataset:
                 name = 'r' + str(i)
                 data_file = Path(working_folder, name)
                 with open(data_file, 'wb') as file:
-                    pickle.dump(eleana.results_dataset[i], file)
+                    pickle.dump(self.eleana.results_dataset[i], file)
                 i += 1
 
             # Create zip file form the directory
@@ -291,44 +304,3 @@ class MenuAction:
             return {"error": False, 'desc':'', 'return':filename}
         except:
             return {"error": True, 'desc': f"Error while saving {filename.name}"}
-
-
-    # Import EPR
-    def loadElexsys(self, eleana) -> object:
-        path = eleana.paths['last_import_dir']
-        filetypes = (
-            ('Elexsys', '*.DSC'),
-            ('All files', '*.*')
-            )
-        filenames = filedialog.askopenfilenames(initialdir=path, filetypes=filetypes)
-        if len(filenames) == 0:
-            return
-
-        for file in filenames:
-            spectrum = createFromElexsys(file)
-            eleana.dataset.append(spectrum)
-
-        last_import_dir = Path(filenames[-1]).parent
-        eleana.paths['last_import_dir'] = last_import_dir
-        return
-
-
-    # EDIT
-    #       Notes
-    def notes(self):
-        content_to_sent = eleana.notes
-        content_to_sent.update({'window_title': 'Edit notes'})  # Add text for window title
-
-        filename = "eleana_edit_notes.rte"
-        formatted_str = json.dumps(content_to_sent, indent=4)
-
-        # Create /tmp/eleana_edit_notes.rte
-        Eleana.create_tmp_file(self, filename, formatted_str)
-        subprocess_path = Path(eleana.paths['assets'], 'subprogs', 'editor.py')
-        # Run editor in subprocess_path (./assets/edit.py) and wait for end
-        notes = subprocess.run([eleana.interpreter, subprocess_path], capture_output=True, text=True)
-
-        return filename
-
-    def create_new_group(self):
-        print("Crearte group")
