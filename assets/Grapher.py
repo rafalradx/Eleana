@@ -25,9 +25,13 @@ class Grapher:
         self.toolbar.update()
         self.toolbar.grid(row=1, column=0, sticky="ew")
 
+
+        ''' PLOT PREFERENCES '''
+        # Autoscaling variables
         self.autoscaling = {'x': True, 'y': True}
         self.scale1 = {'x': [], 'y': []}
 
+        # Plot styling
         self.colors = {'first_re':  "#d53339",
                       'first_im':   "#ef6f74",
                       'second_re':  "#008cb3",
@@ -35,6 +39,11 @@ class Grapher:
                       'result_re':  "#108d3d",
                       'result_im':  "#32ab5d"
                       }
+        # Logarythmic scales
+        self.log_scales = {'x':False, 'y':False}
+
+        # Show X as points
+        self.x_as_points = False
 
     def axis_title(self, which=None):
         '''Creates title for y and x axes  from "which" dataset '''
@@ -148,9 +157,7 @@ class Grapher:
         return data
 
     def plot_graph(self):
-        if not self.autoscale:
-             x_scale = self.ax.get_xlim()
-             y_scale = self.ax.get_ylim()
+        ''' This method plots the basic workin plot with First,Second,Result'''
         self.ax.clear()
 
         # Add first
@@ -208,15 +215,13 @@ class Grapher:
         self.ax.set_xlabel(axis_title['x_title'])
         self.ax.set_ylabel(axis_title['y_title'])
 
+        #self.ax.set_yscale('log')
+        #self.ax.set_xscale('log')
         self.draw()
 
     def draw(self):
-        print('Before Draw')
-        print(self.scale1)
         self.ax.legend(loc='upper center', bbox_to_anchor=(0.15, 1.1),
                        fancybox=False, shadow=False, ncol=5)
-
-
         # Handle autoscaling
         if self.autoscaling['x']:
             self.scale1['x'] = self.ax.get_xlim()
@@ -227,13 +232,30 @@ class Grapher:
             self.scale1['y'] = self.ax.get_ylim()
         else:
             self.ax.set_ylim(self.scale1['y'])
-        print('After draw')
-        print(self.scale1)
         self.canvas.draw()
-        def on_key_press_on_graph(event):
-           key_press_handler(event, self.canvas, self.toolbar)
-           self.canvas.mpl_connect("key_press_event", on_key_press_on_graph)
+
+        # Connect changes in scales due to ZOOM or MOVE
+        self.ax.callbacks.connect('ylim_changed', self.on_ylim_changed)
+        self.ax.callbacks.connect('xlim_changed', self.on_xlim_changed)
+
     def autoscale(self, autoscaling: dict):
         self.autoscaling = autoscaling
-
         return
+
+    ''' Handling events on graph (key press or navigation toolbar use) '''
+    def on_key_press_on_graph(self, event):
+        key_press_handler(event, self.canvas, self.toolbar)
+        self.canvas.mpl_connect("key_press_event", self.on_key_press_on_graph)
+
+    def on_ylim_changed(self, axes):
+        ylim = self.ax.get_ylim()
+        self.scale1['y'] = ylim
+        self.autoscaling['y'] = False
+        self.app.check_autoscale_y.deselect()
+        print('Auto Y: ' + str(self.autoscaling['y']))
+    def on_xlim_changed(self, axes):
+        xlim = self.ax.get_xlim()
+        self.scale1['x'] = xlim
+        self.autoscaling['x'] = False
+        self.app.check_autoscale_x.deselect()
+        print('Auto X: ' + str(self.autoscaling['x']))

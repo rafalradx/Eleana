@@ -63,8 +63,6 @@ class Eleana:
                       'f_dsp':True, 's_dsp':True ,'r_dsp':True
                       }
 
-
-    # ----- METHODS ------
     def name_nr_to_index(self, selected_value_text):
         ''' Returns index of Eleana.dataset which name_nr attribute is equal to argument: selected_value_text'''
         numbered_names = []
@@ -144,7 +142,6 @@ class Eleana:
             if type == 'stack 2D':
                 y = data.y[index_stk]
         return {'x':x, 're_y':y, 'complex':False, 'im_y':np.array([])}
-
 
 
     # Write "content" to text file "filename" in temporary directory (/tmp)

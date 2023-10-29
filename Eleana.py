@@ -4,6 +4,8 @@
 import json
 import pickle
 import pathlib
+import tkinter as tk
+from tkinter import ttk
 from pathlib import Path
 import customtkinter
 import pygubu
@@ -33,6 +35,7 @@ DEVEL = True
 
 class EleanaMainApp:
     def __init__(self, eleana_instance, master=None):
+
         # Initialize eleana
         self.eleana = eleana_instance
 
@@ -79,8 +82,11 @@ class EleanaMainApp:
         self.check_result_show = builder.get_object('check_result_show', self.mainwindow)
 
         # Graph Buttons
-        self.check_autoscale = builder.get_object('chbox_autoscale', self.mainwindow)
-
+        self.check_autoscale_x = builder.get_object('check_autoscale_X', self.mainwindow)
+        self.check_autoscale_y = builder.get_object('check_autoscale_Y', self.mainwindow)
+        self.check_log_x = builder.get_object('check_log_x', self.mainwindow)
+        self.check_log_y = builder.get_object('check_log_y', self.mainwindow)
+        self.check_indexed_x = builder.get_object('check_indexed_x', self.mainwindow)
 
         # Command line
         self.command_line = builder.get_object('command_line', self.mainwindow)
@@ -90,26 +96,33 @@ class EleanaMainApp:
 
         self.panedwindow2 = builder.get_object('panedwindow2', self.mainwindow)
         self.panedwindow4 = builder.get_object('panedwindow4', self.mainwindow)
-        #self.pane5 = builder.get_object('pane5', self.mainwindow)
-        #self.pane9 = builder.get_object('pane9', self.mainwindow)
+        self.pane5 = builder.get_object('pane5', self.mainwindow)
+        self.pane9 = builder.get_object('pane9', self.mainwindow)
 
         self.log_field = builder.get_object('log_field', self.mainwindow)
 
-        # Set default values
-        self.firstComplex.set(value="re")
-        self.secondComplex.set(value="re")
-        self.resultComplex.set(value="re")
-        #self.legendFrame = builder.get_object('legendFrame', self.mainwindow)
-
-
-        self.check_first_show.select(1)
-        self.check_second_show.select(1)
-        self.check_result_show.select(1)
-        self.check_autoscale.select(1)
         self.command_history = {'index':0, 'lines':[]}
 
+        # Context menu bindings
+        self.label7 = builder.get_object('label7', self.mainwindow)
+        self.label7.bind("<Button-3>", self.show_context_menu)
+
+    def show_context_menu(self, event):
+        print('Context menu')
+
+    # def create_command_menu(self):
+    #     self.contex_menu.add_command(label="Print hello", command=self.on_print_hello_menu_clicked)
+    # def on_print_hello_menu_clicked(self):
+    #     print('Hello')
+
+
+
+
+
+
+
     def set_pane_height(self):
-        #self.panedwindow2.sashpos(0, 80)
+        self.panedwindow2.sashpos(0, 700)
         self.panedwindow4.sashpos(0, 300)
         return
 
@@ -210,7 +223,6 @@ class EleanaMainApp:
         else:
             self.firstComplex.grid_remove()
         grapher.plot_graph()
-
 
     def f_stk_selected(self, selected_value_text):
         if selected_value_text in self.f_stk._values:
@@ -718,12 +730,17 @@ class EleanaMainApp:
         response = group_assign.get()
 
     ''' Commands for Graph Switches and buttons '''
-    def switch_autoscale(self):
-        autoscaling = {'x':True, 'y':True}
-        mode = bool(self.check_autoscale.get())
-        autoscaling['x'] = mode
-        autoscaling['y'] = mode
+    def switch_autoscale_x(self):
+        autoscaling = {'x':self.check_autoscale_x.get(), 'y':grapher.autoscaling['y']}
         grapher.autoscale(autoscaling)
+        grapher.plot_graph()
+    def switch_autoscale_y(self):
+        autoscaling = {'y':self.check_autoscale_y.get(), 'x':grapher.autoscaling['x']}
+        grapher.autoscale(autoscaling)
+        grapher.plot_graph()
+
+    def set_log_scale_x(self):
+        pass
 
     def execute_command(self,event):
         if event.keysym == "Up":
@@ -772,11 +789,6 @@ class EleanaMainApp:
             self.log_field.insert("end", new_log)
             return output
 
-
-
-
-
-
 # --- GENERAL BATCH METHODS ---
 
 def get_index_by_name(selected_value_text):
@@ -801,14 +813,16 @@ update = Update(app, eleana)     # This contains methods for update things like 
 load = Load(eleana)
 save = Save(eleana)
 grapher = Grapher(app, eleana)
-init = Init(app, eleana)         # Methods for initialize program
-# -------------
+init = Init(app, eleana, grapher)
+#------------
 
-
-# Set geometry, icon and default combobox values and graph canvas
+# Initialize basic settings: geometry, icon, graph, binding, etc
 init.main_window()
 init.paths(update)
 init.folders()
+init.graph()
+
+
 # Create Graph canvas
 grapher.plot_graph()
 # Hide or show widgets in GUI

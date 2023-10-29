@@ -1203,12 +1203,95 @@
                                       <property name="sticky">nsew</property>
                                     </layout>
                                     <child>
-                                      <object class="customtkinter.CTkCheckBox" id="chbox_autoscale" named="True">
-                                        <property name="command" type="command" cbtype="simple">switch_autoscale</property>
-                                        <property name="text" translatable="yes">Autoscale</property>
+                                      <object class="customtkinter.CTkCheckBox" id="check_autoscale_X" named="True">
+                                        <property name="border_width">2</property>
+                                        <property name="command" type="command" cbtype="simple">switch_autoscale_x</property>
+                                        <property name="corner_radius">20</property>
+                                        <property name="text" translatable="yes">Autoscale X</property>
                                         <layout manager="grid">
                                           <property name="column">0</property>
+                                          <property name="padx">5</property>
+                                          <property name="pady">5</property>
                                           <property name="row">0</property>
+                                          <property name="sticky">w</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="customtkinter.CTkCheckBox" id="check_autoscale_Y" named="True">
+                                        <property name="border_width">2</property>
+                                        <property name="command" type="command" cbtype="simple">switch_autoscale_y</property>
+                                        <property name="corner_radius">20</property>
+                                        <property name="text" translatable="yes">Autoscale Y</property>
+                                        <layout manager="grid">
+                                          <property name="column">0</property>
+                                          <property name="padx">5</property>
+                                          <property name="pady">5</property>
+                                          <property name="row">1</property>
+                                          <property name="sticky">w</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="customtkinter.CTkFrame" id="ctkframe5">
+                                        <property name="height">2</property>
+                                        <layout manager="grid">
+                                          <property name="column">0</property>
+                                          <property name="row">2</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="customtkinter.CTkCheckBox" id="check_log_x" named="True">
+                                        <property name="border_width">2</property>
+                                        <property name="command" type="command" cbtype="simple">set_log_scale_x</property>
+                                        <property name="corner_radius">20</property>
+                                        <property name="text" translatable="yes">Log x scale</property>
+                                        <layout manager="grid">
+                                          <property name="column">0</property>
+                                          <property name="padx">5</property>
+                                          <property name="pady">5</property>
+                                          <property name="row">3</property>
+                                          <property name="sticky">w</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="customtkinter.CTkCheckBox" id="check_log_y" named="True">
+                                        <property name="border_width">2</property>
+                                        <property name="command" type="command" cbtype="simple">set_log_scale_y</property>
+                                        <property name="corner_radius">20</property>
+                                        <property name="text" translatable="yes">Log y scale</property>
+                                        <layout manager="grid">
+                                          <property name="column">0</property>
+                                          <property name="padx">5</property>
+                                          <property name="pady">5</property>
+                                          <property name="row">4</property>
+                                          <property name="sticky">w</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="customtkinter.CTkFrame" id="ctkframe6">
+                                        <property name="height">2</property>
+                                        <layout manager="grid">
+                                          <property name="column">0</property>
+                                          <property name="row">5</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="customtkinter.CTkCheckBox" id="check_indexed_x" named="True">
+                                        <property name="border_width">2</property>
+                                        <property name="command" type="command" cbtype="simple">indexed_x</property>
+                                        <property name="corner_radius">20</property>
+                                        <property name="text" translatable="yes">Indexed-based X axis</property>
+                                        <layout manager="grid">
+                                          <property name="column">0</property>
+                                          <property name="padx">5</property>
+                                          <property name="pady">5</property>
+                                          <property name="row">6</property>
+                                          <property name="sticky">w</property>
                                         </layout>
                                       </object>
                                     </child>

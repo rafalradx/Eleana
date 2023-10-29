@@ -8,9 +8,10 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationTool
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 class Init:
-    def __init__(self, app, eleana_instance):
+    def __init__(self, app, eleana_instance, grapher_instance):
         self.app = app
         self.eleana = eleana_instance
+        self.grapher = grapher_instance
 
     def main_window(self):
         '''This method sets properties of the main window'''
@@ -95,22 +96,19 @@ class Init:
         self.eleana.assignmentToGroups = {}
         self.eleana.groupsHierarchy = {}
 
-    # def graph_canvas(self, app):
-    #     fig = plt.Figure(figsize=(8, 4), dpi=100)
-    #     ax = fig.add_subplot(111)
-    #
-    #     # Generowanie danych dla funkcji sinc(x)
-    #     x = np.linspace(-10, 10, 400)
-    #     y = np.sinc(x)
-    #
-    #     # Rysowanie wykresu funkcji sinc(x)
-    #     ax.plot(x, y, color='b', linewidth=2)
-    #
-    #     graph_canvas = FigureCanvasTkAgg(fig, master=app.graphFrame)
-    #     graph_canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
-    #     graph_canvas.draw()
-    #
-    #     graph_toolbar = NavigationToolbar2Tk(graph_canvas, app.graphFrame, pack_toolbar=False)
-    #     graph_toolbar.update()
-    #     graph_toolbar.grid(row=1, column=0, sticky="ew")
-    #     return graph_canvas
+    def graph(self):
+        # Bind keyboard Navbar events to function
+        self.grapher.canvas.mpl_connect("key_press_event", lambda event: self.grapher.on_key_press_on_graph(event))
+
+        # Set variables for Graph buttons
+        self.app.firstComplex.set(value="re")
+        self.app.secondComplex.set(value="re")
+        self.app.resultComplex.set(value="re")
+        self.app.check_first_show.select()
+        self.app.check_second_show.select()
+        self.app.check_result_show.select()
+        self.app.check_autoscale_x.select()
+        self.app.check_autoscale_y.select()
+        self.app.check_log_x.deselect()
+        self.app.check_log_y.deselect()
+        self.app.check_indexed_x.deselect()
