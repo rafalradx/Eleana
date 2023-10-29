@@ -1,12 +1,51 @@
-
 from pathlib import Path, PurePath
 import numpy as np
 import re
+class GeneralDataTemplate():
+    # DSC from Bruker Elexsys
 
-class Spectrum_CWEPR:
+    dsc2eleana = {'title': 'TITL',
+                  'unit_x': 'XUNI',
+                  'name_x': 'XNAM',
+                  'unit_y': 'YUNI',
+                  'name_y': 'IRNAM',
+                  'unit_z': 'YUNI',
+                  'name_z': 'YNAM',
+                  'Compl': 'IKKF',
+                  'MwFreq': 'FrequencyMon',
+                  'ModAmp': 'ModAmp',
+                  'ModFreq': 'ModFreq',
+                  'ConvTime': 'ConvTime',
+                  'SweepTime': 'SweepTime',
+                  'Tconst': 'TIMEC',
+                  'Reson': 'RESO',
+                  'Power': 'Power',
+                  'PowAtten': 'PowerAtten'
+                  }
+
+    # Translation for Bruker EMX
+    parEMX2elena = {}
+
+    parameters = {'title': '',
+                  'unit_x': 'G',
+                  'name_x': 'Magnetic field',
+                  'name_y': 'Amplitude',
+                  'MwFreq': '',
+                  'ModAmp': '',
+                  'ModFreq': '',
+                  'ConvTime': '',
+                  'SweepTime': '',
+                  'TimeConst': '',
+                  'RESO': 'Resonator',
+                  'Power': '',
+                  'PowerAtten': 'PowAtten',
+                  'stk_names': []
+                  }
+
+
+class Spectrum_CWEPR(GeneralDataTemplate):
+
     def __init__(self, name, x_axis: list, dta: list, dsc: dict):
-        self.parameters = {'title': '', 'unit_x': 'G', 'name_x': 'Field', 'name_y': 'Intensity', 'MwFreq': '', 'ModAmp': '', 'ModFreq': '',
-                           'ConvTime': '',  'SweepTime': '',  'TimeConst': '',  'RESO': '',  'Power': '', 'PowerAtten': ''}
         self.groups = []
         self.x = x_axis
         self.y = dta
@@ -17,12 +56,16 @@ class Spectrum_CWEPR:
         self.origin = 'CWEPR'
         self.stk_names = []
 
-        working_par = self.parameters
-
         fill_missing_keys =['title','MwFreq','ModAmp','ModFreq','SweepTime','ConvTime','TimeConst','Power','PowAtten']
+        working_par = self.parameters
         for key in fill_missing_keys:
             try:
-                working_parameters[key] = create_eleana_par(dsc, dsc2eleana(key))
+                bruker_key = GeneralDataTemplate.dsc2eleana[key]
+                value = dsc[bruker_key]
+                value = value.split(' ')
+                value_txt = value[0]
+                value_txt = value_txt.replace("'", "")
+                working_par[key] = value_txt
             except:
                 pass
         self.parameters = working_par
@@ -30,6 +73,7 @@ class Spectrum_CWEPR:
         self.re_y = np.array(dta)
 
 class Spectra_CWEPR_stack(Spectrum_CWEPR):
+
     def __init__(self, name, x_axis: list, dta: list, dsc: dict, ygf):
         super().__init__(name, x_axis, dta, dsc)
 
@@ -38,7 +82,12 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         fill_missing_keys = ['name_z', 'unit_z', 'name_x', 'unit_x', 'name_y', 'unit_y']
         for key in fill_missing_keys:
             try:
-               working_parameters[key] = create_eleana_par(dsc, dsc2eleana(key))
+                bruker_key = GeneralDataTemplate.dsc2eleana[key]
+                value = dsc[bruker_key]
+                value = value.split(' ')
+                value_txt = value[0]
+                value_txt = value_txt.replace("'", "")
+                working_parameters[key] = value_txt
             except:
                 pass
 
@@ -65,13 +114,11 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         self.origin = 'CWEPR'
         self.parameters = working_parameters
 
-class Spectrum_complex:
+
+class Spectrum_complex(GeneralDataTemplate):
     def __init__(self, name, x_axis: list, dta: list, dsc: dict):
-        self.parameters = {'title': '', 'unit_x': '', 'name_x': '', 'name_y': '', 'MwFreq': '', 'ModAmp': '',
-                           'ModFreq': '',
-                           'ConvTime': '', 'SweepTime': '', 'TimeConst': '', 'RESO': '', 'Power': '', 'PowerAtten': '',
-                           'stk_names': []}
         length = len(dta)
+
         y = np.array([])
         i = 0
         while i < length:
@@ -83,7 +130,7 @@ class Spectrum_complex:
         fill_missing_keys = ['name_z', 'unit_z', 'name_x', 'unit_x', 'name_y', 'unit_y']
         for key in fill_missing_keys:
             try:
-                bruker_key = dsc2eleana(key)
+                bruker_key = GeneralDataTemplate.dsc2eleana[key]
                 value = dsc[bruker_key]
                 value = value.split(' ')
                 value_txt = value[0]
@@ -196,44 +243,3 @@ def createFromElexsys(filename: str) -> object:
     elif dsc['IKKF'] != 'REAL':
         spectrum_complex = Spectrum_complex(filename[:-4], x_axis, dta, dsc)
         return spectrum_complex
-
-def create_eleana_par(dsc: dict, bruker_key: str) -> dict:
-    value = dsc[bruker_key]
-    value = value.split(' ')
-    value_txt = value[0]
-    value_txt = value_txt.replace("'", "")
-    return value_txt
-    #working_parameters[key] = value_txt
-def dsc2eleana(key: str) -> str:
-    ''' This function translates keys from Bruker to Eleana Parameter format'''
-    dsc2eleana = {'title': 'TITL',
-                  'unit_x': 'XUNI',
-                  'name_x': 'XNAM',
-                  'unit_y': 'YUNI',
-                  'name_y': 'IRNAM',
-                  'unit_z': 'YUNI',
-                  'name_z': 'YNAM',
-                  'Compl': 'IKKF',
-                  'MwFreq': 'FrequencyMon',
-                  'ModAmp': 'ModAmp',
-                  'ModFreq': 'ModFreq',
-                  'ConvTime': 'ConvTime',
-                  'SweepTime': 'SweepTime',
-                  'Tconst': 'TIMEC',
-                  'Reson': 'RESO',
-                  'Power': 'Power',
-                  'PowAtten': 'PowerAtten'
-                  }
-    try:
-        bruker_key = dsc2eleana[key]
-    except:
-        bruker_key = ''
-    return bruker_key
-
-def par2eleana(key: str) -> str:
-    parEMX2eleana = {}
-    try:
-        bruker_key = parEMX2eleana[key]
-    except:
-        bruker_key = ''
-    return bruker_key

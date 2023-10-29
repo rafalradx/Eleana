@@ -78,7 +78,11 @@ class EleanaMainApp:
         self.check_second_show = builder.get_object('check_second_show', self.mainwindow)
         self.check_result_show = builder.get_object('check_result_show', self.mainwindow)
 
+        # Graph Buttons
+        self.check_autoscale = builder.get_object('chbox_autoscale', self.mainwindow)
 
+
+        # Command line
         self.command_line = builder.get_object('command_line', self.mainwindow)
         self.command_line.bind("<Return>", self.execute_command)
         self.command_line.bind("<Up>", self.execute_command)
@@ -95,15 +99,17 @@ class EleanaMainApp:
         self.firstComplex.set(value="re")
         self.secondComplex.set(value="re")
         self.resultComplex.set(value="re")
-        self.legendFrame = builder.get_object('legendFrame', self.mainwindow)
+        #self.legendFrame = builder.get_object('legendFrame', self.mainwindow)
+
 
         self.check_first_show.select(1)
         self.check_second_show.select(1)
         self.check_result_show.select(1)
+        self.check_autoscale.select(1)
         self.command_history = {'index':0, 'lines':[]}
 
     def set_pane_height(self):
-        self.panedwindow2.sashpos(0, 700)
+        #self.panedwindow2.sashpos(0, 80)
         self.panedwindow4.sashpos(0, 300)
         return
 
@@ -187,9 +193,9 @@ class EleanaMainApp:
             eleana.selections['first'] = -1
             self.firstComplex.grid_remove()
             self.firstStkFrame.grid_remove()
-
             grapher.plot_graph()
             return
+
         i = 0
         while i < len(eleana.dataset):
             name = eleana.dataset[i].name_nr
@@ -710,6 +716,14 @@ class EleanaMainApp:
             return
         group_assign = Groupassign(app, eleana, 'second')
         response = group_assign.get()
+
+    ''' Commands for Graph Switches and buttons '''
+    def switch_autoscale(self):
+        autoscaling = {'x':True, 'y':True}
+        mode = bool(self.check_autoscale.get())
+        autoscaling['x'] = mode
+        autoscaling['y'] = mode
+        grapher.autoscale(autoscaling)
 
     def execute_command(self,event):
         if event.keysym == "Up":

@@ -25,21 +25,23 @@ class Grapher:
         self.toolbar.update()
         self.toolbar.grid(row=1, column=0, sticky="ew")
 
-        self.colours = {'first_re':   "#d53339",
+        self.autoscaling = {'x': True, 'y': True}
+        self.scale1 = {'x': [], 'y': []}
+
+        self.colors = {'first_re':  "#d53339",
                       'first_im':   "#ef6f74",
-                      'second_re:': "#008cb3",
+                      'second_re':  "#008cb3",
                       'second_im':  "#07bbed",
                       'result_re':  "#108d3d",
                       'result_im':  "#32ab5d"
                       }
 
-    def get_axis_title(self, which=None):
+    def axis_title(self, which=None):
         '''Creates title for y and x axes  from "which" dataset '''
 
         if which == None:
             axis_title = {'x_title': "Abscissa [a.u.]", 'y_title': "Ordinate [a.u.]"}
             return axis_title
-
         if which == 'first':
             display = self.eleana.selections['f_dsp']
         elif which == 'second':
@@ -53,13 +55,19 @@ class Grapher:
             axis_title = {'x_title': "Abscissa [a.u.]", 'y_title': "Ordinate [a.u.]"}
             return axis_title
 
-        index = self.eleana.selections[which]
-        data = self.eleana.dataset[index]
+        try:
+            index = self.eleana.selections[which]
+            data = self.eleana.dataset[index]
+        except IndexError:
+            return {'x_title': "Abscissa [a.u.]", 'y_title': "Ordinate [a.u.]"}
 
         name_x = data.parameters['name_x']
         unit_x = data.parameters['unit_x']
         name_y = data.parameters['name_y']
-        unit_y = data.parameters['unit_y']
+        try:
+            unit_y = data.parameters['unit_y']
+        except KeyError:
+            unit_y = 'a.u.'
         if len(unit_x) == 0:
             unit_x = 'a.u.'
         if len(unit_y) == 0:
@@ -69,12 +77,12 @@ class Grapher:
         axis_title = {'x_title':title_x, 'y_title': title_y}
         return axis_title
 
-    def get_legend(self, which=None):
+    def plot_legend(self, which=None):
         ''' This method create legend for plot defined in "which" '''
 
         # 1. If which is selected to None then legend = "no plot" and return
         if which == None:
-            legend = 'no plot'
+            legend = ''
             return legend
 
         # Get selected data from dataset and store in "data"
@@ -82,9 +90,11 @@ class Grapher:
             index = self.eleana.selections[which]
             data = self.eleana.dataset[index]
         except IndexError:
-            legend = 'no plot'
+            legend = ''
             return legend
-
+        if index < 0:
+            legend = ''
+            return legend
         # 2. Chcek if "Show Checkbox" is True. If not then legend = "no plot" and return
         if which == 'first':
             display = self.eleana.selections['f_dsp']
@@ -95,7 +105,7 @@ class Grapher:
         else:
             display = True
         if not display:
-            legend = 'no plot'
+            legend = ''
             return legend
 
         # 3. Check if data is a stack 2D. If yes add appropriate stk name to the legend.
@@ -125,238 +135,105 @@ class Grapher:
             legend = legend + ':' + cplx.upper()
         return legend
 
-    def add_to_plot_list(self):
-        ''' This method gets data from "which" to add them to the plot'''
-        legend = self.get_legend('first')
-        print(legend)
-        #
-        #
-        # if self.eleana.selections['second'] < 0 or self.eleana.selections['s_dsp']:
-        #     second = {'x':np.array[], 're_y':np.array[], 'complex':False, 'im_y':np.array([])}
-        # else:
-        #     second = self.eleana.getDataFromSelection['result']
-        #
-        # if self.eleana.selections['second'] < 0 or self.eleana.selections['s_dsp']:
-
-
-
+    def data_for_plot(self, which):
+        ''' This methods gets data from 'first' or 'second' or 'result' and returns data for plot'''
+        if which == 'first' and self.eleana.selections['f_dsp'] and self.eleana.selections['first'] >= 0:
+            data = self.eleana.getDataFromSelection('first')
+        elif which == 'second' and self.eleana.selections['s_dsp'] and self.eleana.selections['second'] >= 0:
+            data = self.eleana.getDataFromSelection('second')
+        elif which == 'result' and self.eleana.selections['r_dsp'] and self.eleana.selections['result'] >= 0:
+            data = self.eleana.getDataFromSelection('result')
+        else:
+            data = {'x': [], 're_y': [], 'im_y': [], 'complex': False}
+        return data
 
     def plot_graph(self):
-        legend = self.get_legend('first')
-        print(legend)
-        #self.ax.clear()
+        if not self.autoscale:
+             x_scale = self.ax.get_xlim()
+             y_scale = self.ax.get_ylim()
+        self.ax.clear()
 
+        # Add first
+        data = self.data_for_plot('first')
+        first_shown = True if len(data['x']) > 0 else False
+        legend = self.plot_legend('first')
+        if not first_shown:
+            axis_title = {'x_title':'Abscissa [a.u.]', 'y_title': 'Ordinate [a.u.]'}
+        else:
+            axis_title = self.axis_title('first')
+        if data['complex'] and self.eleana.selections['f_cpl'] == 'cpl':
+            self.ax.plot(data['x'], data['re_y'], label=legend, color=self.colors['first_re'])
+            self.ax.plot(data['x'], data['im_y'], label=legend, color=self.colors['first_im'] )
+        elif data['complex'] and self.eleana.selections['f_cpl'] == 'im':
+            self.ax.plot(data['x'], data['im_y'], label=legend, color=self.colors['first_im'])
+        else:
+            self.ax.plot(data['x'], data['re_y'], label=legend, color=self.colors['first_re'])
+        self.ax.set_xlabel(axis_title['x_title'])
+        self.ax.set_ylabel(axis_title['y_title'])
 
-    # def plot_graph(self):
-    #     ''' Plots the graph in self.canvas.
-    #         This is the main method for plotting working plot for first, second, and result'''
-    #
-    #     # Clear canvas
-    #     self.ax.clear()
-    #
-    #     color_first_re = "#d53339"
-    #     color_first_im = "#ef6f74"
-    #     color_second_re = "#008cb3"
-    #     color_second_im = "#07bbed"
-    #     color_result_re = "#108d3d"
-    #     color_result_im = "#32ab5d"
-    #
-    #
-    #     first_complex = False
-    #     second_complex = False
-    #     result_complex = False
-    #
-    #     # FIRST
-    #     index = self.eleana.selections['first']
-    #     is_first_not_none = [True if index >= 0 else False]
-    #
-    #     if self.eleana.selections['f_dsp'] and index >= 0:
-    #         data_for_plot = self.eleana.getDataFromSelection('first')
-    #         data_index = self.eleana.selections['first']
-    #         first_x = data_for_plot['x']
-    #         first_complex = data_for_plot['complex']
-    #         first_re_y = data_for_plot['re_y']
-    #         first_im_y = data_for_plot['im_y']
-    #         first_legend_index = self.eleana.selections['first']
-    #         first_legend = self.eleana.dataset[first_legend_index].name_nr
-    #
-    #         # Label for x axis
-    #         try:
-    #             label_x_title = self.eleana.dataset[data_index].parameters['name_x']
-    #         except:
-    #             label_x_title = ''
-    #         try:
-    #             label_x_unit = self.eleana.dataset[data_index].parameters['unit_x']
-    #         except:
-    #             label_x_unit = 'a.u.'
-    #         first_label_x = label_x_title + ' [' + label_x_unit + ']'
-    #
-    #         # Labels for y axis
-    #         try:
-    #             label_y_title = self.eleana.dataset[data_index].parameters['name_y']
-    #         except:
-    #             label_y_title = ''
-    #         try:
-    #             label_y_unit = self.eleana.dataset[data_index].parameters['unit_y']
-    #         except:
-    #             label_y_unit = 'a.u.'
-    #         first_label_y = label_y_title + ' [' + label_y_unit + ']'
-    #
-    #     else:
-    #         first_x = np.array([])
-    #         first_re_y = np.array([])
-    #         first_im_y = np.array([])
-    #         first_legend = 'no plot'
-    #         first_label_x = ''
-    #         first_label_y = ''
-    #
-    #     # Add FIRST to plot
-    #     self.ax.set_ylabel(first_label_y)
-    #     self.ax.set_xlabel(first_label_x)
-    #     if first_complex:
-    #         if self.eleana.selections['f_cpl'] == 'im':
-    #             first_legend = first_legend + ' :IMAG'
-    #             self.ax.plot(first_x, first_im_y, label=first_legend, color=color_first_im)
-    #         elif self.eleana.selections['f_cpl'] == 'magn':
-    #             first_legend = first_legend + ' :MAGN'
-    #             self.ax.plot(first_x, first_re_y, label=first_legend, color=color_first_re)
-    #         elif self.eleana.selections['f_cpl'] == 'cpl':
-    #             first_legend_r = first_legend + ' :REAL'
-    #             self.ax.plot(first_x, first_re_y, label=first_legend_r, color=color_first_re)
-    #             first_legend_i = first_legend + ' :IMAG'
-    #             self.ax.plot(first_x, first_im_y, label=first_legend_i, color=color_first_im)
-    #         elif self.eleana.selections['f_cpl'] == 're':
-    #             first_legend = first_legend + ' :REAL'
-    #             self.ax.plot(first_x, first_re_y, label=first_legend, color=color_first_re)
-    #     else:
-    #         self.ax.plot(first_x, first_re_y, label=first_legend, color=color_first_re)
-    #
-    #     # SECOND
-    #     index = self.eleana.selections['second']
-    #     is_second_not_none = [True if index >= 0 else False]
-    #     if self.eleana.selections['s_dsp'] and index >= 0:
-    #         data_for_plot = self.eleana.getDataFromSelection('second')
-    #         data_index = self.eleana.selections['second']
-    #         second_x = data_for_plot['x']
-    #         second_re_y = data_for_plot['re_y']
-    #         second_im_y = data_for_plot['im_y']
-    #         second_legend_index = self.eleana.selections['second']
-    #         second_legend = self.eleana.dataset[second_legend_index].name_nr
-    #
-    #         # Label for x axis
-    #         try:
-    #             label_x_title = self.eleana.dataset[data_index].parameters['name_x']
-    #         except:
-    #             label_x_title = ''
-    #         try:
-    #             label_x_unit = self.eleana.dataset[data_index].parameters['unit_x']
-    #         except:
-    #             label_x_unit = 'a.u.'
-    #         second_label_x = label_x_title + ' [' + label_x_unit + ']'
-    #
-    #         # Labels for y axis
-    #         try:
-    #             label_y_title = self.eleana.dataset[data_index].parameters['name_y']
-    #         except:
-    #             label_y_title = ''
-    #         try:
-    #             label_y_unit = self.eleana.dataset[data_index].parameters['unit_y']
-    #         except:
-    #             label_y_unit = 'a.u.'
-    #         second_label_y = label_y_title + ' [' + label_y_unit + ']'
-    #
-    #     else:
-    #         second_x = np.array([])
-    #         second_re_y = np.array([])
-    #         second_im_y = np.array([])
-    #         second_legend = 'no plot'
-    #         second_label_x = ''
-    #         second_label_y = ''
-    #
-    #     # Add SECOND to plot
-    #     if self.eleana.selections['f_dsp'] and index >= 0:
-    #         # If FIRST spectrum is on then do not change axes labels
-    #         pass
-    #     else:
-    #         # If FIRST spectrum is off or set tu None then change labels to those from SECOND
-    #         self.ax.set_ylabel(second_label_y)
-    #         self.ax.set_xlabel(second_label_x)
-    #
-    #     self.ax.plot(second_x, second_re_y, label=second_legend, color=color_second_re)
-    #
-    #     # RESULT
-    #     if len(self.eleana.results_dataset) != 0:
-    #         index = self.eleana.selections['first']
-    #
-    #         if index >= 0:
-    #             is_result_not_none = True
-    #         else:
-    #             is_result_not_none = False
-    #
-    #         if self.eleana.selections['s_dsp'] and is_result_not_none:
-    #             data_for_plot = self.eleana.getDataFromSelection('result')
-    #             data_index = self.eleana.selections['result']
-    #             result_x = data_for_plot['x']
-    #             result_re_y = data_for_plot['re_y']
-    #             result_im_y = data_for_plot['im_y']
-    #             result_legend_index = self.eleana.selections['result']
-    #             result_legend = self.eleana.results_dataset[result_legend_index].name_nr
-    #
-    #             # Label for x axis
-    #             try:
-    #                 label_x_title = self.eleana.results_dataset[data_index].parameters['name_x']
-    #             except:
-    #                 label_x_title = ''
-    #             try:
-    #                 label_x_unit = self.eleana.results_dataset[data_index].parameters['unit_x']
-    #             except:
-    #                 label_x_unit = 'a.u.'
-    #             result_label_x = label_x_title + ' [' + label_x_unit + ']'
-    #
-    #             # Labels for y axis
-    #             try:
-    #                 label_y_title = self.eleana.results_dataset[data_index].parameters['name_y']
-    #             except:
-    #                 label_y_title = ''
-    #             try:
-    #                 label_y_unit = self.eleana.results_dataset[data_index].parameters['unit_y']
-    #             except:
-    #                 label_y_unit = 'a.u.'
-    #             result_label_y = label_y_title + ' [' + label_y_unit + ']'
-    #
-    #         else:
-    #             result_x = np.array([])
-    #             result_re_y = np.array([])
-    #             result_im_y = np.array([])
-    #             result_legend = 'no plot'
-    #             result_label_x = ''
-    #             result_label_y = ''
-    #
-    #         # Add SECOND to plot
-    #         if self.eleana.selections['f_dsp'] and self.eleana.selections['s_dsp'] and is_first_not_none and is_second_not_none:
-    #             pass
-    #         else:
-    #             # If FIRST spectrum is off or set tu None then change labels to those from SECOND
-    #             self.ax.set_ylabel(result_label_y)
-    #             self.ax.set_xlabel(result_label_x)
-    #
-    #         self.ax.plot(result_x, result_re_y, label=result_legend, color=color_result_re)
-    #
-    #     # Put data on Graph
-    #     self.ax.legend(loc='upper center', bbox_to_anchor=(0.15, 1.1),
-    #               fancybox=False, shadow=False, ncol=5)
-    #
-    #     self.canvas.draw()
-    #
-    #     def on_key_press(event):
-    #         print("you pressed {}".format(event.key))
-    #         key_press_handler(event, self.canvas, self.toolbar)
-    #
-    #     self.canvas.mpl_connect("key_press_event", on_key_press)
+        # Add second
+        data = self.data_for_plot('second')
+        legend = self.plot_legend('second')
+        second_shown = True if len(data['x']) > 0 else False
+        if second_shown and not first_shown:
+            axis_title = self.axis_title('second')
+        else:
+            pass
+
+        if data['complex'] and self.eleana.selections['s_cpl'] == 'cpl':
+            self.ax.plot(data['x'], data['re_y'], label=legend, color=self.colors['second_re'])
+            self.ax.plot(data['x'], data['im_y'], label=legend, color=self.colors['second_im'])
+        elif data['complex'] and self.eleana.selections['s_cpl'] == 'im':
+            self.ax.plot(data['x'], data['im_y'], label=legend, color=self.colors['second_im'])
+        else:
+            self.ax.plot(data['x'], data['re_y'], label=legend, color=self.colors['second_re'])
+
+        self.ax.set_xlabel(axis_title['x_title'])
+        self.ax.set_ylabel(axis_title['y_title'])
+
+        # Add result
+        data = self.data_for_plot('result')
+        legend = self.plot_legend('result')
+        result_shown = True if len(data['x']) > 0 else False
+        if result_shown and not first_shown and not second_shown:
+            axis_title = self.axis_title('result')
+        else:
+            pass
+
+        if data['complex'] and self.eleana.selections['r_cpl'] == 'cpl':
+            self.ax.plot(data['x'], data['re_y'], label=legend, color=self.colors['result_re'])
+            self.ax.plot(data['x'], data['im_y'], label=legend, color=self.colors['result_im'])
+        else:
+            self.ax.plot(data['x'], data['re_y'], label=legend, color=self.colors['result_re'])
+        self.ax.set_xlabel(axis_title['x_title'])
+        self.ax.set_ylabel(axis_title['y_title'])
+
+        self.draw()
+
     def draw(self):
+        print('Before Draw')
+        print(self.scale1)
         self.ax.legend(loc='upper center', bbox_to_anchor=(0.15, 1.1),
                        fancybox=False, shadow=False, ncol=5)
+
+
+        # Handle autoscaling
+        if self.autoscaling['x']:
+            self.scale1['x'] = self.ax.get_xlim()
+        else:
+            self.ax.set_xlim(self.scale1['x'])
+
+        if self.autoscaling['y']:
+            self.scale1['y'] = self.ax.get_ylim()
+        else:
+            self.ax.set_ylim(self.scale1['y'])
+        print('After draw')
+        print(self.scale1)
         self.canvas.draw()
         def on_key_press_on_graph(event):
            key_press_handler(event, self.canvas, self.toolbar)
            self.canvas.mpl_connect("key_press_event", on_key_press_on_graph)
+    def autoscale(self, autoscaling: dict):
+        self.autoscaling = autoscaling
+
+        return
