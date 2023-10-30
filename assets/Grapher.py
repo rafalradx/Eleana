@@ -131,7 +131,7 @@ class Grapher:
                 name_stk = '/' + str(data.stk_names[stk_index])
         legend = str(data.name_nr + name_stk)
 
-        # 4. Check if data is complex then add RE, IM, or MAGN to the legend
+        # 4. Check if data is complex then add RE, IM, CPL or MAGN to the legend
         if data.complex:
             if which == 'first':
                 cplx = self.eleana.selections['f_cpl']

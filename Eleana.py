@@ -22,6 +22,7 @@ from assets.LoadSave import Save
 from assets.Initialization import Init
 from assets.Grapher import Grapher
 from assets.Update import Update
+from assets.Menu import ContextMenu, MainMenu
 from subprogs.group_edit.add_group import Groupcreate
 from subprogs.group_edit.assign_to_group import Groupassign
 
@@ -49,13 +50,19 @@ class EleanaMainApp:
         self.mainwindow.withdraw()
 
         # Main menu
-        main_menu = builder.get_object("mainmenu", self.mainwindow)
-        self.mainwindow.configure(menu=main_menu)
+        #main_menu = builder.get_object("mainmenu", self.mainwindow)
+        #self.mainwindow.configure(menu=main_menu)
 
-        self.group_down = None
-        self.group_up = None
-        self.group = None
-        self.first_down = None
+        # Menu
+        # self.main_menu = tk.Menu(self.mainwindow)
+        # self.mainwindow.config(menu=self.main_menu)
+        #
+        # self.menu_file = tk.Menu(self.main_menu, tearoff=0)
+        # self.main_menu.add_cascade(label="File", menu=self.menu_file)
+        # self.group_down = None
+        # self.group_up = None
+        # self.group = None
+        # self.first_down = None
         builder.connect_callbacks(self)
         # END OF PYGUBU BUILDER
 
@@ -65,6 +72,7 @@ class EleanaMainApp:
         self.sel_second = builder.get_object("sel_second", self.mainwindow)
         self.sel_result = builder.get_object("sel_result", self.mainwindow)
         self.firstFrame = builder.get_object("firstFrame", self.mainwindow)
+        self.secondFrame = builder.get_object("secondFrame", self.mainwindow)
         self.resultFrame = builder.get_object("resultFrame", self.mainwindow)
         self.resultStkFrame = builder.get_object("resultStkFrame", self.mainwindow)
         self.firstStkFrame = builder.get_object("firstStkFrame", self.mainwindow)
@@ -103,12 +111,15 @@ class EleanaMainApp:
 
         self.command_history = {'index':0, 'lines':[]}
 
-        # Context menu bindings
-        self.label7 = builder.get_object('label7', self.mainwindow)
-        self.label7.bind("<Button-3>", self.show_context_menu)
-
-    def show_context_menu(self, event):
-        print('Context menu')
+        # # Context menu bindings to first
+        # self.context_menu = tk.Menu(self.mainwindow, tearoff=0)
+        # self.firstFrame.bind("<Button-3>", self.show_context_menu_first)
+        # self.sel_first.bind("<Button-3>", self.show_context_menu_first)
+        # self.context_menu.add_command(label="Print hello")
+    # def show_context_menu_first(self, event):
+    #     self.context_menu.tk_popup(event.x_root, event.y_root)
+    #
+    #     print('Context menu')
 
     # def create_command_menu(self):
     #     self.contex_menu.add_command(label="Print hello", command=self.on_print_hello_menu_clicked)
@@ -742,6 +753,13 @@ class EleanaMainApp:
     def set_log_scale_x(self):
         pass
 
+    '''Method to handle context menu selection'''
+    def context_first_pos1(self):
+        print('mAIN First 1')
+
+    def context_first_pos2(self):
+        print('main First 2')
+
     def execute_command(self,event):
         if event.keysym == "Up":
             try:
@@ -814,6 +832,8 @@ load = Load(eleana)
 save = Save(eleana)
 grapher = Grapher(app, eleana)
 init = Init(app, eleana, grapher)
+main_menu = MainMenu(app, eleana)
+context_menu = ContextMenu(app, eleana)
 #------------
 
 # Initialize basic settings: geometry, icon, graph, binding, etc
