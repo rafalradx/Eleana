@@ -12,7 +12,7 @@ class MainMenu:
         ''' Styling of the menu '''
         self.bg = '#303030'
         self.fg = '#aaaaaa'
-        self.font = ("Arial", 11)
+        self.font = ("Arial", 10)
         self.activebg = "#676767" # Hover background
         self.activefg = "#eaeaea" # Hover font color
         self.borderwidth = 0

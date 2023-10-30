@@ -101,40 +101,22 @@ class EleanaMainApp:
         self.command_line.bind("<Return>", self.execute_command)
         self.command_line.bind("<Up>", self.execute_command)
         self.command_line.bind("<Down>", self.execute_command)
+        self.command_history = {'index':0, 'lines':[]}
+        self.log_field = builder.get_object('log_field', self.mainwindow)
 
+        # Paned windows
         self.panedwindow2 = builder.get_object('panedwindow2', self.mainwindow)
         self.panedwindow4 = builder.get_object('panedwindow4', self.mainwindow)
         self.pane5 = builder.get_object('pane5', self.mainwindow)
         self.pane9 = builder.get_object('pane9', self.mainwindow)
 
-        self.log_field = builder.get_object('log_field', self.mainwindow)
-
-        self.command_history = {'index':0, 'lines':[]}
-
-        # # Context menu bindings to first
-        # self.context_menu = tk.Menu(self.mainwindow, tearoff=0)
-        # self.firstFrame.bind("<Button-3>", self.show_context_menu_first)
-        # self.sel_first.bind("<Button-3>", self.show_context_menu_first)
-        # self.context_menu.add_command(label="Print hello")
-    # def show_context_menu_first(self, event):
-    #     self.context_menu.tk_popup(event.x_root, event.y_root)
-    #
-    #     print('Context menu')
-
-    # def create_command_menu(self):
-    #     self.contex_menu.add_command(label="Print hello", command=self.on_print_hello_menu_clicked)
-    # def on_print_hello_menu_clicked(self):
-    #     print('Hello')
-
-
-
-
-
+        # Keyboard bindings
+        self.mainwindow.bind("<Control-c>", self.copy_to_clipboard)
 
 
     def set_pane_height(self):
-        self.panedwindow2.sashpos(0, 700)
-        self.panedwindow4.sashpos(0, 300)
+        #self.panedwindow2.sashpos(0, 700)
+        #self.panedwindow4.sashpos(0, 300)
         return
 
     def run(self):
@@ -751,7 +733,16 @@ class EleanaMainApp:
         grapher.plot_graph()
 
     def set_log_scale_x(self):
-        pass
+        grapher.log_scales['x'] = bool(self.check_log_x.get())
+        grapher.plot_graph()
+
+    def set_log_scale_y(self):
+        grapher.log_scales['y'] = bool(self.check_log_y.get())
+        grapher.plot_graph()
+
+    def indexed_x(self):
+        grapher.indexed_x = bool(self.check_indexed_x.get())
+        grapher.plot_graph()
 
     '''Method to handle context menu selection'''
     def context_first_pos1(self):
@@ -806,6 +797,10 @@ class EleanaMainApp:
             new_log = '\n' + output
             self.log_field.insert("end", new_log)
             return output
+
+    ''' Keyboard bindings '''
+    def copy_to_clipboard(self, event):
+        print('Copy to clipboard')
 
 # --- GENERAL BATCH METHODS ---
 

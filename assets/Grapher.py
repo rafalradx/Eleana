@@ -24,6 +24,7 @@ class Grapher:
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.app.graphFrame, pack_toolbar=False)
         self.toolbar.update()
         self.toolbar.grid(row=1, column=0, sticky="ew")
+        #self.toolbar.configure(bg="#FDF6E3", background="#FDF6E3")
 
 
         ''' PLOT PREFERENCES '''
@@ -43,7 +44,7 @@ class Grapher:
         self.log_scales = {'x':False, 'y':False}
 
         # Show X as points
-        self.x_as_points = False
+        self.indexed_x = False
 
     def axis_title(self, which=None):
         '''Creates title for y and x axes  from "which" dataset '''
@@ -86,7 +87,7 @@ class Grapher:
         axis_title = {'x_title':title_x, 'y_title': title_y}
         return axis_title
 
-    def plot_legend(self, which=None):
+    def create_legend(self, which=None):
         ''' This method create legend for plot defined in "which" '''
 
         # 1. If which is selected to None then legend = "no plot" and return
@@ -157,13 +158,17 @@ class Grapher:
         return data
 
     def plot_graph(self):
-        ''' This method plots the basic workin plot with First,Second,Result'''
+        ''' This method plots the basic working plot with First,Second,Result'''
         self.ax.clear()
 
         # Add first
         data = self.data_for_plot('first')
+        # If indexed is True replace X values with consecutive points
+        if self.indexed_x:
+            length = len(data['x'])+1
+            data['x'] = [i for i in range(1, length)]
         first_shown = True if len(data['x']) > 0 else False
-        legend = self.plot_legend('first')
+        legend = self.create_legend('first')
         if not first_shown:
             axis_title = {'x_title':'Abscissa [a.u.]', 'y_title': 'Ordinate [a.u.]'}
         else:
@@ -180,7 +185,11 @@ class Grapher:
 
         # Add second
         data = self.data_for_plot('second')
-        legend = self.plot_legend('second')
+        # If indexed is True replace X values with consecutive points
+        if self.indexed_x:
+            length = len(data['x']) + 1
+            data['x'] = [i for i in range(1, length)]
+        legend = self.create_legend('second')
         second_shown = True if len(data['x']) > 0 else False
         if second_shown and not first_shown:
             axis_title = self.axis_title('second')
@@ -193,14 +202,19 @@ class Grapher:
         elif data['complex'] and self.eleana.selections['s_cpl'] == 'im':
             self.ax.plot(data['x'], data['im_y'], label=legend, color=self.colors['second_im'])
         else:
+            #self.ax2.cla()
+            #self.ax2.plot(data['x'], data['re_y'], label=legend, color=self.colors['second_re'])
             self.ax.plot(data['x'], data['re_y'], label=legend, color=self.colors['second_re'])
-
         self.ax.set_xlabel(axis_title['x_title'])
         self.ax.set_ylabel(axis_title['y_title'])
 
         # Add result
         data = self.data_for_plot('result')
-        legend = self.plot_legend('result')
+        # If indexed is True replace X values with consecutive points
+        if self.indexed_x:
+            length = len(data['x']) + 1
+            data['x'] = [i for i in range(1, length)]
+        legend = self.create_legend('result')
         result_shown = True if len(data['x']) > 0 else False
         if result_shown and not first_shown and not second_shown:
             axis_title = self.axis_title('result')
@@ -215,8 +229,18 @@ class Grapher:
         self.ax.set_xlabel(axis_title['x_title'])
         self.ax.set_ylabel(axis_title['y_title'])
 
-        #self.ax.set_yscale('log')
-        #self.ax.set_xscale('log')
+        # Log or Linear scales
+        if self.log_scales['x']:
+            self.ax.set_xscale('log')
+        else:
+            self.ax.set_xscale('linear')
+        if self.log_scales['y']:
+            self.ax.set_yscale('log')
+        else:
+            self.ax.set_yscale('linear')
+
+
+        # Draw Graph
         self.draw()
 
     def draw(self):
@@ -252,10 +276,10 @@ class Grapher:
         self.scale1['y'] = ylim
         self.autoscaling['y'] = False
         self.app.check_autoscale_y.deselect()
-        print('Auto Y: ' + str(self.autoscaling['y']))
+
     def on_xlim_changed(self, axes):
         xlim = self.ax.get_xlim()
         self.scale1['x'] = xlim
         self.autoscaling['x'] = False
         self.app.check_autoscale_x.deselect()
-        print('Auto X: ' + str(self.autoscaling['x']))
+
