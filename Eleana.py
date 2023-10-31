@@ -9,11 +9,13 @@ from tkinter import ttk
 from pathlib import Path
 import customtkinter
 import pygubu
-from CTkMessagebox import CTkMessagebox
+from modules.CTkMessagebox import CTkMessagebox
+from modules.CTkListbox import *
 import sys
 import customtkinter as ctk
 import io
 import sys
+from modules.CTkListbox import *
 
 # Import Eleana specific classes
 from assets.GeneralEleana import Eleana
@@ -67,10 +69,13 @@ class EleanaMainApp:
         # END OF PYGUBU BUILDER
 
         # Create references to Widgets and Frames
+        self.switch_comparison = builder.get_object("switch_comp_view", self.mainwindow)
         self.sel_group = builder.get_object("sel_group", self.mainwindow)
         self.sel_first = builder.get_object("sel_first", self.mainwindow)
         self.sel_second = builder.get_object("sel_second", self.mainwindow)
         self.sel_result = builder.get_object("sel_result", self.mainwindow)
+        self.listFrame = builder.get_object("listFrame", self.mainwindow)
+        self.listFrame.grid_remove()
         self.firstFrame = builder.get_object("firstFrame", self.mainwindow)
         self.secondFrame = builder.get_object("secondFrame", self.mainwindow)
         self.resultFrame = builder.get_object("resultFrame", self.mainwindow)
@@ -81,6 +86,7 @@ class EleanaMainApp:
         self.secondComplex = builder.get_object("secondComplex", self.mainwindow)
         self.resultComplex = builder.get_object("resultComplex", self.mainwindow)
         self.graphFrame = builder.get_object('graphFrame', self.mainwindow)
+        self.swapFrame = builder.get_object('swapFrame', self.mainwindow)
         self.f_stk = builder.get_object('f_stk', self.mainwindow)
         self.s_stk = builder.get_object('s_stk', self.mainwindow)
         self.r_stk = builder.get_object('r_stk', self.mainwindow)
@@ -123,6 +129,31 @@ class EleanaMainApp:
             self.mainwindow.deiconify()
             self.mainwindow.after(100, self.set_pane_height)
             self.mainwindow.mainloop()
+
+    def comparison_view(self):
+        mode = bool(self.switch_comparison.get())
+        if mode:
+            self.firstFrame.grid_remove()
+            self.secondFrame.grid_remove()
+            self.swapFrame.grid_remove()
+            self.listFrame.grid()
+            self.listbox = CTkListbox(self.listFrame, command=self.list_selected, multiple_selection=True)
+            self.listbox.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=1, sticky="nsew")
+
+            self.listbox.insert(0, "Option 0")
+            self.listbox.insert(1, "Option 1")
+            self.listbox.insert(2, "Option 2")
+            self.listbox.insert(3, "Option 3")
+            self.listbox.insert("END", "Option 8")
+        else:
+            self.listbox.grid_remove()
+            self.listFrame.grid_remove()
+            self.firstFrame.grid()
+            self.secondFrame.grid()
+            self.swapFrame.grid()
+
+    def list_selected(self, selected_items):
+        pass
 
     def group_down_clicked(self):
         current_group = self.sel_group.get()
