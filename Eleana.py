@@ -121,8 +121,8 @@ class EleanaMainApp:
 
 
     def set_pane_height(self):
-        #self.panedwindow2.sashpos(0, 700)
-        #self.panedwindow4.sashpos(0, 300)
+        self.panedwindow2.sashpos(0, 700)
+        self.panedwindow4.sashpos(0, 300)
         return
 
     def run(self):
@@ -131,8 +131,8 @@ class EleanaMainApp:
             self.mainwindow.mainloop()
 
     def comparison_view(self):
-        mode = bool(self.switch_comparison.get())
-        if mode:
+        comparison_mode = bool(self.switch_comparison.get())
+        if comparison_mode:
             self.firstFrame.grid_remove()
             self.secondFrame.grid_remove()
             self.swapFrame.grid_remove()
@@ -140,19 +140,40 @@ class EleanaMainApp:
             self.listbox = CTkListbox(self.listFrame, command=self.list_selected, multiple_selection=True)
             self.listbox.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=1, sticky="nsew")
 
-            self.listbox.insert(0, "Option 0")
-            self.listbox.insert(1, "Option 1")
-            self.listbox.insert(2, "Option 2")
-            self.listbox.insert(3, "Option 3")
-            self.listbox.insert("END", "Option 8")
+            # Here prepare new canvas for plots
+            grapher.canvas.get_tk_widget().grid_remove()
+
+            # Get names from group to be used for the list
+            group = eleana.selections['group']
+            names_nr = []
+            indexes = []
+            if group == 'All':
+                i = 0
+                while i < len(eleana.dataset):
+                    names_nr.append(eleana.dataset[i].name_nr)
+                    indexes.append(i)
+                    i += 1
+            else:
+                indexes = eleana.assignmentToGroups[group]
+                for i in indexes:
+                    names_nr.append(eleana.dataset[i].name_nr)
+            i = 0
+            while i < len(names_nr)-1:
+                self.listbox.insert(indexes[i], names_nr[i])
+                i += 1
+            self.listbox.insert("END", names_nr[i])
         else:
-            self.listbox.grid_remove()
             self.listFrame.grid_remove()
+            self.listbox.grid_remove()
             self.firstFrame.grid()
             self.secondFrame.grid()
             self.swapFrame.grid()
+            grapher.canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+            # Here restore previous canvas for plot
+
 
     def list_selected(self, selected_items):
+        grapher.comparison_plot(selected_items)
         pass
 
     def group_down_clicked(self):

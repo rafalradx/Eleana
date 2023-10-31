@@ -243,6 +243,12 @@ class Grapher:
         # Draw Graph
         self.draw()
 
+
+    def comparison_plot(self, selected_items):
+        print(' W grapherze. ', selected_items)
+        return
+
+
     def draw(self):
         self.ax.legend(loc='upper center', bbox_to_anchor=(0.15, 1.1),
                        fancybox=False, shadow=False, ncol=5)

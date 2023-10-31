@@ -15,7 +15,7 @@ class MainMenu:
         self.font = ("Arial", 10)
         self.activebg = "#676767" # Hover background
         self.activefg = "#eaeaea" # Hover font color
-        self.borderwidth = 0
+        self.borderwidth = 1
 
         # Icons
         self.icon_dropdown = self.prepare_icon("dropdown.png")
@@ -80,6 +80,17 @@ class MainMenu:
         # -------- Clear result
         self.menu_clear.add_command(label="Result", command=self.app.clear_results)
 
+        # - Groups
+        self.menu_groups = tk.Menu(self.menu_edit, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                                 activebackground=self.activebg, activeforeground=self.activefg,
+                                 borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.menu_edit.add_cascade(label="Groups", menu=self.menu_groups, image=self.icon_dropdown, compound="left")
+        # -------- Assign First to group
+        self.menu_groups.add_command(label="Assign First to group", command=self.app.first_to_group)
+        # -------- Assign Second to group
+        self.menu_groups.add_command(label="Assign Second to group", command=self.app.second_to_group)
+
+
     def prepare_icon(self, filename):
         ''' This method prepares icon photoimage that is named "filename" '''
         icon_file = Path(self.icons, filename)
@@ -117,8 +128,8 @@ class ContextMenu:
         self.build_menu_result()
     def build_menu_first(self):
         '''This creates positions for FIRST context menu '''
-        self.context_menu_first.add_command(label="First 1", command=self.app.context_first_pos1)
-        self.context_menu_first.add_command(label="First 2", command=self.app.context_first_pos2)
+        self.context_menu_first.add_command(label="Assign to group", command=self.app.first_to_group)
+        #self.context_menu_first.add_command(label="First 2", command=self.app.context_first_pos2)
 
     def build_menu_second(self):
         '''This creates positions for SECOND context menu '''
