@@ -80,7 +80,8 @@ class MainMenu:
         # -------- Clear result
         self.menu_clear.add_command(label="Result", command=self.app.clear_results)
 
-        # - Groups
+
+        # - First
         self.menu_groups = tk.Menu(self.menu_edit, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                  activebackground=self.activebg, activeforeground=self.activefg,
                                  borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
@@ -89,6 +90,8 @@ class MainMenu:
         self.menu_groups.add_command(label="Assign First to group", command=self.app.first_to_group)
         # -------- Assign Second to group
         self.menu_groups.add_command(label="Assign Second to group", command=self.app.second_to_group)
+
+
 
 
     def prepare_icon(self, filename):
@@ -129,7 +132,8 @@ class ContextMenu:
     def build_menu_first(self):
         '''This creates positions for FIRST context menu '''
         self.context_menu_first.add_command(label="Assign to group", command=self.app.first_to_group)
-        #self.context_menu_first.add_command(label="First 2", command=self.app.context_first_pos2)
+        self.context_menu_first.add_command(label="Convert stack to group", command=lambda: self.app.stack_to_group('first'))
+        self.context_menu_first.add_command(label="Rename", command=lambda: self.app.rename_data('first'))
 
     def build_menu_second(self):
         '''This creates positions for SECOND context menu '''

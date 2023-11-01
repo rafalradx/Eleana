@@ -22,7 +22,6 @@ class Groupcreate:
         self.response = None
         ''' Do not modify the code until this part'''
 
-
         # Set the window properties to modal mode
         self.mainwindow.grab_set()  # Set as modal
         self.mainwindow.attributes('-topmost', True)  # Always on top
@@ -34,9 +33,11 @@ class Groupcreate:
         self.description = builder.get_object("ctkentry3", self.mainwindow)
         self.btn_create = builder.get_object("btn_create", self.mainwindow)
 
+        self.group_name.focus_set()
         # Define keyboard bindings
         self.mainwindow.bind('<Return>', lambda event: self.btn_create.invoke())
         self.mainwindow.bind("<Escape>", self.cancel)
+
 
     ''' DO NOT REMOVE GET AND RUN FUNCTIONS'''
     def get(self):
@@ -54,8 +55,6 @@ class Groupcreate:
             self.eleana.assignmentToGroups[new_group] = []
             self.group_name.delete(0, "end")
             self.description.delete(0, "end")
-            #info = "Group named '" + new_group + "' has been created."
-            #CTkMessagebox(title="", message=info)
             self.cancel(None)
         else:
             info = "The group '" + new_group + "' already exists! Please choose different name."

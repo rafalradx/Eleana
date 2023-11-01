@@ -3,6 +3,18 @@ from pathlib import Path, PurePath
 import numpy as np
 import re
 
+class Single2D:
+    def __init__(self, data: dict):
+        self.parameters: dict = data['parameters']
+        self.groups: list = data['groups']
+        self.x: np.ndarray = data['x']
+        self.y: np.ndarray = data['y']
+        self.name: str = data['name']
+        self.complex = data.get('complex', False)
+        self.type = 'single 2D'
+        self.origin = data.get('origin', '')
+
+
 class Spectrum_CWEPR:
     def __init__(self, name, x_axis: list, dta: list, dsc: dict):
         self.parameters = {'title': '', 'unit_x': 'G', 'name_x': 'Field', 'name_y': 'Intensity', 'MwFreq': '', 'ModAmp': '', 'ModFreq': '',

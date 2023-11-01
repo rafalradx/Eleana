@@ -25,9 +25,11 @@ from assets.Initialization import Init
 from assets.Grapher import Grapher
 from assets.Update import Update
 from assets.Menu import ContextMenu, MainMenu
-from subprogs.group_edit.add_group import Groupcreate
-from subprogs.group_edit.assign_to_group import Groupassign
 
+from subprogs.group_edit.add_group import Groupcreate
+from subprogs.group_edit.stack_to_group import StackToGroup
+from subprogs.group_edit.assign_to_group import Groupassign
+from subprogs.user_input.single_dialog import SingleDialog
 
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "ui" / "Eleana_main.ui"
@@ -119,6 +121,10 @@ class EleanaMainApp:
         # Keyboard bindings
         self.mainwindow.bind("<Control-c>", self.copy_to_clipboard)
 
+        # This keeps the information if any information or dialog should be displayed.
+        # This is useful to constantly display the same information in a loop etc.
+        self.info_show = True
+        self.repeated_items = []
 
     def set_pane_height(self):
         self.panedwindow2.sashpos(0, 700)
@@ -131,6 +137,8 @@ class EleanaMainApp:
             self.mainwindow.mainloop()
 
     def comparison_view(self):
+        self.info_show =True
+        self.repeated_items = []
         comparison_mode = bool(self.switch_comparison.get())
         if comparison_mode:
             self.firstFrame.grid_remove()
@@ -141,7 +149,6 @@ class EleanaMainApp:
             self.listbox.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=1, sticky="nsew")
 
             # Here prepare new canvas for plots
-            grapher.canvas.get_tk_widget().grid_remove()
 
             # Get names from group to be used for the list
             group = eleana.selections['group']
@@ -161,7 +168,11 @@ class EleanaMainApp:
             while i < len(names_nr)-1:
                 self.listbox.insert(indexes[i], names_nr[i])
                 i += 1
-            self.listbox.insert("END", names_nr[i])
+            try:
+                self.listbox.insert("END", names_nr[i])
+            except:
+                pass
+
         else:
             self.listFrame.grid_remove()
             self.listbox.grid_remove()
@@ -169,12 +180,27 @@ class EleanaMainApp:
             self.secondFrame.grid()
             self.swapFrame.grid()
             grapher.canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+
             # Here restore previous canvas for plot
 
 
     def list_selected(self, selected_items):
-        grapher.comparison_plot(selected_items)
-        pass
+        self.repeated_items.extend(selected_items)
+        for each in selected_items:
+            index = get_index_by_name(each)
+            type = eleana.dataset[index].type
+            name_nr = eleana.dataset[index].name_nr
+            if name_nr in set(self.repeated_items):
+                self.info_show = True
+            if type == 'stack 2D' and self.info_show:
+                info = 'Data "' + name_nr + '" is a 2D stack. Selecting this data will display all stack items on the graph.'
+                CTkMessagebox(title="", message=info)
+                self.info_show = False
+        items_list = []
+        for each in selected_items:
+            items_list.append(get_index_by_name(each))
+        items_list.sort()
+        grapher.comparison_plot(items_list)
 
     def group_down_clicked(self):
         current_group = self.sel_group.get()
@@ -201,6 +227,10 @@ class EleanaMainApp:
     def group_selected(self, value):
         eleana.selections['group'] = value
         update.all_lists()
+        self.sel_first.set('None')
+        self.sel_second.set('None')
+        update.gui_widgets()
+
 
     def first_show(self):
         eleana.selections['f_dsp'] = bool(self.check_first_show.get())
@@ -244,7 +274,6 @@ class EleanaMainApp:
     def first_complex_clicked(self, value):
             eleana.selections['f_cpl'] = value
             grapher.plot_graph()
-
 
     def first_selected(self, selected_value_text):
         if selected_value_text == 'None':
@@ -766,7 +795,6 @@ class EleanaMainApp:
         response = group_assign.get()
         update.group_list()
         update.all_lists()
-        print(eleana.assignmentToGroups)
 
     def second_to_group(self):
         if eleana.selections['second'] < 0:
@@ -774,7 +802,11 @@ class EleanaMainApp:
         group_assign = Groupassign(app, eleana, 'second')
         response = group_assign.get()
 
-    ''' Commands for Graph Switches and buttons '''
+    '''***********************************************
+    *                                                *
+    *           GRAPH SWITCHES AND BUTTONS           *
+    *                                                *  
+    ***********************************************'''
     def switch_autoscale_x(self):
         autoscaling = {'x':self.check_autoscale_x.get(), 'y':grapher.autoscaling['y']}
         grapher.autoscale(autoscaling)
@@ -796,9 +828,59 @@ class EleanaMainApp:
         grapher.indexed_x = bool(self.check_indexed_x.get())
         grapher.plot_graph()
 
-    '''Method to handle context menu selection'''
-    def context_first_pos1(self):
-        print('mAIN First 1')
+
+    '''***********************************************
+    *                                                *
+    *           METHODS FOR CONTEXT MENU             *
+    *                                                *  
+    ***********************************************'''
+
+    def stack_to_group(self, which):
+        index = eleana.selections[which]
+        if index < 0:
+            return
+        data = eleana.dataset[index]
+        if not data.type == 'stack 2D':
+            CTkMessagebox(title="Conversion to group", message="The data you selected is not a 2D stack")
+        else:
+            select_group = StackToGroup(app, eleana, which)
+            response = select_group.get()
+            if response == None:
+                return
+            update.dataset_list()
+            update.group_list()
+            update.all_lists()
+    def rename_data(self, which):
+        index = eleana.selections[which]
+        index_f = eleana.selections['first']
+        index_s = eleana.selections['second']
+        index_r = eleana.selections['result']
+
+        if index < 0:
+            return
+        name = eleana.dataset[index].name
+        if which == 'first':
+            title = 'Rename First'
+        elif which == 'second':
+            title = 'Rename Second'
+        elif which == 'result':
+            title = 'Rename Result'
+
+        dialog = SingleDialog(master=app, title=title, label='Enter new name', text=name)
+        response = dialog.get()
+        if response == None:
+            return
+
+        eleana.dataset[index].name = response
+        update.dataset_list()
+        update.group_list()
+        update.all_lists()
+        if index_f >= 0:
+            self.sel_first.set(eleana.dataset[index_f].name_nr)
+        if index_s >= 0:
+            self.sel_second.set(eleana.dataset[index_s].name_nr)
+        if index_r >= 0:
+            self.sel_result.set(eleana.dataset[index_r].name_nr)
 
     def context_first_pos2(self):
         print('main First 2')

@@ -2,7 +2,7 @@
 import pathlib
 import pygubu
 from tkinter import Event
-from CTkMessagebox import CTkMessagebox
+from modules.CTkMessagebox import CTkMessagebox
 from subprogs.group_edit.add_group import Groupcreate
 PROJECT_PATH = pathlib.Path(__file__).parent
 
@@ -10,7 +10,7 @@ PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "assign_to_group.ui"
 
 class Groupassign:
-    def __init__(self, master = None, eleana_instance = None, which = 'first'):
+    def __init__(self, master = None, eleana_instance = None, which = 'first', window_title = "Add new group"):
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)

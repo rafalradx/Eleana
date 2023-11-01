@@ -217,7 +217,7 @@ class Update:
         is_result_none = True if self.eleana.selections['result'] < 0 else False
 
         # FIRST frame
-        if len(self.eleana.dataset) == 0 or self.first.type != "stack 2D" or is_first_none:
+        if len(self.eleana.dataset) == 0 or first.type != "stack 2D" or is_first_none:
             self.app.firstStkFrame.grid_remove()
             self.app.firstComplex.grid_remove()
 

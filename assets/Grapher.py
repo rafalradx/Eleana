@@ -244,7 +244,7 @@ class Grapher:
         self.draw()
 
 
-    def comparison_plot(self, selected_items):
+    def comparison_plot(self, selected_items, shifts={}):
         print(' W grapherze. ', selected_items)
         return
 
