@@ -35,7 +35,7 @@ class MainMenu:
         self.main_menu.add_cascade(label="File", menu=self.menu_file, image = self.icon_dropdown, compound="left")
 
         # - Load project
-        self.menu_file.add_command(label="Load project", command=self.app.load_project, image = self.icon_load_project, compound="left")
+        self.menu_file.add_command(label="Load project", command=self.app.load_project, image = self.icon_load_project, compound="left", accelerator="Ctrl+O")
 
         # - Recent projects:
         self.menu_recent = tk.Menu(self.menu_file, tearoff=0, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
@@ -43,6 +43,8 @@ class MainMenu:
 
         # - Save As
         self.menu_file.add_command(label="Save As", command=self.app.save_as, image = self.icon_save_as, compound="left")
+        # - Save As
+        self.menu_file.add_command(label="Save", command=self.app.save_as, image=self.icon_save_as, compound="left", accelerator="Ctrl+S")
 
         # - Import data
         self.menu_import = tk.Menu(self.menu_file, tearoff=0, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
@@ -57,13 +59,16 @@ class MainMenu:
         self.menu_file.add_separator()
 
         # - Quit
-        self.menu_file.add_command(label="Quit", command=self.app.close_application, image = self.icon_exit, compound="left")
+        self.menu_file.add_command(label="Quit", command=self.app.close_application, image = self.icon_exit, compound="left", accelerator="Ctrl+Q")
 
         #  EDIT
         self.menu_edit = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                  activebackground=self.activebg, activeforeground=self.activefg,
                                  borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
         self.main_menu.add_cascade(label="Edit", menu=self.menu_edit, image = self.icon_dropdown, compound="left")
+
+        # - Delete selected data
+        self.menu_edit.add_command(label="Delete selected data", command=self.app.delete_selected_data)
 
         # - Notes
         self.menu_edit.add_command(label="Notes", command=self.app.notes)
@@ -91,7 +96,8 @@ class MainMenu:
         # -------- Assign Second to group
         self.menu_groups.add_command(label="Assign Second to group", command=self.app.second_to_group)
 
-
+        # - Graph Preferences
+        self.menu_edit.add_command(label="Graph preferences", command = self.app.graph_preferences)
 
 
     def prepare_icon(self, filename):

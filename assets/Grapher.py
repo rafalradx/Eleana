@@ -2,7 +2,11 @@
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
-import matplotlib.pyplot
+
+import matplotlib.pyplot as plt
+from matplotlib.widgets import Cursor
+import matplotlib
+matplotlib.use('TkAgg')
 import numpy as np
 
 class Grapher:
@@ -10,11 +14,12 @@ class Grapher:
         ''' Initialize app, eleana and graphs objects (fig, canvas, toolbar'''
         self.app = app_instance
         self.eleana = eleana_instance
-
-        matplotlib.pyplot.style.use('Solarize_Light2')
+        self.plt = plt
+        plt.style.use('Solarize_Light2')
 
         # Create canvas
         self.fig = Figure(figsize=(8, 4), dpi=100)
+        #self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.app.graphFrame)
         self.canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
@@ -24,8 +29,6 @@ class Grapher:
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.app.graphFrame, pack_toolbar=False)
         self.toolbar.update()
         self.toolbar.grid(row=1, column=0, sticky="ew")
-        #self.toolbar.configure(bg="#FDF6E3", background="#FDF6E3")
-
 
         ''' PLOT PREFERENCES '''
         # Autoscaling variables
@@ -45,6 +48,8 @@ class Grapher:
 
         # Show X as points
         self.indexed_x = False
+
+        # Add cursor
 
     def axis_title(self, which=None):
         '''Creates title for y and x axes  from "which" dataset '''
@@ -239,14 +244,11 @@ class Grapher:
         else:
             self.ax.set_yscale('linear')
 
+        # Add cursor
+
 
         # Draw Graph
         self.draw()
-
-
-    def comparison_plot(self, selected_items, shifts={}):
-        print(' W grapherze. ', selected_items)
-        return
 
 
     def draw(self):
@@ -262,11 +264,15 @@ class Grapher:
             self.scale1['y'] = self.ax.get_ylim()
         else:
             self.ax.set_ylim(self.scale1['y'])
+
+        cursor = Cursor(self.ax, color='green', linewidth=2)
+        self.plt.show()
         self.canvas.draw()
 
         # Connect changes in scales due to ZOOM or MOVE
         self.ax.callbacks.connect('ylim_changed', self.on_ylim_changed)
         self.ax.callbacks.connect('xlim_changed', self.on_xlim_changed)
+
 
     def autoscale(self, autoscaling: dict):
         self.autoscaling = autoscaling
@@ -289,3 +295,15 @@ class Grapher:
         self.autoscaling['x'] = False
         self.app.check_autoscale_x.deselect()
 
+    def plot_comparison(self, indexes, vsep, hsep):
+        self.ax.clear()
+        i = 0
+        for each in indexes:
+            x = self.eleana.dataset[each].x
+            x = x - hsep[i]
+            y = self.eleana.dataset[each].y
+            y = y - vsep[i]
+            self.ax.plot(x, y)
+            i +=1
+
+        self.canvas.draw()

@@ -97,7 +97,11 @@ class Eleana:
         else:
             return {}
 
-        data = self.dataset[index_main]
+        if first_second_or_results == 'result':
+            data = self.results_dataset[index_main]
+        else:
+            data = self.dataset[index_main]
+
         type = data.type
 
         if type == 'stack 2D':

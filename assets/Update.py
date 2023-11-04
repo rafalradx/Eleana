@@ -13,9 +13,10 @@ Example usage in main Eleana.py:
 This will create 3 positions in the list of Second combobox
 '''
 class Update:
-    def __init__(self, app_instance, eleana_instance):
+    def __init__(self, app_instance, eleana_instance, main_menu_instance):
         self.app = app_instance
         self.eleana = eleana_instance
+        self.main_menu = main_menu_instance
 
     def last_projects_menu(self):
         ''' Updates list of the recently loaded or saved projects and adds the list to the main menu'''
@@ -27,7 +28,8 @@ class Update:
             list_for_menu.append(item)
             i += 1
 
-        recent_menu = self.app.builder.get_object("menu_recent", self.app.mainwindow)
+        #recent_menu = self.app.builder.get_object("menu_recent", self.app.mainwindow)
+        recent_menu = self.main_menu.menu_recent
         recent_menu.delete(0, tk.END)
         for label in list_for_menu:
             def create_command(l):
@@ -70,19 +72,22 @@ class Update:
         assignments['<group-list/>'] = list_of_groups
         self.eleana.assignmentToGroups = assignments
 
-    def dataset_list(self):
+    def dataset_list(self, eleana = None):
         ''' It scans the whole dataset, create numbered names, collects groups and assigns to groups'''
 
-        # 1. Create numbered names for data in eleana.dataset[X].names_nr and collect groups
         i = 0
         while i < len(self.eleana.dataset):
-            self.eleana.dataset[i].name_nr = str(i+1) + '. ' + self.eleana.dataset[i].name
+            new_name_nr = str(i+1) + '. ' + self.eleana.dataset[i].name
+            self.eleana.dataset[i].name_nr = new_name_nr
             i += 1
 
 
     def list_in_combobox(self, comboboxID):
         box = self.ref_to_combobox(self.app, comboboxID)
         comboboxList = ['None']
+        if len(self.eleana.dataset) == 0:
+            box.configure(values=comboboxList)
+            return
 
         if comboboxID == 'sel_group':
             list_of_groups = self.eleana.assignmentToGroups['<group-list/>']

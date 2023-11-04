@@ -1141,8 +1141,8 @@
                                               </object>
                                             </child>
                                             <child>
-                                              <object class="customtkinter.CTkButton" id="btn_all_to_results" named="True">
-                                                <property name="command" type="command" cbtype="simple">all_results_to_main</property>
+                                              <object class="customtkinter.CTkButton" id="btn_all_to_current_gropu" named="True">
+                                                <property name="command" type="command" cbtype="simple">all_results_to_current_group</property>
                                                 <property name="corner_radius">5</property>
                                                 <property name="fg_color">#3c9b59</property>
                                                 <property name="font">{Arial} 12 {bold}</property>

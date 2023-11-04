@@ -84,6 +84,7 @@ class StackToGroup:
             new_data = Single2D(data)
             self.eleana.dataset.append(new_data)
             i += 1
+            self.response = group
             self.quit()
 
     def display_data_groups(self):

@@ -8,10 +8,11 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationTool
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 class Init:
-    def __init__(self, app, eleana_instance, grapher_instance):
+    def __init__(self, app, eleana_instance, grapher_instance, main_menu_instance):
         self.app = app
         self.eleana = eleana_instance
         self.grapher = grapher_instance
+        self.main_menu = main_menu_instance
 
     def main_window(self):
         '''This method sets properties of the main window'''
@@ -21,12 +22,11 @@ class Init:
         self.app.mainwindow.geometry('800x800')
         #app.mainwindow.geometry(str(width) + 'x' + str(height) + "+0+0")  # Set geometry to max
 
-
         # Add icon to the top window bar form pixmaps folder
         top_window_icon = Path(self.eleana.paths['pixmaps'], "eleana_top_window.png")
         main_icon = tk.PhotoImage(file=top_window_icon)
         self.app.mainwindow.iconphoto(True, main_icon)
-        self.app.mainwindow.title('Eleana')
+        self.app.mainwindow.title('new project - Eleana')
         # Set color motive for GUI
         ctk.set_default_color_theme("dark-blue")
 
@@ -93,7 +93,7 @@ class Init:
 
         self.eleana.dataset = []
         self.eleana.results_dataset = []
-        self.eleana.assignmentToGroups = {}
+        self.eleana.assignmentToGroups = self.assignmentToGroups = {'<group-list/>': ['All']}
         self.eleana.groupsHierarchy = {}
 
     def graph(self):
