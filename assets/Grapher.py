@@ -6,20 +6,84 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Cursor
 import matplotlib
+import mplcursors
+
 matplotlib.use('TkAgg')
 import numpy as np
 
-class Grapher:
+class GraphPreferences:
+    def __init__(self, app_instance):
+        self.app = app_instance
+
+        ''' CURSOR DEFINITIONS '''
+        # Create avaliable cursor modes: hov - enable hover,
+        #                                a_txt - display text label,
+        #                                annot - display selection on graph
+        #                                multp - enable multiple annotations on graph
+        #                                store - enable collecting the selected points
+        self.cursor_modes = [
+                        {'label': 'None'},
+                        {'label': 'Continuous read XY', 'hov':True, 'a_txt':True, 'annot':True, 'multip':False, 'store': False},
+                        {'label': 'Selection of points with labels', 'hov': False, 'annot':True, 'a_txt':True, 'multip':True, 'store': True},
+                        {'label': 'Selection of points', 'hov': False, 'annot':True, 'a_txt': False, 'multip':True, 'store': True},
+                        {'label': 'Numbered selections', 'hov':False, 'annot':True, 'a_txt': True, 'multip':True, 'store': True, 'nr': True}
+                        ]
+        self.available_cursor_modes = []
+        for each in self.cursor_modes:
+            self.available_cursor_modes.append(each['label'])
+        self.current_cursor_mode = {'label': 'None'}
+
+        # Plot colors
+        self.colors = {'first_re': "#d53339",
+                       'first_im': "#ef6f74",
+                       'second_re': "#008cb3",
+                       'second_im': "#07bbed",
+                       'result_re': "#108d3d",
+                       'result_im': "#32ab5d"
+                       }
+
+        # Set cursor modes
+        self.set_cursor_modes()
+
+        # Canvas style
+        plt.style.use('Solarize_Light2')
+
+        # Scale settings
+        self.autoscaling = {'x': True, 'y': True}
+        self.log_scales = {'x': False, 'y': False}
+        self.indexed_x = False
+
+        # Plot colors
+        self.colors = {'first_re': "#d53339",
+                       'first_im': "#ef6f74",
+                       'second_re': "#008cb3",
+                       'second_im': "#07bbed",
+                       'result_re': "#108d3d",
+                       'result_im': "#32ab5d"
+                       }
+
+    def set_cursor_modes(self):
+        ''' This function creates list of cursor
+            modes in cursor combobox'''
+        box_values = []
+        for each in self.cursor_modes:
+            box_values.append(each['label'])
+        self.app.sel_cursor_mode.configure(values=box_values)
+        self.app.sel_cursor_mode.set('None')
+
+
+class Grapher(GraphPreferences):
     def __init__(self, app_instance, eleana_instance):
+        # Initialize GraphPreferences
+        super().__init__(app_instance)
         ''' Initialize app, eleana and graphs objects (fig, canvas, toolbar'''
         self.app = app_instance
         self.eleana = eleana_instance
         self.plt = plt
-        plt.style.use('Solarize_Light2')
+        self.mplcursors = mplcursors
 
         # Create canvas
         self.fig = Figure(figsize=(8, 4), dpi=100)
-        #self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.app.graphFrame)
         self.canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
@@ -30,26 +94,11 @@ class Grapher:
         self.toolbar.update()
         self.toolbar.grid(row=1, column=0, sticky="ew")
 
-        ''' PLOT PREFERENCES '''
-        # Autoscaling variables
-        self.autoscaling = {'x': True, 'y': True}
+        self.cursor_annotations = []
+
+
         self.scale1 = {'x': [], 'y': []}
 
-        # Plot styling
-        self.colors = {'first_re':  "#d53339",
-                      'first_im':   "#ef6f74",
-                      'second_re':  "#008cb3",
-                      'second_im':  "#07bbed",
-                      'result_re':  "#108d3d",
-                      'result_im':  "#32ab5d"
-                      }
-        # Logarythmic scales
-        self.log_scales = {'x':False, 'y':False}
-
-        # Show X as points
-        self.indexed_x = False
-
-        # Add cursor
 
     def axis_title(self, which=None):
         '''Creates title for y and x axes  from "which" dataset '''
@@ -244,14 +293,11 @@ class Grapher:
         else:
             self.ax.set_yscale('linear')
 
-        # Add cursor
-
-
         # Draw Graph
         self.draw()
 
-
     def draw(self):
+        ''' Puts the selected curves on the graph'''
         self.ax.legend(loc='upper center', bbox_to_anchor=(0.15, 1.1),
                        fancybox=False, shadow=False, ncol=5)
         # Handle autoscaling
@@ -265,20 +311,96 @@ class Grapher:
         else:
             self.ax.set_ylim(self.scale1['y'])
 
-        cursor = Cursor(self.ax, color='green', linewidth=2)
-        self.plt.show()
+        # Create cursor
+        self.cursor_on_off()
+
+        # Draw canvas
         self.canvas.draw()
 
         # Connect changes in scales due to ZOOM or MOVE
         self.ax.callbacks.connect('ylim_changed', self.on_ylim_changed)
         self.ax.callbacks.connect('xlim_changed', self.on_xlim_changed)
 
+    '''**********************************
+    *                                   *
+    *       CURSORS AND ANNOTATIONS     *
+    *                                   *
+    **********************************'''
+    def cursor_on_off(self):
+        crs_mode = self.current_cursor_mode['label']
+        try:
+            for sel in self.cursor.selections:
+                sel.annotation.remove()
+        except:
+            pass
+        if crs_mode in self.available_cursor_modes:
+            index = self.available_cursor_modes.index(crs_mode)
+        else:
+            index = 0
+        self.current_cursor_mode = self.cursor_modes[index]
+
+        if not index == 0:
+            self.cursor = self.mplcursors.cursor(self.ax,
+                                                 multiple=self.current_cursor_mode['multip'],
+                                                 hover=self.current_cursor_mode['hov']
+                                                 )
+            self.cursor.connect("add", self.annotation_create)
+            self.cursor.connect("remove", self.annotation_removed)
+        else:
+            try:
+                for sel in self.cursor.selections:
+                    sel.annotation.remove()
+                    self.cursor_annotations = {}
+            except:
+                pass
+    def annotation_create(self, sel):
+        ''' This creates annotations on the graph and add selected
+            to the list in self.cursor_annotations '''
+        print(sel.annotation.axes.figure)
+        print(type(sel.annotation))
+        x = sel.target[0]
+        y = sel.target[1]
+        point = [x,y]
+        current_nr = 0
+        if self.cursor_annotations:
+            last_annotation = self.cursor_annotations[-1]
+            current_nr = last_annotation.get('nr', 0) + 1
+        my_annotation = {'point':point, 'nr': current_nr, 'curve':''}
+        if not self.current_cursor_mode['hov']:
+            self.cursor_annotations.append(my_annotation)
+        label = f'Point: x={x:.2f}, y={y:.2f}'
+        if not self.current_cursor_mode['a_txt']:
+            label = ''
+        elif self.current_cursor_mode.get('nr', False):
+            label = str(current_nr)
+        sel.annotation.set_text(label)
+        sel.annotation.set_visible(self.current_cursor_mode['annot'])
+        print(self.cursor_annotations)
+    def annotation_removed(self, event):
+        ''' This deletes selected annotation from the graph
+            and removes the respective point from the list in
+            self.cursor_annotations. '''
+        annotation = event.annotation
+        x = annotation.xy[0]
+        y = annotation.xy[1]
+        point = [x,y]
+        points = [d['point'] for d in self.cursor_annotations if 'point' in d]
+        if point in points:
+            index = points.index(point)
+            self.cursor_annotations.pop(index)
+            print(self.cursor_annotations)
+
 
     def autoscale(self, autoscaling: dict):
         self.autoscaling = autoscaling
         return
 
-    ''' Handling events on graph (key press or navigation toolbar use) '''
+    '''******************************************
+    *                                           *
+    *              EVENTS ON GRAPH              *
+    *   (key press or navigation toolbar use)   *
+    *                                           *
+    ******************************************'''
     def on_key_press_on_graph(self, event):
         key_press_handler(event, self.canvas, self.toolbar)
         self.canvas.mpl_connect("key_press_event", self.on_key_press_on_graph)

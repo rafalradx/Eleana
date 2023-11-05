@@ -58,6 +58,24 @@ class MainMenu:
         # - SEPARATOR -
         self.menu_file.add_separator()
 
+
+        # Export
+        self.menu_export = tk.Menu(self.menu_file, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                                   activebackground=self.activebg, activeforeground=self.activefg,
+                                   borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.menu_file.add_cascade(label="Export", menu=self.menu_export, image=self.icon_import, compound="left")
+        # - Export first
+        self.menu_export.add_command(label="Export First", command=self.app.delete_selected_data, image=self.icon_exit,
+                                   compound="left")
+        # - Export group
+        self.menu_export.add_command(label="Export Group", command=self.app.delete_selected_data, image=self.icon_exit,
+                                   compound="left", accelerator="Ctrl+Q")
+
+
+        # - SEPARATOR -
+        self.menu_file.add_separator()
+
+
         # - Quit
         self.menu_file.add_command(label="Quit", command=self.app.close_application, image = self.icon_exit, compound="left", accelerator="Ctrl+Q")
 

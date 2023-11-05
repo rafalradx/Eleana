@@ -2,10 +2,15 @@
 
 # Import Python Modules
 import json
+print("1")
 import pickle
+print("2")
 import pathlib
+print("3")
 import copy
+print("4")
 from pathlib import Path
+print("5")
 import customtkinter
 import pygubu
 import numpy as np
@@ -23,7 +28,7 @@ from assets.GeneralEleana import Eleana
 from assets.LoadSave import Load
 from assets.LoadSave import Save
 from assets.Initialization import Init
-from assets.Grapher import Grapher
+from assets.Grapher import Grapher, GraphPreferences
 from assets.Update import Update
 from assets.Menu import ContextMenu, MainMenu
 
@@ -104,12 +109,14 @@ class EleanaMainApp:
         self.check_second_show = builder.get_object('check_second_show', self.mainwindow)
         self.check_result_show = builder.get_object('check_result_show', self.mainwindow)
 
+
         # Graph Buttons
         self.check_autoscale_x = builder.get_object('check_autoscale_X', self.mainwindow)
         self.check_autoscale_y = builder.get_object('check_autoscale_Y', self.mainwindow)
         self.check_log_x = builder.get_object('check_log_x', self.mainwindow)
         self.check_log_y = builder.get_object('check_log_y', self.mainwindow)
         self.check_indexed_x = builder.get_object('check_indexed_x', self.mainwindow)
+        self.sel_cursor_mode = builder.get_object('sel_cursor_mode', self.mainwindow)
 
         # Command line
         self.command_line = builder.get_object('command_line', self.mainwindow)
@@ -163,11 +170,12 @@ class EleanaMainApp:
             self.firstFrame.grid_remove()
             self.secondFrame.grid_remove()
             self.swapFrame.grid_remove()
-            self.listFrame.grid()
-            listbox = CTkListbox(self.listFrame, command=self.list_selected, multiple_selection=True)
-            listbox.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=1, sticky="nsew")
+            self.listFrame.grid(column=0, row = 2, rowspan=3)
+            listbox = CTkListbox(self.listFrame, command=self.list_selected, multiple_selection=True, height=400)
+            listbox.grid(column=0, columnspan=1, rowspan=4, padx=4, pady=4, row=0, sticky="nsew")
+
             ver_slider = CTkHorizontalSlider('Vertical separation', 'vsep', [0,1], self.listFrame, self)
-            ver_slider.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=4, sticky="nsew")
+            ver_slider.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=5, sticky="nsew")
             hor_slider = CTkHorizontalSlider('Horizontal separation', 'hsep', [-1,1], self.listFrame, self)
             hor_slider.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=8, sticky="nsew")
 
@@ -841,7 +849,7 @@ class EleanaMainApp:
         index = int(index[0])
         index = index - 1
         recent = eleana.paths['last_projects'][index]
-        self.load_project(recent)
+        self.load_project(recent=recent)
         eleana.paths['last_project_dir'] = Path(recent).parent
         grapher.plot_graph()
 
@@ -939,6 +947,9 @@ class EleanaMainApp:
         grapher.indexed_x = bool(self.check_indexed_x.get())
         grapher.plot_graph()
 
+    def sel_graph_cursor(self, value):
+        grapher.current_cursor_mode['label'] = value
+        grapher.plot_graph()
 
     '''***********************************************
     *                                                *
@@ -1061,16 +1072,20 @@ def get_index_by_name(selected_value_text):
 ctk.set_appearance_mode("dark")
 
 # Create general main instances for the program
-eleana = Eleana()                # This contains all data, settings and selections etc.
+print('5')
+eleana = Eleana()
+print('6')
 app = EleanaMainApp(eleana)      # This is GUI
-
+print('7')
+grapher = Grapher(app, eleana)
 load = Load(eleana)
 save = Save(eleana)
-grapher = Grapher(app, eleana)
+
 main_menu = MainMenu(app, eleana)
 init = Init(app, eleana, grapher, main_menu)
 context_menu = ContextMenu(app, eleana)
 update = Update(app, eleana, main_menu)     # This contains methods for update things like lists, settings, gui, groups etc.
+
 
 # Initialize basic settings: geometry, icon, graph, binding, etc
 init.main_window()
