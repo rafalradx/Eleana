@@ -9,10 +9,9 @@ import pickle
 from tkinter.filedialog import asksaveasfile, askopenfilename
 import random
 import shutil
-import tkinter as tk
 from tkinter import filedialog
 from CTkMessagebox import CTkMessagebox
-from assets.DataClasses import createFromElexsys
+from assets.DataClasses import createFromElexsys, createFromEMX
 
 
 class Load:
@@ -186,6 +185,23 @@ class Load:
         last_import_dir = Path(filenames[-1]).parent
         self.eleana.paths['last_import_dir'] = last_import_dir
         return
+
+    def loadEMX(self):
+        path = self.eleana.paths['last_import_dir']
+        filetypes = (
+            ('EMX', '*.spc'),
+            ('All files', '*.*')
+        )
+        filenames = filedialog.askopenfilenames(initialdir=path, filetypes=filetypes)
+        if len(filenames) == 0:
+            return
+        for file in filenames:
+            spectrum = createFromEMX(file)
+            self.eleana.dataset.append(spectrum)
+        last_import_dir = Path(filenames[-1]).parent
+        self.eleana.paths['last_import_dir'] = last_import_dir
+        return
+
 
 class Save:
     def __init__(self, eleana_instance):

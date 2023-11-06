@@ -209,6 +209,21 @@ def createFromElexsys(filename: str) -> object:
         spectrum_complex = Spectrum_complex(filename[:-4], x_axis, dta, dsc)
         return spectrum_complex
 
+def createFromEMX(filename: str) -> object:
+    emx_SPC = Path(filename[:-3] + 'spc')
+    emx_SPC = Path(filename[:-3] + 'par')
+
+    #raw_data = np.fromfile(emx_SPC, '<f')
+
+    raw_data = np.fromfile(emx_SPC, dtype=np.float64)
+    #raw_data = np.fromfile(emx_SPC, dtype = '>d')
+    with open('/home/marcin/widmo.txt', 'w') as file:
+        for value in raw_data:
+            file.write(str(value) + '\n')
+
+    #raw_data = np.fromfile(emx_SPC, '>i4')
+    print(raw_data)
+
 def create_eleana_par(dsc: dict, bruker_key: str) -> dict:
     value = dsc[bruker_key]
     value = value.split(' ')
