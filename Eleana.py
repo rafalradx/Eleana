@@ -882,6 +882,8 @@ class EleanaMainApp:
 
     def import_EMX(self):
         load.loadEMX()
+        update.dataset_list(eleana)
+        update.all_lists()
 
     # --- Quit (also window close by clicking on X)
     def close_application(self, event = None):

@@ -16,7 +16,7 @@ class Single2D:
 
 
 class Spectrum_CWEPR:
-    def __init__(self, name, x_axis: list, dta: list, dsc: dict):
+    def __init__(self, name, x_axis: list, dta: list, dsc: dict, format="elexsys"):
         self.parameters = {'title': '', 'unit_x': 'G', 'name_x': 'Field', 'name_y': 'Intensity', 'MwFreq': '', 'ModAmp': '', 'ModFreq': '',
                            'ConvTime': '',  'SweepTime': '',  'TimeConst': '',  'RESO': '',  'Power': '', 'PowerAtten': ''}
         self.groups = []
@@ -34,15 +34,19 @@ class Spectrum_CWEPR:
         fill_missing_keys =['title','MwFreq','ModAmp','ModFreq','SweepTime','ConvTime','TimeConst','Power','PowAtten']
         for key in fill_missing_keys:
             try:
-                working_parameters[key] = create_eleana_par(dsc, dsc2eleana(key))
+                if format == 'elexsys':
+                    working_par[key] = create_eleana_par(dsc, dsc2eleana(key))
+                elif format == 'emx' or format == 'esp':
+                    working_par[key] = create_eleana_par(dsc, par2eleana(key, format))
             except:
                 pass
+
         self.parameters = working_par
         self.x = np.array(x_axis)
         self.re_y = np.array(dta)
 
 class Spectra_CWEPR_stack(Spectrum_CWEPR):
-    def __init__(self, name, x_axis: list, dta: list, dsc: dict, ygf):
+    def __init__(self, name, x_axis: list, dta: list, dsc: dict, ygf, format='elexsys'):
         super().__init__(name, x_axis, dta, dsc)
 
         working_parameters = self.parameters
@@ -50,7 +54,10 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         fill_missing_keys = ['name_z', 'unit_z', 'name_x', 'unit_x', 'name_y', 'unit_y']
         for key in fill_missing_keys:
             try:
-               working_parameters[key] = create_eleana_par(dsc, dsc2eleana(key))
+                if format == 'elexsys':
+                    working_parameters[key] = create_eleana_par(dsc, dsc2eleana(key))
+                elif format == 'emx_stack':
+                    working_parameters[key] = create_eleana_par(dsc, par2eleana(key, format))
             except:
                 pass
 
@@ -67,7 +74,7 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         working_stk_names = []
         # Create in stack names:
         for each in ygf:
-            name = working_parameters['name_z'] + ' ' + str(each) + ' ' + working_parameters['unit_z'] + ''
+            name = working_parameters.get('name_z', '') + ' ' + str(each) + ' ' + working_parameters.get('unit_z', '')
             working_stk_names.append(name)
 
         self.stk_names = working_stk_names
@@ -165,10 +172,8 @@ def createFromElexsys(filename: str) -> object:
 
     dsc_lines = dsc_text.split('\n')
     for i in dsc_lines:
-        #element = i.split("\t")
         element = re.split(r'\s+', i.strip(), maxsplit=1)
         try:
-            #dsc[element[0].upper()] = element[1]
             dsc[element[0]] = element[1]
         except:
             pass
@@ -189,7 +194,6 @@ def createFromElexsys(filename: str) -> object:
 
 
     # Now create object containing particular type of data
-
     filename = Path(filename).name
     try:
         val = dsc['EXPT']
@@ -212,30 +216,125 @@ def createFromElexsys(filename: str) -> object:
 def createFromEMX(filename: str) -> object:
     emx_SPC = Path(filename[:-3] + 'spc')
     emx_PAR = Path(filename[:-3] + 'par')
+    dsc = {}
+    dta = []
+    x_data = []
+    format = {'spectr':'', 'stack':False}
 
+    # Load PAR
+    try:
+       with open(emx_PAR, 'r', encoding='ascii', errors='ignore') as file:
+           dsc_text = file.read()
+       if re.search(r'DOS\s*Format', dsc_text):
+           format['spectr'] = 'emx'
+       else:
+           format['spectr'] = 'esp'
+    except:
+        return {'Error': True, 'desc': f'Cannot load {emx_PAR}'}
 
-    # with open(emx_PAR, 'r') as file:
-    #     dsc = file.read()
-    par = ""
-    with open(emx_PAR, 'r', encoding='ascii', errors='ignore') as file:
-        par = file.read()
+    # Load SPC to dta varaiable
+    try:
+       with open(emx_SPC, 'rb') as file:
+           binary_data = file.read()
+           if format['spectr'] == 'emx':
+               dta = np.frombuffer(binary_data, dtype=np.float32)
+           else:
+               dta = np.frombuffer(binary_data, dtype='>i4')
+    except:
+        return {'Error': True, 'desc': f'Cannot load {emx_SPC}'}
 
-    print(par)
+    # Convert Par to dictionary and store in dsc dictionary
+    dsc_lines = dsc_text.split('\n')
+    for i in dsc_lines:
+        element = re.split(r'\s+', i.strip(), maxsplit=1)
+        try:
+            dsc[element[0]] = element[1]
+        except:
+            pass
 
-    if "DOS  Format" in dsc:
-        format = 'emx'
+    # Check if data contains stack or is single
+
+    if dsc['JSS'] == '0' or format['spectr'] == 'esp':
+        format['stack'] = False
     else:
-        format = 'esp'
+        format['stack'] = True
 
-    with open(emx_SPC, 'rb') as file:
-        binary_data = file.read()
-        if format == 'emx':
-            data_array = np.frombuffer(binary_data, dtype=np.float32)
-        else:
-            data_array = np.frombuffer(binary_data, dtype='>i4')
+    filename = Path(filename).name
 
 
-    print(data_array)
+
+    # Depending on the format create x axis and object with Given EPR Type
+    if format['spectr'] == 'emx' and format['stack'] == False:
+        # Create X axis for EMX when there is only a single spectrum
+        try:
+            points = int(dsc['ANZ'])
+            x_min = float(dsc['GST'])
+            x_wid = float(dsc['GSI'])
+            step = x_wid / points
+            x_axis = []
+            for i in range(0, points):
+                x_axis.append(i * step + x_min)
+        except:
+            return {'Error': True, 'desc': f'Cannot create x axis for {emx_SPC}'}
+        cw_spectrum = Spectrum_CWEPR(filename[:-4], x_axis, dta, dsc, 'emx')
+        return cw_spectrum
+
+    elif format['spectr'] == 'emx' and format['stack'] == True:
+        # Create x axis for EMX stack of spectra
+        try:
+            points = int(dsc['SSX'])
+            x_min = float(dsc['XXLB'])
+            x_wid = float(dsc['XXWI'])
+            step = x_wid / points
+            x_axis = []
+            for i in range(0, points):
+                x_axis.append(i * step + x_min)
+
+            ygf = []
+            z_elements = int(dsc['SSY'])
+            z_elements -= 1
+            z_wid = float(dsc['XYWI'])
+            z_min = float(dsc['XYLB'])
+            z_step = z_wid / z_elements
+            if z_elements > 0 and z_wid > 0:
+                z_step = z_wid / z_elements
+                for i in range(z_elements):
+                    ygf.append(z_min + i * z_step)
+
+        except:
+            return {'Error': True, 'desc': f'Cannot create x axis for {emx_SPC}'}
+        cw_stack = Spectra_CWEPR_stack(filename[:-4], x_axis, dta, dsc, ygf, 'emx_stack')
+        return cw_stack
+
+
+    elif format['spectr'] == 'esp' and format['stack'] == False:
+        # Create X axis for ESP if there is only a single spectrum
+        try:
+            points = len(dta)
+            x_min = float(dsc['GST'])
+            x_wid = float(dsc['HSW'])
+            step = x_wid / points
+            x_axis = []
+            for i in range(0, points):
+                x_axis.append(i * step + x_min)
+        except:
+            return {'Error': True, 'desc': f'Cannot create x axis for {emx_SPC}'}
+        cw_spectrum = Spectrum_CWEPR(filename[:-4], x_axis, dta, dsc, 'esp')
+        return cw_spectrum
+
+
+
+        ''' TUTAJ  '''
+
+
+
+
+    elif format['spectr'] == 'esp' and format['stack'] == True:
+        # Create X axis for ESP if there is only a single spectrum
+        print('DataClasses, line 284, create ESP Stack Loader')
+        exit()
+
+
 
 def create_eleana_par(dsc: dict, bruker_key: str) -> dict:
     value = dsc[bruker_key]
@@ -271,45 +370,80 @@ def dsc2eleana(key: str) -> str:
     return bruker_key
 
 def par2eleana(key: str, format = 'emx') -> str:
-    parEMX2eleana = {'title': 'TITL',
-                  'unit_x': 'XUNI',
-                  'name_x': 'XNAM',
-                  'unit_y': 'YUNI',
-                  'name_y': 'IRNAM',
-                  'unit_z': 'YUNI',
-                  'name_z': 'YNAM',
-                  'Compl': 'IKKF',
-                  'MwFreq': 'FrequencyMon',
-                  'ModAmp': 'ModAmp',
-                  'ModFreq': 'ModFreq',
-                  'ConvTime': 'ConvTime',
-                  'SweepTime': 'SweepTime',
-                  'Tconst': 'TIMEC',
-                  'Reson': 'RESO',
-                  'Power': 'Power',
-                  'PowAtten': 'PowerAtten'
-                  }
-    parESP2eleana = {'title': 'TITL',
-                     'unit_x': 'XUNI',
-                     'name_x': 'XNAM',
-                     'unit_y': 'YUNI',
-                     'name_y': 'IRNAM',
-                     'unit_z': 'YUNI',
-                     'name_z': 'YNAM',
-                     'Compl': 'IKKF',
-                     'MwFreq': 'FrequencyMon',
-                     'ModAmp': 'ModAmp',
-                     'ModFreq': 'ModFreq',
-                     'ConvTime': 'ConvTime',
-                     'SweepTime': 'SweepTime',
-                     'Tconst': 'TIMEC',
-                     'Reson': 'RESO',
-                     'Power': 'Power',
-                     'PowAtten': 'PowerAtten'
-                     }
+    parEMX2eleana_single = {
+                              'unit_x': 'JUN',
+                              'name_x': 'JEX',
+                              'unit_y': '',
+                              'name_y': '',
+                              'unit_z': '',
+                              'name_z': 'JEY',
+                              'MwFreq': 'MF',
+                              'ModAmp': 'RMA',
+                              'ModFreq': 'ModFreq',
+                              'ConvTime': 'RCT',
+                              'SweepTime': 'HSW',
+                              'Tconst': 'RTC',
+                              'Reson': 'RESO',
+                              'Power': 'MP',
+                              'PowAtten': 'MPD'
+                              }
 
-    try:
-        bruker_key = parEMX2eleana[key]
-    except:
-        bruker_key = ''
-    return bruker_key
+    parEMX2eleana_stack = {
+                                    'unit_x': 'JUN',
+                                    'name_x': 'JEX',
+                                    'unit_y': '',
+                                    'name_y': '',
+                                    'unit_z': '',
+                                    'name_z': 'JEY',
+                                    'MwFreq': 'MF',
+                                    'ModAmp': 'RMA',
+                                    'ModFreq': 'ModFreq',
+                                    'ConvTime': 'RCT',
+                                    'SweepTime': 'HSW',
+                                    'Tconst': 'RTC',
+                                    'Reson': 'RESO',
+                                    'Power': 'MP',
+                                    'PowAtten': 'MPD'
+                                 }
+
+    parESP2eleana_single = {
+                     'unit_x': 'XXUN',
+                     'name_x': 'JEX',
+                     'unit_y': 'XYUN',
+                     'name_y': 'IRNAM',
+                     'unit_z': '',
+                     'name_z': 'JEY',
+                     'MwFreq': 'MF',
+                     'ModAmp': 'RMA',
+                     'ConvTime': 'RCT',
+                     'SweepTime': 'HSW',
+                     'Tconst': 'RTC',
+                     'Reson': 'RESO',
+                     'Power': 'MP',
+                     'PowAtten': 'MPD'
+                     }
+    if format == 'emx':
+        try:
+            bruker_key = parEMX2eleana_single[key]
+        except:
+            bruker_key = ''
+        return bruker_key
+    elif format == 'emx_stack':
+        try:
+            bruker_key = parEMX2eleana_stack[key]
+        except:
+            bruker_key = ''
+        return bruker_key
+    elif format == 'esp':
+        try:
+            bruker_key = parESP2eleana_single[key]
+        except:
+            bruker_key = ''
+        return bruker_key
+
+    else:
+        try:
+            bruker_key = parESP2eleana[key]
+        except:
+            bruker_key = ''
+        return bruker_key
