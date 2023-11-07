@@ -211,18 +211,31 @@ def createFromElexsys(filename: str) -> object:
 
 def createFromEMX(filename: str) -> object:
     emx_SPC = Path(filename[:-3] + 'spc')
-    emx_SPC = Path(filename[:-3] + 'par')
+    emx_PAR = Path(filename[:-3] + 'par')
 
-    #raw_data = np.fromfile(emx_SPC, '<f')
 
-    raw_data = np.fromfile(emx_SPC, dtype=np.float64)
-    #raw_data = np.fromfile(emx_SPC, dtype = '>d')
-    with open('/home/marcin/widmo.txt', 'w') as file:
-        for value in raw_data:
-            file.write(str(value) + '\n')
+    # with open(emx_PAR, 'r') as file:
+    #     dsc = file.read()
+    par = ""
+    with open(emx_PAR, 'r', encoding='ascii', errors='ignore') as file:
+        par = file.read()
 
-    #raw_data = np.fromfile(emx_SPC, '>i4')
-    print(raw_data)
+    print(par)
+
+    if "DOS  Format" in dsc:
+        format = 'emx'
+    else:
+        format = 'esp'
+
+    with open(emx_SPC, 'rb') as file:
+        binary_data = file.read()
+        if format == 'emx':
+            data_array = np.frombuffer(binary_data, dtype=np.float32)
+        else:
+            data_array = np.frombuffer(binary_data, dtype='>i4')
+
+
+    print(data_array)
 
 def create_eleana_par(dsc: dict, bruker_key: str) -> dict:
     value = dsc[bruker_key]
@@ -257,8 +270,44 @@ def dsc2eleana(key: str) -> str:
         bruker_key = ''
     return bruker_key
 
-def par2eleana(key: str) -> str:
-    parEMX2eleana = {}
+def par2eleana(key: str, format = 'emx') -> str:
+    parEMX2eleana = {'title': 'TITL',
+                  'unit_x': 'XUNI',
+                  'name_x': 'XNAM',
+                  'unit_y': 'YUNI',
+                  'name_y': 'IRNAM',
+                  'unit_z': 'YUNI',
+                  'name_z': 'YNAM',
+                  'Compl': 'IKKF',
+                  'MwFreq': 'FrequencyMon',
+                  'ModAmp': 'ModAmp',
+                  'ModFreq': 'ModFreq',
+                  'ConvTime': 'ConvTime',
+                  'SweepTime': 'SweepTime',
+                  'Tconst': 'TIMEC',
+                  'Reson': 'RESO',
+                  'Power': 'Power',
+                  'PowAtten': 'PowerAtten'
+                  }
+    parESP2eleana = {'title': 'TITL',
+                     'unit_x': 'XUNI',
+                     'name_x': 'XNAM',
+                     'unit_y': 'YUNI',
+                     'name_y': 'IRNAM',
+                     'unit_z': 'YUNI',
+                     'name_z': 'YNAM',
+                     'Compl': 'IKKF',
+                     'MwFreq': 'FrequencyMon',
+                     'ModAmp': 'ModAmp',
+                     'ModFreq': 'ModFreq',
+                     'ConvTime': 'ConvTime',
+                     'SweepTime': 'SweepTime',
+                     'Tconst': 'TIMEC',
+                     'Reson': 'RESO',
+                     'Power': 'Power',
+                     'PowAtten': 'PowerAtten'
+                     }
+
     try:
         bruker_key = parEMX2eleana[key]
     except:
