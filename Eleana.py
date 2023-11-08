@@ -885,6 +885,11 @@ class EleanaMainApp:
         update.dataset_list(eleana)
         update.all_lists()
 
+    def import_magnettech1(self):
+        load.loadMagnettech(1)
+        update.dataset_list(eleana)
+        update.all_lists()
+
     def import_shimadzu_spc(self):
         load.loadShimadzuSPC()
         update.dataset_list(eleana)

@@ -12,8 +12,8 @@ Usage:
 Options:
   -h --help     Show this screen.
 """
-from docopt import docopt
-from pathlib import Path
+#from docopt import docopt
+#from pathlib import Path
 #from getSpectrum import main
 
 import struct

@@ -1,9 +1,4 @@
 from pathlib import Path
-import pathlib
-import json
-import subprocess
-from customtkinter import filedialog
-#from assets.general_eleana_methods import Eleana
 
 import pickle
 from tkinter.filedialog import asksaveasfile, askopenfilename
@@ -11,8 +6,7 @@ import random
 import shutil
 from tkinter import filedialog
 from CTkMessagebox import CTkMessagebox
-from assets.DataClasses import createFromElexsys, createFromEMX, createFromShimadzuSPC
-
+from assets.DataClasses import createFromElexsys, createFromEMX, createFromShimadzuSPC, createFromMagnettech
 
 class Load:
     def __init__(self, eleana_instance):
@@ -201,6 +195,23 @@ class Load:
         last_import_dir = Path(filenames[-1]).parent
         self.eleana.paths['last_import_dir'] = last_import_dir
         return
+
+    def loadMagnettech(self, mscope):
+        path = self.eleana.paths['last_import_dir']
+        filetypes = (
+            ('Magnettech 1', '*.spe'),
+            ('All files', '*.*')
+        )
+        filenames = filedialog.askopenfilenames(initialdir=path, filetypes=filetypes)
+        if len(filenames) == 0:
+            return
+        for file in filenames:
+            spectrum = createFromMagnettech(file, mscope = mscope)
+            self.eleana.dataset.append(spectrum)
+        last_import_dir = Path(filenames[-1]).parent
+        self.eleana.paths['last_import_dir'] = last_import_dir
+        return
+
 
     def loadShimadzuSPC(self):
         path = self.eleana.paths['last_import_dir']

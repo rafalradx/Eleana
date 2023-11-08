@@ -1,9 +1,9 @@
-
+import math, struct
 from pathlib import Path, PurePath
 import numpy as np
 import re
 from modules.ShimadzuSPC.shimadzu_spc import load_shimadzu_spc
-
+from modules.Magnettech.magnettech import load_magnettech
 class Single2D:
     def __init__(self, data: dict):
         self.parameters: dict = data['parameters']
@@ -14,7 +14,7 @@ class Single2D:
         self.complex = data.get('complex', False)
         self.type = 'single 2D'
         self.origin = data.get('origin', '')
-
+        self.name_nr = []
 
 class Spectrum_CWEPR:
     def __init__(self, name, x_axis: list, dta: list, dsc: dict, format="elexsys"):
@@ -120,7 +120,6 @@ class Spectrum_complex:
         self.origin = 'Pulse EPR'
         self.name_nr = ''
         self.groups = ['All']
-# Functions to import data
 
 def createFromElexsys(filename: str) -> object:
     elexsys_DTA = Path(filename[:-3]+'DTA')
@@ -189,10 +188,8 @@ def createFromElexsys(filename: str) -> object:
         x_axis = []
         for i in range(0, points):
             x_axis.append(i * step + x_min)
-
     except:
         return {'Error': True, 'desc': f'Cannot create x axis for {elexsys_DTA}'}
-
 
     # Now create object containing particular type of data
     filename = Path(filename).name
@@ -332,7 +329,6 @@ def createFromShimadzuSPC(filename: str) -> object:
     spectrum = load_shimadzu_spc(filename)
     if spectrum == None:
         return {'Error':True, 'desc':'Error'}
-
     name = Path(filename).name
     data =  {'parameters':
                 {   'unit_x': 'nm',
@@ -352,7 +348,34 @@ def createFromShimadzuSPC(filename: str) -> object:
     spectrum = Single2D(data)
     return spectrum
 
-
+def createFromMagnettech(filename, mscope=1, pool = -1, rescale = -1, shift = 0):
+    spectrum = load_magnettech(filename, mscope, pool, rescale, shift)
+    if spectrum == None:
+        return {'Error': True, 'desc': 'Error'}
+    par = spectrum['parameters']
+    name = Path(filename).name
+    data = {'parameters':
+                {'unit_x': 'G',
+                 'name_x': 'Field',
+                 'unit_y': 'a.u.',
+                 'name_y': 'Intensity',
+                 'Compl': False,
+                 'unit_z': '',
+                 'ModAmp': par['ModAmp'],
+                 'PowAtten': par['PowAtten'],
+                 'Power': par['Power'],
+                 'SweepTime': par['SweepTime'],
+                  },
+           'groups': 'All',
+           'x': np.array(spectrum['x']),
+           'y': np.array(spectrum['y']),
+           'name': name,
+           'complex': False,
+           'type': 'single2D',
+           'origin': 'Magnettech EPR'
+            }
+    spectrum = Single2D(data)
+    return spectrum
 
 def create_eleana_par(dsc: dict, bruker_key: str) -> dict:
     value = dsc[bruker_key]
@@ -361,6 +384,7 @@ def create_eleana_par(dsc: dict, bruker_key: str) -> dict:
     value_txt = value_txt.replace("'", "")
     return value_txt
     #working_parameters[key] = value_txt
+
 def dsc2eleana(key: str) -> str:
     ''' This function translates keys from Bruker to Eleana Parameter format'''
     dsc2eleana = {'title': 'TITL',

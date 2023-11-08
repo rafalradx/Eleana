@@ -54,6 +54,11 @@ class MainMenu:
         self.menu_import.add_command(label="Bruker Elexsys", command=self.app.import_elexsys, image = self.icon_epr, compound="left")
         # ------------ Bruker EMX
         self.menu_import.add_command(label="Bruker EMX", command=self.app.import_EMX, image = self.icon_epr, compound="left")
+        # ------------ Magnettech
+        self.menu_import.add_command(label="Magnettech SPE 1", command=self.app.import_magnettech1,
+                                     image=self.icon_epr,
+                                     compound="left")
+
         # ------------ Shimadzu SPC
         self.menu_import.add_command(label="Shimadzu Spectrum SPC", command=self.app.import_shimadzu_spc, image=self.icon_epr,
                                      compound="left")
