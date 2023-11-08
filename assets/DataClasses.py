@@ -2,6 +2,7 @@
 from pathlib import Path, PurePath
 import numpy as np
 import re
+from modules.ShimadzuSPC.shimadzu_spc import load_shimadzu_spc
 
 class Single2D:
     def __init__(self, data: dict):
@@ -322,17 +323,34 @@ def createFromEMX(filename: str) -> object:
         cw_spectrum = Spectrum_CWEPR(filename[:-4], x_axis, dta, dsc, 'esp')
         return cw_spectrum
 
-
-
-        ''' TUTAJ  '''
-
-
-
-
     elif format['spectr'] == 'esp' and format['stack'] == True:
         # Create X axis for ESP if there is only a single spectrum
         print('DataClasses, line 284, create ESP Stack Loader')
         exit()
+
+def createFromShimadzuSPC(filename: str) -> object:
+    spectrum = load_shimadzu_spc(filename)
+    if spectrum == None:
+        return {'Error':True, 'desc':'Error'}
+
+    name = Path(filename).name
+    data =  {'parameters':
+                {   'unit_x': 'nm',
+                    'name_x': 'Wavelength',
+                    'unit_y': 'OD',
+                    'name_y': 'Absorbance',
+                    'unit_z': ''
+                },
+             'groups':'All',
+             'x': np.array(spectrum['x']),
+             'y': np.array(spectrum['y']),
+             'name': name,
+             'complex': False,
+             'type': 'single2D',
+             'origin': 'UV VIS spectrum'
+             }
+    spectrum = Single2D(data)
+    return spectrum
 
 
 

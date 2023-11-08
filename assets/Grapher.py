@@ -124,14 +124,17 @@ class Grapher(GraphPreferences):
             data = self.eleana.dataset[index]
         except IndexError:
             return {'x_title': "Abscissa [a.u.]", 'y_title': "Ordinate [a.u.]"}
-
-        name_x = data.parameters['name_x']
-        unit_x = data.parameters['unit_x']
-        name_y = data.parameters['name_y']
         try:
+            name_x = data.parameters['name_x']
+            unit_x = data.parameters['unit_x']
+            name_y = data.parameters['name_y']
             unit_y = data.parameters['unit_y']
         except KeyError:
+            name_x = 'Abscissa'
+            unit_x = 'a.u.'
+            name_y = 'Ordinate'
             unit_y = 'a.u.'
+
         if len(unit_x) == 0:
             unit_x = 'a.u.'
         if len(unit_y) == 0:

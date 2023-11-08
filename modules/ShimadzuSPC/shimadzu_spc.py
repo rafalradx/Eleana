@@ -1,6 +1,39 @@
+#!/usr/bin/env python3
+
+"""Shimadzu SPC file bulk converter.
+
+Finds all spc file in the given directory and converts them to CSV.
+See https://github.com/uri-t/shimadzu-spc-converter for more details
+
+Usage:
+  spc_bulk_convert.py <directory>
+  spc_bulk_convert.py -h | --help
+
+Options:
+  -h --help     Show this screen.
+"""
+from docopt import docopt
+from pathlib import Path
+#from getSpectrum import main
+
 import struct
-import consts
+#import consts
 import sys
+
+HEADERSIZE = 512
+SUBSECT_SIZE = 128
+SECT_SIZE_IND = 0
+MINI_SECT_SIZE_IND = 1
+NUM_SAT_IND = 2
+SID_ROOT_IND = 3
+MINISTREAM_CUTOFF_IND = 4
+SID_SSAT_IND = 5
+NUM_SSAT_IND = 7
+SID_SAT_IND = 7
+SID_MINI_IND = 8
+SUB_SECTOR_SIZE = 128
+MSAT_OFFSET = 76
+
 
 
 # takes a file object set up to read bytes; returns tuple with:
@@ -43,18 +76,18 @@ def getParams(f):
     sidSAT = struct.unpack('i', f.read(4))[0]
 
     # ministream index
-    f.seek(consts.HEADERSIZE + sectSize * sidRoot + 116)
+    f.seek(HEADERSIZE + sectSize * sidRoot + 116)
     sidMini = struct.unpack('i', f.read(4))[0]
 
     return (sectSize, miniSectSize, numSAT, sidRoot, ministreamCutoff, sidSSAT, numSSAT, sidSAT, sidMini)
 
 
 def dirIndToOffset(ind, params, f):
-    offSet = ind * consts.SUB_SECTOR_SIZE
-    sid = params[consts.SID_ROOT_IND];
+    offSet = ind * SUB_SECTOR_SIZE
+    sid = params[SID_ROOT_IND];
 
-    sectSize = params[consts.SECT_SIZE_IND]
-    SATOffset = params[consts.SID_SAT_IND] * sectSize + consts.HEADERSIZE
+    sectSize = params[SECT_SIZE_IND]
+    SATOffset = params[SID_SAT_IND] * sectSize + HEADERSIZE
 
     while offSet >= sectSize:
         offSet = offSet - sectSize
@@ -63,17 +96,17 @@ def dirIndToOffset(ind, params, f):
         if sid == -1:
             print("Error: reached end of the sector chain before desired offset")
             break
-    return sid * sectSize + consts.HEADERSIZE + offSet
+    return sid * sectSize + HEADERSIZE + offSet
 
 
 def streamIndToOffset(ind, params, f):
-    sectSize = params[consts.SECT_SIZE_IND]
-    SATOffset = params[consts.SID_SAT_IND] * sectSize + consts.HEADERSIZE
+    sectSize = params[SECT_SIZE_IND]
+    SATOffset = params[SID_SAT_IND] * sectSize + HEADERSIZE
 
-    sid = params[consts.SID_MINI_IND]
-    sidSSAT = params[consts.SID_SSAT_IND]
+    sid = params[SID_MINI_IND]
+    sidSSAT = params[SID_SSAT_IND]
 
-    offset = ind * params[consts.MINI_SECT_SIZE_IND]
+    offset = ind * params[MINI_SECT_SIZE_IND]
 
     # follow SAT chain for ministream until desired offset is reached
     while offset >= sectSize:
@@ -83,7 +116,7 @@ def streamIndToOffset(ind, params, f):
         if sid == -1:
             print("Error: reached of the sector chain before desired offset")
             break
-    return sid * sectSize + consts.HEADERSIZE + offset
+    return sid * sectSize + HEADERSIZE + offset
 
 
 def getDirName(ind, params, f):
@@ -171,12 +204,12 @@ def getStreamContents(ind, size, params, f):
     data = b''
     sid = ind
 
-    miniSectSize = params[consts.MINI_SECT_SIZE_IND]
-    sectSize = params[consts.SECT_SIZE_IND]
-    SSATOffset = params[consts.SID_SSAT_IND] * sectSize + consts.HEADERSIZE
-    SATOffset = params[consts.SID_SAT_IND] * sectSize + consts.HEADERSIZE
+    miniSectSize = params[MINI_SECT_SIZE_IND]
+    sectSize = params[SECT_SIZE_IND]
+    SSATOffset = params[SID_SSAT_IND] * sectSize + HEADERSIZE
+    SATOffset = params[SID_SAT_IND] * sectSize + HEADERSIZE
 
-    if size < params[consts.MINISTREAM_CUTOFF_IND]:
+    if size < params[MINISTREAM_CUTOFF_IND]:
         # for i in range(0,20):
         while size > 0:
             if sid < 0:
@@ -192,7 +225,7 @@ def getStreamContents(ind, size, params, f):
             if sid < 0:
                 print("Error: reached end of stream before end of data")
                 break
-            f.seek(sid * sectSize + consts.HEADERSIZE)
+            f.seek(sid * sectSize + HEADERSIZE)
             data += f.read(min(sectSize, size))
             size = size - sectSize
             sid = getNextSect(sid, params, f)
@@ -206,9 +239,9 @@ def bytesToArr(b, fmt):
 
 
 def getNextSect(sid, params, f):
-    sectSize = params[consts.SECT_SIZE_IND]
+    sectSize = params[SECT_SIZE_IND]
     offset = 4 * sid
-    sidSAT = params[consts.SID_SAT_IND]
+    sidSAT = params[SID_SAT_IND]
 
     # not taking into account possibility of multiple MSATS,  it probs wont happen and
     # its late and i don't give a shit
@@ -217,10 +250,10 @@ def getNextSect(sid, params, f):
         offset = offset - sectSize
         msatInd = msatInd + 1
 
-    f.seek(consts.MSAT_OFFSET + 4 * msatInd)
+    f.seek(MSAT_OFFSET + 4 * msatInd)
     sidSAT = struct.unpack('i', f.read(4))[0]
 
-    f.seek(sidSAT * sectSize + consts.HEADERSIZE + offset)
+    f.seek(sidSAT * sectSize + HEADERSIZE + offset)
     return struct.unpack('i', f.read(4))[0]
 
 
@@ -233,10 +266,10 @@ def removeNull(s1):
 
 
 def getNextMiniSect(ind, params, f):
-    sectSize = params[consts.SECT_SIZE_IND]
-    sid = params[consts.SID_SSAT_IND]
-    SSATOffset = sid * sectSize + consts.HEADERSIZE
-    SATOffset = params[consts.SID_SAT_IND] * sectSize + consts.HEADERSIZE
+    sectSize = params[SECT_SIZE_IND]
+    sid = params[SID_SSAT_IND]
+    SSATOffset = sid * sectSize + HEADERSIZE
+    SATOffset = params[SID_SAT_IND] * sectSize + HEADERSIZE
 
     offset = ind * 4
 
@@ -245,64 +278,51 @@ def getNextMiniSect(ind, params, f):
         f.seek(SATOffset + sid * 4)
         sid = struct.unpack('i', f.read(4))[0]
 
-    f.seek(sid * sectSize + consts.HEADERSIZE + offset)
+    f.seek(sid * sectSize + HEADERSIZE + offset)
     return struct.unpack('i', f.read(4))[0]
 
 
 def main(filename):
     f = open(filename, 'rb')
     params = getParams(f)
-
     # Root entry
     name00 = b'\x52\x00\x6f\x00\x6f\x00\x74\x00\x20\x00\x45\x00\x6e\x00\x74\x00\x72\x00\x79\x00\x00\x00'.decode('utf-8')
-
     # Contents
     name01 = b'\x43\x00\x6f\x00\x6e\x00\x74\x00\x65\x00\x6e\x00\x74\x00\x73\x00\x00\x00'.decode('utf-8')
-
     # DataStorage1
     name05 = b'\x44\x00\x61\x00\x74\x00\x61\x00\x53\x00\x74\x00\x6f\x00\x72\x00\x61\x00\x67\x00\x65\x00\x31\x00\x00\x00'.decode(
         'utf-8')
-
     # DataSetGroup
     name08 = b'\x44\x00\x61\x00\x74\x00\x61\x00\x53\x00\x65\x00\x74\x00\x47\x00\x72\x00\x6f\x00\x75\x00\x70\x00\x00\x00'.decode(
         'utf-8')
-
     # DataSetGroupHeaderInfo
     name12 = b'\x44\x00\x61\x00\x74\x00\x61\x00\x53\x00\x65\x00\x74\x00\x47\x00\x72\x00\x6f\x00\x75\x00\x70\x00\x48\x00\x65\x00\x61\x00\x64\x00\x65\x00\x72\x00\x49\x00\x6e\x00\x66\x00\x6f\x00\x00\x00'.decode(
         'utf-8')
-
     setToDataPath = []
-
     # DataSpectrumStorage
     setToDataPath.append(
         b'\x44\x00\x61\x00\x74\x00\x61\x00\x53\x00\x70\x00\x65\x00\x63\x00\x74\x00\x72\x00\x75\x00\x6d\x00\x53\x00\x74\x00\x6f\x00\x72\x00\x61\x00\x67\x00\x65\x00\x00\x00'.decode(
             'utf-8'))
-
     # Data
     setToDataPath.append(b'\x44\x00\x61\x00\x74\x00\x61\x00\x00\x00'.decode('utf-8'))
-
     # X Data.1
     nameXData = b'\x58\x00\x20\x00\x44\x00\x61\x00\x74\x00\x61\x00\x2e\x00\x31\x00\x00\x00'.decode('utf-8')
     # Y Data.1
     nameYData = b'\x59\x00\x20\x00\x44\x00\x61\x00\x74\x00\x61\x00\x2e\x00\x31\x00\x00\x00'.decode('utf-8')
-
     namelist = [name00, name05, name08]
-
     dataSetGroupDir = dirFromPath(0, namelist, params, f)
-
     groupDirContents = traverseDirSibs(getDirLRC(dataSetGroupDir, params, f)[2], params, f)
     dataSets = []
     for d in groupDirContents:
         name = getDirName(d, params, f)
         if (name != name12):
             dataSets.append(d)
-
     for ds in dataSets:
         name = getDirName(ds, params, f)
         dataDir = dirFromPath(ds, [name] + setToDataPath, params, f)
 
-        fout = open(filename[:-4] + '-' + removeNull(name) + '.csv', 'w')
-        # print(getDirName(dataDir, params, f))
+        # fout = open(filename[:-4] + '-' + removeNull(name) + '.csv', 'w')
+        # # print(getDirName(dataDir, params, f))
 
         xdata = []
         ydata = []
@@ -314,8 +334,9 @@ def main(filename):
             if childName == nameYData:
                 ydata = bytesToArr(getDirStream(child, params, f), 'd')
 
-        for i in range(0, len(xdata)):
-            fout.write("{:f}, {:f}\n".format(xdata[i], ydata[i]))
+        return {'x': xdata, 'y':ydata}
+        # for i in range(0, len(xdata)):
+        #     fout.write("{:f}, {:f}\n".format(xdata[i], ydata[i]))
 
 
 def main2():
@@ -347,3 +368,40 @@ def printParams():
         params = getParams(f)
         print(fname, params)
         f.close()
+
+
+
+
+
+
+
+
+
+
+
+
+# if __name__ == '__main__':
+#     arguments = docopt(__doc__, version='Naval Fate 2.0')
+#
+#     directory = arguments['<directory>']
+#     # recursively iterate all items matching the glob pattern
+#     for spc_file in Path(directory).rglob('*'):
+#         # .suffix property refers to .ext extension
+#         ext = spc_file.suffix
+#         # use the .lower() method to get lowercase version of extension
+#         if ext.lower() == ".spc":
+#             spc_file = str(spc_file)
+def load_shimadzu_spc(filename):
+    spc_file = str(filename)
+    try:
+        with open(spc_file, 'rb') as f:
+            signature = f.read(4)
+    except:
+        return {'Error': True, 'desc': f"Cannot load {spc_file}"}
+
+    if signature == b'\xD0\xCF\x11\xE0':
+        spectrum = main(spc_file)
+        return spectrum
+
+    else:
+        return {'Error':True, 'desc':f'Not OLE CF type file format, skipping {spc_file}'}

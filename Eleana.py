@@ -885,6 +885,10 @@ class EleanaMainApp:
         update.dataset_list(eleana)
         update.all_lists()
 
+    def import_shimadzu_spc(self):
+        load.loadShimadzuSPC()
+        update.dataset_list(eleana)
+        update.all_lists()
     # --- Quit (also window close by clicking on X)
     def close_application(self, event = None):
         quit_dialog = CTkMessagebox(title="Quit", message="Do you want to close the program?",
