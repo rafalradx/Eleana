@@ -1,1 +1,86 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#aaaaaa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="20"
+   height="20"
+   viewBox="0 0 24 24"
+   fill="none"
+   stroke="#aaaaaa"
+   stroke-width="1.5"
+   stroke-linecap="round"
+   stroke-linejoin="round"
+   class="feather feather-trash-2"
+   version="1.1"
+   id="svg10"
+   sodipodi:docname="trash-2.svg"
+   inkscape:export-filename="/home/marcin/PycharmProjects/Eleana/pixmaps/trash.png"
+   inkscape:export-xdpi="124.8"
+   inkscape:export-ydpi="124.8"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)">
+  <metadata
+     id="metadata16">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs14" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="2560"
+     inkscape:window-height="1367"
+     id="namedview12"
+     showgrid="false"
+     inkscape:zoom="36.65"
+     inkscape:cx="10"
+     inkscape:cy="10"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg10" />
+  <g
+     id="g845"
+     transform="matrix(0.6900737,0,0,0.69245775,3.5307816,1.2629831)"
+     style="stroke-width:2.16994">
+    <polyline
+       points="3 6 5 6 21 6"
+       id="polyline2"
+       style="stroke-width:2.16994" />
+    <path
+       d="m 19,6 v 14 a 2,2 0 0 1 -2,2 H 7 A 2,2 0 0 1 5,20 V 6 M 8,6 V 4 a 2,2 0 0 1 2,-2 h 4 a 2,2 0 0 1 2,2 v 2"
+       id="path4"
+       style="stroke-width:2.16994" />
+    <line
+       x1="10"
+       y1="11"
+       x2="10"
+       y2="17"
+       id="line6"
+       style="stroke-width:2.16994" />
+    <line
+       x1="14"
+       y1="11"
+       x2="14"
+       y2="17"
+       id="line8"
+       style="stroke-width:2.16994" />
+  </g>
+</svg>

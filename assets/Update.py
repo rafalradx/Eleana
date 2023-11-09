@@ -35,7 +35,9 @@ class Update:
             def create_command(l):
                 return lambda: self.app.load_recent(l)
 
-            recent_menu.add_command(label=label, command=create_command(label))
+            icon_file = Path(self.eleana.paths['pixmaps'], 'x.png')
+            icon_clear = tk.PhotoImage(file=icon_file)
+            recent_menu.add_command(label=label, image=icon_clear, compound="left", command=create_command(label))
 
     def group_list(self):
         ''' This scans for groups and creates assignments in eleana.assignmentToGroups'''

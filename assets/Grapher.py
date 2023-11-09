@@ -96,9 +96,11 @@ class Grapher(GraphPreferences):
 
         self.cursor_annotations = []
 
-
         self.scale1 = {'x': [], 'y': []}
 
+    def clear_plot(self):
+        self.ax.clear()
+        self.canvas.draw()
 
     def axis_title(self, which=None):
         '''Creates title for y and x axes  from "which" dataset '''
@@ -259,8 +261,7 @@ class Grapher(GraphPreferences):
         elif data['complex'] and self.eleana.selections['s_cpl'] == 'im':
             self.ax.plot(data['x'], data['im_y'], label=legend, color=self.colors['second_im'])
         else:
-            #self.ax2.cla()
-            #self.ax2.plot(data['x'], data['re_y'], label=legend, color=self.colors['second_re'])
+
             self.ax.plot(data['x'], data['re_y'], label=legend, color=self.colors['second_re'])
         self.ax.set_xlabel(axis_title['x_title'])
         self.ax.set_ylabel(axis_title['y_title'])
@@ -331,9 +332,12 @@ class Grapher(GraphPreferences):
     **********************************'''
     def cursor_on_off(self):
         crs_mode = self.current_cursor_mode['label']
+
         try:
             for sel in self.cursor.selections:
-                sel.annotation.remove()
+
+                    sel.annotation.remove()
+
         except:
             pass
         if crs_mode in self.available_cursor_modes:
@@ -359,8 +363,6 @@ class Grapher(GraphPreferences):
     def annotation_create(self, sel):
         ''' This creates annotations on the graph and add selected
             to the list in self.cursor_annotations '''
-        print(sel.annotation.axes.figure)
-        print(type(sel.annotation))
         x = sel.target[0]
         y = sel.target[1]
         point = [x,y]
@@ -378,11 +380,12 @@ class Grapher(GraphPreferences):
             label = str(current_nr)
         sel.annotation.set_text(label)
         sel.annotation.set_visible(self.current_cursor_mode['annot'])
-        print(self.cursor_annotations)
+
     def annotation_removed(self, event):
         ''' This deletes selected annotation from the graph
             and removes the respective point from the list in
             self.cursor_annotations. '''
+        print(event)
         annotation = event.annotation
         x = annotation.xy[0]
         y = annotation.xy[1]
@@ -391,8 +394,13 @@ class Grapher(GraphPreferences):
         if point in points:
             index = points.index(point)
             self.cursor_annotations.pop(index)
-            print(self.cursor_annotations)
+        return
 
+    def clear_all_annotations(self):
+        self.cursor_annotations = []
+        value = self.app.sel_cursor_mode.get()
+        self.app.sel_graph_cursor(value)
+        return
 
     def autoscale(self, autoscaling: dict):
         self.autoscaling = autoscaling

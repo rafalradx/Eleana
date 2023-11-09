@@ -21,7 +21,6 @@ class CTkHorizontalSlider(CTkFrame):
         self.slider.configure(command=self.set_increment)
         self.reset()
         self.factor = CTkEntry(self.sliderFrame)
-        #self.factor.configure(state="active", width=50)
         self.factor.grid(column=1, padx=2, row=1, sticky="ew")
         self.btn_reset = CTkButton(self.sliderFrame)
         self.btn_reset.configure(text='Reset', width=20, command=self.reset)
@@ -46,6 +45,7 @@ class CTkHorizontalSlider(CTkFrame):
         slider = self.slider.get()
         self.increment = factor * slider
         self.app.separate_plots_by(self.direction, self.increment)
+        self.app.separate_plots_by()
 
 if __name__ == "__main__":
     root = tk.Tk()

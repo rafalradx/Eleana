@@ -25,6 +25,12 @@ class MainMenu:
         self.icon_import = self.prepare_icon("import.png")
         self.icon_exit = self.prepare_icon("exit.png")
         self.icon_epr = self.prepare_icon("epr.png")
+        self.icon_export = self.prepare_icon("export.png")
+        self.icon_none = self.prepare_icon("x.png")
+        self.icon_trash = self.prepare_icon("trash.png")
+        self.icon_clear = self.prepare_icon("clear.png")
+        self.icon_notes = self.prepare_icon("notes.png")
+        self.icon_graphPrefs = self.prepare_icon("graph_pref.png")
 
         ''' Menu Bar'''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
@@ -51,16 +57,19 @@ class MainMenu:
         self.menu_file.add_cascade(label="Import data", menu=self.menu_import, image = self.icon_import, compound="left")
 
         # ------------ Bruker Elexsys
-        self.menu_import.add_command(label="Bruker Elexsys", command=self.app.import_elexsys, image = self.icon_epr, compound="left")
+        self.menu_import.add_command(label="Bruker Elexsys (DTA)", command=self.app.import_elexsys, image = self.icon_epr, compound="left")
         # ------------ Bruker EMX
-        self.menu_import.add_command(label="Bruker EMX", command=self.app.import_EMX, image = self.icon_epr, compound="left")
+        self.menu_import.add_command(label="Bruker ESP/EMX (spc)", command=self.app.import_EMX, image = self.icon_epr, compound="left")
         # ------------ Magnettech
-        self.menu_import.add_command(label="Magnettech SPE 1", command=self.app.import_magnettech1,
+        self.menu_import.add_command(label="Magnettech older (spe)", command=self.app.import_magnettech1,
+                                     image=self.icon_epr,
+                                     compound="left")
+        self.menu_import.add_command(label="Magnettech newer (spe)", command=self.app.import_magnettech2,
                                      image=self.icon_epr,
                                      compound="left")
 
         # ------------ Shimadzu SPC
-        self.menu_import.add_command(label="Shimadzu Spectrum SPC", command=self.app.import_shimadzu_spc, image=self.icon_epr,
+        self.menu_import.add_command(label="Shimadzu UV/VIS (spc)", command=self.app.import_shimadzu_spc, image=self.icon_epr,
                                      compound="left")
 
         # - SEPARATOR -
@@ -71,7 +80,7 @@ class MainMenu:
         self.menu_export = tk.Menu(self.menu_file, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                    activebackground=self.activebg, activeforeground=self.activefg,
                                    borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        self.menu_file.add_cascade(label="Export", menu=self.menu_export, image=self.icon_import, compound="left")
+        self.menu_file.add_cascade(label="Export", menu=self.menu_export, image=self.icon_export, compound="left")
         # - Export first
         self.menu_export.add_command(label="Export First", command=self.app.delete_selected_data, image=self.icon_exit,
                                    compound="left")
@@ -87,6 +96,9 @@ class MainMenu:
         # - Quit
         self.menu_file.add_command(label="Quit", command=self.app.close_application, image = self.icon_exit, compound="left", accelerator="Ctrl+Q")
 
+
+        ''' Menu EDIT'''
+
         #  EDIT
         self.menu_edit = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                  activebackground=self.activebg, activeforeground=self.activefg,
@@ -94,16 +106,16 @@ class MainMenu:
         self.main_menu.add_cascade(label="Edit", menu=self.menu_edit, image = self.icon_dropdown, compound="left")
 
         # - Delete selected data
-        self.menu_edit.add_command(label="Delete selected data", command=self.app.delete_selected_data)
+        self.menu_edit.add_command(label="Delete selected data", command=self.app.delete_selected_data, image = self.icon_trash, compound="left")
 
         # - Notes
-        self.menu_edit.add_command(label="Notes", command=self.app.notes)
+        self.menu_edit.add_command(label="Notes", command=self.app.notes, image = self.icon_notes, compound="left")
 
         # - Clear
         self.menu_clear = tk.Menu(self.menu_edit, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                  activebackground=self.activebg, activeforeground=self.activefg,
                                  borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        self.menu_edit.add_cascade(label="Clear", menu=self.menu_clear)
+        self.menu_edit.add_cascade(label="Clear", menu=self.menu_clear, image = self.icon_clear, compound="left")
 
         # -------- Clear dataset
         self.menu_clear.add_command(label="Dataset", command=self.app.clear_dataset)
@@ -123,7 +135,7 @@ class MainMenu:
         self.menu_groups.add_command(label="Assign Second to group", command=self.app.second_to_group)
 
         # - Graph Preferences
-        self.menu_edit.add_command(label="Graph preferences", command = self.app.graph_preferences)
+        self.menu_edit.add_command(label="Graph preferences", command = self.app.graph_preferences, image=self.icon_graphPrefs, compound="left")
 
 
     def prepare_icon(self, filename):

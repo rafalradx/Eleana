@@ -64,21 +64,6 @@ class EleanaMainApp:
         self.mainwindow = builder.get_object("Eleana", master)
         self.mainwindow.iconify()
         self.mainwindow.withdraw()
-        #self.mainwindow.config(cursor="watch")
-        # Main menu
-        #main_menu = builder.get_object("mainmenu", self.mainwindow)
-        #self.mainwindow.configure(menu=main_menu)
-
-        # Menu
-        # self.main_menu = tk.Menu(self.mainwindow)
-        # self.mainwindow.config(menu=self.main_menu)
-        #
-        # self.menu_file = tk.Menu(self.main_menu, tearoff=0)
-        # self.main_menu.add_cascade(label="File", menu=self.menu_file)
-        # self.group_down = None
-        # self.group_up = None
-        # self.group = None
-        # self.first_down = None
         builder.connect_callbacks(self)
         # END OF PYGUBU BUILDER
 
@@ -146,6 +131,9 @@ class EleanaMainApp:
         self.info_show = True
         self.repeated_items = []
 
+        # Comparison view
+        self.comparison_settings = {'vsep': 0, 'hsep': 0, 'indexes': (), 'v_factor':'1', 'h_factor':'1'}
+
     def set_pane_height(self):
         self.panedwindow2.sashpos(0, 700)
         self.panedwindow4.sashpos(0, 300)
@@ -164,27 +152,24 @@ class EleanaMainApp:
     def comparison_view(self):
         self.info_show =True
         self.repeated_items = []
-        self.comparison_settings = {'vsep':0, 'hsep':0, 'indexes':()}
         comparison_mode = bool(self.switch_comparison.get())
         if comparison_mode:
             self.firstFrame.grid_remove()
             self.secondFrame.grid_remove()
             self.swapFrame.grid_remove()
             self.listFrame.grid(column=0, row = 2, rowspan=3)
-            listbox = CTkListbox(self.listFrame, command=self.list_selected, multiple_selection=True, height=400)
-            listbox.grid(column=0, columnspan=1, rowspan=4, padx=4, pady=4, row=0, sticky="nsew")
+            self.listbox = CTkListbox(self.listFrame, command=self.list_selected, multiple_selection=True, height=400)
+            self.listbox.grid(column=0, columnspan=1, rowspan=4, padx=4, pady=4, row=0, sticky="nsew")
 
-            ver_slider = CTkHorizontalSlider('Vertical separation', 'vsep', [0,1], self.listFrame, self)
-            ver_slider.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=5, sticky="nsew")
-            hor_slider = CTkHorizontalSlider('Horizontal separation', 'hsep', [-1,1], self.listFrame, self)
-            hor_slider.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=8, sticky="nsew")
+            self.ver_slider = CTkHorizontalSlider('Vertical separation', 'vsep', [0,1], self.listFrame, self)
+            self.ver_slider.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=5, sticky="nsew")
+            self.hor_slider = CTkHorizontalSlider('Horizontal separation', 'hsep', [-1,1], self.listFrame, self)
+            self.hor_slider.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=8, sticky="nsew")
 
-            # Delete canvas object
-            #grapher.canvas.get_tk_widget().grid_remove()
-
-            # Here prepare new canvas for plots
-            #self.compare_graph = ComparisonGraph(app, eleana)
-            #self.compare_graph = grapher.canvas
+            self.ver_slider.factor.delete(0, 'end')
+            self.ver_slider.factor.insert(0, self.comparison_settings['v_factor'])
+            self.hor_slider.factor.delete(0, 'end')
+            self.hor_slider.factor.insert(0, self.comparison_settings['h_factor'])
 
             # Get names from group to be used for the list
             group = eleana.selections['group']
@@ -202,18 +187,21 @@ class EleanaMainApp:
                     names_nr.append(eleana.dataset[i].name_nr)
             i = 0
             while i < len(names_nr)-1:
-                listbox.insert(indexes[i], names_nr[i])
+                self.listbox.insert(indexes[i], names_nr[i])
                 i += 1
             try:
-                listbox.insert("END", names_nr[i])
+                self.listbox.insert("END", names_nr[i])
             except:
                 pass
+            if len(self.comparison_settings['indexes']) > 0:
+                for each in self.comparison_settings['indexes']:
+                    self.listbox.activate(each)
         else:
             self.listFrame.grid_remove()
             self.firstFrame.grid()
             self.secondFrame.grid()
             self.swapFrame.grid()
-
+            grapher.plot_graph()
 
     def separate_plots_by(self, direction=None, value=None):
         self.mainwindow.config(cursor="watch")
@@ -232,26 +220,32 @@ class EleanaMainApp:
             i += 1
 
         grapher.plot_comparison(self.comparison_settings['indexes'], vsep, hsep)
+        self.comparison_settings['v_factor'] = self.ver_slider.factor.get()
+        self.comparison_settings['h_factor'] = self.hor_slider.factor.get()
         self.mainwindow.config(cursor='arrow')
-    def list_selected(self, selected_items, ):
-        self.repeated_items.extend(selected_items)
-        for each in selected_items:
-            index = int(get_index_by_name(each))
-            type = eleana.dataset[index].type
-            name_nr = eleana.dataset[index].name_nr
-            if name_nr in set(self.repeated_items):
-                self.info_show = True
-            if type == 'stack 2D' and self.info_show:
-                info = 'Data "' + name_nr + '" is a 2D stack. Selecting this data will display all stack items on the graph.'
-                CTkMessagebox(title="", message=info)
-                self.info_show = False
-        items_list = []
-        for each in selected_items:
-            items_list.append(int(get_index_by_name(each)))
-        items_list.sort()
-        self.comparison_settings['indexes'] = tuple(items_list)
-        self.separate_plots_by()
 
+    def list_selected(self, selected_items=None):
+        if selected_items != None:
+            self.repeated_items.extend(selected_items)
+            for each in selected_items:
+                index = int(get_index_by_name(each))
+                type = eleana.dataset[index].type
+                name_nr = eleana.dataset[index].name_nr
+                if name_nr in set(self.repeated_items):
+                    self.info_show = True
+                if type == 'stack 2D' and self.info_show:
+                    info = 'Data "' + name_nr + '" is a 2D stack. Selecting this data will display all stack items on the graph.'
+                    CTkMessagebox(title="", message=info)
+                    self.info_show = False
+            items_list = []
+            for each in selected_items:
+                items_list.append(int(get_index_by_name(each)))
+            items_list.sort()
+            self.comparison_settings['indexes'] = tuple(items_list)
+            self.separate_plots_by()
+        else:
+            self.comparison_settings['indexes'] = ()
+            grapher.clear_plot()
     ''' *******************************************'''
 
 
@@ -872,7 +866,9 @@ class EleanaMainApp:
         # Perform update to place the item into menu
         update.last_projects_menu()
         app.mainwindow.title(Path(last_projects[0]).name[:-4] + ' - Eleana')
-    # --- Import EPR --> Bruker Elexsys
+
+    # - Import
+    # Bruker Elexsys
 
     def import_elexsys(self):
         ''' Open window that loads the spectra '''
@@ -887,6 +883,11 @@ class EleanaMainApp:
 
     def import_magnettech1(self):
         load.loadMagnettech(1)
+        update.dataset_list(eleana)
+        update.all_lists()
+
+    def import_magnettech2(self):
+        load.loadMagnettech(2)
         update.dataset_list(eleana)
         update.all_lists()
 
@@ -961,9 +962,17 @@ class EleanaMainApp:
         grapher.indexed_x = bool(self.check_indexed_x.get())
         grapher.plot_graph()
 
+    '''***********************************************
+    *                                                *
+    *                    CURSORS                     *
+    *                                                *  
+    ***********************************************'''
+
+    def clear_cursors(self):
+        grapher.clear_all_annotations()
     def sel_graph_cursor(self, value):
-        grapher.current_cursor_mode['label'] = value
-        grapher.plot_graph()
+         grapher.current_cursor_mode['label'] = value
+         grapher.plot_graph()
 
     '''***********************************************
     *                                                *
