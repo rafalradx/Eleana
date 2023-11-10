@@ -36,6 +36,10 @@ class SelectData:
         # Keyboard bindings
         self.mainwindow.bind("<Escape>", self.cancel)
         self.mainwindow.bind("<Return>", lambda event: self.btn_ok.invoke())
+
+        self.response = None
+
+        self.selection_list.bind("<MouseWheel>", self.on_mousewheel)
         # Create available date
         i = 0
         for each in self.items:
@@ -48,6 +52,7 @@ class SelectData:
         if self.mainwindow.winfo_exists():
             self.master.wait_window(self.mainwindow)
         return self.response
+
     def run(self):
         self.mainwindow.mainloop()
 
@@ -74,6 +79,12 @@ class SelectData:
     def cancel(self, event = None):
         self.response = None
         self.mainwindow.destroy()
+
+    def on_mousewheel(self, event):
+        # Przewijaj listę przy użyciu kółka myszki
+        if event.delta:
+            print(event)
+            #self.selection_list.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
 if __name__ == "__main__":
     app = SelectData()

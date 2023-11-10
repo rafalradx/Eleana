@@ -29,7 +29,8 @@ class Eleana:
              'assets': Path(Path(__file__).resolve().parent, ""),
              'last_import_dir': '',
              'last_project_dir': '',
-             'last_projects': []
+             'last_projects': [],
+             'last_export_dir': ''
 
              }
 

@@ -28,7 +28,7 @@ class CTkListbox(customtkinter.CTkScrollableFrame):
         super().__init__(master, width=width, height=height, fg_color=fg_color, border_width=border_width, **kwargs)
         self._scrollbar.grid_configure(padx=(0,border_width+4))
         self._scrollbar.configure(width=12)
-        
+
         if bg_color:
             super().configure(bg_color=bg_color)
         
@@ -57,6 +57,11 @@ class CTkListbox(customtkinter.CTkScrollableFrame):
 
         super().bind("<Destroy>", lambda e: self.unbind_all("<Configure>"))
         
+    def on_mousewheel(self, event):
+        # Przewijaj listę za pomocą kółka myszy
+        print(event)
+        self._scrollbar.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
     def update_listvar(self):
         values = list(eval(self.listvariable.get()))
         self.delete("all")

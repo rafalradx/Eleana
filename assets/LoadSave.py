@@ -1,10 +1,13 @@
 from pathlib import Path
 
 import pickle
+import csv
 from tkinter.filedialog import asksaveasfile, askopenfilename
 import random
 import shutil
 from tkinter import filedialog
+
+import numpy as np
 from CTkMessagebox import CTkMessagebox
 from assets.DataClasses import createFromElexsys, createFromEMX, createFromShimadzuSPC, createFromMagnettech
 
@@ -346,3 +349,52 @@ class Save:
             return {"error": False, 'desc':'', 'return':filename}
         except:
             return {"error": True, 'desc': f"Error while saving {filename.name}"}
+
+class Export:
+    def __init__(self, eleana_instance):
+        self.eleana = eleana_instance
+
+    def csv(self, which = 'first'):
+        init_dir = self.eleana.paths.get('last_export_dir', Path("~").expanduser())
+        try:
+            filename = asksaveasfile(initialdir=init_dir,
+                                     initialfile='',
+                                     defaultextension=".csv",
+                                     filetypes=[("Comma separated values", "*.csv"),
+                                                ("All Files", "*.*")
+                                                ])
+        except:
+            return {'error': True, 'desc': f'Could not save {filename} file.'}
+
+        # Prepare data from First or second
+        index = self.eleana.selections[which]
+        data = self.eleana.dataset[index]
+
+        if data.type == 'stack 2D':
+            pass
+
+        else:
+            if data.complex:
+                print('ok. 375 Loadsave.py. Dane pojedyncze complex')
+                x = data.x
+                y = data.y
+                re_y = np.real(y)
+                im_y = np.imag(y)
+                magn = np.absolute(y)
+                headers = []
+
+            else:
+                x = data.x
+                y = data.y
+                with open(filename.name, 'a') as exported_csv:
+                    exported_csv.write("X, Y")
+                    i = 0
+                    while i < len(x):
+                        row = "\n" + str(x[i]) + ", " + str(y[i])
+                        exported_csv.write(row)
+                        i += 1
+
+
+
+
+

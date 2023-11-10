@@ -1,32 +1,31 @@
 #!/usr/bin/python3
 
 # Import Python Modules
+print("IMPORT PYTHON MODULES")
 import json
-print("1")
 import pickle
-print("2")
-import pathlib
-print("3")
 import copy
-print("4")
+import pathlib
 from pathlib import Path
-print("5")
 import customtkinter
+import customtkinter as ctk
 import pygubu
 import numpy as np
-import customtkinter as ctk
 import io
 import sys
+import pandas
+
 
 # Third-party modules fin Eleana project
+print("Load third-party modules.")
 from modules.CTkListbox import *
 from modules.CTkMessagebox import CTkMessagebox
 from modules.CTkColorPicker import *
+from modules.CTkTable import *
 
 # Import Eleana specific classes
 from assets.GeneralEleana import Eleana
-from assets.LoadSave import Load
-from assets.LoadSave import Save
+from assets.LoadSave import Load, Save, Export
 from assets.Initialization import Init
 from assets.Grapher import Grapher, GraphPreferences
 from assets.Update import Update
@@ -148,7 +147,7 @@ class EleanaMainApp:
     *                                               *
     *              COMPARISON VIEW                  *
     *                                               *
-    *************************************************'''
+    **********************************************'''
     def comparison_view(self):
         self.info_show =True
         self.repeated_items = []
@@ -196,6 +195,7 @@ class EleanaMainApp:
             if len(self.comparison_settings['indexes']) > 0:
                 for each in self.comparison_settings['indexes']:
                     self.listbox.activate(each)
+            self.list_selected()
         else:
             self.listFrame.grid_remove()
             self.firstFrame.grid()
@@ -226,6 +226,7 @@ class EleanaMainApp:
 
     def list_selected(self, selected_items=None):
         if selected_items != None:
+            previous_selection = self.comparison_settings['indexes']
             self.repeated_items.extend(selected_items)
             for each in selected_items:
                 index = int(get_index_by_name(each))
@@ -234,9 +235,16 @@ class EleanaMainApp:
                 if name_nr in set(self.repeated_items):
                     self.info_show = True
                 if type == 'stack 2D' and self.info_show:
-                    info = 'Data "' + name_nr + '" is a 2D stack. Selecting this data will display all stack items on the graph.'
+                    info = 'Data "' + name_nr + '" is a 2D stack. You need to convert the stack into a group to display it.'
                     CTkMessagebox(title="", message=info)
+                    selected_stack = self.listbox.curselection()
+                    difference = set(selected_stack) - set(previous_selection)
+                    difference = list(difference)
+                    if len(difference) > 0:
+                        self.listbox.deselect(difference[0])
                     self.info_show = False
+                    return
+
             items_list = []
             for each in selected_items:
                 items_list.append(int(get_index_by_name(each)))
@@ -246,10 +254,12 @@ class EleanaMainApp:
         else:
             self.comparison_settings['indexes'] = ()
             grapher.clear_plot()
-    ''' *******************************************'''
 
-
-
+    ''' *********************************************
+    *                                               *
+    *              COMBOBOX SELECTIONS              *
+    *                                               *
+    **********************************************'''
 
     def group_down_clicked(self):
         current_group = self.sel_group.get()
@@ -358,7 +368,6 @@ class EleanaMainApp:
             return
         grapher.plot_graph()
 
-
     def f_stk_up_clicked(self):
         current_position = self.f_stk.get()
         list_of_items = self.f_stk._values
@@ -375,7 +384,6 @@ class EleanaMainApp:
         except IndexError:
             return
         grapher.plot_graph()
-
 
     def f_stk_down_clicked(self):
         current_position = self.f_stk.get()
@@ -762,13 +770,18 @@ class EleanaMainApp:
         for each in indexes:
             eleana.dataset.pop(each)
         # Set all data to None
-        update.dataset_list()
-        update.all_lists()
+
         eleana.selections['first'] = -1
         eleana.selections['second'] = -1
         self.sel_first.set('None')
         self.sel_first.set('None')
+        self.comparison_settings['indexes'] = []
+        update.dataset_list()
+        update.group_list()
+        update.all_lists()
         update.gui_widgets()
+        self.comparison_view()
+
 
     ''' EDIT: Delete Results dataset                            '''
     def clear_results(self):
@@ -895,6 +908,27 @@ class EleanaMainApp:
         load.loadShimadzuSPC()
         update.dataset_list(eleana)
         update.all_lists()
+
+    def export_first(self):
+        export.csv('first')
+
+        #
+        # init_dir = self.eleana.paths.get('last_export_dir', Path("~").expanduser())
+        #
+        # # if not init_dir:
+        # #     self.eleana.paths['last_export_dir'] = Path("~").expanduser()
+        #
+        # try:
+        #     filename = asksaveasfile(initialdir=init_dir,
+        #                              initialfile='',
+        #                              defaultextension=".csv",
+        #                              filetypes=[("All Files", "*.*"),
+        #                                         ("Comma separated values", "*.csv")])
+        # except:
+        #     return {'error': True, 'desc': f'Could not save {filename} file.'}
+        #
+        # print(filename)
+
     # --- Quit (also window close by clicking on X)
     def close_application(self, event = None):
         quit_dialog = CTkMessagebox(title="Quit", message="Do you want to close the program?",
@@ -1062,7 +1096,7 @@ class EleanaMainApp:
             sys.stdout = io.StringIO()
 
             try:
-                #exec(command, globals(), locals())
+
                 eval(command, globals(), locals())
                 output = sys.stdout.getvalue()
             except Exception as e:
@@ -1095,15 +1129,17 @@ def get_index_by_name(selected_value_text):
 ctk.set_appearance_mode("dark")
 
 # Create general main instances for the program
-print('5')
+print('INITIATE ELEANA: ', end="")
 eleana = Eleana()
-print('6')
+print('create GUI, ', end="")
 app = EleanaMainApp(eleana)      # This is GUI
-print('7')
+print('build grapher, ', end="")
 grapher = Grapher(app, eleana)
 load = Load(eleana)
 save = Save(eleana)
+export = Export(eleana)
 
+print('build menu', end="")
 main_menu = MainMenu(app, eleana)
 init = Init(app, eleana, grapher, main_menu)
 context_menu = ContextMenu(app, eleana)
