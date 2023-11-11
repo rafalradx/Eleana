@@ -17,7 +17,6 @@ class Load:
     # FILE
     def load_project(self, recent=None):
         ''' This method loads projects created by Eleana'''
-
         init_dir = Path(self.eleana.paths['last_project_dir'])
         try:
             init_file = Path(self.eleana.paths['last_projects'][0])
@@ -319,7 +318,6 @@ class Save:
                 with open(data_file, 'wb') as file:
                     pickle.dump(self.eleana.dataset[i], file)
                 i += 1
-
             ''' 
             Save result dataset
             '''
@@ -355,6 +353,9 @@ class Export:
         self.eleana = eleana_instance
 
     def csv(self, which = 'first'):
+        if which == 'first' and self.eleana.selections['first'] < 0:
+            info = CTkMessagebox(title="Info ", message=f'Please select data in {which}')
+            return
         init_dir = self.eleana.paths.get('last_export_dir', Path("~").expanduser())
         try:
             filename = asksaveasfile(initialdir=init_dir,
@@ -369,31 +370,73 @@ class Export:
         # Prepare data from First or second
         index = self.eleana.selections[which]
         data = self.eleana.dataset[index]
-
-        if data.type == 'stack 2D':
+        if data.type == 'stack 2D' and not data.complex:
+            x = data.x
+            y = data.y
+            stk_names = data.stk_names
+            name_x = data.parameters.get('name_x', 'X') + " [" + data.parameters.get('unit_x', 'a.u.') + "]"
+            header = name_x
+            for stk in stk_names:
+                header = header + ", " + stk
+            try:
+                with open(filename.name, 'a') as exported_csv:
+                    exported_csv.write(header)
+                    i = 0
+                    while i < len(x):
+                        x_row = "\n" + str(x[i])
+                        j = 0
+                        data = ''
+                        while j < len(stk_names):
+                            data = data + ", " + str(y[j][i])
+                            row = x_row + data
+                            j += 1
+                        exported_csv.write(row)
+                        i += 1
+            except:
+                return {'error': True, 'desc': f'Could not save {filename.name} file.'}
             pass
-
-        else:
-            if data.complex:
-                print('ok. 375 Loadsave.py. Dane pojedyncze complex')
+        elif data.type == 'stack 2D' and data.complex:
+            info = CTkMessagebox(title="Info ", message=f'Stack of complex data is not supported yet.')
+            return
+        elif data.type != 'stack 2D' and data.complex:
                 x = data.x
                 y = data.y
                 re_y = np.real(y)
                 im_y = np.imag(y)
                 magn = np.absolute(y)
-                headers = []
+                name_x = data.parameters.get('name_x', 'X') + " [" + data.parameters.get('unit_x', 'a.u.') + "]"
+                name_rey = data.parameters.get('name_y', 'Y') + " [" + data.parameters.get('unit_y', 'a.u') + "]:REAL"
+                name_imy = data.parameters.get('name_y', 'Y') + " [" + data.parameters.get('unit_y', 'a.u') + "]:IMAGINARY"
+                name_magn = data.parameters.get('name_y', 'Y') + " [" + data.parameters.get('unit_y', 'a.u') + "]:MAGNITUDE"
+                header = str(name_x) + ", " + str(name_rey) + ", " + str(name_imy) + ", " + str(name_magn)
+                try:
+                    with open(filename.name, 'a') as exported_csv:
+                        exported_csv.write(header)
+                        i = 0
+                        while i < len(x):
+                            row = "\n" + str(x[i]) + ", " + str(re_y[i]) + ", " + str(im_y[i]) + ", " + str(magn[i])
+                            exported_csv.write(row)
+                            i += 1
+                except:
+                    return {'error': True, 'desc': f'Could not save {filename.name} file.'}
 
-            else:
-                x = data.x
-                y = data.y
+        else:
+            # Single Data not complex
+            x = data.x
+            y = data.y
+            name_x = data.parameters.get('name_x', 'X') + " [" + data.parameters.get('unit_x', 'a.u.') + "]"
+            name_y = data.parameters.get('name_y', 'Y') + " [" + data.parameters.get('unit_y', 'a.u') + "]"
+            header = str(name_x) + ", " + str(name_y)
+            try:
                 with open(filename.name, 'a') as exported_csv:
-                    exported_csv.write("X, Y")
+                    exported_csv.write(header)
                     i = 0
                     while i < len(x):
                         row = "\n" + str(x[i]) + ", " + str(y[i])
                         exported_csv.write(row)
                         i += 1
-
+            except:
+                return {'error': True, 'desc': f'Could not save {filename.name} file.'}
 
 
 

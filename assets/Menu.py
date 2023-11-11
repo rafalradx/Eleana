@@ -194,7 +194,7 @@ class ContextMenu:
 
     def build_menu_result(self):
         '''This creates positions for SECOND context menu '''
-        self.context_menu_result.add_command(label="Result 1")
+        self.context_menu_result.add_command(label="Rename", command=lambda: self.app.rename_data('result'))
         self.context_menu_result.add_command(label="Result 2")
 
     def show_context_menu_first(self, event):

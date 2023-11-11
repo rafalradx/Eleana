@@ -28,6 +28,7 @@ class SelectData:
         self.group_field.configure(state="readonly")
 
         self.btn_ok = builder.get_object("btn_ok", master)
+
         # Set as modal
         self.mainwindow.grab_set()
         self.mainwindow.attributes('-topmost', True)

@@ -14,7 +14,7 @@ import numpy as np
 import io
 import sys
 import pandas
-
+from tkinter.filedialog import asksaveasfile, askopenfilename
 
 # Third-party modules fin Eleana project
 print("Load third-party modules.")
@@ -37,6 +37,7 @@ from subprogs.group_edit.stack_to_group import StackToGroup
 from subprogs.group_edit.assign_to_group import Groupassign
 from subprogs.user_input.single_dialog import SingleDialog
 from subprogs.select_data.select_data import SelectData
+from subprogs.notepad.notepad import Notepad
 
 # Widgets used by main application
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
@@ -691,12 +692,54 @@ class EleanaMainApp:
         grapher.plot_graph()
 
     def all_results_to_current_group(self):
-        if len(eleana.results_dataset) == 0:
+        if len(self.eleana.results_dataset) == 0:
             return
-        group = eleana.selections['group']
-        eleana.dataset.extend(copy.deepcopy(eleana.results_dataset))
+
+        for each in self.eleana.results_dataset:
+            result = copy.deepcopy(each)
+            result.groups = [self.sel_group.get()]
+            self.eleana.dataset.append(result)
         update.dataset_list()
         update.all_lists()
+        added_item = self.eleana.dataset[-1].name_nr
+        group = self.sel_group.get()
+        self.group_selected(group)
+        self.sel_first.set(added_item)
+        self.first_selected(added_item)
+
+    def replace_first(self):
+        if self.eleana.selections['result'] < 0:
+            return
+        index = self.eleana.selections['result']
+        index_first = self.eleana.selections['first']
+        result = copy.deepcopy(self.eleana.results_dataset[index])
+        result.groups = [self.sel_group.get()]
+        self.eleana.dataset.pop(index_first)
+        self.eleana.dataset.insert(index_first, result)
+        update.dataset_list()
+        update.all_lists()
+        group = self.sel_group.get()
+        self.group_selected(group)
+        name = self.eleana.dataset[index_first].name_nr
+        print(name)
+        self.first_selected(name)
+        self.sel_first.set(name)
+
+    def result_to_main(self):
+        if self.eleana.selections['result'] < 0:
+            return
+        index = self.eleana.selections['result']
+        result = copy.deepcopy(self.eleana.results_dataset[index])
+        result.groups = [self.sel_group.get()]
+        self.eleana.dataset.append(result)
+        update.dataset_list()
+        update.all_lists()
+        added_item = self.eleana.dataset[-1].name_nr
+        group = self.sel_group.get()
+        self.group_selected(group)
+        self.sel_first.set(added_item)
+        self.first_selected(added_item)
+
 
     def delete_sel_result(self):
         index = eleana.selections['result']
@@ -822,14 +865,43 @@ class EleanaMainApp:
     ''' FILE: Load Project                                          '''
     def load_project(self, event=None, recent=None):
         project = load.load_project(recent)
-        eleana.selections = project['selections']
-        eleana.dataset = project['dataset']
-        eleana.results_dataset = project['results_dataset']
-        eleana.assignmentToGroups = project['assignmentToGroups']
-        eleana.groupsHierarchy = project['groupsHierarchy']
-        eleana.notes = project['notes']
+        if len(self.eleana.dataset) > 0:
+            question = CTkMessagebox(title="Dataset is not empty", message="There are data in the dataset. Choose what you want to",
+                        icon="question", option_3="Append to the dataset", option_2="Replace the dataset", option_1="Cancel")
+            response = question.get()
+            if response == None or response == 'Cancel':
+                return
+            elif response == 'Replace the dataset':
+                self.eleana.dataset = []
+                eleana.selections = project['selections']
+                eleana.selections = project['selections']
+                eleana.dataset = project['dataset']
+                eleana.results_dataset = project['results_dataset']
+                eleana.assignmentToGroups = project['assignmentToGroups']
+                eleana.groupsHierarchy = project['groupsHierarchy']
+                eleana.notes = project['notes']
+
+            else:
+                eleana.dataset.extend(project['dataset'])
+                eleana.results_dataset.extend(project['results_dataset'])
+                #eleana.notes = eleana.notes + "\n" + project['notes']
+
+        # project = load.load_project(recent)
+        else:
+            eleana.selections = project['selections']
+            eleana.dataset = project['dataset']
+            eleana.results_dataset = project['results_dataset']
+            eleana.assignmentToGroups = project['assignmentToGroups']
+            eleana.groupsHierarchy = project['groupsHierarchy']
+            eleana.notes = project['notes']
+
         update.dataset_list()
+        update.groups()
         update.all_lists()
+        path_to_file = Path(eleana.paths['last_projects'])
+        name = path_to_file.name
+        app.mainwindow.title(name)
+
         try:
             selected_value_text = eleana.dataset[eleana.selections['first']].name_nr
             self.first_selected(selected_value_text)
@@ -843,7 +915,7 @@ class EleanaMainApp:
         except:
             pass
         try:
-            selected_value_text = eleana.dataset[eleana.selections['result']].name_nr
+            selected_value_text = eleana.results_dataset[eleana.selections['result']].name
             self.result_selected(selected_value_text)
             self.sel_result.set(selected_value_text)
         except:
@@ -880,54 +952,39 @@ class EleanaMainApp:
         update.last_projects_menu()
         app.mainwindow.title(Path(last_projects[0]).name[:-4] + ' - Eleana')
 
-    # - Import
-    # Bruker Elexsys
-
+    '''******************************************
+    *                                           *
+    *          IMPORT EXTERNAL DATA             *
+    *                                           *
+    *********************************************'''
     def import_elexsys(self):
         ''' Open window that loads the spectra '''
         load.loadElexsys()
-        update.dataset_list(eleana)
+        update.dataset_list()
         update.all_lists()
 
     def import_EMX(self):
         load.loadEMX()
-        update.dataset_list(eleana)
+        update.dataset_list()
         update.all_lists()
 
     def import_magnettech1(self):
         load.loadMagnettech(1)
-        update.dataset_list(eleana)
+        update.dataset_list()
         update.all_lists()
 
     def import_magnettech2(self):
         load.loadMagnettech(2)
-        update.dataset_list(eleana)
+        update.dataset_list()
         update.all_lists()
 
     def import_shimadzu_spc(self):
         load.loadShimadzuSPC()
-        update.dataset_list(eleana)
+        update.dataset_list()
         update.all_lists()
 
     def export_first(self):
         export.csv('first')
-
-        #
-        # init_dir = self.eleana.paths.get('last_export_dir', Path("~").expanduser())
-        #
-        # # if not init_dir:
-        # #     self.eleana.paths['last_export_dir'] = Path("~").expanduser()
-        #
-        # try:
-        #     filename = asksaveasfile(initialdir=init_dir,
-        #                              initialfile='',
-        #                              defaultextension=".csv",
-        #                              filetypes=[("All Files", "*.*"),
-        #                                         ("Comma separated values", "*.csv")])
-        # except:
-        #     return {'error': True, 'desc': f'Could not save {filename} file.'}
-        #
-        # print(filename)
 
     # --- Quit (also window close by clicking on X)
     def close_application(self, event = None):
@@ -946,10 +1003,12 @@ class EleanaMainApp:
     # EDIT Menu:
     #   Notes
     def notes(self):
-        filename = menuAction.notes()
-        # Grab result
-        file_back = eleana.read_tmp_file(filename)
-        eleana.notes = json.loads(file_back)
+        notes = Notepad(master = app.mainwindow, title="Edit notes", text = self.eleana.notes)
+        response = notes.get()
+        if response == None:
+            return
+        else:
+            eleana.notes = response
 
     def create_new_group(self):
         group_create = Groupcreate(self.mainwindow, eleana)
@@ -1044,22 +1103,29 @@ class EleanaMainApp:
             title = 'Rename Second'
         elif which == 'result':
             title = 'Rename Result'
+            name = eleana.results_dataset[index_r].name
 
         dialog = SingleDialog(master=app, title=title, label='Enter new name', text=name)
         response = dialog.get()
         if response == None:
             return
 
-        eleana.dataset[index].name = response
-        update.dataset_list()
-        update.group_list()
-        update.all_lists()
-        if index_f >= 0:
-            self.sel_first.set(eleana.dataset[index_f].name_nr)
-        if index_s >= 0:
-            self.sel_second.set(eleana.dataset[index_s].name_nr)
+        if not which == 'result':
+            eleana.dataset[index].name = response
+            update.dataset_list()
+            update.group_list()
+            update.all_lists()
+            if index_f >= 0:
+                self.sel_first.set(eleana.dataset[index_f].name_nr)
+            if index_s >= 0:
+                self.sel_second.set(eleana.dataset[index_s].name_nr)
+        else:
+            eleana.results_dataset[index_r].name = response
+            eleana.results_dataset[index_r].name_nr = response
+            update.dataset_list()
+            update.all_lists()
         if index_r >= 0:
-            self.sel_result.set(eleana.dataset[index_r].name_nr)
+            self.sel_result.set(eleana.results_dataset[index_r].name_nr)
 
     def execute_command(self,event):
         if event.keysym == "Up":

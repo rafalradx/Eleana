@@ -74,7 +74,7 @@ class Update:
         assignments['<group-list/>'] = list_of_groups
         self.eleana.assignmentToGroups = assignments
 
-    def dataset_list(self, eleana = None):
+    def dataset_list(self):
         ''' It scans the whole dataset, create numbered names, collects groups and assigns to groups'''
 
         i = 0
@@ -289,7 +289,8 @@ class Update:
         return names
 
     # Creating groups on basis of groups defined in eleana.dataset
-    def groups(self, dataset):
+    def groups(self):
+        dataset = self.eleana.dataset
         found_groups = set()
         self.groups = []
         for data in dataset:

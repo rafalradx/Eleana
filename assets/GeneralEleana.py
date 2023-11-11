@@ -15,10 +15,7 @@ class Eleana:
         self.groupsHierarchy = {}                       # <-- This store information about which group belongs to other
 
         # Attribute "notes" contains general notes edited by Edit --> Notes in RTF
-        self.notes = {"content": "",
-                 "tags": {"bold": [], "italic": [], "code": [], "normal size": [], "larger size": [], "largest size": [],
-                          "highlight": [], "highlight red": [], "highlight green": [], "highlight black": [],
-                          "text white": [], "text grey": [], "text blue": [], "text green": [], "text red": []}}
+        self.notes = ""
 
         # Attribute paths contains paths for different standard directories like user, tmp, last import directory etc.
         self.paths = {'program_dir': Path(__file__).resolve().parent,
