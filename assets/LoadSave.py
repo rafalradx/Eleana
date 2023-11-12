@@ -1,19 +1,20 @@
 from pathlib import Path
-
+import string
 import pickle
-import csv
 from tkinter.filedialog import asksaveasfile, askopenfilename
 import random
 import shutil
 from tkinter import filedialog
-
+import pandas
 import numpy as np
 from CTkMessagebox import CTkMessagebox
 from assets.DataClasses import createFromElexsys, createFromEMX, createFromShimadzuSPC, createFromMagnettech
-
+from subprogs.ascii_file_preview.ascii_file_preview import AsciFilePreview
+from subprogs.table.table import CreateFromTable
 class Load:
-    def __init__(self, eleana_instance):
+    def __init__(self, app_instance, eleana_instance):
         self.eleana = eleana_instance
+        self.app = app_instance
     # FILE
     def load_project(self, recent=None):
         ''' This method loads projects created by Eleana'''
@@ -230,6 +231,86 @@ class Load:
         last_import_dir = Path(filenames[-1]).parent
         self.eleana.paths['last_import_dir'] = last_import_dir
         return
+
+    def loadAscii(self):
+        def _create_headers(amount):
+            current_len = 0
+            alphabet = list(string.ascii_uppercase)
+            current_len = len(alphabet)
+            if current_len >= amount:
+                alphabet = alphabet[:amount]
+                return alphabet
+            alpha_list = []
+            headers = []
+            for i in alphabet:
+                char = list(string.ascii_uppercase)
+                for each in char:
+                    new_entry = i + each
+                    headers.append(new_entry)
+                    current_len += 1
+                    if current_len >= amount:
+                        alphabet.extend(headers)
+                        return alphabet
+            alphabet.extend(headers)
+            return alphabet
+
+        path = self.eleana.paths['last_import_dir']
+        filetypes = (
+            ('Data file', '*.dat'),
+            ('Text file', '*.txt'),
+            ('CSV file', '*.csv'),
+            ('All files', '*.*')
+        )
+        filename = filedialog.askopenfilename(initialdir=path, filetypes=filetypes)
+        if not filename:
+            return
+        preview = AsciFilePreview(master = self.app.mainwindow, filename=filename)
+        response = preview.get()
+        if response == None:
+            return
+
+        # Set separator
+        r_sep = response['separator']
+        if r_sep == 'Tab':
+            separator = '\t'
+        elif r_sep == 'Semicolon':
+            separator = ';'
+        elif r_sep == 'Comma':
+            separator = ','
+        else:
+            separator = r_sep
+
+        text = response['text']
+        text_timmed = text.strip()
+        # Create data from the file
+        data = []
+        # Dzielimy na poszczególne linie
+        lines = text_timmed.split("\n")
+        for line in lines:
+            line = (line.split(separator))
+            elements = []
+            for element in line:
+                if element:
+                    elements.append(element)
+                    data.append(elements)
+        try:
+            values = np.array(data, dtype=float)
+        except:
+            info = CTkMessagebox(title = 'Error', message="Your data contains non numeric values. This cannot be converted to dataset. Please chcek if separator is correct.", icon="cancel")
+            return {'Error':True}
+
+        # Generate DataFrame
+        headers = _create_headers(len(data[0]))
+        print(headers)
+        df = pandas.DataFrame(data, columns=headers)
+
+        spreadsheet = CreateFromTable(self.app.mainwindow, df=df, name="nowy", group = 'oinne')
+
+
+
+
+
+
 
 class Save:
     def __init__(self, eleana_instance):

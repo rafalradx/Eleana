@@ -983,6 +983,9 @@ class EleanaMainApp:
         update.dataset_list()
         update.all_lists()
 
+    def import_ascii(self):
+        load.loadAscii()
+
     def export_first(self):
         export.csv('first')
 
@@ -1201,7 +1204,7 @@ print('create GUI, ', end="")
 app = EleanaMainApp(eleana)      # This is GUI
 print('build grapher, ', end="")
 grapher = Grapher(app, eleana)
-load = Load(eleana)
+load = Load(app, eleana)
 save = Save(eleana)
 export = Export(eleana)
 

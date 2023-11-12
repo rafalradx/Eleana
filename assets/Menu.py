@@ -75,9 +75,19 @@ class MainMenu:
         self.menu_import.add_command(label="Magnettech newer (spe)", command=self.app.import_magnettech2,
                                      image=self.icon_epr,
                                      compound="left")
+        # ------------ Separator
+        self.menu_import.add_separator()
 
         # ------------ Shimadzu SPC
         self.menu_import.add_command(label="Shimadzu UV/VIS (spc)", command=self.app.import_shimadzu_spc, image=self.icon_epr,
+                                     compound="left")
+
+        # ------------ Separator
+        self.menu_import.add_separator()
+
+        # ------------ ASCII Files
+        self.menu_import.add_command(label="ASCII file", command=self.app.import_ascii,
+                                     image=self.icon_epr,
                                      compound="left")
 
         # - SEPARATOR -

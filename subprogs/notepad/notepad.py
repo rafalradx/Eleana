@@ -30,7 +30,7 @@ class Notepad:
         # Keyboard bindings
         self.mainwindow.bind("<Escape>", self.cancel)
         self.mainwindow.bind("<Control-c>", self.copy_to_clipboard)
-        #self.textbox.bind("<Control-c>", self.copy_to_clipboard)
+        self.textbox.bind("<Control-c>", self.copy_to_clipboard)
         self.mainwindow.bind("<Control-v>", self.paste_from_clipboard)
         self.response = None
 
