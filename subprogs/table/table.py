@@ -39,7 +39,5 @@ class CreateFromTable:
         self.mainwindow.mainloop()
 
 if __name__ == "__main__":
-    app = TableApp()
-    pt = Table(app.tableFrame, showtoolbar=True)
-    pt.show()
+    app = CreateFromTable()
     app.run()

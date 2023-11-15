@@ -256,10 +256,10 @@ class Load:
 
         path = self.eleana.paths['last_import_dir']
         filetypes = (
+            ('CSV file', '*.csv'),
             ('Data file', '*.dat'),
             ('Text file', '*.txt'),
-            ('CSV file', '*.csv'),
-            ('All files', '*.*')
+            ('All files', '*.*'),
         )
         filename = filedialog.askopenfilename(initialdir=path, filetypes=filetypes)
         if not filename:
@@ -277,33 +277,46 @@ class Load:
             separator = ';'
         elif r_sep == 'Comma':
             separator = ','
+
+        elif r_sep == 'Space':
+            separator = ' '
         else:
             separator = r_sep
 
-        text = response['text']
-        text_timmed = text.strip()
-        # Create data from the file
-        data = []
-        # Dzielimy na poszczególne linie
-        lines = text_timmed.split("\n")
-        for line in lines:
-            line = (line.split(separator))
-            elements = []
-            for element in line:
-                if element:
-                    elements.append(element)
-                    data.append(elements)
         try:
-            values = np.array(data, dtype=float)
+            text = response['text']
+            text_trimmed = text.strip()
+            precision = 8
+            df = pandas.DataFrame([list(map(lambda x: round(float(x), precision), row.split(','))) for row in text_trimmed.split('\n')])
+            df.columns = _create_headers(df.shape[1])
         except:
-            info = CTkMessagebox(title = 'Error', message="Your data contains non numeric values. This cannot be converted to dataset. Please chcek if separator is correct.", icon="cancel")
+            info = CTkMessagebox(title='Error',
+                                 message="Cannot import data from ASCII file. Possible reasons:\n- Your data contains non-numeric values.\n- The selected column separator does not match the separator used in the file.",
+                                 icon="cancel")
             return {'Error':True}
 
-        # Generate DataFrame
-        headers = _create_headers(len(data[0]))
-        print(headers)
-        df = pandas.DataFrame(data, columns=headers)
+        # # Create data from the file
+        # data = []
+        # # Dzielimy na poszczególne linie
+        # lines = text_timmed.split("\n")
+        # for line in lines:
+        #     line = (line.split(separator))
+        #     elements = []
+        #     for element in line:
+        #         if element:
+        #             elements.append(element)
+        #         data.append(elements)
+        # try:
+        #     values = np.array(data, dtype=float)
+        # except:
+        #     info = CTkMessagebox(title = 'Error', message="Your data contains non numeric values. This cannot be converted to dataset. Please chcek if separator is correct.", icon="cancel")
+        #     return {'Error':True}
 
+        # Generate DataFrame
+        #headers = _create_headers(len(data[0]))
+
+        #df = pandas.DataFrame(data, columns=headers)
+        print(df)
         spreadsheet = CreateFromTable(self.app.mainwindow, df=df, name="nowy", group = 'oinne')
 
 

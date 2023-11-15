@@ -26,19 +26,19 @@ class MainMenu:
         self.icon_exit = self.prepare_icon("exit.png")
         self.icon_epr = self.prepare_icon("epr.png")
 
-        # self.icon_export = self.prepare_icon("export.png")
-        # self.icon_none = self.prepare_icon("x.png")
-        # self.icon_trash = self.prepare_icon("trash.png")
-        # self.icon_clear = self.prepare_icon("clear.png")
-        # self.icon_notes = self.prepare_icon("notes.png")
-        # self.icon_graphPrefs = self.prepare_icon("graph_pref.png")
-
-        self.icon_export = self.prepare_icon("x.png")
+        self.icon_export = self.prepare_icon("export.png")
         self.icon_none = self.prepare_icon("x.png")
-        self.icon_trash = self.prepare_icon("x.png")
-        self.icon_clear = self.prepare_icon("x.png")
-        self.icon_notes = self.prepare_icon("x.png")
-        self.icon_graphPrefs = self.prepare_icon("x.png")
+        self.icon_trash = self.prepare_icon("trash.png")
+        self.icon_clear = self.prepare_icon("clear.png")
+        self.icon_notes = self.prepare_icon("notes.png")
+        self.icon_graphPrefs = self.prepare_icon("graph_pref.png")
+
+        # self.icon_export = self.prepare_icon("x.png")
+        # self.icon_none = self.prepare_icon("x.png")
+        # self.icon_trash = self.prepare_icon("x.png")
+        # self.icon_clear = self.prepare_icon("x.png")
+        # self.icon_notes = self.prepare_icon("x.png")
+        # self.icon_graphPrefs = self.prepare_icon("x.png")
 
         ''' Menu Bar'''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)

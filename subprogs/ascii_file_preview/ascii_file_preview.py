@@ -30,7 +30,7 @@ class AsciFilePreview:
         self.last_lines.insert(1, 0)
 
         self.sel_separator = builder.get_object('box_sel_separator', master)
-        self.sel_separator.set("Tab")
+        self.sel_separator.set("Comma")
 
         self.label_custom = builder.get_object('label_custom', master)
         self.field_custom = builder.get_object('field_custom', master)

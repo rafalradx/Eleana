@@ -138,7 +138,7 @@
                         <child>
                           <object class="customtkinter.CTkComboBox" id="box_sel_separator" named="True">
                             <property name="command" type="command" cbtype="simple">sel_separator</property>
-                            <property name="values">["Tab", "Semicolon", "Comma", "Custom"]</property>
+                            <property name="values">["Comma", "Tab", "Semicolon", "Space", "Custom"]</property>
                             <layout manager="grid">
                               <property name="column">0</property>
                               <property name="row">5</property>
