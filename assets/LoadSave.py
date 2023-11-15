@@ -283,6 +283,8 @@ class Load:
         else:
             separator = r_sep
 
+        print(response)
+
         try:
             text = response['text']
             text_trimmed = text.strip()

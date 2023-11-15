@@ -6,6 +6,7 @@ PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "ascii_file_preview.ui"
 import tkinter as tk
 from tkinter import ttk
+import customtkinter as ctk
 
 class AsciFilePreview:
     def __init__(self, master=None, filename = None):
@@ -29,15 +30,24 @@ class AsciFilePreview:
         self.last_lines = builder.get_object('last_lines', master)
         self.last_lines.insert(1, 0)
 
+
+        self.first_as_headers = builder.get_object('first_lines', master)
         self.sel_separator = builder.get_object('box_sel_separator', master)
         self.sel_separator.set("Comma")
 
         self.label_custom = builder.get_object('label_custom', master)
         self.field_custom = builder.get_object('field_custom', master)
+        self.field_headers = builder.get_object('field_headers', master)
         self.custom_on(False)
+        self.field_headers.delete(1, 'end')
+        self.check_headers = builder.get_object('check_headers', master)
 
-        self.preview = builder.get_object('preview', master)
-        self.text_original = ""
+        # suwak i pole tekstowe
+        self.textframe = builder.get_object('textframe', master)
+        scrollbar_y = ttk.Scrollbar(self.textframe, orient="vertical")
+        scrollbar_x = ttk.Scrollbar(self.textframe, orient="horizontal")
+        self.preview = ctk.CTkTextbox(self.textframe, wrap=tk.NONE, yscrollcommand=scrollbar_y.set,  xscrollcommand=scrollbar_x.set)
+        self.preview.pack(expand=True, fill="both")
 
         # Set as modal
         self.mainwindow.grab_set()
@@ -45,13 +55,13 @@ class AsciFilePreview:
         self.mainwindow.title("Import ASCII file")
 
         # Keyboard bindings
-        #self.mainwindow.bind("<Escape>", self.cancel)
+        self.mainwindow.bind("<Escape>", self.cancel)
         #self.mainwindow.bind("<Return>", lambda event: self.btn_ok.invoke())
         self.first_lines.bind("<Return>", lambda position: self.show_preview(position = 'first'))
         self.first_lines.bind("<KP_Enter>", lambda position: self.show_preview(position='first'))
         self.last_lines.bind("<Return>", lambda position: self.show_preview(position = 'last'))
         self.last_lines.bind("<KP_Enter>", lambda position: self.show_preview(position='last'))
-        self.response = {'text':'', 'separator':'Tab', 'name':''}
+        self.response = {'text':'', 'separator':'Tab', 'name':'', 'headers':''}
 
         self.read_file()
         self.show_preview()
@@ -121,15 +131,36 @@ class AsciFilePreview:
         text = self.file_content.split('\n')
         if n_last_lines > 0:
             text = text[:-n_last_lines]
+
         if n_first_lines > 0:
             text = text[n_first_lines:]
         text_without_lines = '\n'.join(text)
         self.response['text'] = text_without_lines
+        self.response['headers'] = self.field_headers.get()
         self.preview.delete('1.0', 'end')
         self.preview.insert('1.0', self.response.get('text', ""))
-        self.file_content = self.response['text']
+
+
         if position == 'last':
             self.preview.see('end')
+
+    def first_as_headers(self):
+        if self.check_headers.get() == 1:
+            self.field_headers.delete(0, 'end')
+            headers = self.file_content.split('\n')[0]
+            self.field_headers.insert(1, headers)
+            n_first_lines = int(self.first_lines.get())
+            if n_first_lines == 0:
+                self.first_lines.delete(0, 'end')
+                self.first_lines.insert(0, '1')
+                self.show_preview()
+        else:
+            self.field_headers.delete(0, 'end')
+            self.first_lines.delete(0, 'end')
+            self.first_lines.insert(0, '0')
+            self.read_file()
+
+
 
 if __name__ == "__main__":
     app = AsciFilePreview()
