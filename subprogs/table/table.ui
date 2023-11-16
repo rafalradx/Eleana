@@ -244,7 +244,7 @@
                   </object>
                 </child>
                 <child>
-                  <object class="customtkinter.CTkComboBox" id="ctkcombobox2">
+                  <object class="customtkinter.CTkComboBox" id="sel_x_axis" named="True">
                     <layout manager="grid">
                       <property name="column">0</property>
                       <property name="row">1</property>
@@ -255,7 +255,7 @@
               </object>
             </child>
             <child>
-              <object class="customtkinter.CTkFrame" id="ctkframe5">
+              <object class="customtkinter.CTkFrame" id="sel_rey_axsi" named="True">
                 <property name="corner_radius">0</property>
                 <layout manager="grid">
                   <property name="column">1</property>
@@ -276,7 +276,7 @@
                   </object>
                 </child>
                 <child>
-                  <object class="customtkinter.CTkComboBox" id="ctkcombobox3">
+                  <object class="customtkinter.CTkComboBox" id="sel_rey_axis" named="True">
                     <layout manager="grid">
                       <property name="column">0</property>
                       <property name="row">1</property>
@@ -308,7 +308,7 @@
                   </object>
                 </child>
                 <child>
-                  <object class="customtkinter.CTkComboBox" id="ctkcombobox4">
+                  <object class="customtkinter.CTkComboBox" id="sel_imy_axis" named="True">
                     <layout manager="grid">
                       <property name="column">0</property>
                       <property name="row">1</property>
@@ -348,6 +348,7 @@
         </containerlayout>
         <child>
           <object class="customtkinter.CTkButton" id="ctkbutton1">
+            <property name="command" type="command" cbtype="simple">ok</property>
             <property name="text" translatable="yes">OK</property>
             <layout manager="grid">
               <property name="column">0</property>
@@ -359,6 +360,7 @@
         </child>
         <child>
           <object class="customtkinter.CTkButton" id="ctkbutton2">
+            <property name="command" type="command" cbtype="simple">add_to_dataset</property>
             <property name="text" translatable="yes">Add to dataset</property>
             <layout manager="grid">
               <property name="column">1</property>
@@ -370,6 +372,7 @@
         </child>
         <child>
           <object class="customtkinter.CTkButton" id="ctkbutton3">
+            <property name="command" type="command" cbtype="simple">cancel</property>
             <property name="text" translatable="yes">Cancel</property>
             <layout manager="grid">
               <property name="column">2</property>

@@ -79,6 +79,10 @@ class Update:
 
         i = 0
         while i < len(self.eleana.dataset):
+            # Replace comma to hyphen
+            name = self.eleana.dataset[i].name
+            name = name.replace(',', '-')
+            self.eleana.dataset[i].name = name
             new_name_nr = str(i+1) + '. ' + self.eleana.dataset[i].name
             self.eleana.dataset[i].name_nr = new_name_nr
             i += 1

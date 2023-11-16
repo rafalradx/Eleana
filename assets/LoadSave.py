@@ -234,13 +234,11 @@ class Load:
 
     def loadAscii(self):
         def _create_headers(amount):
-            current_len = 0
             alphabet = list(string.ascii_uppercase)
             current_len = len(alphabet)
             if current_len >= amount:
                 alphabet = alphabet[:amount]
                 return alphabet
-            alpha_list = []
             headers = []
             for i in alphabet:
                 char = list(string.ascii_uppercase)
@@ -253,7 +251,6 @@ class Load:
                         return alphabet
             alphabet.extend(headers)
             return alphabet
-
         path = self.eleana.paths['last_import_dir']
         filetypes = (
             ('CSV file', '*.csv'),
@@ -268,7 +265,6 @@ class Load:
         response = preview.get()
         if response == None:
             return
-
         # Set separator
         r_sep = response['separator']
         if r_sep == 'Tab':
@@ -277,50 +273,28 @@ class Load:
             separator = ';'
         elif r_sep == 'Comma':
             separator = ','
-
         elif r_sep == 'Space':
             separator = ' '
         else:
             separator = r_sep
-
-        print(response)
-
         try:
             text = response['text']
             text_trimmed = text.strip()
             precision = 8
             df = pandas.DataFrame([list(map(lambda x: round(float(x), precision), row.split(','))) for row in text_trimmed.split('\n')])
-            df.columns = _create_headers(df.shape[1])
+            headers = response.get('headers', '')
+            if headers:
+                df.columns = headers.split(separator)
+            else:
+                df.columns = _create_headers(df.shape[1])
         except:
             info = CTkMessagebox(title='Error',
                                  message="Cannot import data from ASCII file. Possible reasons:\n- Your data contains non-numeric values.\n- The selected column separator does not match the separator used in the file.",
                                  icon="cancel")
             return {'Error':True}
 
-        # # Create data from the file
-        # data = []
-        # # Dzielimy na poszczególne linie
-        # lines = text_timmed.split("\n")
-        # for line in lines:
-        #     line = (line.split(separator))
-        #     elements = []
-        #     for element in line:
-        #         if element:
-        #             elements.append(element)
-        #         data.append(elements)
-        # try:
-        #     values = np.array(data, dtype=float)
-        # except:
-        #     info = CTkMessagebox(title = 'Error', message="Your data contains non numeric values. This cannot be converted to dataset. Please chcek if separator is correct.", icon="cancel")
-        #     return {'Error':True}
-
-        # Generate DataFrame
-        #headers = _create_headers(len(data[0]))
-
-        #df = pandas.DataFrame(data, columns=headers)
-        print(df)
-        spreadsheet = CreateFromTable(self.app.mainwindow, df=df, name="nowy", group = 'oinne')
-
+        spreadsheet = CreateFromTable(self.eleana, self.app.mainwindow, df=df, name=response['name'], group = self.eleana.selections['group'])
+        response = spreadsheet.get()
 
 
 

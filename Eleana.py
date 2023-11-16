@@ -21,7 +21,7 @@ print("Load third-party modules.")
 from modules.CTkListbox import *
 from modules.CTkMessagebox import CTkMessagebox
 from modules.CTkColorPicker import *
-from modules.CTkTable import *
+import time
 
 # Import Eleana specific classes
 from assets.GeneralEleana import Eleana
@@ -94,7 +94,6 @@ class EleanaMainApp:
         self.check_second_show = builder.get_object('check_second_show', self.mainwindow)
         self.check_result_show = builder.get_object('check_result_show', self.mainwindow)
 
-
         # Graph Buttons
         self.check_autoscale_x = builder.get_object('check_autoscale_X', self.mainwindow)
         self.check_autoscale_y = builder.get_object('check_autoscale_Y', self.mainwindow)
@@ -135,8 +134,8 @@ class EleanaMainApp:
         self.comparison_settings = {'vsep': 0, 'hsep': 0, 'indexes': (), 'v_factor':'1', 'h_factor':'1'}
 
     def set_pane_height(self):
-        self.panedwindow2.sashpos(0, 700)
-        self.panedwindow4.sashpos(0, 300)
+        #self.panedwindow2.sashpos(0, 700)
+        #self.panedwindow4.sashpos(0, 300)
         return
 
     def run(self):
