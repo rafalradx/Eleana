@@ -52,7 +52,7 @@ class GraphPreferences:
         self.autoscaling = {'x': True, 'y': True}
         self.log_scales = {'x': False, 'y': False}
         self.indexed_x = False
-
+        self.inverted_x_axis = False
         # Plot colors
         self.colors = {'first_re': "#d53339",
                        'first_im': "#ef6f74",
@@ -317,6 +317,9 @@ class Grapher(GraphPreferences):
 
         # Create cursor
         self.cursor_on_off()
+
+        if self.inverted_x_axis:
+            self.ax.invert_xaxis()
 
         # Draw canvas
         self.canvas.draw()

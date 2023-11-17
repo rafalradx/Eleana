@@ -4,6 +4,7 @@
     <property name="geometry">1024x576</property>
     <property name="height">600</property>
     <property name="overrideredirect">false</property>
+    <property name="resizable">both</property>
     <property name="width">20</property>
     <containerlayout manager="grid">
       <property type="col" id="0" name="minsize">0</property>
@@ -1350,7 +1351,7 @@
                                       </object>
                                     </child>
                                     <child>
-                                      <object class="customtkinter.CTkCheckBox" id="btn_invert_x" named="True">
+                                      <object class="customtkinter.CTkCheckBox" id="check_invert_x" named="True">
                                         <property name="border_width">2</property>
                                         <property name="command" type="command" cbtype="simple">invert_x_axis</property>
                                         <property name="corner_radius">20</property>

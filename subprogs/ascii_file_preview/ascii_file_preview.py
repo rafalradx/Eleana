@@ -56,7 +56,6 @@ class AsciFilePreview:
 
         # Keyboard bindings
         self.mainwindow.bind("<Escape>", self.cancel)
-        #self.mainwindow.bind("<Return>", lambda event: self.btn_ok.invoke())
         self.first_lines.bind("<Return>", lambda position: self.show_preview(position = 'first'))
         self.first_lines.bind("<KP_Enter>", lambda position: self.show_preview(position='first'))
         self.last_lines.bind("<Return>", lambda position: self.show_preview(position = 'last'))

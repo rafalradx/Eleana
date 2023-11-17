@@ -21,7 +21,7 @@ print("Load third-party modules.")
 from modules.CTkListbox import *
 from modules.CTkMessagebox import CTkMessagebox
 from modules.CTkColorPicker import *
-import time
+from modules.CTkTable import *
 
 # Import Eleana specific classes
 from assets.GeneralEleana import Eleana
@@ -94,6 +94,7 @@ class EleanaMainApp:
         self.check_second_show = builder.get_object('check_second_show', self.mainwindow)
         self.check_result_show = builder.get_object('check_result_show', self.mainwindow)
 
+
         # Graph Buttons
         self.check_autoscale_x = builder.get_object('check_autoscale_X', self.mainwindow)
         self.check_autoscale_y = builder.get_object('check_autoscale_Y', self.mainwindow)
@@ -101,6 +102,7 @@ class EleanaMainApp:
         self.check_log_y = builder.get_object('check_log_y', self.mainwindow)
         self.check_indexed_x = builder.get_object('check_indexed_x', self.mainwindow)
         self.sel_cursor_mode = builder.get_object('sel_cursor_mode', self.mainwindow)
+        self.check_invert_x = builder.get_object('check_invert_x', self.mainwindow)
 
         # Command line
         self.command_line = builder.get_object('command_line', self.mainwindow)
@@ -134,8 +136,9 @@ class EleanaMainApp:
         self.comparison_settings = {'vsep': 0, 'hsep': 0, 'indexes': (), 'v_factor':'1', 'h_factor':'1'}
 
     def set_pane_height(self):
-        #self.panedwindow2.sashpos(0, 700)
-        #self.panedwindow4.sashpos(0, 300)
+        self.mainwindow.update_idletasks()
+        self.panedwindow2.sashpos(0, 700)
+        self.panedwindow4.sashpos(0, 300)
         return
 
     def run(self):
@@ -977,6 +980,11 @@ class EleanaMainApp:
         update.dataset_list()
         update.all_lists()
 
+    def import_adani_dat(self):
+        load.loadAdaniDat()
+        update.dataset_list()
+        update.all_lists()
+
     def import_shimadzu_spc(self):
         load.loadShimadzuSPC()
         update.dataset_list()
@@ -984,7 +992,8 @@ class EleanaMainApp:
 
     def import_ascii(self):
         load.loadAscii()
-
+        update.dataset_list()
+        update.all_lists()
     def export_first(self):
         export.csv('first')
 
@@ -1055,6 +1064,10 @@ class EleanaMainApp:
 
     def indexed_x(self):
         grapher.indexed_x = bool(self.check_indexed_x.get())
+        grapher.plot_graph()
+
+    def invert_x_axis(self):
+        grapher.inverted_x_axis = bool(self.check_invert_x.get())
         grapher.plot_graph()
 
     '''***********************************************
@@ -1207,7 +1220,7 @@ load = Load(app, eleana)
 save = Save(eleana)
 export = Export(eleana)
 
-print('build menu', end="")
+print('build menu')
 main_menu = MainMenu(app, eleana)
 init = Init(app, eleana, grapher, main_menu)
 context_menu = ContextMenu(app, eleana)

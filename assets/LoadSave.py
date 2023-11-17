@@ -215,7 +215,6 @@ class Load:
         self.eleana.paths['last_import_dir'] = last_import_dir
         return
 
-
     def loadShimadzuSPC(self):
         path = self.eleana.paths['last_import_dir']
         filetypes = (
@@ -239,6 +238,7 @@ class Load:
             if current_len >= amount:
                 alphabet = alphabet[:amount]
                 return alphabet
+            alpha_list = []
             headers = []
             for i in alphabet:
                 char = list(string.ascii_uppercase)
@@ -251,6 +251,7 @@ class Load:
                         return alphabet
             alphabet.extend(headers)
             return alphabet
+
         path = self.eleana.paths['last_import_dir']
         filetypes = (
             ('CSV file', '*.csv'),
@@ -265,6 +266,10 @@ class Load:
         response = preview.get()
         if response == None:
             return
+
+        last_import_dir = Path(filename).parent
+        self.eleana.paths['last_import_dir'] = last_import_dir
+
         # Set separator
         r_sep = response['separator']
         if r_sep == 'Tab':
@@ -273,33 +278,95 @@ class Load:
             separator = ';'
         elif r_sep == 'Comma':
             separator = ','
+
         elif r_sep == 'Space':
             separator = ' '
         else:
             separator = r_sep
+
+
         try:
             text = response['text']
             text_trimmed = text.strip()
             precision = 8
             df = pandas.DataFrame([list(map(lambda x: round(float(x), precision), row.split(','))) for row in text_trimmed.split('\n')])
-            headers = response.get('headers', '')
-            if headers:
-                df.columns = headers.split(separator)
-            else:
-                df.columns = _create_headers(df.shape[1])
+            headers = response['headers']
+            headers = headers.strip()
+            headers = headers.split(',')
+            nr_of_columns = df.shape[1]
+            if nr_of_columns != len(headers):
+                headers = _create_headers(nr_of_columns)
+
+            print(headers)
+            df = pandas.DataFrame([list(map(lambda x: round(float(x), precision), row.split(','))) for row in text_trimmed.split('\n')])
+            df.columns = headers
+
         except:
             info = CTkMessagebox(title='Error',
                                  message="Cannot import data from ASCII file. Possible reasons:\n- Your data contains non-numeric values.\n- The selected column separator does not match the separator used in the file.",
                                  icon="cancel")
             return {'Error':True}
 
-        spreadsheet = CreateFromTable(self.eleana, self.app.mainwindow, df=df, name=response['name'], group = self.eleana.selections['group'])
-        response = spreadsheet.get()
+        # # Create data from the file
+        # data = []
+        # # Dzielimy na poszczególne linie
+        # lines = text_timmed.split("\n")
+        # for line in lines:
+        #     line = (line.split(separator))
+        #     elements = []
+        #     for element in line:
+        #         if element:
+        #             elements.append(element)
+        #         data.append(elements)
+        # try:
+        #     values = np.array(data, dtype=float)
+        # except:
+        #     info = CTkMessagebox(title = 'Error', message="Your data contains non numeric values. This cannot be converted to dataset. Please chcek if separator is correct.", icon="cancel")
+        #     return {'Error':True}
 
+        # Generate DataFrame
+        #headers = _create_headers(len(data[0]))
 
+        #df = pandas.DataFrame(data, columns=headers)
+        spreadsheet = CreateFromTable(self.app.mainwindow, df=df, name="nowy", group = 'oinne')
 
+    def loadAdaniDat(self):
+        def _get_parameter(start: str, end: str, multiply: float):
+            length = len(start)
+            cf_index = adani.find(start) + length
+            cf_end = adani.find(end)
+            parameter_value = adani[cf_index:cf_end].strip()
+            try:
+                parameter_value = float(parameter_value.replace(",", ".")) * multiply
+            except:
+                parameter_value = -1
+            return parameter_value
 
+        path = self.eleana.paths['last_import_dir']
+        filetypes = (
+            ('Adani dat', '*.dat'),
+            ('All files', '*.*'),
+        )
+        filename = filedialog.askopenfilename(initialdir=path, filetypes=filetypes)
+        if not filename:
+            return
 
+        filename = Path(filename)
+
+        try:
+            with open(filename, 'rb') as file:
+                content = file.read()
+                adani = content.decode('utf-8', errors='ignore')
+        except:
+             error = CTkMessagebox(title='Error',
+                                  message=f"Cannot load data from {filename.name}.", icon="cancel")
+
+        data = {}
+        data['parameters']['SweepTime'] = _get_parameter('Sweep time:', ' s ', 1)
+        data['parameters']['PowerAtten'] = _get_parameter('Power attenuation:', ' dB ', 1)
+        data['parameters']['ModAmp'] = _get_parameter('Mod. amplitude:', ' uT', 10)
+        data['parameters']['name_x'] = 'Field'
+        data['parameters']['unit_x'] = 'G'
 
 class Save:
     def __init__(self, eleana_instance):
