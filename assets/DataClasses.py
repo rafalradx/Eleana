@@ -8,13 +8,14 @@ class Single2D:
     def __init__(self, data: dict):
         self.parameters: dict = data['parameters']
         self.groups: list = data['groups']
-        self.x: np.ndarray = data['x']
-        self.y: np.ndarray = data['y']
+        self.x: np.ndarray = np.array(data['x'])
+        self.y: np.ndarray = np.array(data['y'])
         self.name: str = data['name']
         self.complex = data.get('complex', False)
         self.type = 'single 2D'
         self.origin = data.get('origin', '')
-        self.name_nr = []
+        self.name_nr = ''
+        self.comment = data.get('comment', '')
 
 class Spectrum_CWEPR:
     def __init__(self, name, x_axis: list, dta: list, dsc: dict, format="elexsys"):
@@ -29,9 +30,7 @@ class Spectrum_CWEPR:
         self.type = 'single 2D'
         self.origin = 'CWEPR'
         self.stk_names = []
-
         working_par = self.parameters
-
         fill_missing_keys =['title','MwFreq','ModAmp','ModFreq','SweepTime','ConvTime','TimeConst','Power','PowAtten']
         for key in fill_missing_keys:
             try:
@@ -41,17 +40,15 @@ class Spectrum_CWEPR:
                     working_par[key] = create_eleana_par(dsc, par2eleana(key, format))
             except:
                 pass
-
         self.parameters = working_par
         self.x = np.array(x_axis)
         self.re_y = np.array(dta)
+        self.comment = ''
 
 class Spectra_CWEPR_stack(Spectrum_CWEPR):
     def __init__(self, name, x_axis: list, dta: list, dsc: dict, ygf, format='elexsys'):
         super().__init__(name, x_axis, dta, dsc)
-
         working_parameters = self.parameters
-
         fill_missing_keys = ['name_z', 'unit_z', 'name_x', 'unit_x', 'name_y', 'unit_y']
         for key in fill_missing_keys:
             try:
@@ -61,7 +58,6 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
                     working_parameters[key] = create_eleana_par(dsc, par2eleana(key, format))
             except:
                 pass
-
         # Divide y into list of spectra amplitudes:
         length_of_one = len(x_axis)
         list_of_y = []
@@ -70,21 +66,19 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
             spectrum = dta[i*length_of_one:(i+1)*length_of_one]
             list_of_y.append(spectrum)
             i += 1
-
         list_of_y_array = np.array(list_of_y)
         working_stk_names = []
         # Create in stack names:
         for each in ygf:
             name = working_parameters.get('name_z', '') + ' ' + str(each) + ' ' + working_parameters.get('unit_z', '')
             working_stk_names.append(name)
-
         self.stk_names = working_stk_names
         self.y = list_of_y_array
         self.type = 'stack 2D'
         self.complex = False
         self.origin = 'CWEPR'
         self.parameters = working_parameters
-
+        self.comment = ''
 class Spectrum_complex:
     def __init__(self, name, x_axis: list, dta: list, dsc: dict):
         self.parameters = {'title': '', 'unit_x': '', 'name_x': '', 'name_y': '', 'MwFreq': '', 'ModAmp': '',
@@ -98,7 +92,6 @@ class Spectrum_complex:
             complex_nr = complex(dta[i], dta[i+1])
             y = np.append(y, complex_nr)
             i += 2
-
         working_parameters = self.parameters
         fill_missing_keys = ['name_z', 'unit_z', 'name_x', 'unit_x', 'name_y', 'unit_y']
         for key in fill_missing_keys:
@@ -120,32 +113,28 @@ class Spectrum_complex:
         self.origin = 'Pulse EPR'
         self.name_nr = ''
         self.groups = ['All']
-
+        self.comment = ''
 def createFromElexsys(filename: str) -> object:
     elexsys_DTA = Path(filename[:-3]+'DTA')
     elexsys_DSC = Path(filename[:-3]+'DSC')
     elexsys_YGF = Path(filename[:-3]+'YGF')
-
     # Loading dta and dsc from the files
     # DTA data will be in Y_data
     # DSC data will be in desc_data
     # YGF (if exist) will be in ygf_data
     # errors list contain list of encountered error in loading DTA and/or DSC not YGF
-
     error = False
     x_data = []
     dta = []
-    dsc_text = '' # Raw dsc file content
+    dsc_text = ''
     ygf = []
-    dsc = {} # Translated DSC file content to dictionary
-
+    dsc = {}
     # Load DTA from the elexsys_DTA
     try:
         dta = np.fromfile(elexsys_DTA, dtype='>d')
     except:
         elexsys_DTA = PurePath(elexsys_DTA).name
         return {"Error":True,'desc':f"Error in loading {elexsys_DTA}"}
-
     # If DTA sucessfully opened then read DSC
     if error != True:
         try:
@@ -154,7 +143,6 @@ def createFromElexsys(filename: str) -> object:
         except:
             elexsys_DSC = PurePath(elexsys_DSC).name
             return {"Error": True, 'desc': f"Error in loading {elexsys_DSC}"}
-
     # Check if YGF exists
     if error != True:
         if elexsys_YGF.exists() == True:
@@ -166,10 +154,8 @@ def createFromElexsys(filename: str) -> object:
                     return {"Error": True, 'desc': f"Error in loading {elexsys_YGF}" }
         else:
             ygf = []
-
     # Extract DSC to dictionary
     # Divide into separate lines
-
     dsc_lines = dsc_text.split('\n')
     for i in dsc_lines:
         element = re.split(r'\s+', i.strip(), maxsplit=1)
@@ -177,7 +163,6 @@ def createFromElexsys(filename: str) -> object:
             dsc[element[0]] = element[1]
         except:
             pass
-
     # Create X axis
     error = False
     try:
@@ -190,7 +175,6 @@ def createFromElexsys(filename: str) -> object:
             x_axis.append(i * step + x_min)
     except:
         return {'Error': True, 'desc': f'Cannot create x axis for {elexsys_DTA}'}
-
     # Now create object containing particular type of data
     filename = Path(filename).name
     try:
@@ -202,11 +186,9 @@ def createFromElexsys(filename: str) -> object:
         # This will create single CW EPR spectrum
         cw_spectrum = Spectrum_CWEPR(filename[:-4], x_axis, dta, dsc)
         return cw_spectrum # <--- Return object based on Spectrum_CWEPR
-
     elif dsc['YTYP'] != 'NODATA' and dsc['EXPT'] == 'CW':
         cw_stack = Spectra_CWEPR_stack(filename[:-4], x_axis, dta, dsc, ygf)   # <-- This will create stacked CW EPR spectra
         return cw_stack
-
     elif dsc['IKKF'] != 'REAL':
         spectrum_complex = Spectrum_complex(filename[:-4], x_axis, dta, dsc)
         return spectrum_complex
@@ -374,6 +356,45 @@ def createFromMagnettech(filename, mscope=1, pool = -1, rescale = -1, shift = 0)
            'type': 'single2D',
            'origin': 'Magnettech EPR'
             }
+    spectrum = Single2D(data)
+    return spectrum
+
+def createFromAdaniDat(filename, adani: dict):
+    def _get_parameter(start: str, end: str, multiply: float):
+        length = len(start)
+        cf_index = adani.find(start) + length
+        cf_end = adani.find(end)
+        parameter_value = adani[cf_index:cf_end].strip()
+        try:
+            parameter_value = float(parameter_value.replace(",", ".")) * multiply
+        except:
+            parameter_value = -1
+        return parameter_value
+    data = {}
+    data['parameters'] = {}
+    data['parameters']['SweepTime'] = _get_parameter('Sweep time:', ' s ', 1)
+    data['parameters']['PowerAtten'] = _get_parameter('Power attenuation:', ' dB ', 1)
+    data['parameters']['ModAmp'] = _get_parameter('Mod. amplitude:', ' uT', 0.01)
+    data['parameters']['name_x'] = 'Field'
+    data['parameters']['unit_x'] = 'G'
+
+    index = adani.find("  \n0 ")
+    index = index + 3
+    content = adani[index:]
+    content = content.replace(',', '.')
+    content = content.strip()
+    content = content.split('\n')
+    x_data = []
+    y_data = []
+    for each in content:
+        line = each.split(' ')
+        x_data.append(float(line[1]) * 10)
+        y_data.append(float(line[2]))
+
+    data['x'], data['y'] = x_data, y_data
+    data['name'] = filename.name
+    data['groups'] = ['All']
+    data['origin'] = 'Adani ESR'
     spectrum = Single2D(data)
     return spectrum
 

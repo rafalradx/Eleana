@@ -264,7 +264,7 @@
                 <child>
                   <object class="customtkinter.CTkButton" id="btn_cancel" named="True">
                     <property name="command" type="command" cbtype="simple">cancel</property>
-                    <property name="text" translatable="yes">Cancel</property>
+                    <property name="text" translatable="yes">Quit</property>
                     <layout manager="grid">
                       <property name="column">2</property>
                       <property name="padx">4</property>

@@ -151,7 +151,7 @@ class Grapher(GraphPreferences):
 
         # 1. If which is selected to None then legend = "no plot" and return
         if which == None:
-            legend = ''
+            legend = ' '
             return legend
 
         # Get selected data from dataset and store in "data"
@@ -159,10 +159,10 @@ class Grapher(GraphPreferences):
             index = self.eleana.selections[which]
             data = self.eleana.dataset[index]
         except IndexError:
-            legend = ''
+            legend = ' '
             return legend
         if index < 0:
-            legend = ''
+            legend = ' '
             return legend
         # 2. Chcek if "Show Checkbox" is True. If not then legend = "no plot" and return
         if which == 'first':
@@ -174,7 +174,7 @@ class Grapher(GraphPreferences):
         else:
             display = True
         if not display:
-            legend = ''
+            legend = ' '
             return legend
 
         # 3. Check if data is a stack 2D. If yes add appropriate stk name to the legend.
@@ -335,12 +335,9 @@ class Grapher(GraphPreferences):
     **********************************'''
     def cursor_on_off(self):
         crs_mode = self.current_cursor_mode['label']
-
         try:
             for sel in self.cursor.selections:
-
                     sel.annotation.remove()
-
         except:
             pass
         if crs_mode in self.available_cursor_modes:

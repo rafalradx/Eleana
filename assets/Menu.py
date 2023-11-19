@@ -25,13 +25,13 @@ class MainMenu:
         self.icon_import = self.prepare_icon("import.png")
         self.icon_exit = self.prepare_icon("exit.png")
         self.icon_epr = self.prepare_icon("epr.png")
-
         self.icon_export = self.prepare_icon("export.png")
         self.icon_none = self.prepare_icon("x.png")
         self.icon_trash = self.prepare_icon("trash.png")
         self.icon_clear = self.prepare_icon("clear.png")
         self.icon_notes = self.prepare_icon("notes.png")
         self.icon_graphPrefs = self.prepare_icon("graph_pref.png")
+        self.icon_table = self.prepare_icon("table.png")
 
         # self.icon_export = self.prepare_icon("x.png")
         # self.icon_none = self.prepare_icon("x.png")
@@ -89,9 +89,9 @@ class MainMenu:
         self.menu_import.add_separator()
 
         # ------------ ASCII Files
-        self.menu_import.add_command(label="ASCII file", command=self.app.import_ascii,
-                                     image=self.icon_epr,
-                                     compound="left")
+        self.menu_import.add_command(label="ASCII file", command=self.app.import_ascii, image=self.icon_epr, compound="left")
+        # ------------ Excel
+        self.menu_import.add_command(label="MS Excel/LibreOffice Calc", command = self.app.load_excel, image = self.icon_epr, compound='left')
 
         # - SEPARATOR -
         self.menu_file.add_separator()
@@ -125,6 +125,9 @@ class MainMenu:
                                  activebackground=self.activebg, activeforeground=self.activefg,
                                  borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
         self.main_menu.add_cascade(label="Edit", menu=self.menu_edit, image = self.icon_dropdown, compound="left")
+
+        # - Create from table
+        #self.menu_edit.add_command(label="Create data from table", command=self.app.create_from_table, image=self.icon_table, compound="left")
 
         # - Delete selected data
         self.menu_edit.add_command(label="Delete selected data", command=self.app.delete_selected_data, image = self.icon_trash, compound="left")
@@ -199,7 +202,7 @@ class ContextMenu:
         self.context_menu_first.add_command(label="Assign to group", command=self.app.first_to_group)
         self.context_menu_first.add_command(label="Convert stack to group", command=lambda: self.app.stack_to_group('first'))
         self.context_menu_first.add_command(label="Rename", command=lambda: self.app.rename_data('first'))
-
+        self.context_menu_first.add_command(label="Edit comment", command=lambda: self.app.edit_comment('first'))
     def build_menu_second(self):
         '''This creates positions for SECOND context menu '''
         self.context_menu_second.add_command(label="Second 1")

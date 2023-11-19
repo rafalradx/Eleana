@@ -8,7 +8,7 @@ PROJECT_UI = PROJECT_PATH / "notepad.ui"
 
 
 class Notepad:
-    def __init__(self, master=None, title = "Notepad", text = ""):
+    def __init__(self, master=None, title = "Notepad", text = None):
         self.master = master
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)
@@ -34,6 +34,8 @@ class Notepad:
         self.mainwindow.bind("<Control-v>", self.paste_from_clipboard)
         self.response = None
 
+        if text != None:
+            self.textbox.insert(1.0, text)
     ''' DO NOT REMOVE GET AND RUN FUNCTIONS'''
 
     def get(self):

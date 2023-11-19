@@ -8,7 +8,7 @@ from tkinter import filedialog
 import pandas
 import numpy as np
 from CTkMessagebox import CTkMessagebox
-from assets.DataClasses import createFromElexsys, createFromEMX, createFromShimadzuSPC, createFromMagnettech
+from assets.DataClasses import createFromElexsys, createFromEMX, createFromShimadzuSPC, createFromMagnettech, createFromAdaniDat
 from subprogs.ascii_file_preview.ascii_file_preview import AsciFilePreview
 from subprogs.table.table import CreateFromTable
 class Load:
@@ -231,7 +231,7 @@ class Load:
         self.eleana.paths['last_import_dir'] = last_import_dir
         return
 
-    def loadAscii(self):
+    def loadAscii(self, from_clipboard = None):
         def _create_headers(amount):
             alphabet = list(string.ascii_uppercase)
             current_len = len(alphabet)
@@ -252,23 +252,27 @@ class Load:
             alphabet.extend(headers)
             return alphabet
 
-        path = self.eleana.paths['last_import_dir']
-        filetypes = (
-            ('CSV file', '*.csv'),
-            ('Data file', '*.dat'),
-            ('Text file', '*.txt'),
-            ('All files', '*.*'),
-        )
-        filename = filedialog.askopenfilename(initialdir=path, filetypes=filetypes)
-        if not filename:
-            return
-        preview = AsciFilePreview(master = self.app.mainwindow, filename=filename)
-        response = preview.get()
+        if from_clipboard == None:
+            path = self.eleana.paths['last_import_dir']
+            filetypes = (
+                ('CSV file', '*.csv'),
+                ('Data file', '*.dat'),
+                ('Text file', '*.txt'),
+                ('All files', '*.*'),)
+            filename = filedialog.askopenfilename(initialdir=path, filetypes=filetypes)
+            if not filename:
+                return
+            preview = AsciFilePreview(master = self.app.mainwindow, filename=filename)
+            response = preview.get()
+            last_import_dir = Path(filename).parent
+            self.eleana.paths['last_import_dir'] = last_import_dir
+        else:
+            preview = AsciFilePreview(master=self.app.mainwindow, filename=None, clipboard = from_clipboard)
+            response = preview.get()
+            filename = None
+
         if response == None:
             return
-
-        last_import_dir = Path(filename).parent
-        self.eleana.paths['last_import_dir'] = last_import_dir
 
         # Set separator
         r_sep = response['separator']
@@ -278,95 +282,68 @@ class Load:
             separator = ';'
         elif r_sep == 'Comma':
             separator = ','
-
         elif r_sep == 'Space':
             separator = ' '
         else:
             separator = r_sep
 
-
         try:
             text = response['text']
             text_trimmed = text.strip()
             precision = 8
-            df = pandas.DataFrame([list(map(lambda x: round(float(x), precision), row.split(','))) for row in text_trimmed.split('\n')])
+            if not separator == ',':
+                text_trimmed = text_trimmed.replace(',', '.')
+            df = pandas.DataFrame([list(map(lambda x: round(float(x), precision), row.split(separator))) for row in text_trimmed.split('\n')])
+            df = df.map(lambda x: round(float(x), precision)).astype(object)
             headers = response['headers']
             headers = headers.strip()
             headers = headers.split(',')
             nr_of_columns = df.shape[1]
             if nr_of_columns != len(headers):
                 headers = _create_headers(nr_of_columns)
-
-            print(headers)
-            df = pandas.DataFrame([list(map(lambda x: round(float(x), precision), row.split(','))) for row in text_trimmed.split('\n')])
             df.columns = headers
-
         except:
             info = CTkMessagebox(title='Error',
                                  message="Cannot import data from ASCII file. Possible reasons:\n- Your data contains non-numeric values.\n- The selected column separator does not match the separator used in the file.",
                                  icon="cancel")
             return {'Error':True}
 
-        # # Create data from the file
-        # data = []
-        # # Dzielimy na poszczególne linie
-        # lines = text_timmed.split("\n")
-        # for line in lines:
-        #     line = (line.split(separator))
-        #     elements = []
-        #     for element in line:
-        #         if element:
-        #             elements.append(element)
-        #         data.append(elements)
-        # try:
-        #     values = np.array(data, dtype=float)
-        # except:
-        #     info = CTkMessagebox(title = 'Error', message="Your data contains non numeric values. This cannot be converted to dataset. Please chcek if separator is correct.", icon="cancel")
-        #     return {'Error':True}
-
-        # Generate DataFrame
-        #headers = _create_headers(len(data[0]))
-
-        #df = pandas.DataFrame(data, columns=headers)
-        spreadsheet = CreateFromTable(self.app.mainwindow, df=df, name="nowy", group = 'oinne')
+        if filename != None:
+            name = Path(filename).name
+        else:
+            name = ''
+        spreadsheet = CreateFromTable(self.eleana, self.app.mainwindow, df=df, name=name, group = self.eleana.selections['group'])
+        response = spreadsheet.get()
 
     def loadAdaniDat(self):
-        def _get_parameter(start: str, end: str, multiply: float):
-            length = len(start)
-            cf_index = adani.find(start) + length
-            cf_end = adani.find(end)
-            parameter_value = adani[cf_index:cf_end].strip()
-            try:
-                parameter_value = float(parameter_value.replace(",", ".")) * multiply
-            except:
-                parameter_value = -1
-            return parameter_value
-
         path = self.eleana.paths['last_import_dir']
         filetypes = (
             ('Adani dat', '*.dat'),
-            ('All files', '*.*'),
-        )
-        filename = filedialog.askopenfilename(initialdir=path, filetypes=filetypes)
-        if not filename:
+            ('All files', '*.*'),)
+        filenames = filedialog.askopenfilenames(initialdir=path, filetypes=filetypes)
+        error_list = []
+        for filename in filenames:
+            if not filename:
+                return
+            filename = Path(filename)
+            try:
+                with open(filename, 'rb') as file:
+                    content = file.read()
+                    adani = content.decode('utf-8', errors='ignore')
+
+                spectrum = createFromAdaniDat(filename, adani)
+                self.eleana.dataset.append(spectrum)
+                last_import_dir = Path(filename).parent
+                self.eleana.paths['last_import_dir'] = last_import_dir
+            except:
+                 error_list.append(filename.name)
+        if len(error_list) == 0:
             return
+        list = ', '.join(error_list)
+        error = CTkMessagebox(title='Error',
+                              message=f"Cannot load data from {list}.", icon="cancel")
 
-        filename = Path(filename)
 
-        try:
-            with open(filename, 'rb') as file:
-                content = file.read()
-                adani = content.decode('utf-8', errors='ignore')
-        except:
-             error = CTkMessagebox(title='Error',
-                                  message=f"Cannot load data from {filename.name}.", icon="cancel")
-
-        data = {}
-        data['parameters']['SweepTime'] = _get_parameter('Sweep time:', ' s ', 1)
-        data['parameters']['PowerAtten'] = _get_parameter('Power attenuation:', ' dB ', 1)
-        data['parameters']['ModAmp'] = _get_parameter('Mod. amplitude:', ' uT', 10)
-        data['parameters']['name_x'] = 'Field'
-        data['parameters']['unit_x'] = 'G'
 
 class Save:
     def __init__(self, eleana_instance):
@@ -377,7 +354,6 @@ class Save:
             init_file = ''
         except IndexError:
             init_dir = Path(self.eleana.paths['home_dir'])
-
         try:
             filename = asksaveasfile(initialdir=init_dir,
                                  initialfile=init_file,

@@ -14,14 +14,13 @@ import numpy as np
 import io
 import sys
 import pandas
-from tkinter.filedialog import asksaveasfile, askopenfilename
+import pyperclip
 
 # Third-party modules fin Eleana project
 print("Load third-party modules.")
 from modules.CTkListbox import *
 from modules.CTkMessagebox import CTkMessagebox
 from modules.CTkColorPicker import *
-from modules.CTkTable import *
 
 # Import Eleana specific classes
 from assets.GeneralEleana import Eleana
@@ -38,10 +37,10 @@ from subprogs.group_edit.assign_to_group import Groupassign
 from subprogs.user_input.single_dialog import SingleDialog
 from subprogs.select_data.select_data import SelectData
 from subprogs.notepad.notepad import Notepad
+from subprogs.table.table import CreateFromTable
 
 # Widgets used by main application
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
-
 
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "ui" / "Eleana_main.ui"
@@ -126,6 +125,7 @@ class EleanaMainApp:
         self.mainwindow.bind("<Control-s>", self.save_as)
         self.mainwindow.bind("<Control-q>", self.close_application)
         self.mainwindow.bind("<Control-o>", self.load_project)
+        self.mainwindow.bind("<Control-v>", self.quick_paste)
 
         # This keeps the information if any information or dialog should be displayed.
         # This is useful to constantly display the same information in a loop etc.
@@ -140,6 +140,13 @@ class EleanaMainApp:
         self.panedwindow2.sashpos(0, 700)
         self.panedwindow4.sashpos(0, 300)
         return
+
+    def center_window(self, window, width, height):
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+        window.geometry(f"{width}x{height}+{x}+{y}")
 
     def run(self):
             self.mainwindow.deiconify()
@@ -647,7 +654,6 @@ class EleanaMainApp:
         else:
             print('Index in sel_first not found')
             return
-
         try:
             new_position = list_of_items[index - 1]
             self.sel_result.set(new_position)
@@ -990,10 +996,27 @@ class EleanaMainApp:
         update.dataset_list()
         update.all_lists()
 
-    def import_ascii(self):
-        load.loadAscii()
+    def import_ascii(self, clipboard = None):
+        load.loadAscii(clipboard)
         update.dataset_list()
+        update.groups()
         update.all_lists()
+
+    def load_excel(self):
+        x = [['', ''], ['', '']]
+        headers = ['A', 'B']
+        empty = pandas.DataFrame(x, columns=headers)
+        table = CreateFromTable(eleana_app=self.eleana, master=self.mainwindow, df=empty, loadOnStart='excel')
+        response = table.get()
+        update.dataset_list()
+        update.groups()
+        update.all_lists()
+
+    def quick_paste(self, event = None):
+        text = pyperclip.paste()
+        self.import_ascii(text)
+        print(text)
+
     def export_first(self):
         export.csv('first')
 
@@ -1014,7 +1037,7 @@ class EleanaMainApp:
     # EDIT Menu:
     #   Notes
     def notes(self):
-        notes = Notepad(master = app.mainwindow, title="Edit notes", text = self.eleana.notes)
+        notes = Notepad(master = self.mainwindow, title="Edit notes", text = self.eleana.notes)
         response = notes.get()
         if response == None:
             return
@@ -1108,7 +1131,6 @@ class EleanaMainApp:
         index_f = eleana.selections['first']
         index_s = eleana.selections['second']
         index_r = eleana.selections['result']
-
         if index < 0:
             return
         name = eleana.dataset[index].name
@@ -1119,12 +1141,10 @@ class EleanaMainApp:
         elif which == 'result':
             title = 'Rename Result'
             name = eleana.results_dataset[index_r].name
-
         dialog = SingleDialog(master=app, title=title, label='Enter new name', text=name)
         response = dialog.get()
         if response == None:
             return
-
         if not which == 'result':
             eleana.dataset[index].name = response
             update.dataset_list()
@@ -1141,6 +1161,16 @@ class EleanaMainApp:
             update.all_lists()
         if index_r >= 0:
             self.sel_result.set(eleana.results_dataset[index_r].name_nr)
+
+    def edit_comment(self, which):
+        index = eleana.selections[which]
+        if index < 0:
+            return
+        comment = eleana.dataset[index].comment
+        name = 'Comment to: ' + str(eleana.dataset[index].name_nr)
+        text = Notepad(self.mainwindow, title = name, text = comment)
+        response = text.get()
+        eleana.dataset[index].comment = response
 
     def execute_command(self,event):
         if event.keysym == "Up":
@@ -1177,7 +1207,6 @@ class EleanaMainApp:
             sys.stdout = io.StringIO()
 
             try:
-
                 eval(command, globals(), locals())
                 output = sys.stdout.getvalue()
             except Exception as e:

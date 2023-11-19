@@ -9,7 +9,7 @@ from tkinter import ttk
 import customtkinter as ctk
 
 class AsciFilePreview:
-    def __init__(self, master=None, filename = None):
+    def __init__(self, master=None, filename = None, clipboard = None):
         self.builder = builder = pygubu.Builder()
         self.master = master
         builder.add_resource_path(PROJECT_PATH)
@@ -21,15 +21,16 @@ class AsciFilePreview:
 
         # References
         self.filename = filename
+        self.clipboard = clipboard
 
         self.name_entry = builder.get_object('name_entry', master)
-        self.name_entry.insert(1, Path(filename).name)
+        if self.filename != None:
+            self.name_entry.insert(1, Path(filename).name)
 
         self.first_lines = builder.get_object('first_lines', master)
         self.first_lines.insert(1, 0)
         self.last_lines = builder.get_object('last_lines', master)
         self.last_lines.insert(1, 0)
-
 
         self.first_as_headers = builder.get_object('first_lines', master)
         self.sel_separator = builder.get_object('box_sel_separator', master)
@@ -65,6 +66,7 @@ class AsciFilePreview:
         self.read_file()
         self.show_preview()
 
+        self.center_window(self.mainwindow,  700, 500)
     ''' DO NOT REMOVE GET AND RUN FUNCTIONS'''
     def get(self):
         ''' This function returns the output from the closed window'''
@@ -74,6 +76,13 @@ class AsciFilePreview:
 
     def run(self):
         self.mainwindow.mainloop()
+
+    def center_window(self, window, width, height):
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+        window.geometry(f"{width}x{height}+{x}+{y}")
 
     def ok(self):
         ''' This is activated after clicking OK button'''
@@ -116,13 +125,17 @@ class AsciFilePreview:
         self.show_preview()
 
     def read_file(self):
-        try:
-            with open(Path(self.filename), 'r') as file:
-                self.file_content = file.read()
-                self.show_preview()
-        except:
-            self.preview.delete(1.0, 'end')
-            self.preview.insert(1.0, "ERROR. The file could not be loaded.")
+        if self.clipboard == None:
+            try:
+                with open(Path(self.filename), 'rb') as file:
+                    content = file.read()
+                    self.file_content = content.decode('utf-8', errors='ignore')
+                    self.show_preview()
+            except:
+                self.preview.delete(1.0, 'end')
+                self.preview.insert(1.0, "ERROR. The file could not be loaded.")
+        else:
+            self.file_content = self.clipboard
 
     def show_preview(self, event=None, position = 'first'):
         n_first_lines = int(self.first_lines.get())
@@ -138,7 +151,6 @@ class AsciFilePreview:
         self.response['headers'] = self.field_headers.get()
         self.preview.delete('1.0', 'end')
         self.preview.insert('1.0', self.response.get('text', ""))
-
 
         if position == 'last':
             self.preview.see('end')
