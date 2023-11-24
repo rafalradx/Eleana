@@ -1102,6 +1102,7 @@ class EleanaMainApp:
     def clear_cursors(self):
         grapher.clear_all_annotations()
     def sel_graph_cursor(self, value):
+         grapher.clear_all_annotations(True)
          grapher.current_cursor_mode['label'] = value
          grapher.plot_graph()
 

@@ -188,6 +188,9 @@ def createFromElexsys(filename: str) -> object:
         return cw_spectrum # <--- Return object based on Spectrum_CWEPR
     elif dsc['YTYP'] != 'NODATA' and dsc['EXPT'] == 'CW':
         cw_stack = Spectra_CWEPR_stack(filename[:-4], x_axis, dta, dsc, ygf)   # <-- This will create stacked CW EPR spectra
+        unit = cw_stack.parameters.get('unit_y', 'a.u.')
+        if unit == 's':
+            cw_stack.parameters['unit_y'] = 'a.u.'
         return cw_stack
     elif dsc['IKKF'] != 'REAL':
         spectrum_complex = Spectrum_complex(filename[:-4], x_axis, dta, dsc)

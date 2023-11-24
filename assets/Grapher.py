@@ -2,14 +2,10 @@
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
-
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Cursor
 import matplotlib
 import mplcursors
-
 matplotlib.use('TkAgg')
-import numpy as np
 
 class GraphPreferences:
     def __init__(self, app_instance):
@@ -126,21 +122,12 @@ class Grapher(GraphPreferences):
             data = self.eleana.dataset[index]
         except IndexError:
             return {'x_title': "Abscissa [a.u.]", 'y_title': "Ordinate [a.u.]"}
-        try:
-            name_x = data.parameters['name_x']
-            unit_x = data.parameters['unit_x']
-            name_y = data.parameters['name_y']
-            unit_y = data.parameters['unit_y']
-        except KeyError:
-            name_x = 'Abscissa'
-            unit_x = 'a.u.'
-            name_y = 'Ordinate'
-            unit_y = 'a.u.'
 
-        if len(unit_x) == 0:
-            unit_x = 'a.u.'
-        if len(unit_y) == 0:
-            unit_y = 'a.u.'
+        name_x = data.parameters.get('name_x', 'Abscissa')
+        unit_x = data.parameters.get('unit_x', 'a.u.')
+        name_y = data.parameters.get('name_y', 'Ordinate')
+        unit_y = data.parameters.get('unit_y', 'a.u.')
+
         title_x = name_x + ' [' + unit_x + ']'
         title_y = name_y + ' [' + unit_y + ']'
         axis_title = {'x_title':title_x, 'y_title': title_y}
@@ -385,7 +372,6 @@ class Grapher(GraphPreferences):
         ''' This deletes selected annotation from the graph
             and removes the respective point from the list in
             self.cursor_annotations. '''
-        print(event)
         annotation = event.annotation
         x = annotation.xy[0]
         y = annotation.xy[1]
@@ -396,10 +382,13 @@ class Grapher(GraphPreferences):
             self.cursor_annotations.pop(index)
         return
 
-    def clear_all_annotations(self):
+    def clear_all_annotations(self, skip=None):
         self.cursor_annotations = []
         value = self.app.sel_cursor_mode.get()
-        self.app.sel_graph_cursor(value)
+        if skip:
+            return
+        else:
+            self.app.sel_graph_cursor(value)
         return
 
     def autoscale(self, autoscaling: dict):
@@ -438,5 +427,4 @@ class Grapher(GraphPreferences):
             y = y - vsep[i]
             self.ax.plot(x, y)
             i +=1
-
         self.canvas.draw()
