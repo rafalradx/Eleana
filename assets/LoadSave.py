@@ -25,7 +25,6 @@ class Load:
         except IndexError:
             init_dir = Path(self.eleana.paths['home_dir'])
             init_file = ''
-
         if recent == None:
             filename =  askopenfilename(initialdir=init_dir,
                                      initialfile=init_file,
@@ -67,7 +66,6 @@ class Load:
 
             file_to_read = open(eleana_project_details, "rb")
             loaded_object = pickle.load(file_to_read)
-            eleana_project_details = loaded_object
             file_to_read.close()
 
             project_version = float(loaded_object['project version'])
@@ -156,6 +154,13 @@ class Load:
             extract_dir.rmdir()
         except:
             pass
+        last_projects = self.eleana.paths['last_projects']
+        if filename in last_projects:
+            index = last_projects.index(filename)
+            last_projects.pop(index)
+        last_projects.insert(0, filename)
+
+        self.eleana.paths['last_project'] = last_projects
         return {'dataset':eleana_dataset,
                 'result_dataset':eleana_results_dataset,
                 'assignmentToGroups': eleana_assignmentToGroups,
@@ -384,7 +389,6 @@ class Save:
             name = name.replace('. ', '_=_')
             dataset_names[str(i)] = name
             i += 1
-
         results_names = {}
         i = 0
         for each in self.eleana.results_dataset:
@@ -392,13 +396,10 @@ class Save:
             name = name.replace('. ', '_=_')
             results_names[str(i)] = name
             i += 1
-
         project_details = {'project version':'1.0'}
-
         ordered_groups = []
         for group, spectra in self.eleana.assignmentToGroups.items():
             ordered_groups.append({group: spectra})
-
         elements_to_save = {
                             'eleana_assignmentToGroups':ordered_groups,
                             'eleana_groupsHierarchy':self.eleana.groupsHierarchy,
@@ -464,24 +465,29 @@ class Save:
 class Export:
     def __init__(self, eleana_instance):
         self.eleana = eleana_instance
+    def csv(self, which = 'first', filename=None):
+        if filename == None:
+            if which == 'first' and self.eleana.selections['first'] < 0:
+                info = CTkMessagebox(title="Info ", message=f'Please select data in {which}')
+                return
+            init_dir = self.eleana.paths.get('last_export_dir', Path("~").expanduser())
+            try:
+                filename = asksaveasfile(initialdir=init_dir,
+                                         initialfile='',
+                                         defaultextension=".csv",
+                                         filetypes=[("Comma separated values", "*.csv"),
+                                                    ("All Files", "*.*")
+                                                    ])
+                self.eleana.paths['last_export_dir'] = str(Path(filename.name).parent)
+                filename = Path(filename.name)
 
-    def csv(self, which = 'first'):
-        if which == 'first' and self.eleana.selections['first'] < 0:
-            info = CTkMessagebox(title="Info ", message=f'Please select data in {which}')
-            return
-        init_dir = self.eleana.paths.get('last_export_dir', Path("~").expanduser())
-        try:
-            filename = asksaveasfile(initialdir=init_dir,
-                                     initialfile='',
-                                     defaultextension=".csv",
-                                     filetypes=[("Comma separated values", "*.csv"),
-                                                ("All Files", "*.*")
-                                                ])
-        except:
-            return {'error': True, 'desc': f'Could not save {filename} file.'}
-
+            except:
+                return {'error': True, 'desc': f'Could not save {filename} file.'}
+            index = self.eleana.selections[which]
+        else:
+            index = which
         # Prepare data from First or second
-        index = self.eleana.selections[which]
+
         data = self.eleana.dataset[index]
         if data.type == 'stack 2D' and not data.complex:
             x = data.x
@@ -492,7 +498,7 @@ class Export:
             for stk in stk_names:
                 header = header + ", " + stk
             try:
-                with open(filename.name, 'a') as exported_csv:
+                with open(filename, 'a') as exported_csv:
                     exported_csv.write(header)
                     i = 0
                     while i < len(x):
@@ -523,7 +529,7 @@ class Export:
                 name_magn = data.parameters.get('name_y', 'Y') + " [" + data.parameters.get('unit_y', 'a.u') + "]:MAGNITUDE"
                 header = str(name_x) + ", " + str(name_rey) + ", " + str(name_imy) + ", " + str(name_magn)
                 try:
-                    with open(filename.name, 'a') as exported_csv:
+                    with open(filename, 'a') as exported_csv:
                         exported_csv.write(header)
                         i = 0
                         while i < len(x):
@@ -540,16 +546,63 @@ class Export:
             name_x = data.parameters.get('name_x', 'X') + " [" + data.parameters.get('unit_x', 'a.u.') + "]"
             name_y = data.parameters.get('name_y', 'Y') + " [" + data.parameters.get('unit_y', 'a.u') + "]"
             header = str(name_x) + ", " + str(name_y)
-            try:
-                with open(filename.name, 'a') as exported_csv:
-                    exported_csv.write(header)
-                    i = 0
-                    while i < len(x):
-                        row = "\n" + str(x[i]) + ", " + str(y[i])
-                        exported_csv.write(row)
-                        i += 1
-            except:
-                return {'error': True, 'desc': f'Could not save {filename.name} file.'}
+            #try:
+            with open(filename, 'a') as exported_csv:
+                exported_csv.write(header)
+                i = 0
+                while i < len(x):
+                    row = "\n" + str(x[i]) + ", " + str(y[i])
+                    exported_csv.write(row)
+                    i += 1
+            # except:
+            #     return {'error': True, 'desc': f'Could not save {filename.name} file.'}
+
+    def group_csv(self, group):
+        directory = filedialog.askdirectory()
+        try:
+            if directory:
+                directory_path = Path(directory)
+                if not directory_path.exists():
+                    directory_path.mkdir(parents=True, exist_ok=True)
+        except:
+            info = CTkMessagebox(title='Error', message='Could not open the directory for saving data. Check permissions.')
+            return
+
+        list_of_data = self.eleana.assignmentToGroups.get(group, [])
+        if not list_of_data:
+            info = CTkMessagebox(title='Empty group', message=f'In the selected group: {group} there is nothing to export.')
+            return
+
+        if len(list_of_data) > 9 and len(list_of_data) < 100:
+            change = 'two'
+        else:
+           change = 'no'
+
+        list_of_filenames = []
+        for each in list_of_data:
+            name = self.eleana.dataset[each].name_nr
+            entry = name.split('. ')
+            name = entry[1]
+            number = int(entry[0])
+            if change == 'two' and number < 10:
+                number = '0' + str(number)
+            else:
+                number = str(number)
+            name = '' + number + '_' + name
+            name = (name.replace('. ', '-').replace(' ', '_').replace('*', '_').replace('\\', '_').replace('/','_').replace(':', '_').replace('?', '_').replace('"', '_'))+'.csv'
+            filename = Path(directory_path, name)
+            list_of_filenames.append(filename)
+
+        i = 0
+        for each in list_of_filenames:
+            which = list_of_data[i]
+            self.csv(which = which, filename = each)
+            i += 1
+
+
+
+
+
 
 
 

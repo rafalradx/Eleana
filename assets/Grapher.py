@@ -5,6 +5,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib
 import mplcursors
+from modules.CTkListbox import CTkListbox
 matplotlib.use('TkAgg')
 
 class GraphPreferences:
@@ -127,7 +128,6 @@ class Grapher(GraphPreferences):
         unit_x = data.parameters.get('unit_x', 'a.u.')
         name_y = data.parameters.get('name_y', 'Ordinate')
         unit_y = data.parameters.get('unit_y', 'a.u.')
-
         title_x = name_x + ' [' + unit_x + ']'
         title_y = name_y + ' [' + unit_y + ']'
         axis_title = {'x_title':title_x, 'y_title': title_y}
@@ -334,6 +334,9 @@ class Grapher(GraphPreferences):
         self.current_cursor_mode = self.cursor_modes[index]
 
         if not index == 0:
+            self.app.annotationsFrame.grid()
+            self.annotationlist = CTkListbox(self.app.annotationsFrame, command=self.updateAnnotationList, multiple_selection=True, height=300)
+            self.annotationlist.grid(column=0, row=0, sticky="nsew")
             self.cursor = self.mplcursors.cursor(self.ax,
                                                  multiple=self.current_cursor_mode['multip'],
                                                  hover=self.current_cursor_mode['hov']
@@ -341,6 +344,7 @@ class Grapher(GraphPreferences):
             self.cursor.connect("add", self.annotation_create)
             self.cursor.connect("remove", self.annotation_removed)
         else:
+            self.app.annotationsFrame.grid_remove()
             try:
                 for sel in self.cursor.selections:
                     sel.annotation.remove()
@@ -350,14 +354,18 @@ class Grapher(GraphPreferences):
     def annotation_create(self, sel):
         ''' This creates annotations on the graph and add selected
             to the list in self.cursor_annotations '''
+        curve = sel.artist.get_label()
         x = sel.target[0]
         y = sel.target[1]
         point = [x,y]
         current_nr = 0
+        # get curve index
+        curve_type, index, stk_index = self.indexCurveForAnnot(curve)
+
         if self.cursor_annotations:
             last_annotation = self.cursor_annotations[-1]
             current_nr = last_annotation.get('nr', 0) + 1
-        my_annotation = {'point':point, 'nr': current_nr, 'curve':''}
+        my_annotation = {'type': curve_type, 'curve':curve, 'index':index, 'stk_index':stk_index, 'point':point, 'nr': current_nr}
         if not self.current_cursor_mode['hov']:
             self.cursor_annotations.append(my_annotation)
         label = f'Point: x={x:.2f}, y={y:.2f}'
@@ -367,7 +375,7 @@ class Grapher(GraphPreferences):
             label = str(current_nr)
         sel.annotation.set_text(label)
         sel.annotation.set_visible(self.current_cursor_mode['annot'])
-
+        self.updateAnnotationList(action ='add')
     def annotation_removed(self, event):
         ''' This deletes selected annotation from the graph
             and removes the respective point from the list in
@@ -380,16 +388,92 @@ class Grapher(GraphPreferences):
         if point in points:
             index = points.index(point)
             self.cursor_annotations.pop(index)
+            self.updateAnnotationList()
         return
 
     def clear_all_annotations(self, skip=None):
         self.cursor_annotations = []
         value = self.app.sel_cursor_mode.get()
+        try:
+            self.clearAnnotationList()
+        except:
+            pass
         if skip:
             return
         else:
             self.app.sel_graph_cursor(value)
         return
+
+    def clearAnnotationList(self):
+        elements = self.annotationlist.size()
+        i = 0
+        while i < elements:
+            self.annotationlist.delete(0)
+            i +=1
+
+    def updateAnnotationList(self, action=None):
+        self.clearAnnotationList()
+        list_of_annotations = []
+        for each in self.cursor_annotations:
+            nr = each['nr']
+            curve_type = each['type']
+            curve = each['curve']
+            index = each['index']
+            stk_index = each['stk_index']
+            point_x = each['point'][0]
+            point_y = each['point'][1]
+            if nr < 10:
+                nr = '#0' + str(nr)
+            else:
+                nr = '#' + str(nr)
+            entry = nr + ' | ' + str(curve) + ' (' + str(round(point_x,2)) + ', ' + str(round(point_y, 2)) + ')'
+            list_of_annotations.append(entry)
+        i = 0
+        while i < len(list_of_annotations):
+            self.annotationlist.insert(i, list_of_annotations[i])
+            i += 1
+    def indexCurveForAnnot(self, curve):
+        # Search name in the main dataset
+        if '/' in curve:
+            curve = curve.split('/')
+            curve = curve[0]
+        elif ':' in curve:
+            curve = curve.split(':')
+            curve = curve[0]
+        i = 0
+        while i < len(self.eleana.dataset):
+            name = self.eleana.dataset[i].name_nr
+            if name == curve:
+                index = i
+                break
+            i += 1
+        else:
+            # If not found in main dataset then look in results_dataset
+            i = 0
+            while i < len(self.eleana.results_dataset):
+                name = self.eleana.dataset[i].name_nr
+                if name == curve:
+                    index = i
+                    break
+                i += 1
+            else:
+                return None
+        stk_index = -1
+        if index == self.eleana.selections['first']:
+            curve_type = 'first'
+            if self.eleana.dataset[index].type == 'stack 2D':
+                stk_index = self.eleana.selections['f_stk']
+        elif index == self.eleana.selections['second']:
+            curve_type = 'second'
+            if self.eleana.dataset[index].type == 'stack 2D':
+                stk_index = self.eleana.selections['s_stk']
+        elif index == self.eleana.selections['result']:
+            curve_type = 'results'
+            if self.eleana.dataset[index].type == 'stack 2D':
+                stk_index = self.eleana.selections['r_stk']
+        else:
+            curve_type = 'none'
+        return curve_type, index, stk_index
 
     def autoscale(self, autoscaling: dict):
         self.autoscaling = autoscaling

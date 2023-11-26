@@ -55,7 +55,9 @@ class CreateFromTable:
         self.mainwindow.bind("<Escape>", self.cancel)
 
         if loadOnStart == 'excel':
-            self.loadExcel()
+            dialog = self.loadExcel()
+            if dialog == 'cancel':
+                self.cancel
     def loadExcel(self):
         self.mainwindow.iconify()
         filename = filedialog.askopenfilename(parent=self.mainwindow,
@@ -66,8 +68,8 @@ class CreateFromTable:
                                                          ("ods", "*.ods"),
                                                          ("All files", "*.*")])
         if len(filename) == 0:
-            self.response = None
-            self.mainwindow.destroy()
+            return 'cancel'
+
         self.eleana.paths['last_import_dir'] = str(Path(filename).parent)
         name = str(Path(filename).name)
         self.entry_group.insert(0, 'All')

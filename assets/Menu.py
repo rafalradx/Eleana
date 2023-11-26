@@ -106,7 +106,7 @@ class MainMenu:
         self.menu_export.add_command(label="Export First", command=self.app.export_first, image=self.icon_exit,
                                    compound="left")
         # - Export group
-        self.menu_export.add_command(label="Export Group", command=self.app.delete_selected_data, image=self.icon_exit,
+        self.menu_export.add_command(label="Export Group", command=self.app.export_group, image=self.icon_exit,
                                    compound="left", accelerator="Ctrl+Q")
 
 

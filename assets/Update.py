@@ -27,8 +27,6 @@ class Update:
             item = str(i) + '. ' + item.name
             list_for_menu.append(item)
             i += 1
-
-        #recent_menu = self.app.builder.get_object("menu_recent", self.app.mainwindow)
         recent_menu = self.main_menu.menu_recent
         recent_menu.delete(0, tk.END)
         for label in list_for_menu:
@@ -79,14 +77,16 @@ class Update:
 
         i = 0
         while i < len(self.eleana.dataset):
-            # Replace comma to hyphen
+            # Replace forbiden marks
             name = self.eleana.dataset[i].name
+            name = name.replace('.', '-')
             name = name.replace(',', '-')
+            name = name.replace('/', '-')
+            name = name.replace(':', '-')
             self.eleana.dataset[i].name = name
             new_name_nr = str(i+1) + '. ' + self.eleana.dataset[i].name
             self.eleana.dataset[i].name_nr = new_name_nr
             i += 1
-
 
     def list_in_combobox(self, comboboxID):
         box = self.ref_to_combobox(self.app, comboboxID)
@@ -293,17 +293,15 @@ class Update:
         return names
 
     # Creating groups on basis of groups defined in eleana.dataset
-    def groups(self):
+    def get_groups(self):
         dataset = self.eleana.dataset
         found_groups = set()
         self.groups = []
         for data in dataset:
             self.groups.extend(data.groups)
         found_groups.update(self.groups)
-
         self.assignToGroups = {}
         for group_name in found_groups:
-
             i = 0
             spectra_numbers = []
             while i < len(dataset):
@@ -313,105 +311,3 @@ class Update:
                 i += 1
             self.assignToGroups[group_name] = spectra_numbers
         return self.assignToGroups
-
-
-# class Comboboxes():
-#     def select_combobox(self, which_combobox: str):
-#         if which_combobox == 'sel_first':
-#             box = self.app.sel_first
-#         elif which_combobox == 'sel_second':
-#             box = self.app.sel_second
-#         elif which_combobox == 'sel_result':
-#             box = self.app.sel_result
-#         elif which_combobox == 'f_stk':
-#             box = self.app.f_stk
-#         elif which_combobox == 's_stk':
-#             box = self.app.s_stk
-#         elif which_combobox == 'r_stk':
-#             box = self.app.r_stk
-#         return box
-#
-#     def get_current_position(self, eleana: object, which_combobox: str):
-#         box = self.select_combobox(which_combobox)
-#         current_value = box.get()
-#         if current_value in self.eleana.combobox_lists[which_combobox]:
-#             index_list = self.eleana.combobox_lists[which_combobox].index(current_value)
-#             index_dataset = index_list - 1
-#             return {'value': current_value, 'index_dataset': index_dataset, 'index_on_list': index_list,
-#                     'last_index_on_list': len(eleana.combobox_lists[which_combobox]) - 1}
-#         return {}
-#
-#     def set_on_position_value(self, app, eleana, which_combobox: str, entry: str):
-#         ''' Set the value in combobox defined in 'which_combobox
-#         on the value 'entry' which is a string name of the position on the combobox list
-#         '''
-#
-#         if which_combobox == 'r_stk':
-#             box = self.select_combobox(app, which_combobox)
-#             box.set(entry)
-#             return
-#
-#         if which_combobox != 'sel_result':
-#             # Set value in eleana.selections
-#
-#             if entry == 'None':
-#                 box = self.select_combobox(app, which_combobox)
-#                 box.set(entry)
-#                 return
-#
-#             names = []
-#
-#             for each in eleana.dataset:
-#                 names.append(each.name_nr)
-#
-#             if entry in names:
-#                 index = names.index(entry)
-#                 value = eleana.dataset[index].name_nr
-#                 box = self.select_combobox(app, which_combobox)
-#                 box.set(value)
-#         else:
-#             box = self.select_combobox(app, which_combobox)
-#             box.set(entry)
-#
-#     def set_on_position_index(self, app: object, eleana: object, which_combobox: str, index: int):
-#         ''' Set the value in combobox defined in 'which_combobox'
-#         on the position number defined by 'index'.
-#         'index' argument is the number of the position in the combobox list
-#         '''
-#         list_in_combobox = eleana.combobox_lists[which_combobox]
-#         try:
-#             new_val = list_in_combobox[index]
-#             self.set_on_position_value(app, eleana, which_combobox, new_val)
-#         except:
-#             pass
-#
-#     def populate_lists(self, app, eleana):
-#         # Save FIRST list
-#         box = app.sel_first
-#         box_list = eleana.combobox_lists['sel_first']
-#         box.configure(values=box_list)
-#
-#         # Save FIRST stk_list
-#         box = app.f_stk
-#         box_list = eleana.combobox_lists['f_stk']
-#         box.configure(values=box_list)
-#
-#         # Save SECOND list
-#         box = app.sel_second
-#         box_list = eleana.combobox_lists['sel_second']
-#         box.configure(values=box_list)
-#
-#         # Save SECOND stk_list
-#         box = app.f_stk
-#         box_list = eleana.combobox_lists['s_stk']
-#         box.configure(values=box_list)
-#
-#         # Save RESULT list
-#         box = app.sel_result
-#         box_list = eleana.combobox_lists['sel_result']
-#         box.configure(values=box_list)
-#
-#         # Save RESULT stk_list
-#         box = app.r_stk
-#         box_list = eleana.combobox_lists['r_stk']
-#         box.configure(values=box_list)

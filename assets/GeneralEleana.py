@@ -27,8 +27,7 @@ class Eleana:
              'last_import_dir': '',
              'last_project_dir': '',
              'last_projects': [],
-             'last_export_dir': ''
-
+             'last_export_dir':''
              }
 
         # Attribute selection is the basic storage of the settings obtainted from states in GUI

@@ -92,7 +92,7 @@ class EleanaMainApp:
         self.check_first_show = builder.get_object('check_first_show', self.mainwindow)
         self.check_second_show = builder.get_object('check_second_show', self.mainwindow)
         self.check_result_show = builder.get_object('check_result_show', self.mainwindow)
-
+        self.annotationsFrame = builder.get_object('annotationsFrame', self.mainwindow)
 
         # Graph Buttons
         self.check_autoscale_x = builder.get_object('check_autoscale_X', self.mainwindow)
@@ -165,16 +165,15 @@ class EleanaMainApp:
         if comparison_mode:
             self.firstFrame.grid_remove()
             self.secondFrame.grid_remove()
+            self.resultFrame.grid_remove()
             self.swapFrame.grid_remove()
             self.listFrame.grid(column=0, row = 2, rowspan=3)
             self.listbox = CTkListbox(self.listFrame, command=self.list_selected, multiple_selection=True, height=400)
             self.listbox.grid(column=0, columnspan=1, rowspan=4, padx=4, pady=4, row=0, sticky="nsew")
-
             self.ver_slider = CTkHorizontalSlider('Vertical separation', 'vsep', [0,1], self.listFrame, self)
             self.ver_slider.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=5, sticky="nsew")
             self.hor_slider = CTkHorizontalSlider('Horizontal separation', 'hsep', [-1,1], self.listFrame, self)
             self.hor_slider.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=8, sticky="nsew")
-
             self.ver_slider.factor.delete(0, 'end')
             self.ver_slider.factor.insert(0, self.comparison_settings['v_factor'])
             self.hor_slider.factor.delete(0, 'end')
@@ -211,6 +210,8 @@ class EleanaMainApp:
             self.firstFrame.grid()
             self.secondFrame.grid()
             self.swapFrame.grid()
+            if len(eleana.results_dataset) > 0:
+                self.resultFrame.grid()
             grapher.plot_graph()
 
     def separate_plots_by(self, direction=None, value=None):
@@ -880,21 +881,15 @@ class EleanaMainApp:
             if response == None or response == 'Cancel':
                 return
             elif response == 'Replace the dataset':
-                self.eleana.dataset = []
-                eleana.selections = project['selections']
                 eleana.selections = project['selections']
                 eleana.dataset = project['dataset']
                 eleana.results_dataset = project['results_dataset']
                 eleana.assignmentToGroups = project['assignmentToGroups']
                 eleana.groupsHierarchy = project['groupsHierarchy']
                 eleana.notes = project['notes']
-
             else:
                 eleana.dataset.extend(project['dataset'])
                 eleana.results_dataset.extend(project['results_dataset'])
-                #eleana.notes = eleana.notes + "\n" + project['notes']
-
-        # project = load.load_project(recent)
         else:
             eleana.selections = project['selections']
             eleana.dataset = project['dataset']
@@ -904,11 +899,11 @@ class EleanaMainApp:
             eleana.notes = project['notes']
 
         update.dataset_list()
-        update.groups()
+        update.get_groups()
         update.all_lists()
-        path_to_file = Path(eleana.paths['last_projects'])
+        path_to_file = Path(eleana.paths['last_projects'][0])
         name = path_to_file.name
-        app.mainwindow.title(name)
+        app.mainwindow.title(name + ' - Eleana')
 
         try:
             selected_value_text = eleana.dataset[eleana.selections['first']].name_nr
@@ -1019,6 +1014,9 @@ class EleanaMainApp:
 
     def export_first(self):
         export.csv('first')
+
+    def export_group(self):
+        export.group_csv(eleana.selections['group'])
 
     # --- Quit (also window close by clicking on X)
     def close_application(self, event = None):
