@@ -180,19 +180,19 @@ class EleanaMainApp:
             self.hor_slider.factor.insert(0, self.comparison_settings['h_factor'])
 
             # Get names from group to be used for the list
-            group = eleana.selections['group']
+            group = self.eleana.selections['group']
             names_nr = []
             indexes = []
             if group == 'All':
                 i = 0
-                while i < len(eleana.dataset):
-                    names_nr.append(eleana.dataset[i].name_nr)
+                while i < len(self.eleana.dataset):
+                    names_nr.append(self.eleana.dataset[i].name_nr)
                     indexes.append(i)
                     i += 1
             else:
-                indexes = eleana.assignmentToGroups[group]
+                indexes = self.eleana.assignmentToGroups[group]
                 for i in indexes:
-                    names_nr.append(eleana.dataset[i].name_nr)
+                    names_nr.append(self.eleana.dataset[i].name_nr)
             i = 0
             while i < len(names_nr)-1:
                 self.listbox.insert(indexes[i], names_nr[i])
@@ -210,7 +210,7 @@ class EleanaMainApp:
             self.firstFrame.grid()
             self.secondFrame.grid()
             self.swapFrame.grid()
-            if len(eleana.results_dataset) > 0:
+            if len(self.eleana.results_dataset) > 0:
                 self.resultFrame.grid()
             grapher.plot_graph()
 
@@ -241,8 +241,8 @@ class EleanaMainApp:
             self.repeated_items.extend(selected_items)
             for each in selected_items:
                 index = int(get_index_by_name(each))
-                type = eleana.dataset[index].type
-                name_nr = eleana.dataset[index].name_nr
+                type = self.eleana.dataset[index].type
+                name_nr = self.eleana.dataset[index].name_nr
                 if name_nr in set(self.repeated_items):
                     self.info_show = True
                 if type == 'stack 2D' and self.info_show:
@@ -295,7 +295,7 @@ class EleanaMainApp:
         self.group_selected(new_group)
 
     def group_selected(self, value):
-        eleana.selections['group'] = value
+        self.eleana.selections['group'] = value
         update.all_lists()
         self.sel_first.set('None')
         self.sel_second.set('None')
@@ -306,7 +306,7 @@ class EleanaMainApp:
         self.comparison_view()
 
     def first_show(self):
-        eleana.selections['f_dsp'] = bool(self.check_first_show.get())
+        self.eleana.selections['f_dsp'] = bool(self.check_first_show.get())
         selection = self.sel_first.get()
         if selection == 'None':
             return
@@ -345,27 +345,27 @@ class EleanaMainApp:
             return
 
     def first_complex_clicked(self, value):
-            eleana.selections['f_cpl'] = value
+            self.eleana.selections['f_cpl'] = value
             grapher.plot_graph()
 
     def first_selected(self, selected_value_text):
         if selected_value_text == 'None':
-            eleana.selections['first'] = -1
+            self.eleana.selections['first'] = -1
             self.firstComplex.grid_remove()
             self.firstStkFrame.grid_remove()
             grapher.plot_graph()
             return
 
         i = 0
-        while i < len(eleana.dataset):
-            name = eleana.dataset[i].name_nr
+        while i < len(self.eleana.dataset):
+            name = self.eleana.dataset[i].name_nr
             if name == selected_value_text:
-                eleana.selections['first'] = i
+                self.eleana.selections['first'] = i
                 break
             i += 1
         update.list_in_combobox('sel_first')
         update.list_in_combobox('f_stk')
-        if eleana.dataset[eleana.selections['first']].complex:
+        if self.eleana.dataset[self.eleana.selections['first']].complex:
             self.firstComplex.grid()
         else:
             self.firstComplex.grid_remove()
@@ -374,7 +374,7 @@ class EleanaMainApp:
     def f_stk_selected(self, selected_value_text):
         if selected_value_text in self.f_stk._values:
             index = self.f_stk._values.index(selected_value_text)
-            eleana.selections['f_stk'] = index
+            self.eleana.selections['f_stk'] = index
         else:
             return
         grapher.plot_graph()
@@ -391,7 +391,7 @@ class EleanaMainApp:
         try:
             new_position = list_of_items[index + 1]
             self.f_stk.set(new_position)
-            eleana.selections['f_stk'] = index + 1
+            self.eleana.selections['f_stk'] = index + 1
         except IndexError:
             return
         grapher.plot_graph()
@@ -409,13 +409,13 @@ class EleanaMainApp:
         try:
             new_position = list_of_items[index - 1]
             self.f_stk.set(new_position)
-            eleana.selections['f_stk'] = index - 1
+            self.eleana.selections['f_stk'] = index - 1
         except IndexError:
             return
         grapher.plot_graph()
 
     def second_show(self):
-        eleana.selections['s_dsp'] = bool(self.check_second_show.get())
+        self.eleana.selections['s_dsp'] = bool(self.check_second_show.get())
         selection = self.sel_second.get()
         if selection == 'None':
             return
@@ -423,22 +423,22 @@ class EleanaMainApp:
 
     def second_selected(self, selected_value_text):
         if selected_value_text == 'None':
-            eleana.selections['second'] = -1
+            self.eleana.selections['second'] = -1
             self.secondComplex.grid_remove()
             self.secondStkFrame.grid_remove()
             grapher.plot_graph()
             return
         i = 0
-        while i < len(eleana.dataset):
-            name = eleana.dataset[i].name_nr
+        while i < len(self.eleana.dataset):
+            name = self.eleana.dataset[i].name_nr
             if name == selected_value_text:
-                eleana.selections['second'] = i
+                self.eleana.selections['second'] = i
                 break
             i += 1
         update.list_in_combobox('sel_second')
         update.list_in_combobox('s_stk')
 
-        if eleana.dataset[eleana.selections['second']].complex:
+        if self.eleana.dataset[self.eleana.selections['second']].complex:
             self.secondComplex.grid()
         else:
             self.secondComplex.grid_remove()
@@ -483,7 +483,7 @@ class EleanaMainApp:
     def s_stk_selected(self, selected_value_text):
         if selected_value_text in self.s_stk._values:
             index = self.s_stk._values.index(selected_value_text)
-            eleana.selections['s_stk'] = index
+            self.eleana.selections['s_stk'] = index
         else:
             return
         grapher.plot_graph()
@@ -500,7 +500,7 @@ class EleanaMainApp:
         try:
             new_position = list_of_items[index + 1]
             self.s_stk.set(new_position)
-            eleana.selections['s_stk'] = index + 1
+            self.eleana.selections['s_stk'] = index + 1
         except IndexError:
             return
         grapher.plot_graph()
@@ -519,14 +519,14 @@ class EleanaMainApp:
         try:
             new_position = list_of_items[index - 1]
             self.s_stk.set(new_position)
-            eleana.selections['s_stk'] = index - 1
+            self.eleana.selections['s_stk'] = index - 1
         except IndexError:
             return
         grapher.plot_graph()
 
 
     def second_complex_clicked(self, value):
-            eleana.selections['s_cpl'] = value
+            self.eleana.selections['s_cpl'] = value
             grapher.plot_graph()
 
     def swap_first_second(self):
@@ -560,12 +560,12 @@ class EleanaMainApp:
         if current == 'None':
             return
         index = get_index_by_name(current)
-        spectrum = copy.deepcopy(eleana.dataset[index])
+        spectrum = copy.deepcopy(self.eleana.dataset[index])
 
         # Check the name if the same already exists in eleana.result_dataset
         list_of_results = []
         try:
-            for each in eleana.results_dataset:
+            for each in self.eleana.results_dataset:
                 list_of_results.append(each.name)
         except:
             pass
@@ -580,7 +580,7 @@ class EleanaMainApp:
                 return
 
         # Send to result and update lists
-        eleana.results_dataset.append(spectrum)
+        self.eleana.results_dataset.append(spectrum)
         update.list_in_combobox('sel_result')
         update.list_in_combobox('r_stk')
 
@@ -595,7 +595,7 @@ class EleanaMainApp:
     ****************************************'''
 
     def result_show(self):
-        eleana.selections['r_dsp'] = bool(self.check_result_show.get())
+        self.eleana.selections['r_dsp'] = bool(self.check_result_show.get())
         selection = self.sel_result.get()
         if selection == 'None':
             return
@@ -603,24 +603,24 @@ class EleanaMainApp:
 
     def result_selected(self, selected_value_text):
         if selected_value_text == 'None':
-            eleana.selections['result'] = -1
+            self.eleana.selections['result'] = -1
             self.resultComplex.grid_remove()
             self.resultStkFrame.grid_remove()
             grapher.plot_graph()
             return
 
         i = 0
-        while i < len(eleana.results_dataset):
-            name = eleana.results_dataset[i].name
+        while i < len(self.eleana.results_dataset):
+            name = self.eleana.results_dataset[i].name
             if name == selected_value_text:
-                eleana.selections['result'] = i
+                self.eleana.selections['result'] = i
                 break
             i += 1
 
         update.list_in_combobox('sel_result')
         update.list_in_combobox('r_stk')
 
-        if eleana.results_dataset[eleana.selections['result']].complex:
+        if self.eleana.results_dataset[self.eleana.selections['result']].complex:
             self.resultComplex.grid()
         else:
             self.resultComplex.grid_remove()
@@ -676,7 +676,7 @@ class EleanaMainApp:
         try:
             new_position = list_of_items[index + 1]
             self.r_stk.set(new_position)
-            eleana.selections['r_stk'] = index + 1
+            self.eleana.selections['r_stk'] = index + 1
         except IndexError:
             return
 
@@ -695,7 +695,7 @@ class EleanaMainApp:
         try:
             new_position = list_of_items[index - 1]
             self.r_stk.set(new_position)
-            eleana.selections['r_stk'] = index - 1
+            self.eleana.selections['r_stk'] = index - 1
         except IndexError:
             return
         grapher.plot_graph()
@@ -730,7 +730,6 @@ class EleanaMainApp:
         group = self.sel_group.get()
         self.group_selected(group)
         name = self.eleana.dataset[index_first].name_nr
-        print(name)
         self.first_selected(name)
         self.sel_first.set(name)
 
@@ -751,11 +750,12 @@ class EleanaMainApp:
 
 
     def delete_sel_result(self):
-        index = eleana.selections['result']
+
+        index = self.eleana.selections['result']
         if index < 0:
             return
-        eleana.results_dataset.pop(index)
-        eleana.selections['result'] = -1
+        self.eleana.results_dataset.pop(index)
+        self.eleana.selections['result'] = -1
         update.all_lists()
         update.gui_widgets()
         self.sel_result.set('None')
@@ -766,12 +766,12 @@ class EleanaMainApp:
             if current == 'None':
                  return
             index = get_index_by_name(current)
-            spectrum = copy.deepcopy(eleana.dataset[index])
+            spectrum = copy.deepcopy(self.eleana.dataset[index])
 
             # Check the name if the same already exists in eleana.result_dataset
             list_of_results = []
             try:
-                for each in eleana.results_dataset:
+                for each in self.eleana.results_dataset:
                     list_of_results.append(each.name)
             except:
                 pass
@@ -784,7 +784,7 @@ class EleanaMainApp:
                     return
 
             # Send to result and update lists
-            eleana.results_dataset.append(spectrum)
+            self.eleana.results_dataset.append(spectrum)
             update.list_in_combobox('sel_result')
             update.list_in_combobox('r_stk')
 
@@ -808,7 +808,7 @@ class EleanaMainApp:
         av_data = self.sel_first._values
         av_data.pop(0)
         # Open dialog
-        selected_data = SelectData(master=app.mainwindow, title='Select data', group=eleana.selections['group'], items=av_data)
+        selected_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'], items=av_data)
         response = selected_data.get()
         if response == None:
             return
@@ -823,8 +823,8 @@ class EleanaMainApp:
             eleana.dataset.pop(each)
         # Set all data to None
 
-        eleana.selections['first'] = -1
-        eleana.selections['second'] = -1
+        self.eleana.selections['first'] = -1
+        self.eleana.selections['second'] = -1
         self.sel_first.set('None')
         self.sel_first.set('None')
         self.comparison_settings['indexes'] = []
@@ -841,8 +841,8 @@ class EleanaMainApp:
                                     icon="warning", option_1="No", option_2="Yes")
         response = quit_dialog.get()
         if response == "Yes":
-            eleana.results_dataset = []
-            eleana.selections['result'] = -1
+            self.eleana.results_dataset = []
+            self.eleana.selections['result'] = -1
             self.sel_result.configure(values = ['None'])
             self.r_stk.configure(values = [])
             self.resultFrame.grid_remove()
@@ -881,44 +881,44 @@ class EleanaMainApp:
             if response == None or response == 'Cancel':
                 return
             elif response == 'Replace the dataset':
-                eleana.selections = project['selections']
-                eleana.dataset = project['dataset']
-                eleana.results_dataset = project['results_dataset']
-                eleana.assignmentToGroups = project['assignmentToGroups']
-                eleana.groupsHierarchy = project['groupsHierarchy']
-                eleana.notes = project['notes']
+                self.eleana.selections = project['selections']
+                self.eleana.dataset = project['dataset']
+                self.eleana.results_dataset = project['results_dataset']
+                self.eleana.assignmentToGroups = project['assignmentToGroups']
+                self.eleana.groupsHierarchy = project['groupsHierarchy']
+                self.eleana.notes = project['notes']
             else:
-                eleana.dataset.extend(project['dataset'])
-                eleana.results_dataset.extend(project['results_dataset'])
+                self.eleana.dataset.extend(project['dataset'])
+                self.eleana.results_dataset.extend(project['results_dataset'])
         else:
-            eleana.selections = project['selections']
-            eleana.dataset = project['dataset']
-            eleana.results_dataset = project['results_dataset']
-            eleana.assignmentToGroups = project['assignmentToGroups']
-            eleana.groupsHierarchy = project['groupsHierarchy']
-            eleana.notes = project['notes']
+            self.eleana.selections = project['selections']
+            self.eleana.dataset = project['dataset']
+            self.eleana.results_dataset = project['results_dataset']
+            self.eleana.assignmentToGroups = project['assignmentToGroups']
+            self.eleana.groupsHierarchy = project['groupsHierarchy']
+            self.eleana.notes = project['notes']
 
         update.dataset_list()
         update.get_groups()
         update.all_lists()
-        path_to_file = Path(eleana.paths['last_projects'][0])
+        path_to_file = Path(self.eleana.paths['last_projects'][0])
         name = path_to_file.name
         app.mainwindow.title(name + ' - Eleana')
 
         try:
-            selected_value_text = eleana.dataset[eleana.selections['first']].name_nr
+            selected_value_text = self.eleana.dataset[self.eleana.selections['first']].name_nr
             self.first_selected(selected_value_text)
             self.sel_first.set(selected_value_text)
         except:
             pass
         try:
-            selected_value_text = eleana.dataset[eleana.selections['second']].name_nr
+            selected_value_text = self.eleana.dataset[self.eleana.selections['second']].name_nr
             self.second_selected(selected_value_text)
             self.sel_second.set(selected_value_text)
         except:
             pass
         try:
-            selected_value_text = eleana.results_dataset[eleana.selections['result']].name
+            selected_value_text = self.eleana.results_dataset[self.eleana.selections['result']].name
             self.result_selected(selected_value_text)
             self.sel_result.set(selected_value_text)
         except:
@@ -930,9 +930,9 @@ class EleanaMainApp:
         index = selected_value_text.split('. ')
         index = int(index[0])
         index = index - 1
-        recent = eleana.paths['last_projects'][index]
+        recent = self.eleana.paths['last_projects'][index]
         self.load_project(recent=recent)
-        eleana.paths['last_project_dir'] = Path(recent).parent
+        self.eleana.paths['last_project_dir'] = Path(recent).parent
         grapher.plot_graph()
 
     ''' FILE: Save As                                                 '''
@@ -941,15 +941,15 @@ class EleanaMainApp:
         if report['error']:
             CTkMessagebox(title="Error", message=report['desc'], icon="cancel")
         else:
-            last_projects = eleana.paths['last_projects']
+            last_projects = self.eleana.paths['last_projects']
             last_projects.insert(0, report['return'].name)
 
         # Remove duplications and limit the list to 10 items
         last_projects = list(set(last_projects))
 
         # Write the list to eleana.paths
-        eleana.paths['last_projects'] = last_projects
-        eleana.paths['last_project_dir'] = Path(last_projects[0]).parent
+        self.eleana.paths['last_projects'] = last_projects
+        self.eleana.paths['last_project_dir'] = Path(last_projects[0]).parent
 
         # Perform update to place the item into menu
         update.last_projects_menu()
@@ -1016,7 +1016,7 @@ class EleanaMainApp:
         export.csv('first')
 
     def export_group(self):
-        export.group_csv(eleana.selections['group'])
+        export.group_csv(self.eleana.selections['group'])
 
     # --- Quit (also window close by clicking on X)
     def close_application(self, event = None):
@@ -1025,8 +1025,8 @@ class EleanaMainApp:
         response = quit_dialog.get()
         if response == "Yes":
             # Save current settings:
-            filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
-            content = eleana.paths
+            filename = Path(self.eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
+            content = self.eleana.paths
             with open(filename, 'wb') as file:
                 pickle.dump(content, file)
             self.mainwindow.iconify()
@@ -1040,7 +1040,7 @@ class EleanaMainApp:
         if response == None:
             return
         else:
-            eleana.notes = response
+            self.eleana.notes = response
 
     def create_new_group(self):
         group_create = Groupcreate(self.mainwindow, eleana)
@@ -1048,7 +1048,7 @@ class EleanaMainApp:
         update.list_in_combobox('sel_group')
 
     def first_to_group(self):
-        if eleana.selections['first'] < 0:
+        if self.eleana.selections['first'] < 0:
             return
         group_assign = Groupassign(app, eleana, 'first')
         response = group_assign.get()
@@ -1056,7 +1056,7 @@ class EleanaMainApp:
         update.all_lists()
 
     def second_to_group(self):
-        if eleana.selections['second'] < 0:
+        if self.eleana.selections['second'] < 0:
             return
         group_assign = Groupassign(app, eleana, 'second')
         response = group_assign.get()
@@ -1111,10 +1111,10 @@ class EleanaMainApp:
     ***********************************************'''
 
     def stack_to_group(self, which):
-        index = eleana.selections[which]
+        index = self.eleana.selections[which]
         if index < 0:
             return
-        data = copy.deepcopy(eleana.dataset[index])
+        data = copy.deepcopy(self.eleana.dataset[index])
         if not data.type == 'stack 2D':
             CTkMessagebox(title="Conversion to group", message="The data you selected is not a 2D stack")
         else:
@@ -1126,50 +1126,50 @@ class EleanaMainApp:
             update.group_list()
             update.all_lists()
     def rename_data(self, which):
-        index = eleana.selections[which]
-        index_f = eleana.selections['first']
-        index_s = eleana.selections['second']
-        index_r = eleana.selections['result']
+        index = self.eleana.selections[which]
+        index_f = self.eleana.selections['first']
+        index_s = self.eleana.selections['second']
+        index_r = self.eleana.selections['result']
         if index < 0:
             return
-        name = eleana.dataset[index].name
+        name = self.eleana.dataset[index].name
         if which == 'first':
             title = 'Rename First'
         elif which == 'second':
             title = 'Rename Second'
         elif which == 'result':
             title = 'Rename Result'
-            name = eleana.results_dataset[index_r].name
+            name = self.eleana.results_dataset[index_r].name
         dialog = SingleDialog(master=app, title=title, label='Enter new name', text=name)
         response = dialog.get()
         if response == None:
             return
         if not which == 'result':
-            eleana.dataset[index].name = response
+            self.eleana.dataset[index].name = response
             update.dataset_list()
             update.group_list()
             update.all_lists()
             if index_f >= 0:
-                self.sel_first.set(eleana.dataset[index_f].name_nr)
+                self.sel_first.set(self.eleana.dataset[index_f].name_nr)
             if index_s >= 0:
-                self.sel_second.set(eleana.dataset[index_s].name_nr)
+                self.sel_second.set(self.eleana.dataset[index_s].name_nr)
         else:
-            eleana.results_dataset[index_r].name = response
-            eleana.results_dataset[index_r].name_nr = response
+            self.eleana.results_dataset[index_r].name = response
+            self.eleana.results_dataset[index_r].name_nr = response
             update.dataset_list()
             update.all_lists()
         if index_r >= 0:
-            self.sel_result.set(eleana.results_dataset[index_r].name_nr)
+            self.sel_result.set(self.eleana.results_dataset[index_r].name_nr)
 
     def edit_comment(self, which):
-        index = eleana.selections[which]
+        index = self.eleana.selections[which]
         if index < 0:
             return
-        comment = eleana.dataset[index].comment
-        name = 'Comment to: ' + str(eleana.dataset[index].name_nr)
+        comment = self.eleana.dataset[index].comment
+        name = 'Comment to: ' + str(self.eleana.dataset[index].name_nr)
         text = Notepad(self.mainwindow, title = name, text = comment)
         response = text.get()
-        eleana.dataset[index].comment = response
+        self.eleana.dataset[index].comment = response
 
     def execute_command(self,event):
         if event.keysym == "Up":
