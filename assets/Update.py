@@ -20,6 +20,12 @@ class Update:
 
     def last_projects_menu(self):
         ''' Updates list of the recently loaded or saved projects and adds the list to the main menu'''
+        def _clear_recent_list():
+            self.eleana.paths['last_projects'] = []
+            self.last_projects_menu()
+
+        icon_file = Path(self.eleana.paths['pixmaps'], 'x.png')
+        icon_clear = tk.PhotoImage(file=icon_file)
         list_for_menu = []
         i = 1
         for each in self.eleana.paths['last_projects']:
@@ -36,6 +42,11 @@ class Update:
             icon_file = Path(self.eleana.paths['pixmaps'], 'x.png')
             icon_clear = tk.PhotoImage(file=icon_file)
             recent_menu.add_command(label=label, image=icon_clear, compound="left", command=create_command(label))
+
+        # Separator and clear
+        recent_menu.add_separator()
+        recent_menu.add_command(label='Clear list', image=icon_clear, compound="left", command=_clear_recent_list)
+
 
     def group_list(self):
         ''' This scans for groups and creates assignments in eleana.assignmentToGroups'''

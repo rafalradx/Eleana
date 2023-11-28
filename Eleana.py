@@ -874,8 +874,10 @@ class EleanaMainApp:
     ''' FILE: Load Project                                          '''
     def load_project(self, event=None, recent=None):
         project = load.load_project(recent)
+        if project == None:
+            return
         if len(self.eleana.dataset) > 0:
-            question = CTkMessagebox(title="Dataset is not empty", message="There are data in the dataset. Choose what you want to",
+            question = CTkMessagebox(title="Dataset is not empty", message="There is data in the dataset. Choose what you want to",
                         icon="question", option_3="Append to the dataset", option_2="Replace the dataset", option_1="Cancel")
             response = question.get()
             if response == None or response == 'Cancel':
@@ -904,6 +906,8 @@ class EleanaMainApp:
         path_to_file = Path(self.eleana.paths['last_projects'][0])
         name = path_to_file.name
         app.mainwindow.title(name + ' - Eleana')
+        self.eleana.paths['last_project_dir'] = str(Path(path_to_file).parent)
+        update.last_projects_menu()
 
         try:
             selected_value_text = self.eleana.dataset[self.eleana.selections['first']].name_nr
@@ -1270,7 +1274,7 @@ update.all_lists()
 # Set graph Frame scalable
 app.graphFrame.columnconfigure(0, weight=1)
 app.graphFrame.rowconfigure(0, weight=1)
-
+update.last_projects_menu()
 
 # Run
 if __name__ == "__main__":

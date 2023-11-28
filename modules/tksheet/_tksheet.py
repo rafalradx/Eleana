@@ -34,7 +34,6 @@ from ._tksheet_vars import (
     theme_light_green,
 )
 
-
 class Sheet(tk.Frame):
     def __init__(
         self,

@@ -74,6 +74,7 @@ class Init:
 
             # Perform update to place the item into menu
             update.last_projects_menu()
+
         except:
             pass
 

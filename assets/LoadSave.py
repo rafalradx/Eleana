@@ -34,6 +34,8 @@ class Load:
         else:
             filename = Path(recent)
 
+        if not filename:
+            return None
         '''
         1. Extract project into temporary directory /tmp/eleana_extracted_project 
         '''
@@ -44,7 +46,6 @@ class Load:
             shutil.unpack_archive(filename, extract_dir, archive_format)
         except:
             return {"Error": True, 'desc': f"Cannot open the file"}
-
 
         ''' 
         2. Define filenames that will be loaded from unzipped project
@@ -57,7 +58,6 @@ class Load:
         eleana_selections = Path(extract_dir, 'eleana_selections')
         eleana_results_dataset: Path = Path(extract_dir, 'eleana_results_dataset')
         eleana_project_details = Path(extract_dir, 'eleana_project_details')
-        eleana_dataset = Path(extract_dir, 'eleana_dataset')
 
         try:
             '''
@@ -134,8 +134,8 @@ class Load:
 
             eleana_dataset = []
             for filenumber in eleana_dataset_list.keys():
-                filename = Path(extract_dir, filenumber)
-                file_to_read = open(filename, "rb")
+                _filename = Path(extract_dir, filenumber)
+                file_to_read = open(_filename, "rb")
                 loaded_object = pickle.load(file_to_read)
                 eleana_dataset.append(loaded_object)
                 file_to_read.close()
@@ -160,7 +160,7 @@ class Load:
             last_projects.pop(index)
         last_projects.insert(0, filename)
 
-        self.eleana.paths['last_project'] = last_projects
+        self.eleana.paths['last_projects'] = last_projects
         return {'dataset':eleana_dataset,
                 'result_dataset':eleana_results_dataset,
                 'assignmentToGroups': eleana_assignmentToGroups,

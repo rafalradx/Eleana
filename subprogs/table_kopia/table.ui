@@ -17,7 +17,6 @@
         </layout>
         <containerlayout manager="grid">
           <property type="col" id="1" name="weight">1</property>
-          <property type="row" id="2" name="weight">1</property>
         </containerlayout>
         <child>
           <object class="customtkinter.CTkLabel" id="ctklabel1">
@@ -332,10 +331,6 @@
           <property name="row">2</property>
           <property name="sticky">nsew</property>
         </layout>
-        <containerlayout manager="grid">
-          <property type="col" id="0" name="weight">1</property>
-          <property type="row" id="0" name="weight">1</property>
-        </containerlayout>
       </object>
     </child>
     <child>

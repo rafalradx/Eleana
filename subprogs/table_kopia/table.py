@@ -4,13 +4,11 @@ import pathlib
 import numpy as np
 import pygubu
 import pandas
-from pandastable import Table, MultipleValDialog
+from pandastable import Table, MultipleValDialog, TableModel
 from pathlib import Path
 from modules.CTkMessagebox import CTkMessagebox
 from assets.DataClasses import Single2D
 from tkinter import filedialog
-from modules.tksheet import Sheet
-
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "table.ui"
 
@@ -51,9 +49,8 @@ class CreateFromTable:
         self.sel_x_axis.set(self.headers[1])
         self.sel_rey_axis.set(self.headers[2])
         self.sel_imy_axis.set(self.headers[0])
-
-        self.generate_table(df)
-
+        self.table = Table(self.tableFrame, dataframe = df, showtoolbar=False)
+        self.table.show()
         self.response = None
         self.mainwindow.bind("<Escape>", self.cancel)
 
@@ -61,7 +58,6 @@ class CreateFromTable:
             dialog = self.loadExcel()
             if dialog == 'cancel':
                 self.cancel
-
     def loadExcel(self):
         self.mainwindow.iconify()
         filename = filedialog.askopenfilename(parent=self.mainwindow,
@@ -91,7 +87,8 @@ class CreateFromTable:
             return
         df = xl.parse(d.results[0])
         df = df.map(lambda x: round(float(x), 8)).astype(object)
-        self.generate_table(df)
+        self.table = Table(self.tableFrame, dataframe=df)
+        self.table.show()
         self.headers = ['None']
         col_names = df.columns.tolist()
         self.headers.extend(col_names)
@@ -144,14 +141,8 @@ class CreateFromTable:
         data['parameters']['name_y'] = self.y_axis_name.get()
         data['parameters']['unit_x'] = self.x_axis_unit.get()
         data['parameters']['unit_y'] = self.y_axis_unit.get()
-
-        data['x'] = self.get_data_from_column(x_column)
-        rey = self.get_data_from_column(rey_column)
-        data['y'] = rey
-
-        # data['x'] = self.table.model.df[x_column].values.tolist()
-        # rey = self.table.model.df[rey_column].values.tolist()
-
+        data['x'] = self.table.model.df[x_column].values.tolist()
+        rey = self.table.model.df[rey_column].values.tolist()
         data['y'] = rey
         if imy_column == 'None':
             data['complex'] = False
@@ -165,23 +156,6 @@ class CreateFromTable:
         self.eleana.dataset.append(spectrum)
         if show_info == True:
             info = CTkMessagebox(title="", message="The data was added to the dataset.", icon="info")
-
-    def generate_table(self, df):
-        self.table = Sheet(self.tableFrame)
-        column_names = df.columns.tolist()
-        table_data = [df.columns.tolist()] + df.values.tolist()
-        self.table.set_sheet_data(table_data)
-        self.table.headers(column_names)
-        self.table.grid(row=0, column=0, sticky="nswe")
-        self.table.change_theme("dark")
-        self.table.enable_bindings("all", "ctrl_select")
-
-    def get_data_from_column(self, column_name):
-        index = self.sel_x_axis._values.index(column_name)
-        if index < 0:
-            return
-        column_data = self.table.get_column_data(index - 1)
-        return column_data
 
 
 if __name__ == "__main__":
