@@ -12,10 +12,10 @@ from tkinter import filedialog
 from modules.tksheet import Sheet
 
 PROJECT_PATH = pathlib.Path(__file__).parent
-PROJECT_UI = PROJECT_PATH / "table.ui"
+PROJECT_UI = PROJECT_PATH / "edit_parameters.ui"
 
-class CreateFromTable:
-    def __init__(self, eleana_app, master=None, df = None, name = None, group = None, loadOnStart = None):
+class EditParameters:
+    def __init__(self, eleana_app, master=None, index = None):
         self.master = master
         self.eleana = eleana_app
         self.builder = builder = pygubu.Builder()
@@ -28,89 +28,27 @@ class CreateFromTable:
 
         # References
         self.tableFrame = builder.get_object("tableFrame", master)
-        self.mainwindow.title("Create data from table")
-        self.entry_name = builder.get_object("entry_name", master)
-        self.entry_group = builder.get_object("entry_group", master)
-        self.x_axis_name = builder.get_object("x_axis_name", master)
-        self.x_axis_unit = builder.get_object("x_axis_unit", master)
-        self.y_axis_name = builder.get_object("y_axis_name", master)
-        self.y_axis_unit = builder.get_object("y_axis_unit", master)
-        self.sel_x_axis = builder.get_object('sel_x_axis', master)
-        self.sel_rey_axis = builder.get_object('sel_rey_axis', master)
-        self.sel_imy_axis = builder.get_object('sel_imy_axis', master)
+        self.mainwindow.title("Edit parameters")
+        self.entry_name = builder.get_object('entry_name', master)
 
+        self.index_of_data = index
+        self.data_to_edit = self.eleana.dataset[self.index_of_data]
+        name = self.data_to_edit.name_nr
         if name:
             self.entry_name.insert(0, name)
-        if group:
-            self.entry_group.insert(0, group)
-        self.headers = ['None']
-        self.headers.extend(df.columns)
 
-        self.sel_x_axis.configure(values = self.headers)
-        self.sel_rey_axis.configure(values=self.headers)
-        self.sel_imy_axis.configure(values=self.headers)
-        self.sel_x_axis.set(self.headers[1])
-        self.sel_rey_axis.set(self.headers[2])
-        self.sel_imy_axis.set(self.headers[0])
+        headers = ['PARAMETER', 'VALUE']
+        parameters = self.data_to_edit.parameters
+        self.stk_names  = self.data_to_edit.parameters.get('stk_names', None)
+        if self.stk_names != None:
+            parameters.pop('stk_names')
+        df = pandas.DataFrame(list(parameters.items()), columns=headers )
 
         self.generate_table(df)
-
         self.response = None
         self.mainwindow.bind("<Escape>", self.cancel)
         self.table.bind("<<Paste>>", self.paste_event)
-        if loadOnStart == 'excel':
-            dialog = self.loadExcel()
-            if dialog == 'cancel':
-                self.cancel
 
-    def loadExcel(self):
-        self.mainwindow.iconify()
-        filename = filedialog.askopenfilename(parent=self.mainwindow,
-                                              defaultextension='.xls',
-                                              title = "Import Excel/LibreOffice Calc",
-                                              filetypes=[("xlsx", "*.xlsx"),
-                                                         ("xls", "*.xls"),
-                                                         ("ods", "*.ods"),
-                                                         ("All files", "*.*")])
-        if len(filename) == 0:
-            return 'cancel'
-
-        self.eleana.paths['last_import_dir'] = str(Path(filename).parent)
-        name = str(Path(filename).name)
-        self.entry_group.insert(0, 'All')
-        self.mainwindow.deiconify()
-        self.entry_name.delete(0, "end")
-        self.entry_name.insert(0, name)
-        xl = pandas.ExcelFile(filename)
-        names = xl.sheet_names
-        d = MultipleValDialog(title='Import Sheet',
-                              initialvalues=([names]),
-                              labels=(['Sheet']),
-                              types=(['combobox']),
-                              parent=self.mainwindow)
-        if not d.result:
-            return
-        df = xl.parse(d.results[0])
-        df = df.map(lambda x: round(float(x), 8)).astype(object)
-        self.generate_table(df)
-        self.headers = ['None']
-        col_names = df.columns.tolist()
-        self.headers.extend(col_names)
-        self.sel_x_axis.configure(values=self.headers)
-        self.sel_rey_axis.configure(values=self.headers)
-        self.sel_imy_axis.configure(values=self.headers)
-        try:
-            self.sel_imy_axis.set(self.headers[0])
-        except:
-            pass
-        try:
-            self.sel_x_axis.set(self.headers[1])
-        except:
-            pass
-        try:
-            self.sel_rey_axis.set(self.headers[2])
-        except:
-            pass
     def get(self):
         if self.mainwindow.winfo_exists():
            self.master.wait_window(self.mainwindow)

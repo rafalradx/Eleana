@@ -7,7 +7,6 @@ import pickle
 import copy
 import pathlib
 from pathlib import Path
-import customtkinter
 import customtkinter as ctk
 import pygubu
 import numpy as np
@@ -38,6 +37,7 @@ from subprogs.user_input.single_dialog import SingleDialog
 from subprogs.select_data.select_data import SelectData
 from subprogs.notepad.notepad import Notepad
 from subprogs.table.table import CreateFromTable
+from subprogs.edit_parameters.edit_parameters import EditParameters
 
 # Widgets used by main application
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
@@ -869,7 +869,7 @@ class EleanaMainApp:
     def graph_preferences(self):
         pick_color = AskColor()  # open the color picker
         color = pick_color.get()  # get the color string
-        print(color)
+
 
     ''' FILE: Load Project                                          '''
     def load_project(self, event=None, recent=None):
@@ -998,7 +998,7 @@ class EleanaMainApp:
     def import_ascii(self, clipboard = None):
         load.loadAscii(clipboard)
         update.dataset_list()
-        update.groups()
+        update.group_list()
         update.all_lists()
 
     def load_excel(self):
@@ -1008,13 +1008,12 @@ class EleanaMainApp:
         table = CreateFromTable(eleana_app=self.eleana, master=self.mainwindow, df=empty, loadOnStart='excel')
         response = table.get()
         update.dataset_list()
-        update.groups()
+        update.group_list()
         update.all_lists()
 
     def quick_paste(self, event = None):
         text = pyperclip.paste()
         self.import_ascii(text)
-        print(text)
 
     def export_first(self):
         export.csv('first')
@@ -1050,6 +1049,13 @@ class EleanaMainApp:
         group_create = Groupcreate(self.mainwindow, eleana)
         response = group_create.get()
         update.list_in_combobox('sel_group')
+
+    def create_from_table(self):
+        headers = ['A', 'B', 'C']
+        date = [['', '','']]
+        df = pandas.DataFrame(columns = headers, data=date)
+        name = 'new'
+        spreadsheet = CreateFromTable(self.eleana, self.mainwindow, df=df, name=name, group=self.eleana.selections['group'])
 
     def first_to_group(self):
         if self.eleana.selections['first'] < 0:
@@ -1175,6 +1181,14 @@ class EleanaMainApp:
         response = text.get()
         self.eleana.dataset[index].comment = response
 
+    def edit_parameters(self, which='first'):
+        idx = self.eleana.selections.get(which, - 1)
+        if idx < 0:
+            return
+        edit_par = EditParameters(self.eleana, self.mainwindow, index = idx)
+
+
+
     def execute_command(self,event):
         if event.keysym == "Up":
             try:
@@ -1264,7 +1278,6 @@ init.main_window()
 init.paths(update)
 init.folders()
 init.graph()
-
 
 # Create Graph canvas
 grapher.plot_graph()

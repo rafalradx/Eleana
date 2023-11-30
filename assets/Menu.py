@@ -32,6 +32,7 @@ class MainMenu:
         self.icon_notes = self.prepare_icon("notes.png")
         self.icon_graphPrefs = self.prepare_icon("graph_pref.png")
         self.icon_table = self.prepare_icon("table.png")
+        self.icon_clipboard = self.prepare_icon("clipboard.png")
 
         ''' Menu Bar'''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
@@ -102,10 +103,8 @@ class MainMenu:
         self.menu_export.add_command(label="Export Group", command=self.app.export_group, image=self.icon_exit,
                                    compound="left", accelerator="Ctrl+Q")
 
-
         # - SEPARATOR -
         self.menu_file.add_separator()
-
 
         # - Quit
         self.menu_file.add_command(label="Quit", command=self.app.close_application, image = self.icon_exit, compound="left", accelerator="Ctrl+Q")
@@ -119,8 +118,19 @@ class MainMenu:
                                  borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
         self.main_menu.add_cascade(label="Edit", menu=self.menu_edit, image = self.icon_dropdown, compound="left")
 
+        self.menu_spreadsheet = tk.Menu(self.menu_edit, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                                 activebackground=self.activebg, activeforeground=self.activefg,
+                                 borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+
+        self.menu_edit.add_cascade(label="Spreadsheet", menu=self.menu_spreadsheet, image=self.icon_dropdown, compound="left")
+
         # - Create from table
-        #self.menu_edit.add_command(label="Create data from table", command=self.app.create_from_table, image=self.icon_table, compound="left")
+        self.menu_edit.add_command(label="Create data from table", command=self.app.create_from_table, image=self.icon_table, compound="left")
+
+        self.menu_edit.add_command(label="Edit parameters", command = self.app.edit_parameters, image=self.icon_none, compound="left")
+
+        # - Create from clipboard
+        self.menu_edit.add_command(label="Paste from clipboard", command=self.app.quick_paste,  image=self.icon_clipboard, compound="left")
 
         # - Delete selected data
         self.menu_edit.add_command(label="Delete selected data", command=self.app.delete_selected_data, image = self.icon_trash, compound="left")
