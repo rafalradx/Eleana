@@ -9,10 +9,10 @@ PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "edit_parameters.ui"
 
 class EditParameters:
-    def __init__(self, master=None, parameters = None, name = None):
+    def __init__(self, eleana_app, master=None, index = None):
         self.master = master
+        self.eleana = eleana_app
         self.builder = builder = pygubu.Builder()
-        self.parameters = parameters
 
         builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)
@@ -29,11 +29,19 @@ class EditParameters:
         self.mainwindow.title("Edit parameters")
         self.entry_name = builder.get_object('entry_name', master)
 
+        self.index_of_data = index
+        self.data_to_edit = self.eleana.dataset[self.index_of_data]
+        name = self.data_to_edit.name_nr
         if name:
             self.entry_name.insert(0, name)
 
-        column_parameters = list(self.parameters.keys())
-        column_values = list(self.parameters.values())
+        parameters = self.data_to_edit.parameters
+        self.stk_names  = self.data_to_edit.parameters.get('stk_names', None)
+        if self.stk_names != None:
+            parameters.pop('stk_names')
+
+        column_parameters = list(parameters.keys())
+        column_values = list(parameters.values())
         column_description = self.create_description_for_parameters(column_parameters)
 
         df = pandas.DataFrame({'COMMENT': column_description, 'PARAMETER': column_parameters, 'VALUES': column_values},
@@ -75,8 +83,9 @@ class EditParameters:
         while i < len(par_keys):
             parameters[par_keys[i]] = par_values[i]
             i += 1
-        self.response = parameters
-        self.mainwindow.destroy()
+        self.data_to_edit.parameters = parameters
+        self.eleana.dataset[self.index_of_data] = self.data_to_edit
+        self.cancel()
 
     def generate_table(self, df):
         self.table = Sheet(self.tableFrame)

@@ -165,6 +165,8 @@ class CreateFromTable:
         if show_info == True:
             info = CTkMessagebox(title="", message="The data was added to the dataset.", icon="info")
 
+    def edit_parameters(self):
+        info = CTkMessagebox(title = "Edit parameters", message="This option is not implmented yet. Please edit pratmeters after addition of the data.")
     def generate_table(self, df):
         self.table = Sheet(self.tableFrame)
         column_names = df.columns.tolist()

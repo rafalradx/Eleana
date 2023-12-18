@@ -20,7 +20,7 @@ class Single2D:
 class Spectrum_CWEPR:
     def __init__(self, name, x_axis: list, dta: list, dsc: dict, format="elexsys"):
         self.parameters = {'title': '', 'unit_x': 'G', 'name_x': 'Field', 'name_y': 'Intensity', 'MwFreq': '', 'ModAmp': '', 'ModFreq': '',
-                           'ConvTime': '',  'SweepTime': '',  'TimeConst': '',  'RESO': '',  'Power': '', 'PowerAtten': ''}
+                           'ConvTime': '',  'SweepTime': '',  'TimeConst': '',  'Reson': '',  'Power': '', 'PowAtten': ''}
         self.groups = []
         self.x = x_axis
         self.y = dta
@@ -245,7 +245,6 @@ def createFromEMX(filename: str) -> object:
     filename = Path(filename).name
 
 
-
     # Depending on the format create x axis and object with Given EPR Type
     if format['spectr'] == 'emx' and format['stack'] == False:
         # Create X axis for EMX when there is only a single spectrum
@@ -376,7 +375,7 @@ def createFromAdaniDat(filename, adani: dict):
     data = {}
     data['parameters'] = {}
     data['parameters']['SweepTime'] = _get_parameter('Sweep time:', ' s ', 1)
-    data['parameters']['PowerAtten'] = _get_parameter('Power attenuation:', ' dB ', 1)
+    data['parameters']['PowAtten'] = _get_parameter('Power attenuation:', ' dB ', 1)
     data['parameters']['ModAmp'] = _get_parameter('Mod. amplitude:', ' uT', 0.01)
     data['parameters']['name_x'] = 'Field'
     data['parameters']['unit_x'] = 'G'
@@ -407,7 +406,6 @@ def create_eleana_par(dsc: dict, bruker_key: str) -> dict:
     value_txt = value[0]
     value_txt = value_txt.replace("'", "")
     return value_txt
-    #working_parameters[key] = value_txt
 
 def dsc2eleana(key: str) -> str:
     ''' This function translates keys from Bruker to Eleana Parameter format'''
@@ -424,7 +422,7 @@ def dsc2eleana(key: str) -> str:
                   'ModFreq': 'ModFreq',
                   'ConvTime': 'ConvTime',
                   'SweepTime': 'SweepTime',
-                  'Tconst': 'TIMEC',
+                  'TimeConst': 'TIMEC',
                   'Reson': 'RESO',
                   'Power': 'Power',
                   'PowAtten': 'PowerAtten'
@@ -448,7 +446,7 @@ def par2eleana(key: str, format = 'emx') -> str:
                               'ModFreq': 'ModFreq',
                               'ConvTime': 'RCT',
                               'SweepTime': 'HSW',
-                              'Tconst': 'RTC',
+                              'TimeConst': 'RTC',
                               'Reson': 'RESO',
                               'Power': 'MP',
                               'PowAtten': 'MPD'
@@ -466,7 +464,7 @@ def par2eleana(key: str, format = 'emx') -> str:
                                     'ModFreq': 'ModFreq',
                                     'ConvTime': 'RCT',
                                     'SweepTime': 'HSW',
-                                    'Tconst': 'RTC',
+                                    'TimeConst': 'RTC',
                                     'Reson': 'RESO',
                                     'Power': 'MP',
                                     'PowAtten': 'MPD'
@@ -483,7 +481,7 @@ def par2eleana(key: str, format = 'emx') -> str:
                      'ModAmp': 'RMA',
                      'ConvTime': 'RCT',
                      'SweepTime': 'HSW',
-                     'Tconst': 'RTC',
+                     'TimeConst': 'RTC',
                      'Reson': 'RESO',
                      'Power': 'MP',
                      'PowAtten': 'MPD'

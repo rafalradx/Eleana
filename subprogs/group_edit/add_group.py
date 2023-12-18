@@ -2,7 +2,7 @@
 import pathlib
 from tkinter import Event
 import pygubu
-from CTkMessagebox import CTkMessagebox
+from modules.CTkMessagebox.ctkmessagebox import CTkMessagebox
 PROJECT_PATH = pathlib.Path(__file__).parent
 
 # Adjust the name of the file with UI

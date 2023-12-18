@@ -2,7 +2,6 @@
 
 # Import Python Modules
 print("IMPORT PYTHON MODULES")
-import json
 import pickle
 import copy
 import pathlib
@@ -43,7 +42,7 @@ from subprogs.edit_parameters.edit_parameters import EditParameters
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
 
 PROJECT_PATH = pathlib.Path(__file__).parent
-PROJECT_UI = PROJECT_PATH / "ui" / "Eleana_main.ui"
+PROJECT_UI = PROJECT_PATH / "Eleana_interface.ui"
 VERSION = 1
 INTERPRETER = sys.executable  # <-- Python version for subprocesses
 
@@ -134,6 +133,9 @@ class EleanaMainApp:
 
         # Comparison view
         self.comparison_settings = {'vsep': 0, 'hsep': 0, 'indexes': (), 'v_factor':'1', 'h_factor':'1'}
+
+    def set_grapher(self, grapher):
+        self.grapher = grapher
 
     def set_pane_height(self):
         self.mainwindow.update_idletasks()
@@ -1077,14 +1079,12 @@ class EleanaMainApp:
     *                                                *  
     ***********************************************'''
     def switch_autoscale_x(self):
-        autoscaling = {'x':self.check_autoscale_x.get(), 'y':grapher.autoscaling['y']}
-        grapher.autoscale(autoscaling)
-        grapher.plot_graph()
-    def switch_autoscale_y(self):
-        autoscaling = {'y':self.check_autoscale_y.get(), 'x':grapher.autoscaling['x']}
-        grapher.autoscale(autoscaling)
+        grapher.autoscaling['x'] = bool(self.check_autoscale_x.get())
         grapher.plot_graph()
 
+    def switch_autoscale_y(self):
+        grapher.autoscaling['y'] = bool(self.check_autoscale_y.get())
+        grapher.plot_graph()
     def set_log_scale_x(self):
         grapher.log_scales['x'] = bool(self.check_log_x.get())
         grapher.plot_graph()
@@ -1110,9 +1110,10 @@ class EleanaMainApp:
     def clear_cursors(self):
         grapher.clear_all_annotations()
     def sel_graph_cursor(self, value):
-         grapher.clear_all_annotations(True)
-         grapher.current_cursor_mode['label'] = value
-         grapher.plot_graph()
+        grapher.clear_all_annotations(True)
+        grapher.current_cursor_mode['label'] = value
+        grapher.plot_graph()
+        #grapher.plot_graph()
 
     '''***********************************************
     *                                                *
@@ -1185,9 +1186,14 @@ class EleanaMainApp:
         idx = self.eleana.selections.get(which, - 1)
         if idx < 0:
             return
-        edit_par = EditParameters(self.eleana, self.mainwindow, index = idx)
-
-
+        par_to_edit = self.eleana.dataset[idx].parameters
+        name_nr = self.eleana.dataset[idx].name_nr
+        edit_par = EditParameters(self.mainwindow, parameters= par_to_edit, name = name_nr)
+        response = edit_par.get()
+        if response:
+            self.eleana.dataset[idx].parameters = response
+        else:
+            return
 
     def execute_command(self,event):
         if event.keysym == "Up":
@@ -1260,8 +1266,10 @@ print('INITIATE ELEANA: ', end="")
 eleana = Eleana()
 print('create GUI, ', end="")
 app = EleanaMainApp(eleana)      # This is GUI
-print('build grapher, ', end="")
 grapher = Grapher(app, eleana)
+app.set_grapher(grapher)
+print('build grapher, ', end="")
+
 load = Load(app, eleana)
 save = Save(eleana)
 export = Export(eleana)

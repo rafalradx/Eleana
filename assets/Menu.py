@@ -33,6 +33,13 @@ class MainMenu:
         self.icon_graphPrefs = self.prepare_icon("graph_pref.png")
         self.icon_table = self.prepare_icon("table.png")
         self.icon_clipboard = self.prepare_icon("clipboard.png")
+        self.icon_shimadzu = self.prepare_icon("shimadzu.png")
+        self.icon_import_ascii = self.prepare_icon("import_ascii.png")
+        self.icon_import_excel = self.prepare_icon("import_excel.png")
+        self.icon_import_elexsys = self.prepare_icon("import_elexsys.png")
+        self.icon_import_emx = self.prepare_icon("import_emx.png")
+        self.icon_import_adani = self.prepare_icon("import_adani.png")
+        self.icon_edit_par = self.prepare_icon("edit_par.png")
 
         ''' Menu Bar'''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
@@ -59,11 +66,11 @@ class MainMenu:
         self.menu_file.add_cascade(label="Import data", menu=self.menu_import, image = self.icon_import, compound="left")
 
         # ------------ Bruker Elexsys
-        self.menu_import.add_command(label="Bruker Elexsys (DTA)", command=self.app.import_elexsys, image = self.icon_epr, compound="left")
+        self.menu_import.add_command(label="Bruker Elexsys (DTA)", command=self.app.import_elexsys, image = self.icon_import_elexsys, compound="left")
         # ------------ Bruker EMX
-        self.menu_import.add_command(label="Bruker ESP/EMX (spc)", command=self.app.import_EMX, image = self.icon_epr, compound="left")
+        self.menu_import.add_command(label="Bruker ESP/EMX (spc)", command=self.app.import_EMX, image = self.icon_import_emx, compound="left")
         # ------------ Adani dat
-        self.menu_import.add_command(label="Adani text (dat)", command = self.app.import_adani_dat, image = self.icon_epr, compound="left")
+        self.menu_import.add_command(label="Adani text (dat)", command = self.app.import_adani_dat, image = self.icon_import_adani, compound="left")
 
         # ------------ Magnettech
         self.menu_import.add_command(label="Magnettech older (spe)", command=self.app.import_magnettech1,
@@ -76,16 +83,16 @@ class MainMenu:
         self.menu_import.add_separator()
 
         # ------------ Shimadzu SPC
-        self.menu_import.add_command(label="Shimadzu UV/VIS (spc)", command=self.app.import_shimadzu_spc, image=self.icon_epr,
+        self.menu_import.add_command(label="Shimadzu UV/VIS (spc)", command=self.app.import_shimadzu_spc, image=self.icon_shimadzu,
                                      compound="left")
 
         # ------------ Separator
         self.menu_import.add_separator()
 
         # ------------ ASCII Files
-        self.menu_import.add_command(label="ASCII file", command=self.app.import_ascii, image=self.icon_epr, compound="left")
+        self.menu_import.add_command(label="ASCII file", command=self.app.import_ascii, image=self.icon_import_ascii, compound="left")
         # ------------ Excel
-        self.menu_import.add_command(label="MS Excel/LibreOffice Calc", command = self.app.load_excel, image = self.icon_epr, compound='left')
+        self.menu_import.add_command(label="MS Excel/LibreOffice Calc", command = self.app.load_excel, image = self.icon_import_excel, compound='left')
 
         # - SEPARATOR -
         self.menu_file.add_separator()
@@ -127,7 +134,8 @@ class MainMenu:
         # - Create from table
         self.menu_edit.add_command(label="Create data from table", command=self.app.create_from_table, image=self.icon_table, compound="left")
 
-        self.menu_edit.add_command(label="Edit parameters", command = self.app.edit_parameters, image=self.icon_none, compound="left")
+        # - Edit parameters
+        self.menu_edit.add_command(label="Edit parameters", command = self.app.edit_parameters, image=self.icon_edit_par, compound="left")
 
         # - Create from clipboard
         self.menu_edit.add_command(label="Paste from clipboard", command=self.app.quick_paste,  image=self.icon_clipboard, compound="left")
@@ -149,7 +157,6 @@ class MainMenu:
 
         # -------- Clear result
         self.menu_clear.add_command(label="Result", command=self.app.clear_results)
-
 
         # - First
         self.menu_groups = tk.Menu(self.menu_edit, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
@@ -206,10 +213,15 @@ class ContextMenu:
         self.context_menu_first.add_command(label="Convert stack to group", command=lambda: self.app.stack_to_group('first'))
         self.context_menu_first.add_command(label="Rename", command=lambda: self.app.rename_data('first'))
         self.context_menu_first.add_command(label="Edit comment", command=lambda: self.app.edit_comment('first'))
+        self.context_menu_first.add_command(label="Edit parameters", command = lambda: self.app.edit_parameters('first'))
+
     def build_menu_second(self):
         '''This creates positions for SECOND context menu '''
-        self.context_menu_second.add_command(label="Second 1")
-        self.context_menu_second.add_command(label="Second 2")
+        self.context_menu_second.add_command(label="Assign to group", command=self.app.second_to_group)
+        self.context_menu_second.add_command(label="Convert stack to group", command=lambda: self.app.stack_to_group('second'))
+        self.context_menu_second.add_command(label="Rename", command=lambda: self.app.rename_data('second'))
+        self.context_menu_second.add_command(label="Edit comment", command=lambda: self.app.edit_comment('second'))
+        self.context_menu_second.add_command(label="Edit parameters", command=lambda: self.app.edit_parameters('second'))
 
     def build_menu_result(self):
         '''This creates positions for SECOND context menu '''

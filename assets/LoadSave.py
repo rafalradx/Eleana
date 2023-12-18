@@ -7,7 +7,7 @@ import shutil
 from tkinter import filedialog
 import pandas
 import numpy as np
-from CTkMessagebox import CTkMessagebox
+from modules.CTkMessagebox.ctkmessagebox import CTkMessagebox
 from assets.DataClasses import createFromElexsys, createFromEMX, createFromShimadzuSPC, createFromMagnettech, createFromAdaniDat
 from subprogs.ascii_file_preview.ascii_file_preview import AsciFilePreview
 from subprogs.table.table import CreateFromTable
