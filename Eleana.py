@@ -101,6 +101,7 @@ class EleanaMainApp:
         self.check_indexed_x = builder.get_object('check_indexed_x', self.mainwindow)
         self.sel_cursor_mode = builder.get_object('sel_cursor_mode', self.mainwindow)
         self.check_invert_x = builder.get_object('check_invert_x', self.mainwindow)
+        self.btn_clear_cursors = builder.get_object("btn_clear_cursors", self.mainwindow)
 
         # Command line
         self.command_line = builder.get_object('command_line', self.mainwindow)
@@ -1079,18 +1080,14 @@ class EleanaMainApp:
     *                                                *  
     ***********************************************'''
     def switch_autoscale_x(self):
-        grapher.autoscaling['x'] = bool(self.check_autoscale_x.get())
         grapher.plot_graph()
 
     def switch_autoscale_y(self):
-        grapher.autoscaling['y'] = bool(self.check_autoscale_y.get())
         grapher.plot_graph()
     def set_log_scale_x(self):
-        grapher.log_scales['x'] = bool(self.check_log_x.get())
         grapher.plot_graph()
 
     def set_log_scale_y(self):
-        grapher.log_scales['y'] = bool(self.check_log_y.get())
         grapher.plot_graph()
 
     def indexed_x(self):

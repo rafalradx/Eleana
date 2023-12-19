@@ -3,10 +3,8 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationTool
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
-import numpy as np
 import matplotlib
 import mplcursors
-from assets.Crosshair_cursor import BlittedCursor
 from modules.CTkListbox import CTkListbox
 matplotlib.use('TkAgg')
 
@@ -50,9 +48,6 @@ class GraphPreferences:
         plt.style.use('Solarize_Light2')
 
         # Scale settings
-        self.autoscaling = {'x': True, 'y': True}
-        self.log_scales = {'x': False, 'y': False}
-        self.indexed_x = False
         self.inverted_x_axis = False
         # Plot colors
         self.colors = {'first_re': "#d53339",
@@ -109,7 +104,6 @@ class Grapher(GraphPreferences):
 
     def axis_title(self, which=None):
         '''Creates title for y and x axes  from "which" dataset '''
-
         if which == None:
             axis_title = {'x_title': "Abscissa [a.u.]", 'y_title': "Ordinate [a.u.]"}
             return axis_title
@@ -143,7 +137,6 @@ class Grapher(GraphPreferences):
 
     def create_legend(self, which=None):
         ''' This method create legend for plot defined in "which" '''
-
         # 1. If which is selected to None then legend = "no plot" and return
         if which == None:
             legend = ' '
@@ -218,7 +211,7 @@ class Grapher(GraphPreferences):
         # Add first
         data = self.data_for_plot('first')
         # If indexed is True replace X values with consecutive points
-        if self.indexed_x:
+        if bool(self.app.check_indexed_x.get()):
             length = len(data['x'])+1
             data['x'] = [i for i in range(1, length)]
         first_shown = True if len(data['x']) > 0 else False
@@ -240,7 +233,7 @@ class Grapher(GraphPreferences):
         # Add second
         data = self.data_for_plot('second')
         # If indexed is True replace X values with consecutive points
-        if self.indexed_x:
+        if bool(self.app.check_indexed_x.get()):
             length = len(data['x']) + 1
             data['x'] = [i for i in range(1, length)]
         legend = self.create_legend('second')
@@ -264,7 +257,7 @@ class Grapher(GraphPreferences):
         # Add result
         data = self.data_for_plot('result')
         # If indexed is True replace X values with consecutive points
-        if self.indexed_x:
+        if bool(self.app.check_indexed_x.get()):
             length = len(data['x']) + 1
             data['x'] = [i for i in range(1, length)]
         legend = self.create_legend('result')
@@ -283,11 +276,11 @@ class Grapher(GraphPreferences):
         self.ax.set_ylabel(axis_title['y_title'])
 
         # Log or Linear scales
-        if self.log_scales['x']:
+        if bool(self.app.check_log_x.get()):
             self.ax.set_xscale('log')
         else:
             self.ax.set_xscale('linear')
-        if self.log_scales['y']:
+        if bool(self.app.check_log_y.get()):
             self.ax.set_yscale('log')
         else:
             self.ax.set_yscale('linear')
@@ -302,11 +295,11 @@ class Grapher(GraphPreferences):
         self.ax.legend(loc='upper center', bbox_to_anchor=(0.15, 1.1),
                        fancybox=False, shadow=False, ncol=5)
         # Handle autoscaling
-        if self.autoscaling['x']:
+        if bool(self.app.check_autoscale_x.get()):
             self.scale1['x'] = self.ax.get_xlim()
         else:
             self.ax.set_xlim(self.scale1['x'])
-        if self.autoscaling['y']:
+        if bool(self.app.check_autoscale_y.get()):
             self.scale1['y'] = self.ax.get_ylim()
         else:
             self.ax.set_ylim(self.scale1['y'])
@@ -367,12 +360,14 @@ class Grapher(GraphPreferences):
 
         if index == 0:
             # Switch off mplcursors
+            self.app.btn_clear_cursors.grid_remove()
             if hasattr(self.cursor, "events"):
                 self.cursor.events["add"].disconnect()
                 self.cursor = None
             self.app.annotationsFrame.grid_remove()
         elif index > 0 and index < 5:
             # Swtich on mplcursors
+            self.app.btn_clear_cursors.grid()
             _show_annotation_list(self)
             self.cursor = self.mplcursors.cursor(self.ax,
                                                  multiple=self.current_cursor_mode['multip'],
@@ -381,6 +376,7 @@ class Grapher(GraphPreferences):
             self.cursor.connect("remove", self.annotation_removed)
 
         elif index == 5:
+            self.app.btn_clear_cursors.grid()
             _show_annotation_list(self)
             # Switch on Free point selections
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
@@ -404,6 +400,7 @@ class Grapher(GraphPreferences):
         if state['mode']:
             return
         if (event.inaxes is not None and self.app.sel_cursor_mode.get() == 'Free select' and event.button == 1):
+            # Create annotation when left mouse button is clicked
             x, y = event.xdata, event.ydata
             point_selected = (x,y)
             current_nr = 0
@@ -412,20 +409,32 @@ class Grapher(GraphPreferences):
                 current_nr = last_annotation.get('nr', 0) + 1
             my_annotation = {'type': None, 'curve': 'XY', 'index': 0, 'stk_index': -1, 'point': point_selected,
                              'nr': current_nr}
-            __autoscaling = self.autoscaling
             self.cursor_annotations.append(my_annotation)
             self.updateAnnotationList(action='add')
-            self.ax.scatter(x, y, color='red')
-            self.autoscaling = __autoscaling
 
-            self.draw()
-            self.app.check_autoscale_y.select() if __autoscaling['y'] else self.app.check_autoscale_y.deselect()
-            self.app.check_autoscale_x.select() if __autoscaling['x'] else self.app.check_autoscale_x.deselect()
-            print('NALEZY NAPRAWIC FUNKCJE on_click_in_plot żey nie przeskalowywało wykresu')
-    # def on_move_in_plot(self, event):
-    #     if event.inaxes:
-    #         print(f'data coords {event.xdata} {event.ydata},',
-    #               f'pixel coords {event.x} {event.y}')
+            #text = "  "+str(current_nr)
+            text = ' '
+            #self.ax.annotate(text, xy=point_selected, arrowprops=dict(arrowstyle="->", connectionstyle="arc3"))
+            self.ax.annotate(text, xy=point_selected, arrowprops={})
+            self.canvas.draw()
+
+        elif (event.inaxes is not None and self.app.sel_cursor_mode.get() == 'Free select' and event.button == 3):
+            # Remove annotation when right mouse button is clicked
+            x, y = event.xdata, event.ydata
+            xlim = self.ax.get_xlim()
+            ylim = self.ax.get_ylim()
+            x_span = abs(xlim[1]-xlim[0])
+            y_span = abs(ylim[1]-ylim[0])
+
+            tolerance = 0.05  # Tolerancja dla porównania współrzędnych
+            for annotation in self.ax.texts:
+                x_diff = abs(annotation.xy[0] - x)
+                y_diff = abs(annotation.xy[1] - y)
+                if x_diff < tolerance*x_span and y_diff < tolerance*y_span:
+                    annotation.remove()
+            self.canvas.draw()
+        else:
+            return
 
     def annotation_create(self, sel):
         ''' This creates annotations on the graph and add selected
@@ -493,10 +502,7 @@ class Grapher(GraphPreferences):
         list_of_annotations = []
         for each in self.cursor_annotations:
             nr = each['nr']
-            #curve_type = each['type']
             curve = each['curve']
-            #index = each['index']
-            #stk_index = each['stk_index']
             point_x = each['point'][0]
             point_y = each['point'][1]
             if nr < 10:
@@ -511,7 +517,6 @@ class Grapher(GraphPreferences):
             i += 1
     def indexCurveForAnnot(self, curve):
         if self.app.sel_cursor_mode.get() == "Free select":
-            print("free select")
             return
         # Search name in the main dataset
         if '/' in curve:
@@ -555,10 +560,6 @@ class Grapher(GraphPreferences):
             curve_type = 'none'
         return curve_type, index, stk_index
 
-    # def autoscale(self, autoscaling: dict):
-    #     self.autoscaling = autoscaling
-    #     return
-
     '''******************************************l.ann
     *                                           *
     *              EVENTS ON GRAPH              *
@@ -572,13 +573,11 @@ class Grapher(GraphPreferences):
     def on_ylim_changed(self, axes):
         ylim = self.ax.get_ylim()
         self.scale1['y'] = ylim
-        self.autoscaling['y'] = False
         self.app.check_autoscale_y.deselect()
 
     def on_xlim_changed(self, axes):
         xlim = self.ax.get_xlim()
         self.scale1['x'] = xlim
-        self.autoscaling['x'] = False
         self.app.check_autoscale_x.deselect()
 
     def plot_comparison(self, indexes, vsep, hsep):
