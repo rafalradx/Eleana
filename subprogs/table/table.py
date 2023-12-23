@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import pathlib
-
+import customtkinter as ctk
 import numpy as np
 import pygubu
 import pandas
@@ -174,7 +174,8 @@ class CreateFromTable:
         self.table.set_sheet_data(table_data)
         self.table.headers(column_names)
         self.table.grid(row=0, column=0, sticky="nswe")
-        self.table.change_theme("dark")
+
+        self.table.change_theme(ctk.get_appearance_mode())
         self.table.enable_bindings( "ctrl_select", "all", "right_click_popup_menu")
 
     def get_data_from_column(self, column_name):

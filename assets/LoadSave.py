@@ -368,6 +368,8 @@ class Save:
         except:
             return {'error': True, 'desc': f'Could not save the project file. Try to save in different location.'}
 
+        if not filename:
+            return
         file_path = Path(filename.name)
         file_path.unlink()
 

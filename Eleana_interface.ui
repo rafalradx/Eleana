@@ -482,7 +482,8 @@
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkButton" id="ctkbutton46">
+                                          <object class="customtkinter.CTkButton" id="btn_modify" named="True">
+                                            <property name="command" type="command" cbtype="simple">modify</property>
                                             <property name="corner_radius">5</property>
                                             <property name="fg_color">#c6484c</property>
                                             <property name="font">{Arial} 12 {bold}</property>

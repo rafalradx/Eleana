@@ -70,7 +70,7 @@ if __name__ == "__main__":
     update_progress()
 
     # Ustal czas trwania splash screena na co najmniej 2 sekundy
-    splash_duration = 3  # liczba sekund
+    splash_duration = 8  # liczba sekund
 
     # Zamknij okno tkinter po zakończeniu czasu trwania splash screena
     app.mainwindow.after(int(splash_duration * 1000), app.mainwindow.destroy)

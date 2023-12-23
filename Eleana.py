@@ -14,6 +14,8 @@ import sys
 import pandas
 import pyperclip
 
+list_of_subprogs = []
+
 # Third-party modules fin Eleana project
 print("Load third-party modules.")
 from modules.CTkListbox import *
@@ -30,14 +32,23 @@ from assets.Menu import ContextMenu, MainMenu
 
 # Import Eleana subprograms and windows
 from subprogs.group_edit.add_group import Groupcreate
+list_of_subprogs.append(['group_create', 'cancel'])
 from subprogs.group_edit.stack_to_group import StackToGroup
+list_of_subprogs.append(['stack_to_group', 'cancel'])
 from subprogs.group_edit.assign_to_group import Groupassign
+list_of_subprogs.append(['group_assign', 'cancel'])
 from subprogs.user_input.single_dialog import SingleDialog
+list_of_subprogs.append(['single_dialog', 'cancel'])
 from subprogs.select_data.select_data import SelectData
+list_of_subprogs.append(['select_data', 'cancel'])
 from subprogs.notepad.notepad import Notepad
+list_of_subprogs.append(['notepad', 'cancel'])
 from subprogs.table.table import CreateFromTable
+list_of_subprogs.append(['spreadsheet', 'cancel'])
 from subprogs.edit_parameters.edit_parameters import EditParameters
-
+list_of_subprogs.append(['edit_par', 'cancel'])
+from subprogs.modify.modify import ModifyData
+list_of_subprogs.append(['modify_data', 'cancel'])
 # Widgets used by main application
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
 
@@ -152,8 +163,8 @@ class EleanaMainApp:
         window.geometry(f"{width}x{height}+{x}+{y}")
 
     def run(self):
-            self.mainwindow.deiconify()
             self.mainwindow.after(100, self.set_pane_height)
+            self.mainwindow.deiconify()
             self.mainwindow.mainloop()
 
     ''' *********************************************
@@ -416,6 +427,12 @@ class EleanaMainApp:
         except IndexError:
             return
         grapher.plot_graph()
+
+    def modify(self, which = None):
+        if not which:
+            which = 'first'
+        self.modify_data = ModifyData(self.mainwindow, self.eleana, self.grapher, self)
+        response = self.modify_data.get()
 
     def second_show(self):
         self.eleana.selections['s_dsp'] = bool(self.check_second_show.get())
@@ -811,8 +828,8 @@ class EleanaMainApp:
         av_data = self.sel_first._values
         av_data.pop(0)
         # Open dialog
-        selected_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'], items=av_data)
-        response = selected_data.get()
+        self.select_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'], items=av_data)
+        response = self.select_data.get()
         if response == None:
             return
         # Get indexes of selected data to remove
@@ -940,11 +957,13 @@ class EleanaMainApp:
         recent = self.eleana.paths['last_projects'][index]
         self.load_project(recent=recent)
         self.eleana.paths['last_project_dir'] = Path(recent).parent
-        grapher.plot_graph()
+        self.grapher.plot_graph()
 
     ''' FILE: Save As                                                 '''
     def save_as(self):
         report = save.save_project()
+        if not report:
+            return
         if report['error']:
             CTkMessagebox(title="Error", message=report['desc'], icon="cancel")
         else:
@@ -1026,6 +1045,7 @@ class EleanaMainApp:
 
     # --- Quit (also window close by clicking on X)
     def close_application(self, event = None):
+        global list_of_subprogs
         quit_dialog = CTkMessagebox(title="Quit", message="Do you want to close the program?",
                                     icon="warning", option_1="No", option_2="Yes")
         response = quit_dialog.get()
@@ -1036,21 +1056,29 @@ class EleanaMainApp:
             with open(filename, 'wb') as file:
                 pickle.dump(content, file)
             self.mainwindow.iconify()
+
+            print('Closing subprograms')
+            for each in list_of_subprogs:
+                close_cmd = 'self.' + each[0] + '.' + each[1] + '()'
+                try:
+                    exec(close_cmd)
+                except:
+                    pass
             self.mainwindow.destroy()
 
     # EDIT Menu:
     #   Notes
     def notes(self):
-        notes = Notepad(master = self.mainwindow, title="Edit notes", text = self.eleana.notes)
-        response = notes.get()
+        self.notepad = Notepad(master = self.mainwindow, title="Edit notes", text = self.eleana.notes)
+        response = self.notepad.get()
         if response == None:
             return
         else:
             self.eleana.notes = response
 
     def create_new_group(self):
-        group_create = Groupcreate(self.mainwindow, eleana)
-        response = group_create.get()
+        self.group_create = Groupcreate(self.mainwindow, eleana)
+        response = self.group_create.get()
         update.list_in_combobox('sel_group')
 
     def create_from_table(self):
@@ -1058,13 +1086,13 @@ class EleanaMainApp:
         date = [['', '','']]
         df = pandas.DataFrame(columns = headers, data=date)
         name = 'new'
-        spreadsheet = CreateFromTable(self.eleana, self.mainwindow, df=df, name=name, group=self.eleana.selections['group'])
+        self.spreadsheet = CreateFromTable(self.eleana, self.mainwindow, df=df, name=name, group=self.eleana.selections['group'])
 
     def first_to_group(self):
         if self.eleana.selections['first'] < 0:
             return
-        group_assign = Groupassign(app, eleana, 'first')
-        response = group_assign.get()
+        self.group_assign = Groupassign(app, eleana, 'first')
+        response = self.group_assign.get()
         update.group_list()
         update.all_lists()
 
@@ -1080,23 +1108,23 @@ class EleanaMainApp:
     *                                                *  
     ***********************************************'''
     def switch_autoscale_x(self):
-        grapher.plot_graph()
+        self.grapher.plot_graph()
 
     def switch_autoscale_y(self):
-        grapher.plot_graph()
+        self.grapher.plot_graph()
     def set_log_scale_x(self):
-        grapher.plot_graph()
+        self.grapher.plot_graph()
 
     def set_log_scale_y(self):
-        grapher.plot_graph()
+        self.grapher.plot_graph()
 
     def indexed_x(self):
-        grapher.indexed_x = bool(self.check_indexed_x.get())
-        grapher.plot_graph()
+        self.grapher.indexed_x = bool(self.check_indexed_x.get())
+        self.grapher.plot_graph()
 
     def invert_x_axis(self):
-        grapher.inverted_x_axis = bool(self.check_invert_x.get())
-        grapher.plot_graph()
+        self.grapher.inverted_x_axis = bool(self.check_invert_x.get())
+        self.grapher.plot_graph()
 
     '''***********************************************
     *                                                *
@@ -1105,12 +1133,11 @@ class EleanaMainApp:
     ***********************************************'''
 
     def clear_cursors(self):
-        grapher.clear_all_annotations()
+        self.grapher.clear_all_annotations()
     def sel_graph_cursor(self, value):
-        grapher.clear_all_annotations(True)
-        grapher.current_cursor_mode['label'] = value
-        grapher.plot_graph()
-        #grapher.plot_graph()
+        self.grapher.clear_all_annotations(True)
+        self.grapher.current_cursor_mode['label'] = value
+        self.grapher.plot_graph()
 
     '''***********************************************
     *                                                *
@@ -1126,8 +1153,8 @@ class EleanaMainApp:
         if not data.type == 'stack 2D':
             CTkMessagebox(title="Conversion to group", message="The data you selected is not a 2D stack")
         else:
-            select_group = StackToGroup(app, eleana, which)
-            response = select_group.get()
+            self.stack_to_group = StackToGroup(app, eleana, which)
+            response = self.stack_to_group.get()
             if response == None:
                 return
             update.dataset_list()
@@ -1148,8 +1175,8 @@ class EleanaMainApp:
         elif which == 'result':
             title = 'Rename Result'
             name = self.eleana.results_dataset[index_r].name
-        dialog = SingleDialog(master=app, title=title, label='Enter new name', text=name)
-        response = dialog.get()
+        self.single_dialog = SingleDialog(master=app, title=title, label='Enter new name', text=name)
+        response = self.single_dialog.get()
         if response == None:
             return
         if not which == 'result':
@@ -1185,8 +1212,8 @@ class EleanaMainApp:
             return
         par_to_edit = self.eleana.dataset[idx].parameters
         name_nr = self.eleana.dataset[idx].name_nr
-        edit_par = EditParameters(self.mainwindow, parameters= par_to_edit, name = name_nr)
-        response = edit_par.get()
+        self.edit_par = EditParameters(self.mainwindow, parameters= par_to_edit, name = name_nr)
+        response = self.edit_par.get()
         if response:
             self.eleana.dataset[idx].parameters = response
         else:
@@ -1256,8 +1283,11 @@ def get_index_by_name(selected_value_text):
 
 ''' Starting application'''
 # Set default color appearance
-ctk.set_appearance_mode("dark")
+#ctk.set_appearance_mode("dark")
+ctk.set_appearance_mode("light")
 
+mode = ctk.get_appearance_mode()
+print(mode)
 # Create general main instances for the program
 print('INITIATE ELEANA: ', end="")
 eleana = Eleana()

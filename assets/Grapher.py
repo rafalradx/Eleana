@@ -26,9 +26,6 @@ class GraphPreferences:
                         {'label': 'Numbered selections', 'hov':False, 'annot':True, 'a_txt': True, 'multip':True, 'store': True, 'nr': True},
                         {'label': 'Free select'}
                         ]
-        # self.available_cursor_modes = []
-        # for each in self.cursor_modes:
-        #     self.available_cursor_modes.append(each['label'])
 
         self.current_cursor_mode = self.cursor_modes[0]
 
@@ -45,7 +42,8 @@ class GraphPreferences:
         self.set_cursor_modes()
 
         # Canvas style
-        plt.style.use('Solarize_Light2')
+        #plt.style.use('Solarize_Light2')
+        plt.style.use('dark_background')
 
         # Scale settings
         self.inverted_x_axis = False

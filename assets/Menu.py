@@ -1,6 +1,4 @@
 import tkinter as tk
-from tkinter import ttk
-import pathlib
 from pathlib import Path
 
 class MainMenu:

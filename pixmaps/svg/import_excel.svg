@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="20"
+   height="20"
+   viewBox="0 0 24 24"
+   fill="none"
+   stroke="#aaaaaa"
+   stroke-width="1.5"
+   stroke-linecap="round"
+   stroke-linejoin="round"
+   class="feather feather-file-text"
+   version="1.1"
+   id="svg12"
+   sodipodi:docname="import_excel.svg"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   inkscape:export-filename="/home/marcin/PycharmProjects/Eleana/pixmaps/export_excel.png.png"
+   inkscape:export-xdpi="124"
+   inkscape:export-ydpi="124"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <metadata
+     id="metadata18">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs16" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="999"
+     id="namedview14"
+     showgrid="false"
+     inkscape:zoom="36.65"
+     inkscape:cx="15.21146"
+     inkscape:cy="10.027285"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg12"
+     inkscape:pagecheckerboard="0" />
+  <path
+     d="M 13.623425,2.0917156 H 7.2395415 A 1.5959708,1.602897 0 0 0 5.6435707,3.6946126 V 16.517789 a 1.5959708,1.602897 0 0 0 1.5959708,1.602897 h 9.5758255 a 1.5959708,1.602897 0 0 0 1.59597,-1.602897 V 6.9004067 Z"
+     id="path2"
+     style="stroke-width:1.5" />
+  <polyline
+     points="14 2 14 8 20 8"
+     id="polyline4"
+     style="stroke-width:1.87567"
+     transform="matrix(0.79798542,0,0,0.80144852,2.451629,0.48881856)" />
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-weight:normal;font-size:10.6223px;line-height:1.25;font-family:sans-serif;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:0.398334"
+     x="6.3965211"
+     y="18.109777"
+     id="text1822"
+     transform="scale(1.1494035,0.8700165)"><tspan
+       sodipodi:role="line"
+       id="tspan1820"
+       style="stroke-width:0.398334;fill:#b3b3b3;font-weight:bold"
+       x="6.3965211"
+       y="18.109777">X</tspan></text>
+</svg>
