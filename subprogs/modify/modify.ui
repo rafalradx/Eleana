@@ -82,7 +82,8 @@
                         </child>
                         <child>
                           <object class="customtkinter.CTkComboBox" id="sel_x_oper" named="True">
-                            <property name="values">["None", "Add (+)", "Subtract (-)", "Multiply (*)", "Divide (/)", "Square", "Sqrt"]</property>
+                            <property name="command" type="command" cbtype="simple">activate_calc</property>
+                            <property name="values">["None", "Add (+)", "Subtract (-)", "Multiply (*)", "Divide (/)", "Power of two (^2)", "Sqrt (√)"]</property>
                             <layout manager="grid">
                               <property name="column">0</property>
                               <property name="padx">5</property>
@@ -102,6 +103,7 @@
                         </child>
                         <child>
                           <object class="ttk.Spinbox" id="spinbox_x" named="True">
+                            <property name="command" type="command" cbtype="simple">activate_calc</property>
                             <property name="from_">-10000000000</property>
                             <property name="increment">1</property>
                             <property name="to">10000000000</property>
@@ -142,7 +144,8 @@
                         </child>
                         <child>
                           <object class="customtkinter.CTkComboBox" id="sel_y_oper" named="True">
-                            <property name="values">["None", "Add (+)", "Subtract (-)", "Multiply (*)", "Divide (/)", "Square", "Sqrt"]</property>
+                            <property name="command" type="command" cbtype="simple">activate_calc</property>
+                            <property name="values">["None", "Add (+)", "Subtract (-)", "Multiply (*)", "Divide (/)", "Power of two (^2)", "Sqrt (√)"]</property>
                             <layout manager="grid">
                               <property name="column">0</property>
                               <property name="padx">5</property>
@@ -162,6 +165,7 @@
                         </child>
                         <child>
                           <object class="ttk.Spinbox" id="spinbox_y" named="True">
+                            <property name="command" type="command" cbtype="simple">activate_calc</property>
                             <property name="from_">-10000000000</property>
                             <property name="increment">1</property>
                             <property name="to">10000000000</property>
@@ -202,7 +206,8 @@
                         </child>
                         <child>
                           <object class="customtkinter.CTkComboBox" id="sel_z_oper" named="True">
-                            <property name="values">["None", "Add (+)", "Subtract (-)", "Multiply (*)", "Divide (/)", "Square", "Sqrt"]</property>
+                            <property name="command" type="command" cbtype="simple">activate_calc</property>
+                            <property name="values">["None", "Add (+)", "Subtract (-)", "Multiply (*)", "Divide (/)", "Power of two (^2)", "Sqrt (√)"]</property>
                             <layout manager="grid">
                               <property name="column">0</property>
                               <property name="padx">5</property>
@@ -222,6 +227,7 @@
                         </child>
                         <child>
                           <object class="ttk.Spinbox" id="spinbox_z" named="True">
+                            <property name="command" type="command" cbtype="simple">activate_calc</property>
                             <property name="from_">-10000000000</property>
                             <property name="increment">1</property>
                             <property name="to">10000000000</property>

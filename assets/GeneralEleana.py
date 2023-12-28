@@ -4,6 +4,16 @@ import numpy as np
 from pathlib import Path
 import tempfile
 
+# class EleanaObserver:
+#     ''' This class is used to create observers of variables in Eleana object'''
+#     def __init__(self, eleana_instance, modify_data):
+#         self.eleana = eleana_instance
+#         self.modify_data = modify_data
+#         self.eleana.attach(self)
+#
+#     def update(self, subject):
+#         if subject == self.eleana:
+#             self.modify_data.data_changed()
 
 class Eleana:
     # Main attributes associated with data gathered in the programe
@@ -59,6 +69,34 @@ class Eleana:
                       'f_stk':0, 's_stk':0, 'r_stk':0,
                       'f_dsp':True, 's_dsp':True ,'r_dsp':True
                       }
+
+        # Create observer list
+        self._observers = []
+
+    ''' ***************************** 
+     *         OBSERVER METHODS      *
+     ******************************'''
+    def attach(self, observer):
+        if observer not in self._observers:
+            self._observers.append(observer)
+
+    def detach(self, observer):
+        try:
+            self._observers.remove(observer)
+        except ValueError:
+            pass
+
+    def notify(self):
+        for observer in self._observers:
+            observer.update(self)
+
+    # Setter for attributes that should be observed ---
+    def set_selections(self, variable=None, value=None):
+        if variable == None or value == None:
+            return
+        self.selections[variable] = value
+        self.notify()
+    # End of methods for observers --------------------
 
     def name_nr_to_index(self, selected_value_text):
         ''' Returns index of Eleana.dataset which name_nr attribute is equal to argument: selected_value_text'''

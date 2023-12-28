@@ -42,8 +42,8 @@ class GraphPreferences:
         self.set_cursor_modes()
 
         # Canvas style
-        #plt.style.use('Solarize_Light2')
-        plt.style.use('dark_background')
+        plt.style.use('Solarize_Light2')
+        #plt.style.use('dark_background')
 
         # Scale settings
         self.inverted_x_axis = False

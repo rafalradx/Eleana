@@ -14,6 +14,7 @@ class MainMenu:
         self.activebg = "#676767" # Hover background
         self.activefg = "#eaeaea" # Hover font color
         self.borderwidth = 1
+        self.borderwidth_bar = 0
 
         # Icons
         self.icon_dropdown = self.prepare_icon("dropdown.png")
@@ -40,7 +41,7 @@ class MainMenu:
         self.icon_edit_par = self.prepare_icon("edit_par.png")
 
         ''' Menu Bar'''
-        self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth_bar, activeborderwidth=self.borderwidth)
         self.app.mainwindow.config(menu=self.main_menu)
 
         # FILE
@@ -113,7 +114,6 @@ class MainMenu:
 
         # - Quit
         self.menu_file.add_command(label="Quit", command=self.app.close_application, image = self.icon_exit, compound="left", accelerator="Ctrl+Q")
-
 
         ''' Menu EDIT'''
 

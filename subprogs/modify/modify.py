@@ -1,51 +1,57 @@
 #!/usr/bin/python3
+import copy
 import pathlib
 import pygubu
 import tkinter as tk
-from tkinter import ttk
+
+from assets.Observer import Observer
+from modules.CTkMessagebox import CTkMessagebox
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "modify.ui"
 
 class ModifyData:
-    def __init__(self, master, eleana=None, grapher=None, app=None ):
+    def __init__(self, references): # instances master, eleana=None, grapher=None, app=None ):
         # References to the main objects
-        self.eleana = eleana
-        self.grapher = grapher
-        self.app = app
-        self.master = master
+        self.app = references
+        self.eleana = self.app.eleana
+        self.grapher = self.app.grapher
+        self.master = self.app.mainwindow
 
+        # Build GUI
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)
 
-        # Main widget
+        # Configure main window
         self.mainwindow = builder.get_object("toplevel1", self.master)
         self.mainwindow.title("Modify")
         self.mainwindow.attributes('-topmost', True)
 
         # References to widgets
-        self.sel_x_oper = builder.get_object("sel_x_oper", master)
-        self.sel_y_oper = builder.get_object("sel_y_oper", master)
-        self.sel_z_oper = builder.get_object("sel_z_oper", master)
-        self.spinbox_x = builder.get_object("spinbox_x", master)
-        self.spinbox_y = builder.get_object("spinbox_y", master)
-        self.spinbox_z = builder.get_object("spinbox_z", master)
+        self.sel_x_oper = builder.get_object("sel_x_oper", self.master)
+        self.sel_y_oper = builder.get_object("sel_y_oper", self.master)
+        self.sel_z_oper = builder.get_object("sel_z_oper", self.master)
+        self.spinbox_x = builder.get_object("spinbox_x", self.master)
+        self.spinbox_y = builder.get_object("spinbox_y", self.master)
+        self.spinbox_z = builder.get_object("spinbox_z", self.master)
 
+        # Set comboboxes to None
         self.sel_x_oper.set("None")
         self.sel_y_oper.set("None")
         self.sel_z_oper.set("None")
 
-        self.r1 = builder.get_object("r1", master)
-        self.r2 = builder.get_object("r2", master)
-        self.r3 = builder.get_object("r3", master)
-        self.r4 = builder.get_object("r4", master)
-        self.r5 = builder.get_object("r5", master)
-        self.r6 = builder.get_object("r6", master)
-        self.r7 = builder.get_object("r7", master)
-        self.r8 = builder.get_object("r8", master)
-        self.r9 = builder.get_object("r9", master)
+        # References to radiobuttons
+        self.r1 = builder.get_object("r1", self.master)
+        self.r2 = builder.get_object("r2", self.master)
+        self.r3 = builder.get_object("r3", self.master)
+        self.r4 = builder.get_object("r4", self.master)
+        self.r5 = builder.get_object("r5", self.master)
+        self.r6 = builder.get_object("r6", self.master)
+        self.r7 = builder.get_object("r7", self.master)
+        self.r8 = builder.get_object("r8", self.master)
+        self.r9 = builder.get_object("r9", self.master)
 
-        # Radiobuttons
+        # Radiobuttons variable
         self.step = tk.DoubleVar()
         builder.import_variables(self, ['step'])
         builder.connect_callbacks(self)
@@ -54,37 +60,169 @@ class ModifyData:
         self.set_spinbox_starting_value()
         self.r5.select()
 
+        # Response to None
         self.response = None
-        # Add tracing of selections
-        #self.first = tk.DoubleVar(master=self.app, value=self.eleana.selections['first'])
-        #self.first.trace(mode='w', callback=self.first_changed)
+
+        # Create observer
+        self.observer = Observer(self.eleana, self)
+
+        # Get data to modify
+        self.get_data()
+
+        # Switch off the batch mode
+        self.batch = False
+
+        # Set current position in Results Dataset
+        self.result_index = len(self.eleana.results_dataset)
+        response = self.get_data()
+        if response:
+            pass
+    ''' STANDARD METHODS TO HANDLE WINDOW BEHAVIOR '''
+    def data_changed(self):
+    # This is trigerred by the observer
+        self.get_data()
+        self.perform_calculations()
 
     def get(self):
         if self.mainwindow.winfo_exists():
            self.master.wait_window(self.mainwindow)
         return self.response
+
     def cancel(self, event = None):
+    # Close the application
         self.response = None
         self.mainwindow.destroy()
+
     def run(self):
         self.mainwindow.mainloop()
 
-    def first_changed(self, name, index, mode):
-        print("zmieniono")
+    ''' END OF STANDARD METHODS '''
+
     def set_step(self):
+    # Set the step for spinbox according to the radio buttons
         current_step = self.step.get()
         self.spinbox_x.config(increment = current_step)
         self.spinbox_y.config(increment=current_step)
         self.spinbox_z.config(increment=current_step)
-
-        print(current_step)
-    def ok_clicked(self):
-        pass
-
     def set_spinbox_starting_value(self):
+    # Set default values in spinboxes
         self.spinbox_x.set(1)
         self.spinbox_y.set(1)
         self.spinbox_z.set(1)
+
+    def activate_calc(self):
+        print("Oblicz...")
+    def ok_clicked(self):
+        self.perform_calculations()
+        self.grapher.plot_graph()
+
+    def get_data(self):
+        # Get data from selections First or Second
+        if self.eleana.selections['first'] >= 0:
+            index = self.eleana.selections['first']
+            # Copy data from first to results using the method in app
+            self.app.first_to_result()
+        else:
+            return False
+        # Create reference to original data
+        self.original_data = copy.deepcopy(self.eleana.dataset[index])
+        # Create reference to data in results
+        self.result_index = self.eleana.selections['result']
+        self.result_data = self.eleana.results_dataset[self.result_index]
+        return True
+
+    def perform_calculations(self):
+    # This function takes data from self.original_data and perform calculations
+    # on X, Y and Z axis according to what is selected in GUI.
+    # The effect of calculations is in self.modified_data
+        x_oper = self.sel_x_oper.get()[:2]
+        y_oper = self.sel_y.oper.get()[:2]
+        z_oper = self.sel_z_oper.get()[:2]
+        x_val = float(self.spinbox_x.get())
+        y_val = float(self.spinbox_y.get())
+        z_val = float(self.spinbox_z.get())
+
+        # Operations on X axis
+        if x_oper == 'Ad': # (+)
+            self.result_data.x = self.original_data.x + x_val
+        elif x_oper == 'Su': # (-)
+            self.result_data.x = self.original_data.x - x_val
+        elif x_oper == 'Mu': # (*)
+            self.result_data.x = self.original_data.x * x_val
+        elif x_oper == 'Di':  # (/)
+            if x_val == 0:
+                if not self.batch:
+                    info = CTkMessagebox(title="Error", message="Cannot divide X axis by zero.", icon="cancel")
+            else:
+                self.result_data.x = self.original_data.x / x_val
+        elif x_oper == 'Po':  # (^2)
+            not_negative = np.all(self.original_data.x >= 0)
+            if not_negative:
+                self.result_data.x = self.original_data.x ** 2
+            else:
+                if not self.batch:
+                    info = CTkMessagebox(title="Error", message="The X-axis contains negative values. It should not be raised to the second power.", icon="cancel")
+        elif x_oper == 'Sq':  # (\/x)
+            not_negative = np.all(self.original_data.x >= 0)
+            if not_negative:
+                self.result_data.x = self.original_data.x ** 0.5
+            else:
+                if not self.batch:
+                    info = CTkMessagebox(title="Error", message="The X-axis contains negative values. Square root calculation is not possible.", icon="cancel")
+        else:
+            pass
+
+        # Operations on Y axis
+        if y_oper == 'Ad':  # (+)
+            self.result_data.y = self.original_data.y + y_val
+        elif y_oper == 'Su':  # (-)
+            self.result_data.y = self.original_data.y - y_val
+        elif y_oper == 'Mu':  # (*)
+            self.result_data.y = self.original_data.x * y_val
+        elif y_oper == 'Di':  # (/)
+            if y_val == 0:
+                if not self.batch:
+                    info = CTkMessagebox(title="Error", message="Cannot divide Y axis by zero.", icon="cancel")
+            else:
+                self.result_data.y = self.original_data.y / y_val
+        elif y_oper == 'Po':  # (^2)
+            self.result_data.y = self.original_data.y ** 2
+        elif y_oper == 'Sq':  # (\/x)
+            not_negative = np.all(self.original_data.x >= 0)
+            if not_negative:
+                self.result_data.x = self.original_data.x ** 0.5
+            else:
+                if not self.batch:
+                    info = CTkMessagebox(title="Error", message="The Y-axis contains negative values. Square root calculation is not possible.", icon="cancel")
+        else:
+            pass
+
+        # Operations on Z
+        if self.original_data.type == 'single 2D':
+            pass
+        elif z_oper == 'Ad':  # (+)
+            self.result_data.z = self.original_data.z + z_val
+        elif z_oper == 'Su':  # (-)
+            self.result_data.z = self.original_data.z - z_val
+        elif z_oper == 'Mu':  # (*)
+            self.result_data.z = self.original_data.z * z_val
+        elif z_oper == 'Di':  # (/)
+            if z_val == 0:
+                if not self.batch:
+                    info = CTkMessagebox(title="Error", message="Cannot divide Z axis by zero.", icon="cancel")
+            else:
+                self.result_data.z = self.original_data.z / z_val
+        elif z_oper == 'Po':  # (^2)
+            self.result_data.z = self.original_data.z ** 2
+        elif z_oper == 'Sq':  # (\/x)
+            not_negative = np.all(self.original_data.z >= 0)
+            if not_negative:
+                self.result_data.z = self.original_data.z ** 0.5
+            else:
+                if not self.batch:
+                    info = CTkMessagebox(title="Error", message="The Y-axis contains negative values. Square root calculation is not possible.", icon="cancel")
+        else:
+            pass
 
 if __name__ == "__main__":
     app = ModifyData()
