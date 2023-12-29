@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <interface version="1.3">
   <object class="tk.Toplevel" id="Eleana" named="True">
-    <property name="geometry">1600x576</property>
+    <property name="geometry">1024x576</property>
     <property name="height">600</property>
     <property name="overrideredirect">false</property>
     <property name="resizable">both</property>
@@ -482,8 +482,7 @@
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkButton" id="btn_modify" named="True">
-                                            <property name="command" type="command" cbtype="simple">modify_first</property>
+                                          <object class="customtkinter.CTkButton" id="ctkbutton46">
                                             <property name="corner_radius">5</property>
                                             <property name="fg_color">#c6484c</property>
                                             <property name="font">{Arial} 12 {bold}</property>
@@ -791,7 +790,6 @@
                                         </child>
                                         <child>
                                           <object class="customtkinter.CTkButton" id="ctkbutton5">
-                                            <property name="command" type="command" cbtype="simple">modify_second</property>
                                             <property name="corner_radius">5</property>
                                             <property name="fg_color">#20acdc</property>
                                             <property name="font">{Arial} 12 {bold}</property>
@@ -1248,6 +1246,7 @@
                             <child>
                               <object class="customtkinter.CTkFrame" id="rightFrame" named="True">
                                 <property name="corner_radius">0</property>
+                                <property name="fg_color">#505050</property>
                                 <property name="width">50</property>
                                 <layout manager="grid">
                                   <property name="column">1</property>
@@ -1267,10 +1266,6 @@
                                       <property name="row">0</property>
                                       <property name="sticky">nsew</property>
                                     </layout>
-                                    <containerlayout manager="grid">
-                                      <property type="col" id="0" name="weight">1</property>
-                                      <property type="col" id="all" name="weight">1</property>
-                                    </containerlayout>
                                     <child>
                                       <object class="customtkinter.CTkCheckBox" id="check_autoscale_X" named="True">
                                         <property name="border_width">2</property>
@@ -1422,10 +1417,6 @@
                                           <property name="row">11</property>
                                           <property name="sticky">nsew</property>
                                         </layout>
-                                        <containerlayout manager="grid">
-                                          <property type="col" id="0" name="weight">1</property>
-                                          <property type="row" id="0" name="weight">1</property>
-                                        </containerlayout>
                                       </object>
                                     </child>
                                   </object>

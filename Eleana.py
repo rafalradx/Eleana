@@ -12,6 +12,7 @@ import io
 import sys
 import pandas
 import pyperclip
+import re
 
 list_of_subprogs = []
 
@@ -28,6 +29,7 @@ from assets.Initialization import Init
 from assets.Grapher import Grapher, GraphPreferences
 from assets.Update import Update
 from assets.Menu import ContextMenu, MainMenu
+from assets.Sounds import Sound
 
 # Import Eleana subprograms and windows
 from subprogs.group_edit.add_group import Groupcreate
@@ -63,6 +65,7 @@ class EleanaMainApp:
 
         # Initialize eleana
         self.eleana = eleana_instance
+        self.notify = self.eleana.notify_on
 
         # START BUILDER
         self.builder = builder = pygubu.Builder()
@@ -427,12 +430,27 @@ class EleanaMainApp:
             return
         self.grapher.plot_graph()
 
+    def modify_first(self):
+        self.modify('first')
+
+    def modify_second(self):
+        self.modify('second')
     def modify(self, which = None):
+        if len(self.eleana.dataset) == 0:
+            info = CTkMessagebox(title='', message='Empty dataset')
+            return
         if not which:
             which = 'first'
-        #self.modify_data = ModifyData(self.mainwindow, self.eleana, self.grapher, self)
-        self.modify_data = ModifyData(self)
-        response = self.modify_data.get()
+        try:
+            if self.modify_data == None:
+                self.modify_data = ModifyData(self, which)
+                response = self.modify_data.get()
+            else:
+                sound.beep()
+                return
+        except AttributeError:
+            self.modify_data = ModifyData(self)
+            response = self.modify_data.get()
 
     def second_show(self):
         self.eleana.set_selections('s_dsp', bool(self.check_second_show.get()))
@@ -559,19 +577,14 @@ class EleanaMainApp:
 
         if first_pos == 'None':
             self.secondComplex.grid_remove()
-
         self.sel_first.set(second_pos)
         self.sel_second.set(first_pos)
-
         self.first_selected(second_pos)
         self.second_selected(first_pos)
-
         self.f_stk.set(second_stk)
         self.s_stk.set(first_stk)
-
         self.f_stk_selected(second_stk)
         self.s_stk_selected(first_stk)
-
         self.grapher.plot_graph()
 
     def second_to_result(self):
@@ -588,15 +601,7 @@ class EleanaMainApp:
                 list_of_results.append(each.name)
         except:
             pass
-
-        if spectrum.name in list_of_results:
-            dialog = customtkinter.CTkInputDialog(
-                text="There is data with the same name. Please enter a different name.", title="Enter new name")
-            input = dialog.get_input()
-            if type(input) == str and spectrum.name != input:
-                spectrum.name = input
-            else:
-                return
+        spectrum.name = self.generate_name_suffix(spectrum.name, list_of_results)
 
         # Send to result and update lists
         self.eleana.results_dataset.append(spectrum)
@@ -626,8 +631,6 @@ class EleanaMainApp:
             self.resultComplex.grid_remove()
             self.resultStkFrame.grid_remove()
             self.grapher.plot_graph()
-            return
-
         i = 0
         while i < len(self.eleana.results_dataset):
             name = self.eleana.results_dataset[i].name
@@ -643,7 +646,6 @@ class EleanaMainApp:
             self.resultComplex.grid()
         else:
             self.resultComplex.grid_remove()
-
         self.grapher.plot_graph()
 
     def result_up_clicked(self):
@@ -769,7 +771,6 @@ class EleanaMainApp:
 
 
     def delete_sel_result(self):
-
         index = self.eleana.selections['result']
         if index < 0:
             return
@@ -794,13 +795,9 @@ class EleanaMainApp:
                     list_of_results.append(each.name)
             except:
                 pass
-            if spectrum.name in list_of_results:
-                dialog = ctk.CTkInputDialog(text="There is data with the same name. Please enter a different name.", title="Enter new name")
-                input = dialog.get_input()
-                if type(input) == str and spectrum.name != input:
-                    spectrum.name = input
-                else:
-                    return
+
+            # Create numbered name if similar exists in the Result Dataset
+            spectrum.name = self.generate_name_suffix(spectrum.name, list_of_results)
 
             # Send to result and update lists
             self.eleana.results_dataset.append(spectrum)
@@ -813,6 +810,34 @@ class EleanaMainApp:
             self.sel_result.set(position)
             self.result_selected(position)
             self.grapher.plot_graph()
+
+    def generate_name_suffix(self, name, list_of_results):
+        name_lists = []
+        i = 0
+        while i < len(list_of_results):
+            from_list = list_of_results[i]
+            from_list = re.split(r'(_#\d+$)', from_list)
+            head = from_list[0]
+            try:
+                number = int(from_list[1][2:])
+            except IndexError:
+                number = 0
+            name_lists.append({'name': head, 'nr': number})
+            i += 1
+        numbers = [-1]
+        for each in name_lists:
+            if each['name'] == name:
+                numbers.append(each['nr'])
+            else:
+                numbers.append(-1)
+        last_number = max(numbers)
+        if last_number == 0:
+            name = name + '_#1'
+        elif last_number == -1:
+            pass
+        else:
+            name = name + '_#' + str(last_number + 1)
+        return name
 
     ''' *****************************************
     *                                           *
@@ -861,7 +886,7 @@ class EleanaMainApp:
         response = quit_dialog.get()
         if response == "Yes":
             self.eleana.results_dataset = []
-            self.eleana.set_selections('result', -1)
+            self.eleana.selections['result'] = -1
             self.sel_result.configure(values = ['None'])
             self.r_stk.configure(values = [])
             self.resultFrame.grid_remove()
@@ -1300,6 +1325,7 @@ main_menu = MainMenu(app, eleana)
 init = Init(app, eleana, grapher, main_menu)
 context_menu = ContextMenu(app, eleana)
 update = Update(app, eleana, main_menu)     # This contains methods for update things like lists, settings, gui, groups etc.
+sound = Sound()
 
 # Initialize basic settings: geometry, icon, graph, binding, etc
 init.main_window()

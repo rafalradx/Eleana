@@ -72,6 +72,7 @@ class Eleana:
 
         # Create observer list
         self._observers = []
+        self.notify_on = False
 
     ''' ***************************** 
      *         OBSERVER METHODS      *
@@ -95,7 +96,8 @@ class Eleana:
         if variable == None or value == None:
             return
         self.selections[variable] = value
-        self.notify()
+        if self.notify_on and variable != 'result':
+            self.notify()
     # End of methods for observers --------------------
 
     def name_nr_to_index(self, selected_value_text):
@@ -128,7 +130,6 @@ class Eleana:
             index_main = selection['result']
             index_stk = selection['r_stk']
             show_complex = selection['r_cpl']
-
         else:
             return {}
 
