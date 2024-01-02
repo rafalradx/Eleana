@@ -158,7 +158,10 @@ class ModifyData:
                 self.eleana.notify_on = False
             else:
                 self.eleana.notify_on = True
-            self.app.first_to_result()
+            if self.which == 'second':
+                self.app.second_to_result()
+            else:
+                self.app.first_to_result()
             self.eleana.notify_on = False
         else:
             return False
@@ -170,25 +173,14 @@ class ModifyData:
         return True
 
     def process_group(self):
-        #self.processFrame.grid()
-        #self.mainwindow.update_idletasks()
         self.mainwindow.config(cursor='watch')
         spectra = self.app.sel_first._values
-        # max_val = len(spectra)
-        # self.progress_bar.configure(maximum = max_val)
-        # self.progress_bar.configure(value = 0)
         self.app.sel_first.set(spectra[0])
         self.eleana.selections[self.which] = 0
-        # step = 0
-        # self.mainwindow.update_idletasks()
         for each in spectra:
             self.eleana.notify_on = True
             self.app.first_up_clicked()
             self.perform_calculations()
-            #step +=1
-            #self.progress_bar.configure(value = step)
-            #self.mainwindow.update_idletasks()
-        #self.processFrame.grid_remove()
         self.mainwindow.config(cursor='')
 
     def perform_calculations(self):

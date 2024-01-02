@@ -1,18 +1,19 @@
 #!/usr/bin/python3
 
+import copy
+import io
+import pathlib
 # Import Python Modules
 import pickle
-import copy
-import pathlib
-from pathlib import Path
-import customtkinter as ctk
-import pygubu
-import numpy as np
-import io
-import sys
-import pandas
-import pyperclip
 import re
+import sys
+from pathlib import Path
+
+import customtkinter as ctk
+import numpy as np
+import pandas
+import pygubu
+import pyperclip
 
 list_of_subprogs = []
 
@@ -26,29 +27,38 @@ from modules.CTkColorPicker import *
 from assets.GeneralEleana import Eleana
 from assets.LoadSave import Load, Save, Export
 from assets.Initialization import Init
-from assets.Grapher import Grapher, GraphPreferences
+from assets.Grapher import Grapher
 from assets.Update import Update
 from assets.Menu import ContextMenu, MainMenu
 from assets.Sounds import Sound
 
 # Import Eleana subprograms and windows
 from subprogs.group_edit.add_group import Groupcreate
+
 list_of_subprogs.append(['group_create', 'cancel'])
 from subprogs.group_edit.stack_to_group import StackToGroup
+
 list_of_subprogs.append(['stack_to_group', 'cancel'])
 from subprogs.group_edit.assign_to_group import Groupassign
+
 list_of_subprogs.append(['group_assign', 'cancel'])
 from subprogs.user_input.single_dialog import SingleDialog
+
 list_of_subprogs.append(['single_dialog', 'cancel'])
 from subprogs.select_data.select_data import SelectData
+
 list_of_subprogs.append(['select_data', 'cancel'])
 from subprogs.notepad.notepad import Notepad
+
 list_of_subprogs.append(['notepad', 'cancel'])
 from subprogs.table.table import CreateFromTable
+
 list_of_subprogs.append(['spreadsheet', 'cancel'])
 from subprogs.edit_parameters.edit_parameters import EditParameters
+
 list_of_subprogs.append(['edit_par', 'cancel'])
 from subprogs.modify.modify import ModifyData
+
 list_of_subprogs.append(['modify_data', 'cancel'])
 # Widgets used by main application
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
@@ -59,6 +69,7 @@ VERSION = 1
 INTERPRETER = sys.executable  # <-- Python version for subprocesses
 
 DEVEL = True
+
 
 class EleanaMainApp:
     def __init__(self, eleana_instance, master=None):
@@ -121,7 +132,7 @@ class EleanaMainApp:
         self.command_line.bind("<Return>", self.execute_command)
         self.command_line.bind("<Up>", self.execute_command)
         self.command_line.bind("<Down>", self.execute_command)
-        self.command_history = {'index':0, 'lines':[]}
+        self.command_history = {'index': 0, 'lines': []}
         self.log_field = builder.get_object('log_field', self.mainwindow)
 
         # Paned windows
@@ -146,7 +157,7 @@ class EleanaMainApp:
         self.repeated_items = []
 
         # Comparison view
-        self.comparison_settings = {'vsep': 0, 'hsep': 0, 'indexes': (), 'v_factor':'1', 'h_factor':'1'}
+        self.comparison_settings = {'vsep': 0, 'hsep': 0, 'indexes': (), 'v_factor': '1', 'h_factor': '1'}
 
     def set_grapher(self, grapher):
         self.grapher = grapher
@@ -165,17 +176,18 @@ class EleanaMainApp:
         window.geometry(f"{width}x{height}+{x}+{y}")
 
     def run(self):
-            self.mainwindow.after(100, self.set_pane_height)
-            self.mainwindow.deiconify()
-            self.mainwindow.mainloop()
+        self.mainwindow.after(100, self.set_pane_height)
+        self.mainwindow.deiconify()
+        self.mainwindow.mainloop()
 
     ''' *********************************************
     *                                               *
     *              COMPARISON VIEW                  *
     *                                               *
     **********************************************'''
+
     def comparison_view(self):
-        self.info_show =True
+        self.info_show = True
         self.repeated_items = []
         comparison_mode = bool(self.switch_comparison.get())
         if comparison_mode:
@@ -183,12 +195,12 @@ class EleanaMainApp:
             self.secondFrame.grid_remove()
             self.resultFrame.grid_remove()
             self.swapFrame.grid_remove()
-            self.listFrame.grid(column=0, row = 2, rowspan=3)
+            self.listFrame.grid(column=0, row=2, rowspan=3)
             self.listbox = CTkListbox(self.listFrame, command=self.list_selected, multiple_selection=True, height=400)
             self.listbox.grid(column=0, columnspan=1, rowspan=4, padx=4, pady=4, row=0, sticky="nsew")
-            self.ver_slider = CTkHorizontalSlider('Vertical separation', 'vsep', [0,1], self.listFrame, self)
+            self.ver_slider = CTkHorizontalSlider('Vertical separation', 'vsep', [0, 1], self.listFrame, self)
             self.ver_slider.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=5, sticky="nsew")
-            self.hor_slider = CTkHorizontalSlider('Horizontal separation', 'hsep', [-1,1], self.listFrame, self)
+            self.hor_slider = CTkHorizontalSlider('Horizontal separation', 'hsep', [-1, 1], self.listFrame, self)
             self.hor_slider.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=8, sticky="nsew")
             self.ver_slider.factor.delete(0, 'end')
             self.ver_slider.factor.insert(0, self.comparison_settings['v_factor'])
@@ -210,7 +222,7 @@ class EleanaMainApp:
                 for i in indexes:
                     names_nr.append(self.eleana.dataset[i].name_nr)
             i = 0
-            while i < len(names_nr)-1:
+            while i < len(names_nr) - 1:
                 self.listbox.insert(indexes[i], names_nr[i])
                 i += 1
             try:
@@ -312,7 +324,7 @@ class EleanaMainApp:
 
     def group_selected(self, value):
         self.eleana.set_selections('group', value)
-        #self.eleana.selections['group'] = value
+        # self.eleana.selections['group'] = value
         update.all_lists()
         self.sel_first.set('None')
         self.sel_second.set('None')
@@ -362,8 +374,8 @@ class EleanaMainApp:
             return
 
     def first_complex_clicked(self, value):
-            self.eleana.set_selections('f_cpl', value)
-            self.grapher.plot_graph()
+        self.eleana.set_selections('f_cpl', value)
+        self.grapher.plot_graph()
 
     def first_selected(self, selected_value_text):
         if selected_value_text == 'None':
@@ -435,22 +447,19 @@ class EleanaMainApp:
 
     def modify_second(self):
         self.modify('second')
-    def modify(self, which = None):
+
+    def modify(self, which=None):
         if len(self.eleana.dataset) == 0:
             info = CTkMessagebox(title='', message='Empty dataset')
             return
         if not which:
             which = 'first'
         try:
-            if self.modify_data == None:
-                self.modify_data = ModifyData(self, which)
-                response = self.modify_data.get()
-            else:
-                sound.beep()
-                return
+            self.modify_data.cancel()
         except AttributeError:
-            self.modify_data = ModifyData(self)
-            response = self.modify_data.get()
+            pass
+        self.modify_data = ModifyData(self, which)
+        response = self.modify_data.get()
 
     def second_show(self):
         self.eleana.set_selections('s_dsp', bool(self.check_second_show.get()))
@@ -482,7 +491,6 @@ class EleanaMainApp:
             self.secondComplex.grid_remove()
         self.grapher.plot_graph()
 
-
     def second_down_clicked(self):
         current_position = self.sel_second.get()
         list_of_items = self.sel_second._values
@@ -501,7 +509,6 @@ class EleanaMainApp:
         except IndexError:
             return
 
-
     def second_up_clicked(self):
         current_position = self.sel_second.get()
         list_of_items = self.sel_second._values
@@ -516,7 +523,6 @@ class EleanaMainApp:
             self.second_selected(new_position)
         except IndexError:
             return
-
 
     def s_stk_selected(self, selected_value_text):
         if selected_value_text in self.s_stk._values:
@@ -543,7 +549,6 @@ class EleanaMainApp:
             return
         self.grapher.plot_graph()
 
-
     def s_stk_down_clicked(self):
         current_position = self.s_stk.get()
         list_of_items = self.s_stk._values
@@ -563,8 +568,8 @@ class EleanaMainApp:
         self.grapher.plot_graph()
 
     def second_complex_clicked(self, value):
-            self.eleana.set_selections('s_cpl', value)
-            self.grapher.plot_graph()
+        self.eleana.set_selections('s_cpl', value)
+        self.grapher.plot_graph()
 
     def swap_first_second(self):
         first_pos = self.sel_first.get()
@@ -666,6 +671,7 @@ class EleanaMainApp:
             return
 
         self.grapher.plot_graph()
+
     def result_down_clicked(self):
         current_position = self.sel_result.get()
         list_of_items = self.sel_result._values
@@ -702,6 +708,7 @@ class EleanaMainApp:
             return
 
         self.grapher.plot_graph()
+
     def r_stk_down_clicked(self):
         current_position = self.r_stk.get()
         list_of_items = self.r_stk._values
@@ -719,6 +726,10 @@ class EleanaMainApp:
             self.eleana.set_selections('r_stk', index - 1)
         except IndexError:
             return
+        self.grapher.plot_graph()
+
+    def result_complex_clicked(self, value):
+        self.eleana.set_selections('r_cpl', value)
         self.grapher.plot_graph()
 
     def all_results_to_current_group(self):
@@ -769,7 +780,6 @@ class EleanaMainApp:
         self.sel_first.set(added_item)
         self.first_selected(added_item)
 
-
     def delete_sel_result(self):
         index = self.eleana.selections['result']
         if index < 0:
@@ -782,34 +792,34 @@ class EleanaMainApp:
         self.grapher.plot_graph()
 
     def first_to_result(self):
-            current = self.sel_first.get()
-            if current == 'None':
-                 return
-            index = get_index_by_name(current)
-            spectrum = copy.deepcopy(self.eleana.dataset[index])
+        current = self.sel_first.get()
+        if current == 'None':
+            return
+        index = get_index_by_name(current)
+        spectrum = copy.deepcopy(self.eleana.dataset[index])
 
-            # Check the name if the same already exists in eleana.result_dataset
-            list_of_results = []
-            try:
-                for each in self.eleana.results_dataset:
-                    list_of_results.append(each.name)
-            except:
-                pass
+        # Check the name if the same already exists in eleana.result_dataset
+        list_of_results = []
+        try:
+            for each in self.eleana.results_dataset:
+                list_of_results.append(each.name)
+        except:
+            pass
 
-            # Create numbered name if similar exists in the Result Dataset
-            spectrum.name = self.generate_name_suffix(spectrum.name, list_of_results)
+        # Create numbered name if similar exists in the Result Dataset
+        spectrum.name = self.generate_name_suffix(spectrum.name, list_of_results)
 
-            # Send to result and update lists
-            self.eleana.results_dataset.append(spectrum)
-            update.list_in_combobox('sel_result')
-            update.list_in_combobox('r_stk')
+        # Send to result and update lists
+        self.eleana.results_dataset.append(spectrum)
+        update.list_in_combobox('sel_result')
+        update.list_in_combobox('r_stk')
 
-            # Set the position to the last added item
-            list_of_results = self.sel_result._values
-            position = list_of_results[-1]
-            self.sel_result.set(position)
-            self.result_selected(position)
-            self.grapher.plot_graph()
+        # Set the position to the last added item
+        list_of_results = self.sel_result._values
+        position = list_of_results[-1]
+        self.sel_result.set(position)
+        self.result_selected(position)
+        self.grapher.plot_graph()
 
     def generate_name_suffix(self, name, list_of_results):
         name_lists = []
@@ -846,13 +856,15 @@ class EleanaMainApp:
     ******************************************'''
 
     ''' EDIT: Delete selected data                             '''
+
     def delete_selected_data(self):
         current_first = self.sel_first.get()
         current_second = self.sel_second.get()
         av_data = self.sel_first._values
         av_data.pop(0)
         # Open dialog
-        self.select_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'], items=av_data)
+        self.select_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'],
+                                      items=av_data)
         response = self.select_data.get()
         if response == None:
             return
@@ -862,7 +874,7 @@ class EleanaMainApp:
             index = get_index_by_name(each)
             indexes.append(index)
         # Delete data with selected indexes
-        indexes.sort(reverse = True)
+        indexes.sort(reverse=True)
         for each in indexes:
             eleana.dataset.pop(each)
         # Set all data to None
@@ -878,21 +890,23 @@ class EleanaMainApp:
         update.gui_widgets()
         self.comparison_view()
 
-
     ''' EDIT: Delete Results dataset                            '''
+
     def clear_results(self):
-        quit_dialog = CTkMessagebox(title="Clear results", message="Are you sure you want to clear the entire dataset in the results?",
+        quit_dialog = CTkMessagebox(title="Clear results",
+                                    message="Are you sure you want to clear the entire dataset in the results?",
                                     icon="warning", option_1="No", option_2="Yes")
         response = quit_dialog.get()
         if response == "Yes":
             self.eleana.results_dataset = []
             self.eleana.selections['result'] = -1
-            self.sel_result.configure(values = ['None'])
-            self.r_stk.configure(values = [])
+            self.sel_result.configure(values=['None'])
+            self.r_stk.configure(values=[])
             self.resultFrame.grid_remove()
             self.grapher.plot_graph()
 
     ''' EDIT: Delete Main Dataset dataset                            '''
+
     def clear_dataset(self):
         quit_dialog = CTkMessagebox(title="Clear dataset",
                                     message="Are you sure you want to clear the entire dataset?",
@@ -910,19 +924,22 @@ class EleanaMainApp:
             self.grapher.plot_graph()
 
     ''' EDIT: Graph preferences                                     '''
+
     def graph_preferences(self):
         pick_color = AskColor()  # open the color picker
         color = pick_color.get()  # get the color string
 
-
     ''' FILE: Load Project                                          '''
+
     def load_project(self, event=None, recent=None):
         project = load.load_project(recent)
         if project == None:
             return
         if len(self.eleana.dataset) > 0:
-            question = CTkMessagebox(title="Dataset is not empty", message="There is data in the dataset. Choose what you want to",
-                        icon="question", option_3="Append to the dataset", option_2="Replace the dataset", option_1="Cancel")
+            question = CTkMessagebox(title="Dataset is not empty",
+                                     message="There is data in the dataset. Choose what you want to",
+                                     icon="question", option_3="Append to the dataset", option_2="Replace the dataset",
+                                     option_1="Cancel")
             response = question.get()
             if response == None or response == 'Cancel':
                 return
@@ -974,6 +991,7 @@ class EleanaMainApp:
         self.grapher.plot_graph()
 
     ''' FILE: Load Recent project                                     '''
+
     def load_recent(self, selected_value_text):
         index = selected_value_text.split('. ')
         index = int(index[0])
@@ -984,6 +1002,7 @@ class EleanaMainApp:
         self.grapher.plot_graph()
 
     ''' FILE: Save As                                                 '''
+
     def save_as(self):
         report = save.save_project()
         if not report:
@@ -1010,6 +1029,7 @@ class EleanaMainApp:
     *          IMPORT EXTERNAL DATA             *
     *                                           *
     *********************************************'''
+
     def import_elexsys(self):
         ''' Open window that loads the spectra '''
         load.loadElexsys()
@@ -1041,7 +1061,7 @@ class EleanaMainApp:
         update.dataset_list()
         update.all_lists()
 
-    def import_ascii(self, clipboard = None):
+    def import_ascii(self, clipboard=None):
         load.loadAscii(clipboard)
         update.dataset_list()
         update.group_list()
@@ -1057,7 +1077,7 @@ class EleanaMainApp:
         update.group_list()
         update.all_lists()
 
-    def quick_paste(self, event = None):
+    def quick_paste(self, event=None):
         text = pyperclip.paste()
         self.import_ascii(text)
 
@@ -1068,7 +1088,7 @@ class EleanaMainApp:
         export.group_csv(self.eleana.selections['group'])
 
     # --- Quit (also window close by clicking on X)
-    def close_application(self, event = None):
+    def close_application(self, event=None):
         global list_of_subprogs
         quit_dialog = CTkMessagebox(title="Quit", message="Do you want to close the program?",
                                     icon="warning", option_1="No", option_2="Yes")
@@ -1093,7 +1113,7 @@ class EleanaMainApp:
     # EDIT Menu:
     #   Notes
     def notes(self):
-        self.notepad = Notepad(master = self.mainwindow, title="Edit notes", text = self.eleana.notes)
+        self.notepad = Notepad(master=self.mainwindow, title="Edit notes", text=self.eleana.notes)
         response = self.notepad.get()
         if response == None:
             return
@@ -1107,10 +1127,11 @@ class EleanaMainApp:
 
     def create_from_table(self):
         headers = ['A', 'B', 'C']
-        date = [['', '','']]
-        df = pandas.DataFrame(columns = headers, data=date)
+        date = [['', '', '']]
+        df = pandas.DataFrame(columns=headers, data=date)
         name = 'new'
-        self.spreadsheet = CreateFromTable(self.eleana, self.mainwindow, df=df, name=name, group=self.eleana.selections['group'])
+        self.spreadsheet = CreateFromTable(self.eleana, self.mainwindow, df=df, name=name,
+                                           group=self.eleana.selections['group'])
 
     def first_to_group(self):
         if self.eleana.selections['first'] < 0:
@@ -1131,11 +1152,13 @@ class EleanaMainApp:
     *           GRAPH SWITCHES AND BUTTONS           *
     *                                                *  
     ***********************************************'''
+
     def switch_autoscale_x(self):
         self.grapher.plot_graph()
 
     def switch_autoscale_y(self):
         self.grapher.plot_graph()
+
     def set_log_scale_x(self):
         self.grapher.plot_graph()
 
@@ -1158,6 +1181,7 @@ class EleanaMainApp:
 
     def clear_cursors(self):
         self.grapher.clear_all_annotations()
+
     def sel_graph_cursor(self, value):
         self.grapher.clear_all_annotations(True)
         self.grapher.current_cursor_mode['label'] = value
@@ -1184,6 +1208,7 @@ class EleanaMainApp:
             update.dataset_list()
             update.group_list()
             update.all_lists()
+
     def rename_data(self, which):
         index = self.eleana.selections[which]
         index_f = self.eleana.selections['first']
@@ -1226,7 +1251,7 @@ class EleanaMainApp:
             return
         comment = self.eleana.dataset[index].comment
         name = 'Comment to: ' + str(self.eleana.dataset[index].name_nr)
-        text = Notepad(self.mainwindow, title = name, text = comment)
+        text = Notepad(self.mainwindow, title=name, text=comment)
         response = text.get()
         self.eleana.dataset[index].comment = response
 
@@ -1236,14 +1261,14 @@ class EleanaMainApp:
             return
         par_to_edit = self.eleana.dataset[idx].parameters
         name_nr = self.eleana.dataset[idx].name_nr
-        self.edit_par = EditParameters(self.mainwindow, parameters= par_to_edit, name = name_nr)
+        self.edit_par = EditParameters(self.mainwindow, parameters=par_to_edit, name=name_nr)
         response = self.edit_par.get()
         if response:
             self.eleana.dataset[idx].parameters = response
         else:
             return
 
-    def execute_command(self,event):
+    def execute_command(self, event):
         if event.keysym == "Up":
             try:
                 previous = self.command_history['index'] - 1
@@ -1290,8 +1315,10 @@ class EleanaMainApp:
             return output
 
     ''' Keyboard bindings '''
+
     def copy_to_clipboard(self, event):
         print('Copy to clipboard')
+
 
 # --- GENERAL BATCH METHODS ---
 
@@ -1305,14 +1332,15 @@ def get_index_by_name(selected_value_text):
             return i
         i += 1
 
+
 ''' Starting application'''
 # Set default color appearance
-#ctk.set_appearance_mode("dark")
+# ctk.set_appearance_mode("dark")
 ctk.set_appearance_mode("light")
 
 # Create general main instances for the program
 eleana = Eleana()
-app = EleanaMainApp(eleana)      # This is GUI
+app = EleanaMainApp(eleana)  # This is GUI
 grapher = Grapher(app, eleana)
 app.set_grapher(grapher)
 
@@ -1324,7 +1352,8 @@ print('build menu')
 main_menu = MainMenu(app, eleana)
 init = Init(app, eleana, grapher, main_menu)
 context_menu = ContextMenu(app, eleana)
-update = Update(app, eleana, main_menu)     # This contains methods for update things like lists, settings, gui, groups etc.
+update = Update(app, eleana,
+                main_menu)  # This contains methods for update things like lists, settings, gui, groups etc.
 sound = Sound()
 
 # Initialize basic settings: geometry, icon, graph, binding, etc

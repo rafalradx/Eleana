@@ -1080,7 +1080,7 @@
                                         </containerlayout>
                                         <child>
                                           <object class="customtkinter.CTkSegmentedButton" id="resultComplex" named="True">
-                                            <property name="command" type="command" cbtype="simple">first_complex_clicked</property>
+                                            <property name="command" type="command" cbtype="simple">result_complex_clicked</property>
                                             <property name="corner_radius">5</property>
                                             <property name="font">{Arial} 12 {}</property>
                                             <property name="state">normal</property>

@@ -143,7 +143,12 @@ class Grapher(GraphPreferences):
         # Get selected data from dataset and store in "data"
         try:
             index = self.eleana.selections[which]
-            data = self.eleana.dataset[index]
+            data = self.eleana.results_dataset[index] if which == 'result' else self.eleana.dataset[index]
+
+            # if which == 'result':
+            #     data = self.eleana.results_dataset[index]
+            # else:
+            #     data = self.eleana.dataset[index]
         except IndexError:
             legend = ' '
             return legend
