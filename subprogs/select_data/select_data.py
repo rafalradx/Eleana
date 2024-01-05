@@ -22,6 +22,8 @@ class SelectData:
         self.listFrame = builder.get_object("listFrame", master)
         self.selection_list = CTkListbox(self.listFrame, multiple_selection=True)
         self.selection_list.pack(fill="both", expand=True, padx=10, pady=10)
+        #self.selection_list.component('listbox').bind('<MouseWheel>', self.on_mousewheel)
+
 
         self.group_field = builder.get_object("group_field", master)
         self.group_field.insert(0, group)
@@ -40,7 +42,7 @@ class SelectData:
 
         self.response = None
 
-        self.selection_list.bind("<MouseWheel>", self.on_mousewheel)
+
         # Create available date
         i = 0
         for each in self.items:
@@ -83,6 +85,7 @@ class SelectData:
 
     def on_mousewheel(self, event):
         # Przewijaj listę przy użyciu kółka myszki
+        print('Myszka')
         if event.delta:
             print(event)
             #self.selection_list.yview_scroll(int(-1 * (event.delta / 120)), "units")

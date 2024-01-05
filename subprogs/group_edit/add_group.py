@@ -25,7 +25,7 @@ class Groupcreate:
         # Set the window properties to modal mode
         self.mainwindow.grab_set()  # Set as modal
         self.mainwindow.attributes('-topmost', True)  # Always on top
-        self.mainwindow.title('Add new group')
+        self.mainwindow.title('Create new group')
 
         # Define references to objects in the window
         # --- example: self.text_box contains textbox widget object

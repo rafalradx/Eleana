@@ -304,21 +304,28 @@ class Update:
         return names
 
     # Creating groups on basis of groups defined in eleana.dataset
-    def get_groups(self):
+    def groups(self):
         dataset = self.eleana.dataset
-        found_groups = set()
-        self.groups = []
+        found_groups = ['All']
+
         for data in dataset:
-            self.groups.extend(data.groups)
-        found_groups.update(self.groups)
-        self.assignToGroups = {}
-        for group_name in found_groups:
+            found_groups.extend(data.groups)
+        found_groups = list(set(found_groups))
+        found_groups.sort()
+        assignToGroups = {'<group-list/>': found_groups}
+
+        group_assignments = {}
+        for group in found_groups:
+            group_assignments[group] = []
             i = 0
-            spectra_numbers = []
             while i < len(dataset):
-                groups_in_single_spectrum = dataset[i].groups
-                if group_name in groups_in_single_spectrum:
-                    spectra_numbers.append(i)
+                if group == 'All':
+                    group_assignments[group].append(i)
+                elif group in dataset[i].groups:
+                    group_assignments[group].append(i)
                 i += 1
-            self.assignToGroups[group_name] = spectra_numbers
-        return self.assignToGroups
+        self.eleana.assignmentToGroups = assignToGroups
+        for key in group_assignments.keys():
+            self.eleana.assignmentToGroups[key] = group_assignments[key]
+
+

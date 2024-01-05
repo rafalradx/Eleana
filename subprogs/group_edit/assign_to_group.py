@@ -88,16 +88,15 @@ class Groupassign:
     def display_data_groups(self):
         data_name = self.eleana.dataset[self.index].name_nr
         groups = self.eleana.dataset[self.index].groups
-        if len(groups) == 0:
+        if len(groups) == 0 or type(groups) == str:
             groups = ['All']
         self.eleana.dataset[self.index].groups = groups
-        groups = ', '.join(self.eleana.dataset[self.index].groups)
-        text = "NAME: " + data_name
+        groups = ', '.join(list(self.eleana.dataset[self.index].groups))
+        text = 'NAME: ' + data_name
         self.name_label.configure(text=text)
-        text = groups
         self.group_field.configure(state="normal")
         self.group_field.delete("0.0", "end")
-        self.group_field.insert("0.0",  text)
+        self.group_field.insert("0.0",  groups)
         self.group_field.configure(state="disabled")
 
 if __name__ == "__main__":

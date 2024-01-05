@@ -58,7 +58,7 @@
             </child>
             <child>
               <object class="customtkinter.CTkTextbox" id="group_field" named="True">
-                <property name="state">normal</property>
+                <property name="state">active</property>
                 <layout manager="grid">
                   <property name="column">0</property>
                   <property name="padx">10</property>

@@ -244,7 +244,6 @@ def createFromEMX(filename: str) -> object:
 
     filename = Path(filename).name
 
-
     # Depending on the format create x axis and object with Given EPR Type
     if format['spectr'] == 'emx' and format['stack'] == False:
         # Create X axis for EMX when there is only a single spectrum
@@ -321,7 +320,7 @@ def createFromShimadzuSPC(filename: str) -> object:
                     'name_y': 'Absorbance',
                     'unit_z': ''
                 },
-             'groups':'All',
+             'groups':['All'],
              'x': np.array(spectrum['x']),
              'y': np.array(spectrum['y']),
              'name': name,
@@ -350,7 +349,7 @@ def createFromMagnettech(filename, mscope=1, pool = -1, rescale = -1, shift = 0)
                  'Power': par['Power'],
                  'SweepTime': par['SweepTime'],
                   },
-           'groups': 'All',
+           'groups': ['All'],
            'x': np.array(spectrum['x']),
            'y': np.array(spectrum['y']),
            'name': name,

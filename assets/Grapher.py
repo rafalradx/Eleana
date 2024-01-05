@@ -24,7 +24,8 @@ class GraphPreferences:
                         {'label': 'Selection of points with labels', 'hov': False, 'annot':True, 'a_txt':True, 'multip':True, 'store': True},
                         {'label': 'Selection of points', 'hov': False, 'annot':True, 'a_txt': False, 'multip':True, 'store': True},
                         {'label': 'Numbered selections', 'hov':False, 'annot':True, 'a_txt': True, 'multip':True, 'store': True, 'nr': True},
-                        {'label': 'Free select'}
+                        {'label': 'Free select'},
+                        {'label': 'Crosshair', 'hov':True, 'a_txt':True, 'annot':True, 'multip':False, 'store': False}
                         ]
 
         self.current_cursor_mode = self.cursor_modes[0]
@@ -144,11 +145,6 @@ class Grapher(GraphPreferences):
         try:
             index = self.eleana.selections[which]
             data = self.eleana.results_dataset[index] if which == 'result' else self.eleana.dataset[index]
-
-            # if which == 'result':
-            #     data = self.eleana.results_dataset[index]
-            # else:
-            #     data = self.eleana.dataset[index]
         except IndexError:
             legend = ' '
             return legend
@@ -295,7 +291,7 @@ class Grapher(GraphPreferences):
 
     def draw(self):
         ''' Puts the selected curves on the graph'''
-        self.ax.legend(loc='upper center', bbox_to_anchor=(0.15, 1.1),
+        self.ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1),
                        fancybox=False, shadow=False, ncol=5)
         # Handle autoscaling
         if bool(self.app.check_autoscale_x.get()):
@@ -324,9 +320,10 @@ class Grapher(GraphPreferences):
     **********************************'''
     def mplcursor_crosshair(self, sel):
         _mode = self.current_cursor_mode['label']
-        if _mode == "Continuous read XY" or _mode == "Free select":
+        if _mode == "Crosshair":
             x, y = sel.target
-            sel.annotation.set_text(f'x: {x:.2f}\ny1: {y:.2f}')
+            #sel.annotation.set_text(f'x: {x:.2f}\ny1: {y:.2f}')
+            sel.annotation.set_text('')
             # Remove previous crosshairs
             for extra in sel.extras:
                 extra.remove()
@@ -369,7 +366,7 @@ class Grapher(GraphPreferences):
                 self.cursor = None
             self.app.annotationsFrame.grid_remove()
         elif index > 0 and index < 5:
-            # Swtich on mplcursors
+            # Switch on the mplcursors
             self.app.btn_clear_cursors.grid()
             _show_annotation_list(self)
             self.cursor = self.mplcursors.cursor(self.ax,
@@ -379,9 +376,18 @@ class Grapher(GraphPreferences):
             self.cursor.connect("remove", self.annotation_removed)
 
         elif index == 5:
+            # Free select
             self.app.btn_clear_cursors.grid()
             _show_annotation_list(self)
             # Switch on Free point selections
+
+            self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
+
+        elif index == 6:
+            # Crosshair
+            _show_annotation_list(self)
+            self.cursor = self.mplcursors.cursor(self.ax, multiple=False, hover=True)
+            self.cursor.connect("add", self.mplcursor_crosshair)
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
 
         else:
@@ -399,10 +405,10 @@ class Grapher(GraphPreferences):
     def on_click_in_plot(self, event):
         """ Get coordinates from graph when Free Select is set in the combobox """
         # Check if Zoom is activated or not
-        state = self.fig.canvas.toolbar.__getstate__()
-        if state['mode']:
+        state = self.toolbar.mode
+        if state == 'zoom rect' or state == 'pan/zoom':
             return
-        if (event.inaxes is not None and self.app.sel_cursor_mode.get() == 'Free select' and event.button == 1):
+        if (event.inaxes is not None and (self.app.sel_cursor_mode.get() == 'Free select' or self.app.sel_cursor_mode.get() == 'Crosshair') and event.button == 1):
             # Create annotation when left mouse button is clicked
             x, y = event.xdata, event.ydata
             point_selected = (x,y)
@@ -414,10 +420,7 @@ class Grapher(GraphPreferences):
                              'nr': current_nr}
             self.cursor_annotations.append(my_annotation)
             self.updateAnnotationList(action='add')
-
-            #text = "  "+str(current_nr)
             text = ' '
-            #self.ax.annotate(text, xy=point_selected, arrowprops=dict(arrowstyle="->", connectionstyle="arc3"))
             self.ax.annotate(text, xy=point_selected, arrowprops={})
             self.canvas.draw()
 

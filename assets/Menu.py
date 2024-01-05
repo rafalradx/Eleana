@@ -187,6 +187,11 @@ class ContextMenu:
         self.font = ("Arial", 10)
 
         ''' References to Widgets '''
+        # GROUPS
+        self.app.groupFrame.bind("<Button-3>", self.show_context_menu_group)
+        self.app.sel_group.bind("<Button-3>", self.show_context_menu_group)
+        self.context_menu_group = tk.Menu(self.app.mainwindow, tearoff=0, bg=self.bg, fg=self.fg, font=self.font)
+
         # FIRST
         self.app.firstFrame.bind("<Button-3>", self.show_context_menu_first)
         self.app.sel_first.bind("<Button-3>", self.show_context_menu_first)
@@ -196,15 +201,26 @@ class ContextMenu:
         self.app.secondFrame.bind("<Button-3>", self.show_context_menu_second)
         self.app.sel_second.bind("<Button-3>", self.show_context_menu_second)
         self.context_menu_second = tk.Menu(self.app.mainwindow, tearoff=0, bg=self.bg, fg=self.fg, font = self.font)
+
         # RESULT
         self.app.resultFrame.bind("<Button-3>", self.show_context_menu_result)
         self.app.sel_result.bind("<Button-3>", self.show_context_menu_result)
         self.context_menu_result = tk.Menu(self.app.mainwindow, tearoff=0, bg=self.bg, fg=self.fg, font = self.font)
 
         # Build context menu for FIRST
+        self.build_menu_group()
         self.build_menu_first()
         self.build_menu_second()
         self.build_menu_result()
+
+    def build_menu_group(self):
+        '''This creates positions for FIRST context menu '''
+        self.context_menu_group.add_command(label="Delete current group", command=self.app.delete_group)
+        self.context_menu_group.add_command(label="Move data to other group", command=self.app.move_data_to_other_group)
+        self.context_menu_group.add_command(label="Delete data assigned to the group",  command=self.app.delete_data_from_group)
+        self.context_menu_group.add_command(label ="Convert whole group to a stack", command=lambda: self.app.convert_group_to_stack(all = True))
+        self.context_menu_group.add_command(label="Convert selected to a stack", command=lambda: self.app.convert_group_to_stack(all=False))
+
     def build_menu_first(self):
         '''This creates positions for FIRST context menu '''
         self.context_menu_first.add_command(label="Assign to group", command=self.app.first_to_group)
@@ -226,6 +242,8 @@ class ContextMenu:
         self.context_menu_result.add_command(label="Rename", command=lambda: self.app.rename_data('result'))
         self.context_menu_result.add_command(label="Result 2")
 
+    def show_context_menu_group(self, event):
+        self.context_menu_group.tk_popup(event.x_root, event.y_root)
     def show_context_menu_first(self, event):
         self.context_menu_first.tk_popup(event.x_root, event.y_root)
 

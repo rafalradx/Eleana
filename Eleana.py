@@ -34,34 +34,30 @@ from assets.Sounds import Sound
 
 # Import Eleana subprograms and windows
 from subprogs.group_edit.add_group import Groupcreate
-
 list_of_subprogs.append(['group_create', 'cancel'])
 from subprogs.group_edit.stack_to_group import StackToGroup
-
 list_of_subprogs.append(['stack_to_group', 'cancel'])
 from subprogs.group_edit.assign_to_group import Groupassign
-
 list_of_subprogs.append(['group_assign', 'cancel'])
 from subprogs.user_input.single_dialog import SingleDialog
-
 list_of_subprogs.append(['single_dialog', 'cancel'])
 from subprogs.select_data.select_data import SelectData
-
 list_of_subprogs.append(['select_data', 'cancel'])
 from subprogs.notepad.notepad import Notepad
-
 list_of_subprogs.append(['notepad', 'cancel'])
 from subprogs.table.table import CreateFromTable
-
 list_of_subprogs.append(['spreadsheet', 'cancel'])
 from subprogs.edit_parameters.edit_parameters import EditParameters
-
 list_of_subprogs.append(['edit_par', 'cancel'])
 from subprogs.modify.modify import ModifyData
-
 list_of_subprogs.append(['modify_data', 'cancel'])
+from subprogs.group_edit.move_to_group import MoveToGroup
+list_of_subprogs.append(['move_to_group', 'cancel'])
+
+
 # Widgets used by main application
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
+
 
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "Eleana_interface.ui"
@@ -69,7 +65,6 @@ VERSION = 1
 INTERPRETER = sys.executable  # <-- Python version for subprocesses
 
 DEVEL = True
-
 
 class EleanaMainApp:
     def __init__(self, eleana_instance, master=None):
@@ -97,6 +92,7 @@ class EleanaMainApp:
         self.sel_result = builder.get_object("sel_result", self.mainwindow)
         self.listFrame = builder.get_object("listFrame", self.mainwindow)
         self.listFrame.grid_remove()
+        self.groupFrame = builder.get_object("groupFrame", self.mainwindow)
         self.firstFrame = builder.get_object("firstFrame", self.mainwindow)
         self.secondFrame = builder.get_object("secondFrame", self.mainwindow)
         self.resultFrame = builder.get_object("resultFrame", self.mainwindow)
@@ -334,6 +330,76 @@ class EleanaMainApp:
         self.grapher.plot_graph()
         self.comparison_view()
 
+    def delete_group(self):
+        print('Delete group')
+
+    def move_data_to_other_group(self):
+        if self.eleana.selections['group'] == 'All':
+            info = CTkMessagebox(title='', message="Data from the 'All' group cannot be moved to another group. However, you can make an additional assignment.",
+                             icon='cancel')
+            return
+        # Select data
+        av_data = self.sel_first._values
+        av_data.pop(0)
+        self.select_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'],
+                                      items=av_data)
+        names = self.select_data.get()
+        if not names:
+            return
+        indexes = self.get_indexes_by_name(names)
+        if not indexes:
+            return
+        # Open dialog
+        self.move_to_group = MoveToGroup(self.mainwindow, self)
+        new_group = self.move_to_group.get()
+        if new_group == None:
+            return
+        elif new_group == 'All':
+            info = CTkMessagebox(title = '', message = "You cannot move data from the group 'All' to another one.", icon='cancel')
+            return
+
+        # Replace current_group with new_group
+        current_group = self.eleana.selections['group']
+        for index in indexes:
+            groups = self.eleana.dataset[index].groups
+            if current_group in groups:
+                position = groups.index(current_group)
+                groups[position] = new_group
+                self.eleana.dataset[index].groups = groups
+        update.dataset_list()
+
+        update.all_lists()
+        self.sel_group.set('All')
+
+    def delete_data_from_group(self):
+        group = self.eleana.selections['group']
+        data_indexes = self.eleana.assignmentToGroups.get(group, None)
+        if group == 'All':
+            info = CTkMessagebox(title = 'Delete Data from Group', message = 'You cannot delete data from the group "All". Please use "Delete Dataset" instead.', icon = 'cancel' )
+        else:
+            info = CTkMessagebox(title= 'Delete Data from Group', icon="warning", option_1="Cancel", option_2="Delete", message = f'Are you sure you want to delete data from the group "{group}"?')
+            response = info.get()
+            if response == 'Cancel' or not data_indexes:
+                return
+        data_indexes = sorted(data_indexes, reverse=True)
+        for index in data_indexes:
+            self.eleana.dataset.pop(index)
+        group_list = self.eleana.assignmentToGroups['<group-list/>']
+        if group in group_list:
+            group_list.remove(group)
+            self.eleana.assignmentToGroups['<group-list/>'] = group_list
+        update.dataset_list()
+        update.all_lists()
+        update.gui_widgets()
+        self.sel_group.set('All')
+        self.sel_first.set('None')
+        self.sel_second.set('None')
+
+    def convert_group_to_stack(self, all = False):
+        if all:
+            print("Convert whole group")
+        else:
+            print("Convert selected")
     def first_show(self):
         self.eleana.set_selections('f_dsp', bool(self.check_first_show.get()))
         selection = self.sel_first.get()
@@ -735,7 +801,21 @@ class EleanaMainApp:
     def all_results_to_current_group(self):
         if len(self.eleana.results_dataset) == 0:
             return
+        for each in self.eleana.results_dataset:
+            result = copy.deepcopy(each)
+            result.groups = [self.sel_group.get()]
+            self.eleana.dataset.append(result)
+        update.dataset_list()
+        update.all_lists()
+        added_item = self.eleana.dataset[-1].name_nr
+        group = self.sel_group.get()
+        self.group_selected(group)
+        self.sel_first.set(added_item)
+        self.first_selected(added_item)
 
+    def all_results_to_new_group(self):
+        if len(self.eleana.results_dataset) == 0:
+            return
         for each in self.eleana.results_dataset:
             result = copy.deepcopy(each)
             result.groups = [self.sel_group.get()]
@@ -763,6 +843,7 @@ class EleanaMainApp:
         self.group_selected(group)
         name = self.eleana.dataset[index_first].name_nr
         self.first_selected(name)
+        self.mainwindow.update_idletasks()
         self.sel_first.set(name)
 
     def result_to_main(self):
@@ -856,23 +937,32 @@ class EleanaMainApp:
     ******************************************'''
 
     ''' EDIT: Delete selected data                             '''
+    def get_indexes_by_name(self, names = None) -> list:
+        if not names:
+            return
+        if type(names) == str:
+            names = list(names)
+        indexes = []
+        for each in names:
+            index = get_index_by_name(each)
+            indexes.append(index)
+        return indexes
 
     def delete_selected_data(self):
-        current_first = self.sel_first.get()
-        current_second = self.sel_second.get()
+        #current_first = self.sel_first.get()
+        #current_second = self.sel_second.get()
         av_data = self.sel_first._values
         av_data.pop(0)
         # Open dialog
         self.select_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'],
                                       items=av_data)
+
         response = self.select_data.get()
         if response == None:
             return
         # Get indexes of selected data to remove
-        indexes = []
-        for each in response:
-            index = get_index_by_name(each)
-            indexes.append(index)
+        indexes = self.get_indexes_by_name(response)
+
         # Delete data with selected indexes
         indexes.sort(reverse=True)
         for each in indexes:
@@ -962,7 +1052,7 @@ class EleanaMainApp:
             self.eleana.notes = project['notes']
 
         update.dataset_list()
-        update.get_groups()
+        update.groups()
         update.all_lists()
         path_to_file = Path(self.eleana.paths['last_projects'][0])
         name = path_to_file.name
