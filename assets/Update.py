@@ -83,6 +83,12 @@ class Update:
         assignments['<group-list/>'] = list_of_groups
         self.eleana.assignmentToGroups = assignments
 
+    def application(self):
+        # This updates all necessary elements of the application
+        self.dataset_list()     # 1. Update dataset, check if anything changed
+        self.groups()           # 2. Update groups that are defined in dataset
+        self.all_lists()
+
     def dataset_list(self):
         ''' It scans the whole dataset, create numbered names, collects groups and assigns to groups'''
 
@@ -102,18 +108,21 @@ class Update:
     def list_in_combobox(self, comboboxID):
         box = self.ref_to_combobox(self.app, comboboxID)
         comboboxList = ['None']
-        if len(self.eleana.dataset) == 0:
-            box.configure(values=comboboxList)
-            return
-
         if comboboxID == 'sel_group':
             list_of_groups = self.eleana.assignmentToGroups['<group-list/>']
             box.configure(values = list_of_groups)
             return
 
+        if len(self.eleana.dataset) == 0:
+            box.configure(values=comboboxList)
+            return
+
         # Fill list in FIRST or SECOND
         if comboboxID == 'sel_first' or comboboxID == 'sel_second':
             currentGroup = self.eleana.selections['group']
+            if currentGroup not in self.eleana.assignmentToGroups['<group-list/>']:
+                currentGroup = 'All'
+                self.app.sel_group.set('All')
             if currentGroup == 'All':
                 for each in self.eleana.dataset:
                     comboboxList.append(each.name_nr)

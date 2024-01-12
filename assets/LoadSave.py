@@ -155,6 +155,7 @@ class Load:
         except:
             pass
         last_projects = self.eleana.paths['last_projects']
+        filename = str(filename)
         if filename in last_projects:
             index = last_projects.index(filename)
             last_projects.pop(index)
@@ -353,20 +354,22 @@ class Load:
 class Save:
     def __init__(self, eleana_instance):
         self.eleana = eleana_instance
-    def save_project(self):
+    def save_project(self, filename = None):
         try:
             init_dir = Path(self.eleana.paths['last_project_dir'])
             init_file = ''
         except IndexError:
             init_dir = Path(self.eleana.paths['home_dir'])
-        try:
-            filename = asksaveasfile(initialdir=init_dir,
-                                 initialfile=init_file,
-                                 defaultextension=".ele",
-                                 filetypes=[("All Files", "*.*"),
-                                            ("Eleana project", "*.ele")])
-        except:
-            return {'error': True, 'desc': f'Could not save the project file. Try to save in different location.'}
+
+        if not filename:
+            try:
+                filename = asksaveasfile(initialdir=init_dir,
+                                     initialfile=init_file,
+                                     defaultextension=".ele",
+                                     filetypes=[("Eleana project", "*.ele"),
+                                                ("All Files", "*.*")])
+            except:
+                return {'error': True, 'desc': f'Could not save the project file. Try to save in different location.'}
 
         if not filename:
             return

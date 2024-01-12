@@ -1,0 +1,3 @@
+Problemy:
+
+1. Po wczytaniu Load Project

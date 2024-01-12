@@ -331,13 +331,41 @@ class EleanaMainApp:
         self.comparison_view()
 
     def delete_group(self):
-        print('Delete group')
+        current_group = self.eleana.selections['group']
+        if current_group == 'All':
+            info = CTkMessagebox(title='',
+                                 message="The group 'All' cannot be removed.",
+                                 icon='cancel')
+            return
 
-    def move_data_to_other_group(self):
-        if self.eleana.selections['group'] == 'All':
+        av_data = self.sel_first._values
+        av_data.pop(0)
+        self.select_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'],
+                                      items=av_data)
+        names = self.select_data.get()
+        if not names:
+            return
+        indexes = self.get_indexes_by_name(names)
+        if not indexes:
+            return
+        for index in indexes:
+            data_groups = self.eleana.dataset[index].groups
+            if current_group in data_groups:
+                data_groups.remove(current_group)
+                self.eleana.dataset[index].groups = data_groups
+        update.dataset_list()
+        update.groups()
+        update.all_lists()
+        if current_group not in self.eleana.assignmentToGroups['<group-list/>']:
+            self.sel_group.set('All')
+            self.eleana.selections['group'] = 'All'
+
+    def data_to_other_group(self, move = True):
+        if self.eleana.selections['group'] == 'All' and move:
             info = CTkMessagebox(title='', message="Data from the 'All' group cannot be moved to another group. However, you can make an additional assignment.",
                              icon='cancel')
             return
+
         # Select data
         av_data = self.sel_first._values
         av_data.pop(0)
@@ -354,7 +382,7 @@ class EleanaMainApp:
         new_group = self.move_to_group.get()
         if new_group == None:
             return
-        elif new_group == 'All':
+        elif new_group == 'All' and move:
             info = CTkMessagebox(title = '', message = "You cannot move data from the group 'All' to another one.", icon='cancel')
             return
 
@@ -362,12 +390,20 @@ class EleanaMainApp:
         current_group = self.eleana.selections['group']
         for index in indexes:
             groups = self.eleana.dataset[index].groups
-            if current_group in groups:
+            if current_group in groups and move:
                 position = groups.index(current_group)
                 groups[position] = new_group
                 self.eleana.dataset[index].groups = groups
-        update.dataset_list()
+            elif new_group in groups and not move:
+                return
+            elif new_group not in groups and not move:
+                groups.append(new_group)
+                self.eleana.dataset[index].groups = groups
+            else:
+                return
 
+        update.dataset_list()
+        update.groups()
         update.all_lists()
         self.sel_group.set('All')
 
@@ -389,6 +425,7 @@ class EleanaMainApp:
             group_list.remove(group)
             self.eleana.assignmentToGroups['<group-list/>'] = group_list
         update.dataset_list()
+        update.groups()
         update.all_lists()
         update.gui_widgets()
         self.sel_group.set('All')
@@ -1023,8 +1060,13 @@ class EleanaMainApp:
 
     def load_project(self, event=None, recent=None):
         project = load.load_project(recent)
+        error = project.get('Error', False)
         if project == None:
             return
+        elif error:
+            info = CTkMessagebox(title="Error", message = project.get('desc'), icon='cancel')
+            return
+
         if len(self.eleana.dataset) > 0:
             question = CTkMessagebox(title="Dataset is not empty",
                                      message="There is data in the dataset. Choose what you want to",
@@ -1093,8 +1135,8 @@ class EleanaMainApp:
 
     ''' FILE: Save As                                                 '''
 
-    def save_as(self):
-        report = save.save_project()
+    def save_as(self, filename = None):
+        report = save.save_project(filename)
         if not report:
             return
         if report['error']:
@@ -1113,6 +1155,15 @@ class EleanaMainApp:
         # Perform update to place the item into menu
         update.last_projects_menu()
         app.mainwindow.title(Path(last_projects[0]).name[:-4] + ' - Eleana')
+
+    def save_current(self):
+        win_title = self.mainwindow.title()
+        if win_title == 'new project - Eleana':
+            self.save_as(filename = None)
+        else:
+            file = win_title[:-9].strip()
+            filename = Path(self.eleana.paths['last_project_dir'], file)
+            self.save_as(filename)
 
     '''******************************************
     *                                           *

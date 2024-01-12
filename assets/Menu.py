@@ -57,8 +57,8 @@ class MainMenu:
 
         # - Save As
         self.menu_file.add_command(label="Save As", command=self.app.save_as, image = self.icon_save_as, compound="left")
-        # - Save As
-        self.menu_file.add_command(label="Save", command=self.app.save_as, image=self.icon_save_as, compound="left", accelerator="Ctrl+S")
+        # - Save
+        self.menu_file.add_command(label="Save", command=self.app.save_current, image=self.icon_save_as, compound="left", accelerator="Ctrl+S")
 
         # - Import data
         self.menu_import = tk.Menu(self.menu_file, tearoff=0, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
@@ -215,8 +215,9 @@ class ContextMenu:
 
     def build_menu_group(self):
         '''This creates positions for FIRST context menu '''
-        self.context_menu_group.add_command(label="Delete current group", command=self.app.delete_group)
-        self.context_menu_group.add_command(label="Move data to other group", command=self.app.move_data_to_other_group)
+        self.context_menu_group.add_command(label="Remove assignments to the group", command=self.app.delete_group)
+        self.context_menu_group.add_command(label="Assign data to additional group", command=lambda: self.app.data_to_other_group(move=False))
+        self.context_menu_group.add_command(label="Move data to other group", command=lambda: self.app.data_to_other_group(move=True))
         self.context_menu_group.add_command(label="Delete data assigned to the group",  command=self.app.delete_data_from_group)
         self.context_menu_group.add_command(label ="Convert whole group to a stack", command=lambda: self.app.convert_group_to_stack(all = True))
         self.context_menu_group.add_command(label="Convert selected to a stack", command=lambda: self.app.convert_group_to_stack(all=False))
