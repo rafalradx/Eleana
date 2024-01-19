@@ -1,6 +1,7 @@
 from pathlib import Path
 import string
 import pickle
+import json
 from tkinter.filedialog import asksaveasfile, askopenfilename
 import random
 import shutil
@@ -9,6 +10,7 @@ import pandas
 import numpy as np
 from modules.CTkMessagebox.ctkmessagebox import CTkMessagebox
 from assets.DataClasses import createFromElexsys, createFromEMX, createFromShimadzuSPC, createFromMagnettech, createFromAdaniDat
+from assets.Error import Error
 from subprogs.ascii_file_preview.ascii_file_preview import AsciFilePreview
 from subprogs.table.table import CreateFromTable
 class Load:
@@ -349,123 +351,176 @@ class Load:
         error = CTkMessagebox(title='Error',
                               message=f"Cannot load data from {list}.", icon="cancel")
 
-
-
 class Save:
     def __init__(self, eleana_instance):
         self.eleana = eleana_instance
-    def save_project(self, filename = None):
-        try:
-            init_dir = Path(self.eleana.paths['last_project_dir'])
-            init_file = ''
-        except IndexError:
-            init_dir = Path(self.eleana.paths['home_dir'])
 
-        if not filename:
+    def save_project(self, save_current=False):
+        ''' Save project to a file '''
+        init_dir = Path(self.eleana.paths.get('last_project_dir', Path.home()))
+        if not save_current:
+            filename = asksaveasfile(
+                initialdir=init_dir,
+                initialfile='',
+                defaultextension=".ele",
+                filetypes=[("Eleana project", "*.ele"),("All Files", "*.*")]
+            )
+            if not filename:
+                return
+            filename = Path(filename.name)
+        else:
+            filename = Path(save_current)
+        working_folder = Path(filename.parent, '~eleana_project.tmp')
+        if working_folder.exists():
             try:
-                filename = asksaveasfile(initialdir=init_dir,
-                                     initialfile=init_file,
-                                     defaultextension=".ele",
-                                     filetypes=[("Eleana project", "*.ele"),
-                                                ("All Files", "*.*")])
-            except:
-                return {'error': True, 'desc': f'Could not save the project file. Try to save in different location.'}
-
-        if not filename:
+                shutil.rmtree(working_folder)
+            except Exception as e:
+                Error.show(info="Cannot create the project file", details=e)
+                return
+        try:
+            working_folder.mkdir(parents=True)
+        except Exception as e:
+            Error.show(info="Cannot create the project file", details=e)
             return
-        file_path = Path(filename.name)
-        file_path.unlink()
-
-        # Create random name of working directory
-        working_folder = filename.name + '__' + str(random.randint(1000000,9999999))
-        new_directory = Path(working_folder)
+        project_information = {'project version':'1.0'}
+        project_to_save = Project_1(
+            dataset=self.eleana.dataset,
+            results_dataset=self.eleana.results_dataset,
+            groupsHierarchy=self.eleana.groupsHierarchy,
+            notes=self.eleana.notes,
+            selections=self.eleana.selections
+        )
+        working_filename = Path(working_folder, 'project_1')
+        working_information = Path(working_folder, 'info.txt')
         try:
-            new_directory.mkdir(parents=True, exist_ok=True)
-        except:
-            return {"error": True, 'desc': f"Could not create working dir while saving {filename.name}"}
+            with open(working_filename, 'wb') as file:
+                pickle.dump(project_to_save, file)
+            with open(working_information, 'w') as file:
+                json.dump(project_information, file)
+        except Exception as e:
+            message = 'Could not save the file.'
+            message = message + f'\n\nDetails:\n{e}'
+            info = CTkMessagebox(title="Error", message=message, icon='cancel')
+        del project_to_save
+        # Create zip file form the directory
+        working_folder = Path(working_folder)
+        path_to_folder = Path(filename.parent)
+        zip_file = Path(path_to_folder, (str(filename.name[:-4]) + '.ele'))
+        shutil.make_archive(zip_file, 'zip', working_folder)
 
-        '''
-        Create list of names for eleana.dataset
-        '''
-        dataset_names = {}
-        i = 0
-        for each in self.eleana.dataset:
-            name = each.name_nr
-            name = name.replace('. ', '_=_')
-            dataset_names[str(i)] = name
-            i += 1
-        results_names = {}
-        i = 0
-        for each in self.eleana.results_dataset:
-            name = each.name_nr
-            name = name.replace('. ', '_=_')
-            results_names[str(i)] = name
-            i += 1
-        project_details = {'project version':'1.0'}
-        ordered_groups = []
-        for group, spectra in self.eleana.assignmentToGroups.items():
-            ordered_groups.append({group: spectra})
-        elements_to_save = {
-                            'eleana_assignmentToGroups':ordered_groups,
-                            'eleana_groupsHierarchy':self.eleana.groupsHierarchy,
-                            'eleana_notes':self.eleana.notes,
-                            'eleana_paths':self.eleana.paths,
-                            'eleana_selections':self.eleana.selections,
-                            'eleana_dataset_list':dataset_names,
-                            'eleana_results_list':results_names,
-                            'eleana_results_dataset':self.eleana.results_dataset,
-                            'eleana_project_details':project_details
-                            }
 
-        try:
-            # Save the eleana attributes to separate files
-            # Names for files are taken form keys of element_to_save
-            for each in elements_to_save.keys():
-                file_path = Path(new_directory, each)
-                with open(file_path, 'wb') as file:
-                    pickle.dump(elements_to_save[each], file)
-
-            '''
-            Each object in eleana.dataset will be saved 
-            using pickle as a separate file, for which name is
-            the numeber in the eleana.dataset list.
-            Additionally the list of dataset names is saved in dataset_list
-            '''
-            i = 0
-            for name in dataset_names.keys():
-                data_file = Path(working_folder, str(i))
-                with open(data_file, 'wb') as file:
-                    pickle.dump(self.eleana.dataset[i], file)
-                i += 1
-            ''' 
-            Save result dataset
-            '''
-            i = 0
-            for each in self.eleana.results_dataset:
-                name = 'r' + str(i)
-                data_file = Path(working_folder, name)
-                with open(data_file, 'wb') as file:
-                    pickle.dump(self.eleana.results_dataset[i], file)
-                i += 1
-
-            # Create zip file form the directory
-            name_without_extension = filename.name[:-4]
-            shutil.make_archive(name_without_extension, 'zip', new_directory)
-            zip_file = Path(name_without_extension + '.zip')
-            new_name = zip_file.with_suffix(".ele")
-
-            # Rename zip to ele
-            zip_file.rename(new_name)
-
-            # Remove files in working_dir
-            for file in new_directory.glob('*'):
-                file.unlink()
-
-            # Remove working dir
-            new_directory.rmdir()
-            return {"error": False, 'desc':'', 'return':filename}
-        except:
-            return {"error": True, 'desc': f"Error while saving {filename.name}"}
+    # def save_project(self, filename = None):
+    #     try:
+    #         init_dir = Path(self.eleana.paths['last_project_dir'])
+    #         init_file = ''
+    #     except IndexError:
+    #         init_dir = Path(self.eleana.paths['home_dir'])
+    #
+    #     if not filename:
+    #         try:
+    #             filename = asksaveasfile(initialdir=init_dir,
+    #                                  initialfile=init_file,
+    #                                  defaultextension=".ele",
+    #                                  filetypes=[("Eleana project", "*.ele"),
+    #                                             ("All Files", "*.*")])
+    #         except:
+    #             return {'error': True, 'desc': f'Could not save the project file. Try to save in different location.'}
+    #
+    #     if not filename:
+    #         return
+    #     file_path = Path(filename.name)
+    #     file_path.unlink()
+    #
+    #     # Create random name of working directory
+    #     working_folder = filename.name + '__' + str(random.randint(1000000,9999999))
+    #     new_directory = Path(working_folder)
+    #     try:
+    #         new_directory.mkdir(parents=True, exist_ok=True)
+    #     except:
+    #         return {"error": True, 'desc': f"Could not create working dir while saving {filename.name}"}
+    #
+    #     '''
+    #     Create list of names for eleana.dataset
+    #     '''
+    #     dataset_names = {}
+    #     i = 0
+    #     for each in self.eleana.dataset:
+    #         name = each.name_nr
+    #         name = name.replace('. ', '_=_')
+    #         dataset_names[str(i)] = name
+    #         i += 1
+    #     results_names = {}
+    #     i = 0
+    #     for each in self.eleana.results_dataset:
+    #         name = each.name_nr
+    #         name = name.replace('. ', '_=_')
+    #         results_names[str(i)] = name
+    #         i += 1
+    #     project_details = {'project version':'1.0'}
+    #     ordered_groups = []
+    #     for group, spectra in self.eleana.assignmentToGroups.items():
+    #         ordered_groups.append({group: spectra})
+    #     elements_to_save = {
+    #                         'eleana_assignmentToGroups':ordered_groups,
+    #                         'eleana_groupsHierarchy':self.eleana.groupsHierarchy,
+    #                         'eleana_notes':self.eleana.notes,
+    #                         'eleana_paths':self.eleana.paths,
+    #                         'eleana_selections':self.eleana.selections,
+    #                         'eleana_dataset_list':dataset_names,
+    #                         'eleana_results_list':results_names,
+    #                         'eleana_results_dataset':self.eleana.results_dataset,
+    #                         'eleana_project_details':project_details
+    #                         }
+    #
+    #     try:
+    #         # Save the eleana attributes to separate files
+    #         # Names for files are taken form keys of element_to_save
+    #         for each in elements_to_save.keys():
+    #             file_path = Path(new_directory, each)
+    #             with open(file_path, 'wb') as file:
+    #                 pickle.dump(elements_to_save[each], file)
+    #
+    #         '''
+    #         Each object in eleana.dataset will be saved
+    #         using pickle as a separate file, for which name is
+    #         the number in the eleana.dataset list.
+    #         Additionally the list of dataset names is saved in dataset_list
+    #         '''
+    #         i = 0
+    #         for name in dataset_names.keys():
+    #             data_file = Path(working_folder, str(i))
+    #             with open(data_file, 'wb') as file:
+    #                 pickle.dump(self.eleana.dataset[i], file)
+    #             i += 1
+    #         '''
+    #         Save result dataset
+    #         '''
+    #         i = 0
+    #         for each in self.eleana.results_dataset:
+    #             name = 'r' + str(i)
+    #             data_file = Path(working_folder, name)
+    #             with open(data_file, 'wb') as file:
+    #                 pickle.dump(self.eleana.results_dataset[i], file)
+    #             i += 1
+    #
+    #         # Create zip file form the directory
+    #         name_without_extension = filename.name[:-4]
+    #         shutil.make_archive(name_without_extension, 'zip', new_directory)
+    #         zip_file = Path(name_without_extension + '.zip')
+    #         new_name = zip_file.with_suffix(".ele")
+    #
+    #         # Rename zip to ele
+    #         zip_file.rename(new_name)
+    #
+    #         # Remove files in working_dir
+    #         for file in new_directory.glob('*'):
+    #             file.unlink()
+    #
+    #         # Remove working dir
+    #         new_directory.rmdir()
+    #         return {"error": False, 'desc':'', 'return':filename}
+    #     except:
+    #         return {"error": True, 'desc': f"Error while saving {filename.name}"}
 
 class Export:
     def __init__(self, eleana_instance):
@@ -604,6 +659,18 @@ class Export:
             self.csv(which = which, filename = each)
             i += 1
 
+class Project_1:
+    '''Create object used to save/load Eleana projects'''
+    def __init__(self, dataset: list,
+                 results_dataset: list,
+                 groupsHierarchy:dict,
+                 notes: str,
+                 selections: dict):
+        self.dataset = dataset
+        self.results_dataset = results_dataset
+        self.groupsHierarchy = groupsHierarchy
+        self.notes = notes
+        self.selections = selections
 
 
 

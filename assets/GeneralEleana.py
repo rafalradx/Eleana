@@ -4,17 +4,6 @@ import numpy as np
 from pathlib import Path
 import tempfile
 
-# class EleanaObserver:
-#     ''' This class is used to create observers of variables in Eleana object'''
-#     def __init__(self, eleana_instance, modify_data):
-#         self.eleana = eleana_instance
-#         self.modify_data = modify_data
-#         self.eleana.attach(self)
-#
-#     def update(self, subject):
-#         if subject == self.eleana:
-#             self.modify_data.data_changed()
-
 class Eleana:
     # Main attributes associated with data gathered in the programe
     def __init__(self):

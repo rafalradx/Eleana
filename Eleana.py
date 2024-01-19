@@ -14,6 +14,7 @@ import numpy as np
 import pandas
 import pygubu
 import pyperclip
+from tkinter.filedialog import asksaveasfile, askopenfilename
 
 list_of_subprogs = []
 
@@ -25,12 +26,13 @@ from modules.CTkColorPicker import *
 
 # Import Eleana specific classes
 from assets.GeneralEleana import Eleana
-from assets.LoadSave import Load, Save, Export
+from assets.LoadSave import Load, Save, Export, Project_1
 from assets.Initialization import Init
 from assets.Grapher import Grapher
 from assets.Update import Update
 from assets.Menu import ContextMenu, MainMenu
 from assets.Sounds import Sound
+from assets.Error import Error
 
 # Import Eleana subprograms and windows
 from subprogs.group_edit.add_group import Groupcreate
@@ -1057,6 +1059,38 @@ class EleanaMainApp:
         color = pick_color.get()  # get the color string
 
     ''' FILE: Load Project                                          '''
+
+    # def save_project(self, save_current = False):
+    #     ''' Save project to a file '''
+    #     init_dir = Path(self.eleana.paths.get('last_project_dir', Path.home()))
+    #     if not save_current:
+    #         filename = asksaveasfile(initialdir=init_dir,
+    #                                  initialfile='',
+    #                                  defaultextension=".ele",
+    #                                  filetypes=[("Eleana project", "*.ele"),
+    #                                             ("All Files", "*.*")])
+    #         if not filename:
+    #             return
+    #
+    #         filename = Path(filename.name)
+    #     else:
+    #         filename = Path(save_current)
+    #
+    #     tmp = self.eleana.paths.get('tmp_dir', None)
+    #     if not tmp:
+    #         print("Save As Error: eleana.paths['tmp_dir'] is not defined")
+    #
+    #     project_to_save = Project_1(
+    #         dataset=self.eleana.dataset,
+    #         results_dataset=self.eleana.results_dataset,
+    #         groupsHierarchy=self.eleana.groupsHierarchy,
+    #         notes=self.notes,
+    #         selections=self.eleana.selections
+    #     )
+    #
+    #     with open(filename, 'w+b') as file:
+    #         pickle.dump(project_to_save, file)
+    #     del project_to_save
 
     def load_project(self, event=None, recent=None):
         project = load.load_project(recent)

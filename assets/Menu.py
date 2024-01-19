@@ -60,6 +60,8 @@ class MainMenu:
         # - Save
         self.menu_file.add_command(label="Save", command=self.app.save_current, image=self.icon_save_as, compound="left", accelerator="Ctrl+S")
 
+        #self.menu_file.add_command(label="Save NEW", command=self.app.save_project, image=self.icon_save_as, compound="left")
+
         # - Import data
         self.menu_import = tk.Menu(self.menu_file, tearoff=0, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
         self.menu_file.add_cascade(label="Import data", menu=self.menu_import, image = self.icon_import, compound="left")
