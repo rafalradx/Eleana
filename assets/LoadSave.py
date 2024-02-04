@@ -366,7 +366,7 @@ class Save:
                 filetypes=[("Eleana project", "*.ele"),("All Files", "*.*")]
             )
             if not filename:
-                return
+                return None
             filename = Path(filename.name)
         else:
             filename = Path(save_current)
@@ -376,12 +376,12 @@ class Save:
                 shutil.rmtree(working_folder)
             except Exception as e:
                 Error.show(info="Cannot create the project file", details=e)
-                return
+                return None
         try:
             working_folder.mkdir(parents=True)
         except Exception as e:
             Error.show(info="Cannot create the project file", details=e)
-            return
+            return None
         project_information = {'project version':'1.0'}
         project_to_save = Project_1(
             dataset=self.eleana.dataset,
@@ -403,11 +403,22 @@ class Save:
             info = CTkMessagebox(title="Error", message=message, icon='cancel')
         del project_to_save
         # Create zip file form the directory
-        working_folder = Path(working_folder)
-        path_to_folder = Path(filename.parent)
-        zip_file = Path(path_to_folder, (str(filename.name[:-4]) + '.ele'))
-        shutil.make_archive(zip_file, 'zip', working_folder)
-
+        try:
+            working_folder = Path(working_folder)
+            path_to_folder = Path(filename.parent)
+            zip_file = Path(path_to_folder, ('~' + str(filename.name[:-4] + '_tmpProject')))
+            project_zip = shutil.make_archive(zip_file, 'zip', working_folder)
+            project_zip = Path(project_zip)
+            project_ele = project_zip.rename(filename)
+        except Exception as e:
+            Error.show(info="Error while creating project archive.", details=e)
+            return None
+        try:
+            shutil.rmtree(working_folder)
+        except Exception as e:
+            Error.show(info="Cannot remove temporary project folder. Please remove it manually.", details=e)
+            return None
+        return filename
 
     # def save_project(self, filename = None):
     #     try:

@@ -1170,14 +1170,12 @@ class EleanaMainApp:
     ''' FILE: Save As                                                 '''
 
     def save_as(self, filename = None):
-        report = save.save_project(filename)
-        if not report:
+        file_saved = save.save_project(filename)
+        if not file_saved:
             return
-        if report['error']:
-            CTkMessagebox(title="Error", message=report['desc'], icon="cancel")
         else:
             last_projects = self.eleana.paths['last_projects']
-            last_projects.insert(0, report['return'].name)
+            last_projects.insert(0, str(file_saved.name))
 
         # Remove duplications and limit the list to 10 items
         last_projects = list(set(last_projects))

@@ -3,7 +3,7 @@
 INSTRUCTIONS:
 Assume that you want to detect changes in Eleana instance:
 to notify subprogram in Notify instance.
-1. Initiate empty list of observers in __init__() of Elana class:
+1. Initiate empty list of observers in __init__() of Eleana class:
 
     self._observers = []
 
@@ -37,7 +37,7 @@ to notify subprogram in Notify instance.
         eleana = Eleana()    <-- This creates instance
         eleana.set_selections(2)
 
-    This will invole setter, set the value to 2 and invoke
+    This will involve setter, set the value to 2 and invoke
     eleana.notify() method.
 
 4. Now you must create subscriber that will receive the notification.
