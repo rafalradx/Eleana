@@ -1094,39 +1094,8 @@ class EleanaMainApp:
 
     def load_project(self, event=None, recent=None):
         project = load.load_project(recent)
-        error = project.get('Error', False)
-        if project == None:
+        if not project:
             return
-        elif error:
-            info = CTkMessagebox(title="Error", message = project.get('desc'), icon='cancel')
-            return
-
-        if len(self.eleana.dataset) > 0:
-            question = CTkMessagebox(title="Dataset is not empty",
-                                     message="There is data in the dataset. Choose what you want to",
-                                     icon="question", option_3="Append to the dataset", option_2="Replace the dataset",
-                                     option_1="Cancel")
-            response = question.get()
-            if response == None or response == 'Cancel':
-                return
-            elif response == 'Replace the dataset':
-                self.eleana.selections = project['selections']
-                self.eleana.dataset = project['dataset']
-                self.eleana.results_dataset = project['results_dataset']
-                self.eleana.assignmentToGroups = project['assignmentToGroups']
-                self.eleana.groupsHierarchy = project['groupsHierarchy']
-                self.eleana.notes = project['notes']
-            else:
-                self.eleana.dataset.extend(project['dataset'])
-                self.eleana.results_dataset.extend(project['results_dataset'])
-        else:
-            self.eleana.selections = project['selections']
-            self.eleana.dataset = project['dataset']
-            self.eleana.results_dataset = project['results_dataset']
-            self.eleana.assignmentToGroups = project['assignmentToGroups']
-            self.eleana.groupsHierarchy = project['groupsHierarchy']
-            self.eleana.notes = project['notes']
-
         update.dataset_list()
         update.groups()
         update.all_lists()

@@ -59,17 +59,36 @@ class Load:
             loaded_object = pickle.load(file_to_read)
             file_to_read.close()
             # Write values to eleana attributes
-            self.eleana.dataset = copy.deepcopy(loaded_object.dataset)
-            self.eleana.results_dataset = copy.deepcopy(loaded_object.results_dataset)
-            self.eleana.groupsHierarchy = copy.deepcopy(loaded_object.groupsHierarchy)
-            self.eleana.notes = copy.deepcopy(loaded_object.notes)
-            self.eleana.selections = copy.deepcopy(loaded_object.selections)
+            # Check if dataset is empty
+            if len(self.eleana.dataset) > 0:
+                question = CTkMessagebox(title="Dataset is not empty",
+                                         message="There is data in the dataset. Choose what you want to",
+                                         icon="question", option_3="Append to the dataset",
+                                         option_2="Replace the dataset",
+                                         option_1="Cancel")
+                response = question.get()
+                if response == None or response == 'Cancel':
+                    return None
+                elif response == 'Replace the dataset':
+                    self.eleana.dataset = copy.deepcopy(loaded_object.dataset)
+                    self.eleana.results_dataset = copy.deepcopy(loaded_object.results_dataset)
+                    self.eleana.groupsHierarchy = copy.deepcopy(loaded_object.groupsHierarchy)
+                    self.eleana.notes = copy.deepcopy(loaded_object.notes)
+                    self.eleana.selections = copy.deepcopy(loaded_object.selections)
+                else:
+                    self.eleana.dataset.extend(copy.deepcopy(loaded_object.dataset))
+                    self.eleana.results_dataset.extend(copy.deepcopy(loaded_object.results_dataset))
             # If success return True
+            else:
+                self.eleana.dataset = copy.deepcopy(loaded_object.dataset)
+                self.eleana.results_dataset = copy.deepcopy(loaded_object.results_dataset)
+                self.eleana.groupsHierarchy = copy.deepcopy(loaded_object.groupsHierarchy)
+                self.eleana.notes = copy.deepcopy(loaded_object.notes)
+                self.eleana.selections = copy.deepcopy(loaded_object.selections)
             return True
         except Exception as e:
             Error.show(info="Cannot load the project file", details=e)
             return None
-
 
 
         ''' 
