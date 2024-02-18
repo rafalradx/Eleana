@@ -1,5 +1,6 @@
 from pathlib import Path
 import string
+import copy
 import pickle
 import json
 from tkinter.filedialog import asksaveasfile, askopenfilename
@@ -17,7 +18,7 @@ class Load:
     def __init__(self, app_instance, eleana_instance):
         self.eleana = eleana_instance
         self.app = app_instance
-    # FILE
+
     def load_project(self, recent=None):
         ''' This method loads projects created by Eleana'''
         init_dir = Path(self.eleana.paths['last_project_dir'])
@@ -35,114 +36,136 @@ class Load:
                                                 ("All Files", "*.*")])
         else:
             filename = Path(recent)
-
         if not filename:
             return None
-        '''
-        1. Extract project into temporary directory /tmp/eleana_extracted_project 
-        '''
+        # Extract project into temporary directory /tmp/eleana_extracted_project
         tmp_folder = 'eleana_extracted_project'
         extract_dir = Path(self.eleana.paths['tmp_dir'], tmp_folder)
         archive_format = 'zip'
         try:
             shutil.unpack_archive(filename, extract_dir, archive_format)
-        except:
-            return {"Error": True, 'desc': f"Cannot open the file"}
+            # Check project version
+            info_file = Path(extract_dir, 'info.txt')
+            info = info_file.read_text()
+            info = json.loads(info)
+            project_version = float(info['project version'])
+            # Throw error if project version is higher than Eleana version
+            if project_version > self.eleana.version:
+                Error.show(info="Cannot load the project file.", details="The project was created using a newer version of Eleana.")
+                return None
+            # Load Project_1
+            path_to_project = Path(extract_dir, 'project_1')
+            file_to_read = open(path_to_project, "rb")
+            loaded_object = pickle.load(file_to_read)
+            file_to_read.close()
+            # Write values to eleana attributes
+            self.eleana.dataset = copy.deepcopy(loaded_object.dataset)
+            self.eleana.results_dataset = copy.deepcopy(loaded_object.results_dataset)
+            self.eleana.groupsHierarchy = copy.deepcopy(loaded_object.groupsHierarchy)
+            self.eleana.notes = copy.deepcopy(loaded_object.notes)
+            self.eleana.selections = copy.deepcopy(loaded_object.selections)
+            # If success return True
+            return True
+        except Exception as e:
+            Error.show(info="Cannot load the project file", details=e)
+            return None
+
+
 
         ''' 
-        2. Define filenames that will be loaded from unzipped project
-        '''
-        eleana_dataset_list = Path(extract_dir, 'eleana_dataset_list')
-        eleana_assignmentToGroups = Path(extract_dir, 'eleana_assignmentToGroups')
-        eleana_groupsHierarchy = Path(extract_dir, 'eleana_groupsHierarchy')
-        eleana_notes = Path(extract_dir, 'eleana_notes')
-        eleana_paths = Path(extract_dir, 'eleana_paths')
-        eleana_selections = Path(extract_dir, 'eleana_selections')
-        eleana_results_dataset: Path = Path(extract_dir, 'eleana_results_dataset')
-        eleana_project_details = Path(extract_dir, 'eleana_project_details')
-
-        try:
-            '''
-            3. Load eleana_project_details to check if its compatible with the current Eleana version
-            '''
-
-            file_to_read = open(eleana_project_details, "rb")
-            loaded_object = pickle.load(file_to_read)
-            file_to_read.close()
-
-            project_version = float(loaded_object['project version'])
-
-            if float(project_version) > float(self.eleana.version):
-                info = CTkMessagebox(title="Project load", message='This project was created in newer Eleana version. Some errors in loaded content are possible')
-
-            '''
-            4. Load eleana_XXXXX files and store the content in temporary variables  
-            '''
-
-            # LOAD: eleana_selections
-
-            file_to_read = open(eleana_selections, "rb")
-            loaded_object = pickle.load(file_to_read)
-            eleana_selections = loaded_object
-            file_to_read.close()
-
-            # LOAD eleana_paths
-
-            file_to_read = open(eleana_paths, "rb")
-            loaded_object = pickle.load(file_to_read)
-            eleana_paths = loaded_object
-            file_to_read.close()
-
-            # LOAD notes
-
-            file_to_read = open(eleana_notes, "rb")
-            loaded_object = pickle.load(file_to_read)
-            eleana_notes = loaded_object
-            file_to_read.close()
-
-            # LOAD groupsHierarchy
-
-            file_to_read = open(eleana_groupsHierarchy, "rb")
-            loaded_object = pickle.load(file_to_read)
-            eleana_groupsHierarchy = loaded_object
-            file_to_read.close()
-
-            # LOAD assignmentsToGroups
-
-            file_to_read = open(eleana_assignmentToGroups, "rb")
-            loaded_object = pickle.load(file_to_read)
-            eleana_assignmentToGroups = {}
-            for each in loaded_object:
-                group, value = list(each.items())[0]
-                eleana_assignmentToGroups[group] = value
-            file_to_read.close()
-
-            '''
-            5. Load list of the objects to store in eleana.dataset
-            '''
-            # LOAD results_dataset
-
-            file_to_read = open(eleana_results_dataset, "rb")
-            loaded_object = pickle.load(file_to_read)
-            eleana_results_dataset = loaded_object
-            file_to_read.close()
-
-            # LOAD dataset
-
-            file_to_read = open(eleana_dataset_list, "rb")
-            loaded_object = pickle.load(file_to_read)
-            eleana_dataset_list = loaded_object
-            file_to_read.close()
-
-            eleana_dataset = []
-            for filenumber in eleana_dataset_list.keys():
-                _filename = Path(extract_dir, filenumber)
-                file_to_read = open(_filename, "rb")
-                loaded_object = pickle.load(file_to_read)
-                eleana_dataset.append(loaded_object)
-                file_to_read.close()
-        except:
-            return {"Error": True, 'desc': f"An error occured while loading the file"}
+        # 2. Define filenames that will be loaded from unzipped project
+        # '''
+        # eleana_dataset_list = Path(extract_dir, 'eleana_dataset_list')
+        # eleana_assignmentToGroups = Path(extract_dir, 'eleana_assignmentToGroups')
+        # eleana_groupsHierarchy = Path(extract_dir, 'eleana_groupsHierarchy')
+        # eleana_notes = Path(extract_dir, 'eleana_notes')
+        # eleana_paths = Path(extract_dir, 'eleana_paths')
+        # eleana_selections = Path(extract_dir, 'eleana_selections')
+        # eleana_results_dataset: Path = Path(extract_dir, 'eleana_results_dataset')
+        # eleana_project_details = Path(extract_dir, 'eleana_project_details')
+        #
+        # try:
+        #     '''
+        #     3. Load eleana_project_details to check if its compatible with the current Eleana version
+        #     '''
+        #
+        #     file_to_read = open(eleana_project_details, "rb")
+        #     loaded_object = pickle.load(file_to_read)
+        #     file_to_read.close()
+        #
+        #     project_version = float(loaded_object['project version'])
+        #
+        #     if float(project_version) > float(self.eleana.version):
+        #         info = CTkMessagebox(title="Project load", message='This project was created in newer Eleana version. Some errors in loaded content are possible')
+        #
+        #     '''
+        #     4. Load eleana_XXXXX files and store the content in temporary variables
+        #     '''
+        #
+        #     # LOAD: eleana_selections
+        #
+        #     file_to_read = open(eleana_selections, "rb")
+        #     loaded_object = pickle.load(file_to_read)
+        #     eleana_selections = loaded_object
+        #     file_to_read.close()
+        #
+        #     # LOAD eleana_paths
+        #
+        #     file_to_read = open(eleana_paths, "rb")
+        #     loaded_object = pickle.load(file_to_read)
+        #     eleana_paths = loaded_object
+        #     file_to_read.close()
+        #
+        #     # LOAD notes
+        #
+        #     file_to_read = open(eleana_notes, "rb")
+        #     loaded_object = pickle.load(file_to_read)
+        #     eleana_notes = loaded_object
+        #     file_to_read.close()
+        #
+        #     # LOAD groupsHierarchy
+        #
+        #     file_to_read = open(eleana_groupsHierarchy, "rb")
+        #     loaded_object = pickle.load(file_to_read)
+        #     eleana_groupsHierarchy = loaded_object
+        #     file_to_read.close()
+        #
+        #     # LOAD assignmentsToGroups
+        #
+        #     file_to_read = open(eleana_assignmentToGroups, "rb")
+        #     loaded_object = pickle.load(file_to_read)
+        #     eleana_assignmentToGroups = {}
+        #     for each in loaded_object:
+        #         group, value = list(each.items())[0]
+        #         eleana_assignmentToGroups[group] = value
+        #     file_to_read.close()
+        #
+        #     '''
+        #     5. Load list of the objects to store in eleana.dataset
+        #     '''
+        #     # LOAD results_dataset
+        #
+        #     file_to_read = open(eleana_results_dataset, "rb")
+        #     loaded_object = pickle.load(file_to_read)
+        #     eleana_results_dataset = loaded_object
+        #     file_to_read.close()
+        #
+        #     # LOAD dataset
+        #
+        #     file_to_read = open(eleana_dataset_list, "rb")
+        #     loaded_object = pickle.load(file_to_read)
+        #     eleana_dataset_list = loaded_object
+        #     file_to_read.close()
+        #
+        #     eleana_dataset = []
+        #     for filenumber in eleana_dataset_list.keys():
+        #         _filename = Path(extract_dir, filenumber)
+        #         file_to_read = open(_filename, "rb")
+        #         loaded_object = pickle.load(file_to_read)
+        #         eleana_dataset.append(loaded_object)
+        #         file_to_read.close()
+        # except:
+        #     return {"Error": True, 'desc': f"An error occured while loading the file"}
         '''
         6. Remove all files from extract_directory and then remove extract directory
         '''
