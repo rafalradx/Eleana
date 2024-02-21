@@ -1128,6 +1128,7 @@ class EleanaMainApp:
     ''' FILE: Load Recent project                                     '''
 
     def load_recent(self, selected_value_text):
+        """ Load a project selected from Last Projects Menu"""
         index = selected_value_text.split('. ')
         index = int(index[0])
         index = index - 1
@@ -1477,8 +1478,8 @@ def get_index_by_name(selected_value_text):
 
 ''' Starting application'''
 # Set default color appearance
-# ctk.set_appearance_mode("dark")
-ctk.set_appearance_mode("light")
+ctk.set_appearance_mode("dark")
+#ctk.set_appearance_mode("light")
 
 # Create general main instances for the program
 eleana = Eleana()
