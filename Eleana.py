@@ -1175,58 +1175,80 @@ class EleanaMainApp:
 
     def import_elexsys(self):
         ''' Open window that loads the spectra '''
-        load.loadElexsys()
-        update.dataset_list()
-        update.all_lists()
-
+        try:
+            load.loadElexsys()
+            update.dataset_list()
+            update.all_lists()
+        except Exception as e:
+            Error.show(info="Cannot import the data. Please check if the format is correct.", details=e)
     def import_EMX(self):
-        load.loadEMX()
-        update.dataset_list()
-        update.all_lists()
-
+        try:
+            load.loadEMX()
+            update.dataset_list()
+            update.all_lists()
+        except Exception as e:
+            Error.show(info="Cannot import the data. Please check if the format is correct.", details=e)
     def import_magnettech1(self):
-        load.loadMagnettech(1)
-        update.dataset_list()
-        update.all_lists()
-
+        try:
+            load.loadMagnettech(1)
+            update.dataset_list()
+            update.all_lists()
+        except Exception as e:
+            Error.show(info="Cannot import the data. Please check if the format is correct.", details=e)
     def import_magnettech2(self):
-        load.loadMagnettech(2)
-        update.dataset_list()
-        update.all_lists()
+        try:
+            load.loadMagnettech(2)
+            update.dataset_list()
+            update.all_lists()
+        except Exception as e:
+            Error.show(info="Cannot import the data. Please check if the format is correct.", details=e)
 
     def import_adani_dat(self):
-        load.loadAdaniDat()
-        update.dataset_list()
-        update.all_lists()
+        try:
+            load.loadAdaniDat()
+            update.dataset_list()
+            update.all_lists()
+        except Exception as e:
+            Error.show(info="Cannot import the data. Please check if the format is correct.", details=e)
 
     def import_shimadzu_spc(self):
-        load.loadShimadzuSPC()
-        update.dataset_list()
-        update.all_lists()
-
+        try:
+            load.loadShimadzuSPC()
+            update.dataset_list()
+            update.all_lists()
+        except:
+            except Exception as e:
+            Error.show(info="Cannot import the data. Please check if the format is correct.", details=e)
     def import_ascii(self, clipboard=None):
-        load.loadAscii(clipboard)
-        update.dataset_list()
-        update.group_list()
-        update.all_lists()
+        try:
+            load.loadAscii(clipboard)
+            update.dataset_list()
+            update.group_list()
+            update.all_lists()
+        except Exception as e:
+            Error.show(info="Cannot import the data. Please check if the format is correct.", details=e)
 
     def load_excel(self):
-        x = [['', ''], ['', '']]
-        headers = ['A', 'B']
-        empty = pandas.DataFrame(x, columns=headers)
-        table = CreateFromTable(eleana_app=self.eleana, master=self.mainwindow, df=empty, loadOnStart='excel')
-        response = table.get()
-        update.dataset_list()
-        update.group_list()
-        update.all_lists()
-
+        try:
+            x = [['', ''], ['', '']]
+            headers = ['A', 'B']
+            empty = pandas.DataFrame(x, columns=headers)
+            table = CreateFromTable(eleana_app=self.eleana, master=self.mainwindow, df=empty, loadOnStart='excel')
+            response = table.get()
+            update.dataset_list()
+            update.group_list()
+            update.all_lists()
+        except Exception as e:
+            Error.show(info="Cannot import the data. Please check if the format is correct.", details=e)
     def quick_paste(self, event=None):
         text = pyperclip.paste()
         self.import_ascii(text)
 
     def export_first(self):
-        export.csv('first')
-
+        try:
+            export.csv('first')
+        except Exception as e:
+            Error.show(info="Cannot export csv file.", details=e)
     def export_group(self):
         export.group_csv(self.eleana.selections['group'])
 

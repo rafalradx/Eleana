@@ -29,6 +29,7 @@ class Load:
                 index = last_projects.index(filename)
                 last_projects.pop(index)
             last_projects.insert(0, filename)
+            self.eleana.paths['last_projects'] = last_projects
 
         init_dir = Path(self.eleana.paths['last_project_dir'])
         try:
@@ -105,23 +106,6 @@ class Load:
         except Exception as e:
             Error.show(info="Cannot load the project file", details=e)
             return None
-        last_projects = self.eleana.paths['last_projects']
-        filename = str(filename)
-        if filename in last_projects:
-            index = last_projects.index(filename)
-            last_projects.pop(index)
-        last_projects.insert(0, filename)
-
-        self.eleana.paths['last_projects'] = last_projects
-        return {'dataset':eleana_dataset,
-                'result_dataset':eleana_results_dataset,
-                'assignmentToGroups': eleana_assignmentToGroups,
-                'groupsHierarchy':eleana_groupsHierarchy,
-                'notes':eleana_notes,
-                'paths':eleana_paths,
-                'selections':eleana_selections,
-                'results_dataset':eleana_results_dataset
-                }
 
     # Import EPR
     def loadElexsys(self) -> object:
