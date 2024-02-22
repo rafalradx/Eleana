@@ -2,11 +2,8 @@ import json
 from pathlib import Path
 import tkinter as tk
 import customtkinter as ctk
-import numpy as np
 import pickle
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
-from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
+from assets.Error import Error
 class Init:
     def __init__(self, app, eleana_instance, grapher_instance, main_menu_instance):
         self.app = app
@@ -39,21 +36,18 @@ class Init:
         self.app.sel_second.set('None')
         self.app.sel_result.configure(values=['None', 'yes'])
         self.app.sel_result.set('None')
-
         self.app.mainwindow.protocol('WM_DELETE_WINDOW', self.app.close_application)
 
-
     def folders(self):
-        '''This method creates standard Eleana folder in user directory.
-            If the folder does not exist it will be created.'''
-
+        '''Create standard EleanaPy folder in user directory.
+            Unless it exists, it will be created.'''
         home_dir = self.eleana.paths['home_dir']
         eleana_user_dir = Path(home_dir, '.EleanaPy' )
         if not eleana_user_dir.exists():
             try:
                 eleana_user_dir.mkdir()
-            except:
-                return {"Error": True, 'desc': f"Cannot create working Eleana folder in your home directory."}
+            except Exception as e:
+                Error.show(info = "Unable to create folder for configuration files.", details = e)
 
     def paths(self, update):
         try:

@@ -1,5 +1,4 @@
 from pathlib import Path
-import random
 import string
 import copy
 import pickle
@@ -19,6 +18,9 @@ class Load:
     def __init__(self, app_instance, eleana_instance):
         self.eleana = eleana_instance
         self.app = app_instance
+
+    @classmethod
+    def load_configuration_file(cls):
 
     def load_project(self, recent=None):
         ''' This method loads projects created by Eleana'''
@@ -288,6 +290,20 @@ class Save:
     def __init__(self, eleana_instance):
         self.eleana = eleana_instance
 
+    @classmethod
+    def save_eleana_paths(self, show_error=False):
+        '''Save self.eleana.paths to .EleanaPy user folder'''
+        try:
+            filename = Path(self.eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
+            content = self.eleana.paths
+            with open(filename, 'wb') as file:
+                pickle.dump(content, file)
+        except Exception as e:
+            if show_error:
+                Error.show(info = "Cannot save config paths.pic file", details = e)
+    @classmethod
+    def save_last_project_list(self):
+        pass
     def save_project(self, save_current=False):
         ''' Save project to a file '''
         init_dir = Path(self.eleana.paths.get('last_project_dir', Path.home()))

@@ -56,10 +56,8 @@ list_of_subprogs.append(['modify_data', 'cancel'])
 from subprogs.group_edit.move_to_group import MoveToGroup
 list_of_subprogs.append(['move_to_group', 'cancel'])
 
-
 # Widgets used by main application
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
-
 
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "Eleana_interface.ui"
@@ -70,8 +68,7 @@ DEVEL = True
 
 class EleanaMainApp:
     def __init__(self, eleana_instance, master=None):
-
-        # Initialize eleana
+        '''Construct main GUI application '''
         self.eleana = eleana_instance
         self.notify = self.eleana.notify_on
 
@@ -1216,8 +1213,7 @@ class EleanaMainApp:
             load.loadShimadzuSPC()
             update.dataset_list()
             update.all_lists()
-        except:
-            except Exception as e:
+        except Exception as e:
             Error.show(info="Cannot import the data. Please check if the format is correct.", details=e)
     def import_ascii(self, clipboard=None):
         try:
@@ -1259,11 +1255,7 @@ class EleanaMainApp:
                                     icon="warning", option_1="No", option_2="Yes")
         response = quit_dialog.get()
         if response == "Yes":
-            # Save current settings:
-            filename = Path(self.eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
-            content = self.eleana.paths
-            with open(filename, 'wb') as file:
-                pickle.dump(content, file)
+            save.save_eleana_paths(show_error=True)
             self.mainwindow.iconify()
 
             print('Closing subprograms')
