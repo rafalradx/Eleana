@@ -1,9 +1,12 @@
+import json
 from pathlib import Path
 import tkinter as tk
 import customtkinter as ctk
+import numpy as np
 import pickle
-
-from assets.LoadSave import Load, Save
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 class Init:
     def __init__(self, app, eleana_instance, grapher_instance, main_menu_instance):
         self.app = app
@@ -53,19 +56,27 @@ class Init:
                 return {"Error": True, 'desc': f"Cannot create working Eleana folder in your home directory."}
 
     def paths(self, update):
-        '''Loads the settings from paths.pic '''
-        success = Load.load_paths_settings(self.eleana)
-        if not success:
-            return
-        # Create last project list in the main menu
-        last_projects = self.eleana.paths['last_projects']
-        last_projects = [element for i, element in enumerate(last_projects) if i <= 10]
+        try:
+            filename = Path(self.eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
 
-        # Write the list to eleana.paths
-        self.eleana.paths['last_projects'] = last_projects
+            # Read paths.pic
+            file_to_read = open(filename, "rb")
+            paths = pickle.load(file_to_read)
+            self.eleana.paths = paths
+            file_to_read.close()
 
-        # Perform update to place the item into menu
-        update.last_projects_menu()
+            # Create last project list in the main menu
+            last_projects = self.eleana.paths['last_projects']
+            last_projects = [element for i, element in enumerate(last_projects) if i <= 10]
+
+            # Write the list to eleana.paths
+            self.eleana.paths['last_projects'] = last_projects
+
+            # Perform update to place the item into menu
+            update.last_projects_menu()
+
+        except:
+            pass
 
     def eleana_variables(self):
         self.eleana.selections = {'group': 'All',

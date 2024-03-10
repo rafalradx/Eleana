@@ -20,26 +20,6 @@ class Load:
         self.eleana = eleana_instance
         self.app = app_instance
 
-    @classmethod
-    def load_paths_settings(cls, eleana):
-        ''' Load saved settings from home/.EleanaPy/paths.pic'''
-        try:
-            filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
-            # Read paths.pic
-            file_to_read = open(filename, "rb")
-            paths = pickle.load(file_to_read)
-            eleana.paths = paths
-            file_to_read.close()
-            # Create last project list in the main menu
-            last_projects = eleana.paths['last_projects']
-            last_projects = [element for i, element in enumerate(last_projects) if i <= 10]
-            # Write the list to eleana.paths
-            eleana.paths['last_projects'] = last_projects
-            return True
-        except Exception as e:
-            print(e)
-            return None
-
     def load_project(self, recent=None):
         ''' This method loads projects created by Eleana'''
         def _update_last_projects(filename):
@@ -49,7 +29,6 @@ class Load:
                 index = last_projects.index(filename)
                 last_projects.pop(index)
             last_projects.insert(0, filename)
-            Save.save_settings_paths(self.eleana)
 
         init_dir = Path(self.eleana.paths['last_project_dir'])
         try:
@@ -126,6 +105,23 @@ class Load:
         except Exception as e:
             Error.show(info="Cannot load the project file", details=e)
             return None
+        last_projects = self.eleana.paths['last_projects']
+        filename = str(filename)
+        if filename in last_projects:
+            index = last_projects.index(filename)
+            last_projects.pop(index)
+        last_projects.insert(0, filename)
+
+        self.eleana.paths['last_projects'] = last_projects
+        return {'dataset':eleana_dataset,
+                'result_dataset':eleana_results_dataset,
+                'assignmentToGroups': eleana_assignmentToGroups,
+                'groupsHierarchy':eleana_groupsHierarchy,
+                'notes':eleana_notes,
+                'paths':eleana_paths,
+                'selections':eleana_selections,
+                'results_dataset':eleana_results_dataset
+                }
 
     # Import EPR
     def loadElexsys(self) -> object:
@@ -307,19 +303,6 @@ class Load:
 class Save:
     def __init__(self, eleana_instance):
         self.eleana = eleana_instance
-    @classmethod
-    def save_settings_paths(cls, eleana):
-        ''' Save settings in .EleanaPy/paths.pic '''
-        try:
-            # Save current settings:
-            filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
-            content = eleana.paths
-            with open(filename, 'wb') as file:
-                pickle.dump(content, file)
-            return True
-        except Exception as e:
-            Error.show(info="Cannot save settings", details=e)
-            return None
 
     def save_project(self, save_current=False):
         ''' Save project to a file '''
@@ -637,7 +620,7 @@ class Export:
             i += 1
 
 class Project_1:
-    ''' Create object used to save/load Eleana projects ver. 1'''
+    '''Create object used to save/load Eleana projects'''
     def __init__(self, dataset: list,
                  results_dataset: list,
                  groupsHierarchy:dict,
@@ -648,3 +631,11 @@ class Project_1:
         self.groupsHierarchy = groupsHierarchy
         self.notes = notes
         self.selections = selections
+
+
+
+
+
+
+
+
