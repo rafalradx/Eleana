@@ -1055,44 +1055,12 @@ class EleanaMainApp:
     ''' EDIT: Graph preferences                                     '''
 
     def graph_preferences(self):
+        ''' Open window for setting graph properties and settings '''
         pick_color = AskColor()  # open the color picker
         color = pick_color.get()  # get the color string
 
-    ''' FILE: Load Project                                          '''
-
-    # def save_project(self, save_current = False):
-    #     ''' Save project to a file '''
-    #     init_dir = Path(self.eleana.paths.get('last_project_dir', Path.home()))
-    #     if not save_current:
-    #         filename = asksaveasfile(initialdir=init_dir,
-    #                                  initialfile='',
-    #                                  defaultextension=".ele",
-    #                                  filetypes=[("Eleana project", "*.ele"),
-    #                                             ("All Files", "*.*")])
-    #         if not filename:
-    #             return
-    #
-    #         filename = Path(filename.name)
-    #     else:
-    #         filename = Path(save_current)
-    #
-    #     tmp = self.eleana.paths.get('tmp_dir', None)
-    #     if not tmp:
-    #         print("Save As Error: eleana.paths['tmp_dir'] is not defined")
-    #
-    #     project_to_save = Project_1(
-    #         dataset=self.eleana.dataset,
-    #         results_dataset=self.eleana.results_dataset,
-    #         groupsHierarchy=self.eleana.groupsHierarchy,
-    #         notes=self.notes,
-    #         selections=self.eleana.selections
-    #     )
-    #
-    #     with open(filename, 'w+b') as file:
-    #         pickle.dump(project_to_save, file)
-    #     del project_to_save
-
     def load_project(self, event=None, recent=None):
+        ''' Load project created with the Application '''
         project = load.load_project(recent)
         if not project:
             return
@@ -1168,57 +1136,84 @@ class EleanaMainApp:
             self.save_as(filename)
 
     '''******************************************
-    *                                           *
-    *          IMPORT EXTERNAL DATA             *
-    *                                           *
+              IMPORT EXTERNAL DATA             
     *********************************************'''
 
     def import_elexsys(self):
         ''' Open window that loads the spectra '''
-        load.loadElexsys()
-        update.dataset_list()
-        update.all_lists()
-
+        try:
+            load.loadElexsys()
+            update.dataset_list()
+            update.all_lists()
+            Save.save_settings_paths(self.eleana)
+        except Exception as e:
+            Error.show(info='Unable to import Elexsys file. Please verify that you have selected the correct format for import.', details=e)
     def import_EMX(self):
-        load.loadEMX()
-        update.dataset_list()
-        update.all_lists()
+        try:
+            load.loadEMX()
+            update.dataset_list()
+            update.all_lists()
+            Save.save_settings_paths(self.eleana)
+        except Exception as e:
+            Error.show(info='Unable to import EMX file. Please verify that you have selected the correct format for import.', details=e)
 
     def import_magnettech1(self):
-        load.loadMagnettech(1)
-        update.dataset_list()
-        update.all_lists()
-
+        try:
+            load.loadMagnettech(1)
+            update.dataset_list()
+            update.all_lists()
+            Save.save_settings_paths(self.eleana)
+        except Exception as e:
+            Error.show(info='Unable to import Magnettech file. Please verify that you have selected the correct format for import.', details=e)
     def import_magnettech2(self):
-        load.loadMagnettech(2)
-        update.dataset_list()
-        update.all_lists()
-
+        try:
+            load.loadMagnettech(2)
+            update.dataset_list()
+            update.all_lists()
+            Save.save_settings_paths(self.eleana)
+        except Exception as e:
+            Error.show(info='Unable to import Magnettech file. Please verify that you have selected the correct format for import.', details=e)
     def import_adani_dat(self):
-        load.loadAdaniDat()
-        update.dataset_list()
-        update.all_lists()
+        try:
+            load.loadAdaniDat()
+            update.dataset_list()
+            update.all_lists()
+            Save.save_settings_paths(self.eleana)
+        except Exception as e:
+            Error.show(info='Unable to import Adani file. Please verify that you have selected the correct format for import.', details=e)
 
     def import_shimadzu_spc(self):
-        load.loadShimadzuSPC()
-        update.dataset_list()
-        update.all_lists()
+        try:
+            load.loadShimadzuSPC()
+            update.dataset_list()
+            update.all_lists()
+            Save.save_settings_paths(self.eleana)
+        except Exception as e:
+            Error.show(info='Unable to import Shimadzu file. Please verify that you have selected the correct format for import.', details=e)
 
     def import_ascii(self, clipboard=None):
-        load.loadAscii(clipboard)
-        update.dataset_list()
-        update.group_list()
-        update.all_lists()
+        try:
+            load.loadAscii(clipboard)
+            update.dataset_list()
+            update.group_list()
+            update.all_lists()
+            Save.save_settings_paths(self.eleana)
+        except Exception as e:
+            Error.show(info='Unable to import Ascii file. Please verify that you have selected the correct format for import.', details=e)
 
     def load_excel(self):
-        x = [['', ''], ['', '']]
-        headers = ['A', 'B']
-        empty = pandas.DataFrame(x, columns=headers)
-        table = CreateFromTable(eleana_app=self.eleana, master=self.mainwindow, df=empty, loadOnStart='excel')
-        response = table.get()
-        update.dataset_list()
-        update.group_list()
-        update.all_lists()
+        try:
+            x = [['', ''], ['', '']]
+            headers = ['A', 'B']
+            empty = pandas.DataFrame(x, columns=headers)
+            table = CreateFromTable(eleana_app=self.eleana, master=self.mainwindow, df=empty, loadOnStart='excel')
+            response = table.get()
+            update.dataset_list()
+            update.group_list()
+            update.all_lists()
+            Save.save_settings_paths(self.eleana)
+        except Exception as e:
+            Error.show(info='Unable to import Excel file. Please verify that you have selected the correct format for import.', details=e)
 
     def quick_paste(self, event=None):
         text = pyperclip.paste()
@@ -1237,14 +1232,15 @@ class EleanaMainApp:
                                     icon="warning", option_1="No", option_2="Yes")
         response = quit_dialog.get()
         if response == "Yes":
-            # Save current settings:
-            filename = Path(self.eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
-            content = self.eleana.paths
-            with open(filename, 'wb') as file:
-                pickle.dump(content, file)
+            # # Save current settings:
+            # filename = Path(self.eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
+            # content = self.eleana.paths
+            # with open(filename, 'wb') as file:
+            #     pickle.dump(content, file)
+            Save.save_settings_paths(self)
             self.mainwindow.iconify()
 
-            print('Closing subprograms')
+            # Close all subprograms from the list
             for each in list_of_subprogs:
                 close_cmd = 'self.' + each[0] + '.' + each[1] + '()'
                 try:
@@ -1478,8 +1474,8 @@ def get_index_by_name(selected_value_text):
 
 ''' Starting application'''
 # Set default color appearance
-ctk.set_appearance_mode("dark")
-#ctk.set_appearance_mode("light")
+#ctk.set_appearance_mode("dark")
+ctk.set_appearance_mode("light")
 
 # Create general main instances for the program
 eleana = Eleana()

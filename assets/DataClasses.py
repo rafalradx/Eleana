@@ -371,28 +371,36 @@ def createFromAdaniDat(filename, adani: dict):
         except:
             parameter_value = -1
         return parameter_value
+    adani = adani.strip()
+    adani = adani.replace(',', '.')
+    adani_lines = adani.splitlines()
+    stripped_lines = []
+    for line in adani_lines:
+        line = line.strip()
+        stripped_lines.append(line + '\n')
+    adani = ''.join(stripped_lines[1:])
+    adani_split = adani.split('==\n0')
+    numbers = '0' + adani_split[1]
+    rows = numbers.split('\n')
+    columns = [row.split() for row in rows]
+    x = []
+    y = []
+    for column in columns:
+        try:
+            field = float(column[1])*10
+            amplitude = float(column[2])
+            x.append(field)
+            y.append(amplitude)
+        except:
+            pass
     data = {}
     data['parameters'] = {}
-    data['parameters']['SweepTime'] = _get_parameter('Sweep time:', ' s ', 1)
-    data['parameters']['PowAtten'] = _get_parameter('Power attenuation:', ' dB ', 1)
-    data['parameters']['ModAmp'] = _get_parameter('Mod. amplitude:', ' uT', 0.01)
+    data['parameters']['SweepTime'] = _get_parameter('Sweep time:', ' s\n', 1)
+    data['parameters']['PowAtten'] = _get_parameter('Power attenuation:', ' dB\n', 1)
+    data['parameters']['ModAmp'] = _get_parameter('Mod. amplitude:', ' uT\n', 0.01)
     data['parameters']['name_x'] = 'Field'
     data['parameters']['unit_x'] = 'G'
-
-    index = adani.find("  \n0 ")
-    index = index + 3
-    content = adani[index:]
-    content = content.replace(',', '.')
-    content = content.strip()
-    content = content.split('\n')
-    x_data = []
-    y_data = []
-    for each in content:
-        line = each.split(' ')
-        x_data.append(float(line[1]) * 10)
-        y_data.append(float(line[2]))
-
-    data['x'], data['y'] = x_data, y_data
+    data['x'], data['y'] = x, y
     data['name'] = filename.name
     data['groups'] = ['All']
     data['origin'] = 'Adani ESR'

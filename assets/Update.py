@@ -1,5 +1,6 @@
 from pathlib import Path
 import tkinter as tk
+from assets.LoadSave import Load, Save
 '''
 Update class contains methods for creating list in comboboxes
 and adds the created lists to the ComboboxLists.entries
@@ -21,8 +22,10 @@ class Update:
     def last_projects_menu(self):
         ''' Updates list of the recently loaded or saved projects and adds the list to the main menu'''
         def _clear_recent_list():
-            self.eleana.paths['last_projects'] = []
+            last = self.eleana.paths['last_projects'][0]
+            self.eleana.paths['last_projects'] = [last]
             self.last_projects_menu()
+            Save.save_settings_paths(self.eleana)
 
         icon_file = Path(self.eleana.paths['pixmaps'], 'x.png')
         icon_clear = tk.PhotoImage(file=icon_file)
@@ -38,15 +41,13 @@ class Update:
         for label in list_for_menu:
             def create_command(l):
                 return lambda: self.app.load_recent(l)
-
             icon_file = Path(self.eleana.paths['pixmaps'], 'x.png')
             icon_clear = tk.PhotoImage(file=icon_file)
             recent_menu.add_command(label=label, image=icon_clear, compound="left", command=create_command(label))
 
         # Separator and clear
         recent_menu.add_separator()
-        recent_menu.add_command(label='Clear list', image=icon_clear, compound="left", command=_clear_recent_list)
-
+        recent_menu.add_command(label='Keep only last', image=icon_clear, compound="left", command=_clear_recent_list)
 
     def group_list(self):
         ''' This scans for groups and creates assignments in eleana.assignmentToGroups'''
