@@ -1,5 +1,4 @@
 from pathlib import Path
-import random
 import string
 import copy
 import pickle
@@ -20,6 +19,29 @@ class Load:
         self.eleana = eleana_instance
         self.app = app_instance
 
+    @classmethod
+    def load_paths_settings(cls, eleana):
+        ''' Load saved settings from home/.EleanaPy/paths.pic'''
+        try:
+            filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
+            # Read paths.pic
+            file_to_read = open(filename, "rb")
+            paths = pickle.load(file_to_read)
+            eleana.paths = paths
+            file_to_read.close()
+            # Create last project list in the main menu
+            last_projects = eleana.paths['last_projects']
+            last_projects = [element for i, element in enumerate(last_projects) if i <= 10]
+            # Write the list to eleana.paths
+            eleana.paths['last_projects'] = last_projects
+            return True
+        except Exception as e:
+            print(e)
+            return None
+
+    def load_configuration_file(cls):
+        pass
+
     def load_project(self, recent=None):
         ''' This method loads projects created by Eleana'''
         def _update_last_projects(filename):
@@ -29,7 +51,8 @@ class Load:
                 index = last_projects.index(filename)
                 last_projects.pop(index)
             last_projects.insert(0, filename)
-
+            Save.save_settings_paths(self.eleana)
+            self.eleana.paths['last_projects'] = last_projects
         init_dir = Path(self.eleana.paths['last_project_dir'])
         try:
             init_file = Path(self.eleana.paths['last_projects'][0])
@@ -105,23 +128,6 @@ class Load:
         except Exception as e:
             Error.show(info="Cannot load the project file", details=e)
             return None
-        last_projects = self.eleana.paths['last_projects']
-        filename = str(filename)
-        if filename in last_projects:
-            index = last_projects.index(filename)
-            last_projects.pop(index)
-        last_projects.insert(0, filename)
-
-        self.eleana.paths['last_projects'] = last_projects
-        return {'dataset':eleana_dataset,
-                'result_dataset':eleana_results_dataset,
-                'assignmentToGroups': eleana_assignmentToGroups,
-                'groupsHierarchy':eleana_groupsHierarchy,
-                'notes':eleana_notes,
-                'paths':eleana_paths,
-                'selections':eleana_selections,
-                'results_dataset':eleana_results_dataset
-                }
 
     # Import EPR
     def loadElexsys(self) -> object:
@@ -287,7 +293,6 @@ class Load:
                 with open(filename, 'rb') as file:
                     content = file.read()
                     adani = content.decode('utf-8', errors='ignore')
-
                 spectrum = createFromAdaniDat(filename, adani)
                 self.eleana.dataset.append(spectrum)
                 last_import_dir = Path(filename).parent
@@ -303,7 +308,34 @@ class Load:
 class Save:
     def __init__(self, eleana_instance):
         self.eleana = eleana_instance
+    @classmethod
+    def save_settings_paths(cls, eleana):
+        ''' Save settings in .EleanaPy/paths.pic '''
+        try:
+            # Save current settings:
+            filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
+            content = eleana.paths
+            with open(filename, 'wb') as file:
+                pickle.dump(content, file)
+            return True
+        except Exception as e:
+            Error.show(info="Cannot save settings", details=e)
+            return None
 
+    @classmethod
+    def save_eleana_paths(self, show_error=False):
+        '''Save self.eleana.paths to .EleanaPy user folder'''
+        try:
+            filename = Path(self.eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
+            content = self.eleana.paths
+            with open(filename, 'wb') as file:
+                pickle.dump(content, file)
+        except Exception as e:
+            if show_error:
+                Error.show(info = "Cannot save config paths.pic file", details = e)
+    @classmethod
+    def save_last_project_list(self):
+        pass
     def save_project(self, save_current=False):
         ''' Save project to a file '''
         init_dir = Path(self.eleana.paths.get('last_project_dir', Path.home()))
@@ -368,119 +400,6 @@ class Save:
             Error.show(info="Cannot remove temporary project folder. Please remove it manually.", details=e)
             return None
         return filename
-
-    # def save_project(self, filename = None):
-    #     try:
-    #         init_dir = Path(self.eleana.paths['last_project_dir'])
-    #         init_file = ''
-    #     except IndexError:
-    #         init_dir = Path(self.eleana.paths['home_dir'])
-    #
-    #     if not filename:
-    #         try:
-    #             filename = asksaveasfile(initialdir=init_dir,
-    #                                  initialfile=init_file,
-    #                                  defaultextension=".ele",
-    #                                  filetypes=[("Eleana project", "*.ele"),
-    #                                             ("All Files", "*.*")])
-    #         except:
-    #             return {'error': True, 'desc': f'Could not save the project file. Try to save in different location.'}
-    #
-    #     if not filename:
-    #         return
-    #     file_path = Path(filename.name)
-    #     file_path.unlink()
-    #
-    #     # Create random name of working directory
-    #     working_folder = filename.name + '__' + str(random.randint(1000000,9999999))
-    #     new_directory = Path(working_folder)
-    #     try:
-    #         new_directory.mkdir(parents=True, exist_ok=True)
-    #     except:
-    #         return {"error": True, 'desc': f"Could not create working dir while saving {filename.name}"}
-    #
-    #     '''
-    #     Create list of names for eleana.dataset
-    #     '''
-    #     dataset_names = {}
-    #     i = 0
-    #     for each in self.eleana.dataset:
-    #         name = each.name_nr
-    #         name = name.replace('. ', '_=_')
-    #         dataset_names[str(i)] = name
-    #         i += 1
-    #     results_names = {}
-    #     i = 0
-    #     for each in self.eleana.results_dataset:
-    #         name = each.name_nr
-    #         name = name.replace('. ', '_=_')
-    #         results_names[str(i)] = name
-    #         i += 1
-    #     project_details = {'project version':'1.0'}
-    #     ordered_groups = []
-    #     for group, spectra in self.eleana.assignmentToGroups.items():
-    #         ordered_groups.append({group: spectra})
-    #     elements_to_save = {
-    #                         'eleana_assignmentToGroups':ordered_groups,
-    #                         'eleana_groupsHierarchy':self.eleana.groupsHierarchy,
-    #                         'eleana_notes':self.eleana.notes,
-    #                         'eleana_paths':self.eleana.paths,
-    #                         'eleana_selections':self.eleana.selections,
-    #                         'eleana_dataset_list':dataset_names,
-    #                         'eleana_results_list':results_names,
-    #                         'eleana_results_dataset':self.eleana.results_dataset,
-    #                         'eleana_project_details':project_details
-    #                         }
-    #
-    #     try:
-    #         # Save the eleana attributes to separate files
-    #         # Names for files are taken form keys of element_to_save
-    #         for each in elements_to_save.keys():
-    #             file_path = Path(new_directory, each)
-    #             with open(file_path, 'wb') as file:
-    #                 pickle.dump(elements_to_save[each], file)
-    #
-    #         '''
-    #         Each object in eleana.dataset will be saved
-    #         using pickle as a separate file, for which name is
-    #         the number in the eleana.dataset list.
-    #         Additionally the list of dataset names is saved in dataset_list
-    #         '''
-    #         i = 0
-    #         for name in dataset_names.keys():
-    #             data_file = Path(working_folder, str(i))
-    #             with open(data_file, 'wb') as file:
-    #                 pickle.dump(self.eleana.dataset[i], file)
-    #             i += 1
-    #         '''
-    #         Save result dataset
-    #         '''
-    #         i = 0
-    #         for each in self.eleana.results_dataset:
-    #             name = 'r' + str(i)
-    #             data_file = Path(working_folder, name)
-    #             with open(data_file, 'wb') as file:
-    #                 pickle.dump(self.eleana.results_dataset[i], file)
-    #             i += 1
-    #
-    #         # Create zip file form the directory
-    #         name_without_extension = filename.name[:-4]
-    #         shutil.make_archive(name_without_extension, 'zip', new_directory)
-    #         zip_file = Path(name_without_extension + '.zip')
-    #         new_name = zip_file.with_suffix(".ele")
-    #
-    #         # Rename zip to ele
-    #         zip_file.rename(new_name)
-    #
-    #         # Remove files in working_dir
-    #         for file in new_directory.glob('*'):
-    #             file.unlink()
-    #
-    #         # Remove working dir
-    #         new_directory.rmdir()
-    #         return {"error": False, 'desc':'', 'return':filename}
-    #     except:
-    #         return {"error": True, 'desc': f"Error while saving {filename.name}"}
 
 class Export:
     def __init__(self, eleana_instance):
@@ -587,17 +506,14 @@ class Export:
         except:
             info = CTkMessagebox(title='Error', message='Could not open the directory for saving data. Check permissions.')
             return
-
         list_of_data = self.eleana.assignmentToGroups.get(group, [])
         if not list_of_data:
             info = CTkMessagebox(title='Empty group', message=f'In the selected group: {group} there is nothing to export.')
             return
-
         if len(list_of_data) > 9 and len(list_of_data) < 100:
             change = 'two'
         else:
            change = 'no'
-
         list_of_filenames = []
         for each in list_of_data:
             name = self.eleana.dataset[each].name_nr
@@ -620,7 +536,7 @@ class Export:
             i += 1
 
 class Project_1:
-    '''Create object used to save/load Eleana projects'''
+    ''' Create object used to save/load Eleana projects ver. 1'''
     def __init__(self, dataset: list,
                  results_dataset: list,
                  groupsHierarchy:dict,
@@ -631,11 +547,3 @@ class Project_1:
         self.groupsHierarchy = groupsHierarchy
         self.notes = notes
         self.selections = selections
-
-
-
-
-
-
-
-

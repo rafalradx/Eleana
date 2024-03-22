@@ -1121,7 +1121,7 @@ class EleanaMainApp:
         # Write the list to eleana.paths
         self.eleana.paths['last_projects'] = last_projects
         self.eleana.paths['last_project_dir'] = Path(last_projects[0]).parent
-
+        Save.save_settings_paths(self.eleana)
         # Perform update to place the item into menu
         update.last_projects_menu()
         app.mainwindow.title(Path(last_projects[0]).name[:-4] + ' - Eleana')

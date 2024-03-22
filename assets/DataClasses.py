@@ -407,6 +407,7 @@ def createFromAdaniDat(filename, adani: dict):
     spectrum = Single2D(data)
     return spectrum
 
+
 def create_eleana_par(dsc: dict, bruker_key: str) -> dict:
     value = dsc[bruker_key]
     value = value.split(' ')

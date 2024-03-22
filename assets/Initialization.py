@@ -58,23 +58,18 @@ class Init:
     def paths(self, update):
         try:
             filename = Path(self.eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
-
             # Read paths.pic
             file_to_read = open(filename, "rb")
             paths = pickle.load(file_to_read)
             self.eleana.paths = paths
             file_to_read.close()
-
             # Create last project list in the main menu
             last_projects = self.eleana.paths['last_projects']
             last_projects = [element for i, element in enumerate(last_projects) if i <= 10]
-
             # Write the list to eleana.paths
             self.eleana.paths['last_projects'] = last_projects
-
             # Perform update to place the item into menu
             update.last_projects_menu()
-
         except:
             pass
 
@@ -85,13 +80,11 @@ class Init:
                       'f_stk': 0, 's_stk': 0, 'r_stk': 0,
                       'f_dsp': True, 's_dsp': True, 'r_dsp': True
                       }
-
         self.eleana.notes = {"content": "",
                  "tags": {"bold": [], "italic": [], "code": [], "normal size": [], "larger size": [],
                           "largest size": [],
                           "highlight": [], "highlight red": [], "highlight green": [], "highlight black": [],
                           "text white": [], "text grey": [], "text blue": [], "text green": [], "text red": []}}
-
         self.eleana.dataset = []
         self.eleana.results_dataset = []
         self.eleana.assignmentToGroups = self.assignmentToGroups = {'<group-list/>': ['All']}
