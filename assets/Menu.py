@@ -167,7 +167,7 @@ class MainMenu:
         self.menu_groups.add_command(label="Assign Second to group", command=self.app.second_to_group)
 
         # - Graph Preferences
-        self.menu_edit.add_command(label="Graph preferences", command = self.app.graph_preferences, image=self.icon_graphPrefs, compound="left")
+        self.menu_edit.add_command(label="Preferences", command = self.app.preferences, image=self.icon_graphPrefs, compound="left")
 
 
     def prepare_icon(self, filename):

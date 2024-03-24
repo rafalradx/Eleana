@@ -20,6 +20,20 @@ class Load:
         self.app = app_instance
 
     @classmethod
+    def load_preferences(cls, eleana):
+        ''' Load saved graph settings from home/.EleanaPy/graph_prefs.pic'''
+        try:
+            filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'preferences.pic')
+            # Read paths.pic
+            file_to_read = open(filename, "rb")
+            preferences = pickle.load(file_to_read)
+            file_to_read.close()
+            return preferences
+        except Exception as e:
+            print(e)
+            return None
+
+    @classmethod
     def load_paths_settings(cls, eleana):
         ''' Load saved settings from home/.EleanaPy/paths.pic'''
         try:
@@ -38,9 +52,6 @@ class Load:
         except Exception as e:
             print(e)
             return None
-
-    def load_configuration_file(cls):
-        pass
 
     def load_project(self, recent=None):
         ''' This method loads projects created by Eleana'''
@@ -308,6 +319,21 @@ class Load:
 class Save:
     def __init__(self, eleana_instance):
         self.eleana = eleana_instance
+
+    @classmethod
+    def save_preferences(cls, eleana, app, grapher):
+        ''' Save graph preferences in .EleanaPy/graph_prefs.pic '''
+        try:
+            # Create object to store preferences
+            preferences = Preferences(app, grapher)
+            # Save current settings:
+            filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'preferences.pic')
+            with open(filename, 'wb') as file:
+                pickle.dump(preferences, file)
+            return True
+        except Exception as e:
+            print(e)
+            return None
     @classmethod
     def save_settings_paths(cls, eleana):
         ''' Save settings in .EleanaPy/paths.pic '''
@@ -537,7 +563,8 @@ class Export:
 
 class Project_1:
     ''' Create object used to save/load Eleana projects ver. 1'''
-    def __init__(self, dataset: list,
+    def __init__(self,
+                 dataset: list,
                  results_dataset: list,
                  groupsHierarchy:dict,
                  notes: str,
@@ -547,3 +574,15 @@ class Project_1:
         self.groupsHierarchy = groupsHierarchy
         self.notes = notes
         self.selections = selections
+class Preferences:
+    ''' This class is used to create preferences'''
+    def __init__(self, app, grapher):
+        # Define App settings
+        self.ctk_appearence_mode = app.ctk_appearence_mode
+        self.ctk_set_default_color_theme = app.ctk_set_default_color_theme
+
+        # Define Grapher settings
+        self.style_first = grapher.style_first
+        self.style_second = grapher.style_second
+        self.style_result = grapher.style_result
+        self.plt_style = grapher.plt_style

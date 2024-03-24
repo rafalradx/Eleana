@@ -1,4 +1,4 @@
-
+from assets.LoadSave import Load, Save
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
@@ -9,8 +9,9 @@ from modules.CTkListbox import CTkListbox
 matplotlib.use('TkAgg')
 
 class GraphPreferences:
-    def __init__(self, app_instance):
+    def __init__(self, app_instance, eleana_instance):
         self.app = app_instance
+        self.eleana = eleana_instance
 
         ''' CURSOR DEFINITIONS '''
         # Create avaliable cursor modes: hov - enable hover,
@@ -26,36 +27,51 @@ class GraphPreferences:
                         {'label': 'Numbered selections', 'hov':False, 'annot':True, 'a_txt': True, 'multip':True, 'store': True, 'nr': True},
                         {'label': 'Free select'},
                         {'label': 'Crosshair', 'hov':True, 'a_txt':True, 'annot':True, 'multip':False, 'store': False}
-                        ]
-
-        self.current_cursor_mode = self.cursor_modes[0]
-
-        # Plot colors
-        self.colors = {'first_re': "#d53339",
-                       'first_im': "#ef6f74",
-                       'second_re': "#008cb3",
-                       'second_im': "#07bbed",
-                       'result_re': "#108d3d",
-                       'result_im': "#32ab5d"
-                       }
+                            ]
+        # Scale settings
+        self.inverted_x_axis = False
 
         # Set cursor modes
         self.set_cursor_modes()
+        self.current_cursor_mode = self.cursor_modes[0]
 
-        # Canvas style
-        plt.style.use('Solarize_Light2')
-        #plt.style.use('dark_background')
+        # Load preferences from the settings file
+        try:
+            preferences = Load.load_preferences(self.eleana)
+            if not preferences:
+                # Use default if not exists
+                self.default_settings()
+            else:
+                self.plt_style = preferences.plt_style
+                self.style_first = preferences.style_first
+                self.style_second = preferences.style_second
+                self.style_result = preferences.style_result
+        except Exception as e:
+            print('Unable to read preferences.pic file.')
+            print(e)
+            self.default_settings()
+        plt.style.use(self.plt_style)
 
-        # Scale settings
-        self.inverted_x_axis = False
-        # Plot colors
-        self.colors = {'first_re': "#d53339",
-                       'first_im': "#ef6f74",
-                       'second_re': "#008cb3",
-                       'second_im': "#07bbed",
-                       'result_re': "#108d3d",
-                       'result_im': "#32ab5d"
-                       }
+    def default_settings(self):
+        self.plt_style = 'Solarize_Light2'
+        self.style_first = {'plot_type': 'line',
+                            'linewidth': 3,
+                            's': 5,
+                            'color_re': "#d53339",
+                            'color_im': "#ef6f74"
+                            }
+        self.style_second = {'plot_type': 'line',
+                             'linewidth': 3,
+                             's': 5,
+                             'color_re': '#008cb3',
+                             'color_im': '#07bbed'
+                             }
+        self.style_result = {'plot_type': 'line',
+                             'linewidth': 3,
+                             's': 5,
+                             'color_re': '#108d3d',
+                             'color_im': '#32ab5d'
+                                 }
 
     def set_cursor_modes(self):
         ''' This function creates list of cursor
@@ -66,11 +82,10 @@ class GraphPreferences:
         self.app.sel_cursor_mode.configure(values=box_values)
         self.app.sel_cursor_mode.set('None')
 
-
 class Grapher(GraphPreferences):
     def __init__(self, app_instance, eleana_instance):
         # Initialize GraphPreferences
-        super().__init__(app_instance)
+        super().__init__(app_instance, eleana_instance)
         ''' Initialize app, eleana and graphs objects (fig, canvas, toolbar)'''
         self.app = app_instance
         self.eleana = eleana_instance
@@ -220,12 +235,22 @@ class Grapher(GraphPreferences):
         else:
             axis_title = self.axis_title('first')
         if data['complex'] and self.eleana.selections['f_cpl'] == 'cpl':
-            self.ax.plot(data['x'], data['re_y'], label=legend, color=self.colors['first_re'])
-            self.ax.plot(data['x'], data['im_y'], label=legend, color=self.colors['first_im'] )
+            if self.style_first['plot_type'] == 'line':
+                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_first['color_re'], linewidth= self.style_first['linewidth'])
+                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_first['color_im'], linewidth= self.style_first['linewidth'] )
+            else:
+                self.ax.scatter(data['x'], data['re_y'], label=legend, color=self.style_first['color_re'], s=self.style_first['s'])
+                self.ax.scatter(data['x'], data['im_y'], label=legend, color=self.style_first['color_im'], s=self.style_first['s'])
         elif data['complex'] and self.eleana.selections['f_cpl'] == 'im':
-            self.ax.plot(data['x'], data['im_y'], label=legend, color=self.colors['first_im'])
+            if self.style_first['plot_type'] == 'line':
+                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_first['color_im'], linewidth= self.style_first['linewidth'])
+            else:
+                self.ax.scatter(data['x'], data['im_y'], label=legend, color=self.style_first['color_im'], s=self.style_first['s'])
         else:
-            self.ax.plot(data['x'], data['re_y'], label=legend, color=self.colors['first_re'])
+            if self.style_first['plot_type'] == 'line':
+                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_first['color_re'], linewidth=self.style_first['linewidth'])
+            else:
+                self.ax.scatter(data['x'], data['re_y'], label=legend, color=self.style_first['color_im'], s=self.style_first['s'])
         self.ax.set_xlabel(axis_title['x_title'])
         self.ax.set_ylabel(axis_title['y_title'])
 
@@ -241,15 +266,23 @@ class Grapher(GraphPreferences):
             axis_title = self.axis_title('second')
         else:
             pass
-
         if data['complex'] and self.eleana.selections['s_cpl'] == 'cpl':
-            self.ax.plot(data['x'], data['re_y'], label=legend, color=self.colors['second_re'])
-            self.ax.plot(data['x'], data['im_y'], label=legend, color=self.colors['second_im'])
+            if self.style_second['plot_type'] == 'line':
+                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_second['color_re'], linewidth = self.style_second['linewidth'])
+                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_second['color_im'], linewidth = self.style_second['linewidth'])
+            else:
+                self.ax.scatter(data['x'], data['re_y'], label=legend, color=self.style_second['color_re'], s=self.style_second['s'])
+                self.ax.scatter(data['x'], data['im_y'], label=legend, color=self.style_second['color_im'], s=self.style_second['s'])
         elif data['complex'] and self.eleana.selections['s_cpl'] == 'im':
-            self.ax.plot(data['x'], data['im_y'], label=legend, color=self.colors['second_im'])
+            if self.style_second['plot_type'] == 'line':
+                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_second['color_im'], linewidth=self.style_second['linewidth'])
+            else:
+                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_second['color_im'],s=self.style_second['s'])
         else:
-
-            self.ax.plot(data['x'], data['re_y'], label=legend, color=self.colors['second_re'])
+            if self.style_second['plot_type'] == 'line':
+                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_second['color_re'], linewidth=self.style_second['linewidth'])
+            else:
+                self.ax.scatter(data['x'], data['re_y'], label=legend, color=self.style_second['color_re'], s=self.style_second['s'])
         self.ax.set_xlabel(axis_title['x_title'])
         self.ax.set_ylabel(axis_title['y_title'])
 
@@ -265,12 +298,23 @@ class Grapher(GraphPreferences):
             axis_title = self.axis_title('result')
         else:
             pass
-
         if data['complex'] and self.eleana.selections['r_cpl'] == 'cpl':
-            self.ax.plot(data['x'], data['re_y'], label=legend, color=self.colors['result_re'])
-            self.ax.plot(data['x'], data['im_y'], label=legend, color=self.colors['result_im'])
+            if self.style_result['plot_type'] == 'line':
+                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_result['color_re'], linewidth=self.style_result['linewidth'])
+                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_result['color_im'], linewidth=self.style_result['linewidth'])
+            else:
+                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_result['color_re'], s=self.style_result['s'])
+                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_result['color_im'], s=self.style_result['s'])
+        elif data['complex'] and self.eleana.selections['r_cpl'] == 'im':
+            if self.style_result['plot_type'] == 'line':
+                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_result['color_im'], linewidth=self.style_result['linewidth'])
+            else:
+                self.ax.scatter(data['x'], data['im_y'], label=legend, color=self.style_result['color_im'],s=self.style_result['s'])
         else:
-            self.ax.plot(data['x'], data['re_y'], label=legend, color=self.colors['result_re'])
+            if self.style_result['plot_type'] == 'line':
+                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_result['color_re'], linewidth=self.style_result['linewidth'])
+            else:
+                self.ax.scatter(data['x'], data['re_y'], label=legend, color=self.style_result['color_re'], s=self.style_result['s'])
         self.ax.set_xlabel(axis_title['x_title'])
         self.ax.set_ylabel(axis_title['y_title'])
 
@@ -380,7 +424,6 @@ class Grapher(GraphPreferences):
             self.app.btn_clear_cursors.grid()
             _show_annotation_list(self)
             # Switch on Free point selections
-
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
 
         elif index == 6:

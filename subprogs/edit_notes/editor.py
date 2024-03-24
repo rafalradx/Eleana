@@ -18,12 +18,6 @@ root = ctk.CTk()
 root.geometry('600x600')
 root.attributes('-topmost',True)
 
-# Current File Path
-#filePath = None
-
-# initial directory to be the current directory
-#initialdir = '.'
-
 # Define File Types that can be choosen
 validFileTypes = (
     ("Rich Text File", "*.rte"),

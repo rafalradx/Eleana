@@ -1,20 +1,16 @@
 #!/usr/bin/python3
 
+# Import Python Modules
 import copy
 import io
 import pathlib
-# Import Python Modules
-import pickle
 import re
 import sys
 from pathlib import Path
-
-import customtkinter as ctk
 import numpy as np
 import pandas
 import pygubu
 import pyperclip
-from tkinter.filedialog import asksaveasfile, askopenfilename
 
 list_of_subprogs = []
 
@@ -26,7 +22,7 @@ from modules.CTkColorPicker import *
 
 # Import Eleana specific classes
 from assets.GeneralEleana import Eleana
-from assets.LoadSave import Load, Save, Export, Project_1
+from assets.LoadSave import Load, Save, Export
 from assets.Initialization import Init
 from assets.Grapher import Grapher
 from assets.Update import Update
@@ -55,11 +51,10 @@ from subprogs.modify.modify import ModifyData
 list_of_subprogs.append(['modify_data', 'cancel'])
 from subprogs.group_edit.move_to_group import MoveToGroup
 list_of_subprogs.append(['move_to_group', 'cancel'])
-
-
+from subprogs.preferences.preferences import PreferencesApp
+list_of_subprogs.append(['prefereces', 'cancel'])
 # Widgets used by main application
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
-
 
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "Eleana_interface.ui"
@@ -156,6 +151,10 @@ class EleanaMainApp:
 
         # Comparison view
         self.comparison_settings = {'vsep': 0, 'hsep': 0, 'indexes': (), 'v_factor': '1', 'h_factor': '1'}
+
+        # Ctk styles
+        self.ctk_appearence_mode = 'light'
+        self.ctk_set_default_color_theme = 'dark-blue'
 
     def set_grapher(self, grapher):
         self.grapher = grapher
@@ -1054,10 +1053,13 @@ class EleanaMainApp:
 
     ''' EDIT: Graph preferences                                     '''
 
-    def graph_preferences(self):
-        ''' Open window for setting graph properties and settings '''
-        pick_color = AskColor()  # open the color picker
-        color = pick_color.get()  # get the color string
+    def preferences(self):
+        ''' Open window for editing preferences '''
+        preferences = PreferencesApp(self.mainwindow)
+        respones = preferences.get()
+
+        #pick_color = AskColor()  # open the color picker
+        #color = pick_color.get()  # get the color string
 
     def load_project(self, event=None, recent=None):
         ''' Load project created with the Application '''
@@ -1233,13 +1235,9 @@ class EleanaMainApp:
         response = quit_dialog.get()
         if response == "Yes":
             # # Save current settings:
-            # filename = Path(self.eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
-            # content = self.eleana.paths
-            # with open(filename, 'wb') as file:
-            #     pickle.dump(content, file)
-            Save.save_settings_paths(self)
+            Save.save_settings_paths(self.eleana)
+            Save.save_preferences(self.eleana, self, self.grapher)
             self.mainwindow.iconify()
-
             # Close all subprograms from the list
             for each in list_of_subprogs:
                 close_cmd = 'self.' + each[0] + '.' + each[1] + '()'
@@ -1440,7 +1438,6 @@ class EleanaMainApp:
 
             stdout_backup = sys.stdout
             sys.stdout = io.StringIO()
-
             try:
                 eval(command, globals(), locals())
                 output = sys.stdout.getvalue()
@@ -1448,7 +1445,6 @@ class EleanaMainApp:
                 output = f"Error: {e}"
             finally:
                 sys.stdout = stdout_backup
-
             new_log = '\n' + output
             self.log_field.insert("end", new_log)
             return output
@@ -1471,18 +1467,13 @@ def get_index_by_name(selected_value_text):
             return i
         i += 1
 
-
 ''' Starting application'''
-# Set default color appearance
-#ctk.set_appearance_mode("dark")
-ctk.set_appearance_mode("light")
 
 # Create general main instances for the program
 eleana = Eleana()
 app = EleanaMainApp(eleana)  # This is GUI
 grapher = Grapher(app, eleana)
 app.set_grapher(grapher)
-
 load = Load(app, eleana)
 save = Save(eleana)
 export = Export(eleana)
@@ -1491,8 +1482,7 @@ print('build menu')
 main_menu = MainMenu(app, eleana)
 init = Init(app, eleana, grapher, main_menu)
 context_menu = ContextMenu(app, eleana)
-update = Update(app, eleana,
-                main_menu)  # This contains methods for update things like lists, settings, gui, groups etc.
+update = Update(app, eleana, main_menu)  # This contains methods for update things like lists, settings, gui, groups etc.
 sound = Sound()
 
 # Initialize basic settings: geometry, icon, graph, binding, etc

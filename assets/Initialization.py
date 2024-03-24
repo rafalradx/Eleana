@@ -1,12 +1,8 @@
-import json
 from pathlib import Path
 import tkinter as tk
 import customtkinter as ctk
-import numpy as np
 import pickle
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
-from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
+
 class Init:
     def __init__(self, app, eleana_instance, grapher_instance, main_menu_instance):
         self.app = app
@@ -27,8 +23,10 @@ class Init:
         main_icon = tk.PhotoImage(file=top_window_icon)
         self.app.mainwindow.iconphoto(True, main_icon)
         self.app.mainwindow.title('new project - Eleana')
-        # Set color motive for GUI
-        ctk.set_default_color_theme("dark-blue")
+
+        # Set color modes for GUI
+        ctk.set_default_color_theme(self.app.ctk_set_default_color_theme)
+        ctk.set_appearance_mode(self.app.ctk_appearence_mode)
 
         # ---------------------- Set default values in GUI -------
         self.app.sel_group.configure(values=['All'])
@@ -39,7 +37,6 @@ class Init:
         self.app.sel_second.set('None')
         self.app.sel_result.configure(values=['None', 'yes'])
         self.app.sel_result.set('None')
-
         self.app.mainwindow.protocol('WM_DELETE_WINDOW', self.app.close_application)
 
 
