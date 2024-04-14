@@ -54,24 +54,30 @@ class GraphPreferences:
 
     def default_settings(self):
         self.plt_style = 'Solarize_Light2'
-        self.style_first = {'plot_type': 'line',
+        self.style_first = {'plot_type': 'scatter',
                             'linewidth': 3,
+                            'linestyle':'solid',
+                            'marker': '.',
                             's': 5,
                             'color_re': "#d53339",
                             'color_im': "#ef6f74"
                             }
         self.style_second = {'plot_type': 'line',
                              'linewidth': 3,
+                             'linestyle': 'solid',
                              's': 5,
+                             'marker':'.',
                              'color_re': '#008cb3',
                              'color_im': '#07bbed'
                              }
         self.style_result = {'plot_type': 'line',
                              'linewidth': 3,
+                             'linestyle': 'solid',
                              's': 5,
+                             'marker': '.',
                              'color_re': '#108d3d',
                              'color_im': '#32ab5d'
-                                 }
+                             }
 
     def set_cursor_modes(self):
         ''' This function creates list of cursor
@@ -236,21 +242,21 @@ class Grapher(GraphPreferences):
             axis_title = self.axis_title('first')
         if data['complex'] and self.eleana.selections['f_cpl'] == 'cpl':
             if self.style_first['plot_type'] == 'line':
-                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_first['color_re'], linewidth= self.style_first['linewidth'])
-                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_first['color_im'], linewidth= self.style_first['linewidth'] )
+                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_first['color_re'], linewidth= self.style_first['linewidth'], linestyle=self.style_first['linestyle'])
+                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_first['color_im'], linewidth= self.style_first['linewidth'], linestyle=self.style_first['linestyle'])
             else:
-                self.ax.scatter(data['x'], data['re_y'], label=legend, color=self.style_first['color_re'], s=self.style_first['s'])
-                self.ax.scatter(data['x'], data['im_y'], label=legend, color=self.style_first['color_im'], s=self.style_first['s'])
+                self.ax.scatter(data['x'], data['re_y'], label=legend, color=self.style_first['color_re'], s=self.style_first['s'], marker = self.style_first['marker'])
+                self.ax.scatter(data['x'], data['im_y'], label=legend, color=self.style_first['color_im'], s=self.style_first['s'], marker = self.style_first['marker'])
         elif data['complex'] and self.eleana.selections['f_cpl'] == 'im':
             if self.style_first['plot_type'] == 'line':
-                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_first['color_im'], linewidth= self.style_first['linewidth'])
+                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_first['color_im'], linewidth= self.style_first['linewidth'], linestyle=self.style_first['linestyle'])
             else:
-                self.ax.scatter(data['x'], data['im_y'], label=legend, color=self.style_first['color_im'], s=self.style_first['s'])
+                self.ax.scatter(data['x'], data['im_y'], label=legend, color=self.style_first['color_im'], s=self.style_first['s'], marker = self.style_first['marker'])
         else:
             if self.style_first['plot_type'] == 'line':
-                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_first['color_re'], linewidth=self.style_first['linewidth'])
+                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_first['color_re'], linewidth=self.style_first['linewidth'], linestyle=self.style_first['linestyle'])
             else:
-                self.ax.scatter(data['x'], data['re_y'], label=legend, color=self.style_first['color_im'], s=self.style_first['s'])
+                self.ax.scatter(data['x'], data['re_y'], label=legend, color=self.style_first['color_im'], s=self.style_first['s'], marker = self.style_first['marker'])
         self.ax.set_xlabel(axis_title['x_title'])
         self.ax.set_ylabel(axis_title['y_title'])
 
@@ -268,21 +274,21 @@ class Grapher(GraphPreferences):
             pass
         if data['complex'] and self.eleana.selections['s_cpl'] == 'cpl':
             if self.style_second['plot_type'] == 'line':
-                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_second['color_re'], linewidth = self.style_second['linewidth'])
-                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_second['color_im'], linewidth = self.style_second['linewidth'])
+                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_second['color_re'], linewidth = self.style_second['linewidth'], linestyle=self.style_second['linestyle'])
+                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_second['color_im'], linewidth = self.style_second['linewidth'], linestyle=self.style_second['linestyle'])
             else:
-                self.ax.scatter(data['x'], data['re_y'], label=legend, color=self.style_second['color_re'], s=self.style_second['s'])
-                self.ax.scatter(data['x'], data['im_y'], label=legend, color=self.style_second['color_im'], s=self.style_second['s'])
+                self.ax.scatter(data['x'], data['re_y'], label=legend, color=self.style_second['color_re'], s=self.style_second['s'], marker = self.style_second['marker'])
+                self.ax.scatter(data['x'], data['im_y'], label=legend, color=self.style_second['color_im'], s=self.style_second['s'], marker = self.style_second['marker'])
         elif data['complex'] and self.eleana.selections['s_cpl'] == 'im':
             if self.style_second['plot_type'] == 'line':
-                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_second['color_im'], linewidth=self.style_second['linewidth'])
+                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_second['color_im'], linewidth=self.style_second['linewidth'], linestyle=self.style_second['linestyle'])
             else:
-                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_second['color_im'],s=self.style_second['s'])
+                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_second['color_im'],s=self.style_second['s'], marker = self.style_second['marker'])
         else:
             if self.style_second['plot_type'] == 'line':
-                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_second['color_re'], linewidth=self.style_second['linewidth'])
+                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_second['color_re'], linewidth=self.style_second['linewidth'], linestyle=self.style_second['linestyle'])
             else:
-                self.ax.scatter(data['x'], data['re_y'], label=legend, color=self.style_second['color_re'], s=self.style_second['s'])
+                self.ax.scatter(data['x'], data['re_y'], label=legend, color=self.style_second['color_re'], s=self.style_second['s'], marker = self.style_second['marker'])
         self.ax.set_xlabel(axis_title['x_title'])
         self.ax.set_ylabel(axis_title['y_title'])
 
@@ -300,21 +306,21 @@ class Grapher(GraphPreferences):
             pass
         if data['complex'] and self.eleana.selections['r_cpl'] == 'cpl':
             if self.style_result['plot_type'] == 'line':
-                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_result['color_re'], linewidth=self.style_result['linewidth'])
-                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_result['color_im'], linewidth=self.style_result['linewidth'])
+                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_result['color_re'], linewidth=self.style_result['linewidth'], linestyle=self.style_result['linestyle'])
+                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_result['color_im'], linewidth=self.style_result['linewidth'], linestyle=self.style_result['linestyle'])
             else:
-                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_result['color_re'], s=self.style_result['s'])
-                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_result['color_im'], s=self.style_result['s'])
+                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_result['color_re'], s=self.style_result['s'], marker = self.style_result['marker'])
+                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_result['color_im'], s=self.style_result['s'], marker = self.style_result['marker'])
         elif data['complex'] and self.eleana.selections['r_cpl'] == 'im':
             if self.style_result['plot_type'] == 'line':
-                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_result['color_im'], linewidth=self.style_result['linewidth'])
+                self.ax.plot(data['x'], data['im_y'], label=legend, color=self.style_result['color_im'], linewidth=self.style_result['linewidth'], linestyle=self.style_result['linestyle'])
             else:
-                self.ax.scatter(data['x'], data['im_y'], label=legend, color=self.style_result['color_im'],s=self.style_result['s'])
+                self.ax.scatter(data['x'], data['im_y'], label=legend, color=self.style_result['color_im'],s=self.style_result['s'], marker = self.style_result['marker'])
         else:
             if self.style_result['plot_type'] == 'line':
-                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_result['color_re'], linewidth=self.style_result['linewidth'])
+                self.ax.plot(data['x'], data['re_y'], label=legend, color=self.style_result['color_re'], linewidth=self.style_result['linewidth'], linestyle=self.style_result['linestyle'])
             else:
-                self.ax.scatter(data['x'], data['re_y'], label=legend, color=self.style_result['color_re'], s=self.style_result['s'])
+                self.ax.scatter(data['x'], data['re_y'], label=legend, color=self.style_result['color_re'], s=self.style_result['s'], marker = self.style_result['marker'])
         self.ax.set_xlabel(axis_title['x_title'])
         self.ax.set_ylabel(axis_title['y_title'])
 

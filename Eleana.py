@@ -31,6 +31,7 @@ from assets.Sounds import Sound
 from assets.Error import Error
 
 # Import Eleana subprograms and windows
+list_of_subprogs = []
 from subprogs.group_edit.add_group import Groupcreate
 list_of_subprogs.append(['group_create', 'cancel'])
 from subprogs.group_edit.stack_to_group import StackToGroup
