@@ -54,7 +54,7 @@ class GraphPreferences:
 
     def default_settings(self):
         self.plt_style = 'Solarize_Light2'
-        self.style_first = {'plot_type': 'scatter',
+        self.style_first = {'plot_type': 'line',
                             'linewidth': 3,
                             'linestyle':'solid',
                             'marker': '.',

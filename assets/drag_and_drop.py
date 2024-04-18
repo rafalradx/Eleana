@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinterdnd2 import TkinterDnD, DND_FILES
 
 def on_drop(event):
+    print(event.data)
     file_path = event.data
     entry_var.set(file_path)
 
