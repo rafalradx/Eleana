@@ -20,7 +20,7 @@ PATH = os.path.dirname(os.path.realpath(__file__))
 
 class AskColor(customtkinter.CTkToplevel):
     
-    def __init__(self,
+    def __init__(self, master,
                  width: int = 300,
                  title: str = "Choose Color",
                  initial_color: str = None,
@@ -32,7 +32,8 @@ class AskColor(customtkinter.CTkToplevel):
                  corner_radius: int = 24,
                  slider_border: int = 1,
                  **button_kwargs):
-    
+
+        self.master = master
         super().__init__()
         
         self.title(title)

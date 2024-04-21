@@ -477,6 +477,7 @@
                                     </containerlayout>
                                     <child>
                                       <object class="customtkinter.CTkButton" id="btn_first_color_re" named="True">
+                                        <property name="command" type="command" cbtype="simple">select_first_re</property>
                                         <property name="text" translatable="yes">Color RE</property>
                                         <layout manager="grid">
                                           <property name="column">0</property>

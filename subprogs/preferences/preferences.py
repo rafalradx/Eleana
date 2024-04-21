@@ -1,11 +1,17 @@
 #!/usr/bin/python3
 import pathlib
 import pygubu
+import customtkinter
+
+from modules.CTkColorPicker import AskColor
+
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "preferences.ui"
 
 class PreferencesApp:
-    def __init__(self, master=None, preferences={}):
+    def __init__(self, master, grapher, color_theme):
+
+        self.grapher = grapher
         self.master = master
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)
@@ -14,6 +20,15 @@ class PreferencesApp:
         self.mainwindow = builder.get_object("toplevel1", self.master)
         builder.connect_callbacks(self)
         self.mainwindow.title('Preferences')
+        self.mainwindow.attributes('-topmost', False)
+
+        # References to settings
+        self.style_first = grapher.style_first
+        self.style_second = grapher.style_second
+        self.style_result = grapher.style_result
+        self.gui_appearence = customtkinter.get_appearance_mode()
+        self.color_mode = color_theme
+        self.plt_style = grapher.plt_style
 
         # References to widgets
         self.gui_style_box = builder.get_object("gui_style_box", self.mainwindow)
@@ -44,10 +59,8 @@ class PreferencesApp:
         self.btn_result_color_im = builder.get_object('ctkbutton14', self.mainwindow)
 
         self.response = None;
-        # preferences contains list of settings to control
-        self.preferences = preferences
-
         self.on_start()
+
     ''' STANDARD METHODS TO HANDLE WINDOW BEHAVIOR '''
     def get(self):
         if self.mainwindow.winfo_exists():
@@ -63,80 +76,107 @@ class PreferencesApp:
     ''' END OF STANDARD METHODS '''
 
     def on_start(self):
+        '''
+        This sets the values to the widgets according
+        to what is set in the grapher preferences and GUI
+        '''
+
         # Application style
-        style = self.preferences.get('gui_style', 'light')
-        self.gui_style_box.set(style)
-        color_scheme = self.preferences.get('gui_style', 'green')
-        self.color_scheme_box.set(color_scheme)
+        self.gui_style_box.set(self.gui_appearence)
+        self.color_scheme_box.set(self.color_mode)
+        self.graph_general_box.set(self.plt_style)
 
-        # Graph Styles
-        graph_style = self.preferences.get('plt_style', 'default')
-        self.graph_general_box.set(graph_style)
-
-        # First, Second and Result
-        pref_first = self.preferences.get('pref_first', None)
-        pref_second = self.preferences.get('pref_second', None)
-        pref_result = self.preferences.get('pref_result', None)
-
-        if not pref_first:
-            print('First preferences not available.')
-            pref_first = {'plot_type': 'line',
-                            'linewidth': 3,
-                            'linestyle':'solid',
-                            'marker': '.',
-                            's': 5,
-                            'color_re': "#d53339",
-                            'color_im': "#ef6f74"
-                            }
-        if not pref_second:
-            print('Second preferences not available.')
-            pref_second = {'plot_type': 'line',
-                             'linewidth': 3,
-                             'linestyle': 'solid',
-                             's': 5,
-                             'marker':'.',
-                             'color_re': '#008cb3',
-                             'color_im': '#07bbed'
-                             }
-        if not pref_result:
-            print('Result preferences not available.')
-            pref_result = {'plot_type': 'line',
-                             'linewidth': 3,
-                             'linestyle': 'solid',
-                             's': 5,
-                             'marker': '.',
-                             'color_re': '#108d3d',
-                             'color_im': '#32ab5d'
-                             }
-        self.first_plot_type_box.set(pref_first['plot_type'].title())
+        self.first_plot_type_box.set(self.style_first['plot_type'])
         self.first_linewidth.delete(0,'end')
-        self.first_linewidth.insert(0, pref_first['linewidth'])
-        self.first_linestyle.set(pref_first['linestyle'])
-        self.first_marker.set(pref_first['marker'])
+        self.first_linewidth.insert(0, self.style_first['linewidth'])
+        self.first_linestyle.set(self.style_first['linestyle'])
+        self.first_marker.set(self.style_first['marker'])
         self.first_markersize.delete(0, 'end')
-        self.first_markersize.insert(0, pref_first['s'])
-        self.btn_first_color_re.configure(fg_color = pref_first['color_re'])
-        self.btn_first_color_im.configure(fg_color = pref_first['color_im'])
+        self.first_markersize.insert(0, self.style_first['s'])
+        self.btn_first_color_re.configure(fg_color = self.style_first['color_re'])
+        self.btn_first_color_im.configure(fg_color = self.style_first['color_im'])
 
-        self.second_plot_type_box.set(pref_second['plot_type'].title())
+        self.second_plot_type_box.set(self.style_second['plot_type'])
         self.second_linewidth.delete(0, 'end')
-        self.second_linewidth.insert(0, pref_second['linewidth'])
-        self.second_linestyle.set(pref_second['linestyle'])
-        self.second_marker.set(pref_second['marker'])
+        self.second_linewidth.insert(0, self.style_second['linewidth'])
+        self.second_linestyle.set(self.style_second['linestyle'])
+        self.second_marker.set(self.style_second['marker'])
         self.second_markersize.delete(0, 'end')
-        self.second_markersize.insert(0, pref_second['s'])
-        self.btn_second_color_re.configure(fg_color=pref_second['color_re'])
-        self.btn_second_color_im.configure(fg_color=pref_second['color_im'])
+        self.second_markersize.insert(0, self.style_second['s'])
+        self.btn_second_color_re.configure(fg_color=self.style_second['color_re'])
+        self.btn_second_color_im.configure(fg_color=self.style_second['color_im'])
 
-        self.result_plot_type_box.set(pref_result['plot_type'].title())
+        self.result_plot_type_box.set(self.style_result['plot_type'])
         self.result_linewidth.delete(0, 'end')
-        self.result_linewidth.insert(0, pref_result['linewidth'])
-        self.result_linestyle.set(pref_result['linestyle'])
-        self.result_marker.set(pref_result['marker'])
+        self.result_linewidth.insert(0, self.style_result['linewidth'])
+        self.result_linestyle.set(self.style_result['linestyle'])
+        self.result_marker.set(self.style_result['marker'])
         self.result_markersize.delete(0, 'end')
-        self.result_markersize.insert(0, pref_result['s'])
-        self.btn_result_color_re.configure(fg_color=pref_result['color_re'])
-        self.btn_result_color_im.configure(fg_color=pref_result['color_im'])
+        self.result_markersize.insert(0, self.style_result['s'])
+        self.btn_result_color_re.configure(fg_color=self.style_result['color_re'])
+        self.btn_result_color_im.configure(fg_color=self.style_result['color_im'])
+
+    # Handle button of color selection
+    def select_first_re(self):
+        color = self.select_color()
+        if not color:
+            return
+        self.btn_first_color_re.configure(fg_color = color)
+        self.style_first['color_re']
+        self.grapher.draw()
+
+    def select_first_im(self):
+        color = self.select_color()
+        if not color:
+            return
+        self.btn_first_color_im.configure(fg_color = color)
+        self.style_first['color_im']
+        self.grapher.draw()
+
+    def select_second_re(self):
+        color = self.select_color()
+        if not color:
+            return
+        self.btn_first_color_re.configure(fg_color = color)
+        self.style_second['color_re']
+        self.grapher.draw()
+
+    def select_second_im(self):
+        color = self.select_color()
+        if not color:
+            return
+        self.btn_second_color_im.configure(fg_color = color)
+        self.style_second['color_im']
+        self.grapher.draw()
+
+    def select_result_re(self):
+        color = self.select_color()
+        if not color:
+            return
+        self.btn_result_color_re.configure(fg_color = color)
+        self.style_result['color_re']
+        self.grapher.draw()
+
+    def select_result_im(self):
+        color = self.select_color()
+        if not color:
+            return
+        self.btn_result_color_im.configure(fg_color = color)
+        self.style_result['color_im']
+        self.grapher.draw()
+
+
+
+
+    def select_color(self):
+        """
+        Opens the dialog window of color picker
+        """
+        self.mainwindow.attributes('-topmost', False)
+        ask_color = AskColor(self.mainwindow)
+        selected_color = ask_color.get()
+        self.mainwindow.attributes('-topmost', True)
+        return selected_color
 
     def appearence(self, value):
         pass

@@ -59,7 +59,7 @@ class GraphPreferences:
                             'linestyle':'solid',
                             'marker': '.',
                             's': 5,
-                            'color_re': "#d53339",
+                            'color_re': "#d53422",
                             'color_im': "#ef6f74"
                             }
         self.style_second = {'plot_type': 'line',
@@ -395,7 +395,6 @@ class Grapher(GraphPreferences):
             self.annotationlist = CTkListbox(self.app.annotationsFrame, command=self.updateAnnotationList,
                                              multiple_selection=True, height=300)
             self.annotationlist.grid(column=0, row=0, sticky="nsew")
-
         self.free_move_binding_id = None
         self.click_binding_id = None
         crs_mode = self.current_cursor_mode['label']
