@@ -222,7 +222,6 @@
                                       <property name="sticky">nsew</property>
                                     </layout>
                                     <containerlayout manager="grid">
-                                      <property type="col" id="0" name="weight">1</property>
                                       <property type="col" id="1" name="weight">1</property>
                                     </containerlayout>
                                     <child>
@@ -230,7 +229,9 @@
                                         <property name="text" translatable="yes">Plot type</property>
                                         <layout manager="grid">
                                           <property name="column">0</property>
+                                          <property name="padx">30</property>
                                           <property name="row">0</property>
+                                          <property name="sticky">e</property>
                                         </layout>
                                       </object>
                                     </child>
@@ -271,7 +272,6 @@
                                       <property name="sticky">nsew</property>
                                     </layout>
                                     <containerlayout manager="grid">
-                                      <property type="col" id="0" name="weight">1</property>
                                       <property type="col" id="1" name="weight">1</property>
                                     </containerlayout>
                                     <child>
@@ -279,6 +279,7 @@
                                         <property name="text" translatable="yes">Linewidth</property>
                                         <layout manager="grid">
                                           <property name="column">0</property>
+                                          <property name="padx">26</property>
                                           <property name="row">0</property>
                                         </layout>
                                       </object>
@@ -1114,6 +1115,41 @@
                     </child>
                   </object>
                 </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="customtkinter.CTkFrame" id="btn_ok" named="True">
+            <layout manager="grid">
+              <property name="column">0</property>
+              <property name="row">1</property>
+              <property name="sticky">nsew</property>
+            </layout>
+            <containerlayout manager="grid">
+              <property type="col" id="0" name="weight">1</property>
+              <property type="col" id="1" name="weight">1</property>
+            </containerlayout>
+            <child>
+              <object class="customtkinter.CTkButton" id="ctkbutton1">
+                <property name="text" translatable="yes">OK</property>
+                <layout manager="grid">
+                  <property name="column">0</property>
+                  <property name="padx">20</property>
+                  <property name="pady">10</property>
+                  <property name="row">0</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="customtkinter.CTkButton" id="btn_cancel" named="True">
+                <property name="text" translatable="yes">Cancel</property>
+                <layout manager="grid">
+                  <property name="column">1</property>
+                  <property name="padx">20</property>
+                  <property name="pady">10</property>
+                  <property name="row">0</property>
+                </layout>
               </object>
             </child>
           </object>

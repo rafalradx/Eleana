@@ -12,13 +12,10 @@ import pandas
 import pygubu
 import pyperclip
 
-list_of_subprogs = []
-
 # Third-party modules fin Eleana project
 print("Load third-party modules.")
 from modules.CTkListbox import *
 from modules.CTkMessagebox import CTkMessagebox
-from modules.CTkColorPicker import *
 
 # Import Eleana specific classes
 from assets.GeneralEleana import Eleana
