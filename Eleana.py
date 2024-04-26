@@ -1054,10 +1054,7 @@ class EleanaMainApp:
     def preferences(self):
         ''' Open window for editing preferences '''
         preferences = PreferencesApp(self.mainwindow, self.grapher, self.ctk_set_default_color_theme)
-        respones = preferences.get()
-
-        #pick_color = AskColor()  # open the color picker
-        #color = pick_color.get()  # get the color string
+        responese = preferences.get()
 
     def load_project(self, event=None, recent=None):
         ''' Load project created with the Application '''

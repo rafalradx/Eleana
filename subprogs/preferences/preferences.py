@@ -2,6 +2,7 @@
 import pathlib
 import pygubu
 import customtkinter
+import copy
 
 from modules.CTkColorPicker import AskColor
 
@@ -30,35 +31,43 @@ class PreferencesApp:
         self.color_mode = color_theme
         self.plt_style = grapher.plt_style
 
+        # Copy current settings
+        self.copy_style_first = copy.copy(self.style_first)
+        self.copy_style_second = copy.copy(self.style_second)
+        self.copy_style_result = copy.copy(self.style_result)
+        self.copy_plt_style = copy.copy(self.plt_style)
+        self.copy_gui_appearence = copy.copy(self.gui_appearence)
+        self.copy_color_mode = copy.copy(self.color_mode)
+
         # References to widgets
         self.gui_style_box = builder.get_object("gui_style_box", self.mainwindow)
         self.color_scheme_box = builder.get_object("color_scheme_box", self.mainwindow)
         self.graph_general_box = builder.get_object('graph_general_box', self.mainwindow)
-        self.first_plot_type_box = builder.get_object('first_plot_type_box', self.mainwindow)
-        self.first_linewidth = builder.get_object('first_linewidth', self.mainwindow)
-        self.first_linestyle = builder.get_object('first_linestyle', self.mainwindow)
-        self.first_marker = builder.get_object('first_marker', self.mainwindow)
-        self.first_markersize = builder.get_object('first_markersize', self.mainwindow)
-        self.btn_first_color_re = builder.get_object('btn_first_color_re', self.mainwindow)
-        self.btn_first_color_im = builder.get_object('btn_first_color_im', self.mainwindow)
+        self.first_plot_type_box = builder.get_object('ctkcombobox1', self.mainwindow)
+        self.first_linewidth = builder.get_object('spinbox1', self.mainwindow)
+        self.first_linestyle = builder.get_object('ctkcombobox2', self.mainwindow)
+        self.first_marker = builder.get_object('ctkcombobox3', self.mainwindow)
+        self.first_markersize = builder.get_object('spinbox2', self.mainwindow)
+        self.btn_first_color_re = builder.get_object('ctkbutton2', self.mainwindow)
+        self.btn_first_color_im = builder.get_object('ctkbutton2', self.mainwindow)
 
-        self.second_plot_type_box = builder.get_object('ctkcombobox4', self.mainwindow)
-        self.second_linewidth = builder.get_object('spinbox11', self.mainwindow)
-        self.second_linestyle = builder.get_object('ctkcombobox28', self.mainwindow)
-        self.second_marker = builder.get_object('ctkcombobox29', self.mainwindow)
-        self.second_markersize = builder.get_object('spinbox12', self.mainwindow)
-        self.btn_second_color_re = builder.get_object('ctkbutton9', self.mainwindow)
-        self.btn_second_color_im = builder.get_object('ctkbutton10', self.mainwindow)
+        self.second_plot_type_box = builder.get_object('ctkcombobox7', self.mainwindow)
+        self.second_linewidth = builder.get_object('spinbox5', self.mainwindow)
+        self.second_linestyle = builder.get_object('ctkcombobox8', self.mainwindow)
+        self.second_marker = builder.get_object('ctkcombobox9', self.mainwindow)
+        self.second_markersize = builder.get_object('spinbox6', self.mainwindow)
+        self.btn_second_color_re = builder.get_object('ctkbutton6', self.mainwindow)
+        self.btn_second_color_im = builder.get_object('ctkbutton7', self.mainwindow)
 
-        self.result_plot_type_box = builder.get_object('ctkcombobox33', self.mainwindow)
-        self.result_linewidth = builder.get_object('spinbox15', self.mainwindow)
-        self.result_linestyle = builder.get_object('ctkcombobox34', self.mainwindow)
-        self.result_marker = builder.get_object('ctkcombobox35', self.mainwindow)
-        self.result_markersize = builder.get_object('spinbox16', self.mainwindow)
-        self.btn_result_color_re = builder.get_object('ctkbutton13', self.mainwindow)
-        self.btn_result_color_im = builder.get_object('ctkbutton14', self.mainwindow)
+        self.result_plot_type_box = builder.get_object('ctkcombobox10', self.mainwindow)
+        self.result_linewidth = builder.get_object('spinbox7', self.mainwindow)
+        self.result_linestyle = builder.get_object('ctkcombobox11', self.mainwindow)
+        self.result_marker = builder.get_object('ctkcombobox12', self.mainwindow)
+        self.result_markersize = builder.get_object('spinbox8', self.mainwindow)
+        self.btn_result_color_re = builder.get_object('ctkbutton8', self.mainwindow)
+        self.btn_result_color_im = builder.get_object('ctkbutton9', self.mainwindow)
 
-        self.response = None;
+        self.response = None
         self.on_start()
 
     ''' STANDARD METHODS TO HANDLE WINDOW BEHAVIOR '''
@@ -68,8 +77,18 @@ class PreferencesApp:
         return self.response
 
     def cancel(self, event=None):
-        # Close the application
+        ''' Close the window without changes '''
+        # Restore original data
+        self.style_first = copy.copy(self.copy_style_first)
+        self.style_second = copy.copy(self.copy_style_second)
+        self.style_result = copy.copy(self.copy_style_result)
+        self.plt_style = copy.copy(self.copy_plt_style)
+        self.gui_apperance = copy.copy(self.copy_gui_appearence)
+        self.color_mode = copy.copy(self.copy_color_mode)
+
+        #Set response to None and close
         self.response = None
+        self.mainwindow.destroy()
 
     def run(self):
         self.mainwindow.mainloop()
