@@ -8,8 +8,8 @@ PROJECT_UI = PROJECT_PATH / "stack_to_group.ui"
 import numpy as np
 
 class StackToGroup:
-    def __init__(self, master=None, eleana_instance=None, which='first'):
-        self.eleana = eleana_instance
+    def __init__(self, master=None, which='first'):
+        self.eleana = master.eleana
         self.builder = builder = pygubu.Builder()
         self.master = master.mainwindow
         builder.add_resource_path(PROJECT_PATH)

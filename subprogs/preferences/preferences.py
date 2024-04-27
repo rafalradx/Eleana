@@ -3,6 +3,7 @@ import pathlib
 import pygubu
 import customtkinter
 import copy
+import matplotlib.pyplot as plt
 
 from modules.CTkColorPicker import AskColor
 
@@ -10,10 +11,11 @@ PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "preferences.ui"
 
 class PreferencesApp:
-    def __init__(self, master, grapher, color_theme):
+    def __init__(self, app_instance):
+        #master, grapher, color_theme, appearance_mode):
 
-        self.grapher = grapher
-        self.master = master
+        self.grapher = app_instance.grapher
+        self.master = app_instance.mainwindow
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)
@@ -24,12 +26,12 @@ class PreferencesApp:
         self.mainwindow.attributes('-topmost', False)
 
         # References to settings
-        self.style_first = grapher.style_first
-        self.style_second = grapher.style_second
-        self.style_result = grapher.style_result
-        self.gui_appearence = customtkinter.get_appearance_mode()
-        self.color_mode = color_theme
-        self.plt_style = grapher.plt_style
+        self.style_first = self.grapher.style_first
+        self.style_second = self.grapher.style_second
+        self.style_result = self.grapher.style_result
+        self.gui_appearence = app_instance.gui_appearence
+        self.color_mode = app_instance.color_theme
+        self.plt_style = self.grapher.plt_style
 
         # Copy current settings
         self.copy_style_first = copy.copy(self.style_first)
@@ -49,7 +51,7 @@ class PreferencesApp:
         self.first_marker = builder.get_object('ctkcombobox3', self.mainwindow)
         self.first_markersize = builder.get_object('spinbox2', self.mainwindow)
         self.btn_first_color_re = builder.get_object('ctkbutton2', self.mainwindow)
-        self.btn_first_color_im = builder.get_object('ctkbutton2', self.mainwindow)
+        self.btn_first_color_im = builder.get_object('ctkbutton3', self.mainwindow)
 
         self.second_plot_type_box = builder.get_object('ctkcombobox7', self.mainwindow)
         self.second_linewidth = builder.get_object('spinbox5', self.mainwindow)
@@ -83,13 +85,16 @@ class PreferencesApp:
         self.style_second = copy.copy(self.copy_style_second)
         self.style_result = copy.copy(self.copy_style_result)
         self.plt_style = copy.copy(self.copy_plt_style)
-        self.gui_apperance = copy.copy(self.copy_gui_appearence)
+        self.gui_appearence = copy.copy(self.copy_gui_appearence)
         self.color_mode = copy.copy(self.copy_color_mode)
 
         #Set response to None and close
         self.response = None
         self.mainwindow.destroy()
 
+    def ok(self):
+        self.response = {'gui_appearance':self.gui_appearence, 'color_theme':self.color_mode}
+        self.mainwindow.destroy()
     def run(self):
         self.mainwindow.mainloop()
     ''' END OF STANDARD METHODS '''
@@ -135,57 +140,131 @@ class PreferencesApp:
         self.btn_result_color_re.configure(fg_color=self.style_result['color_re'])
         self.btn_result_color_im.configure(fg_color=self.style_result['color_im'])
 
+    def select_gui_appearance(self, value):
+        self.gui_appearence = value
+        customtkinter.set_appearance_mode(self.gui_appearence)
+
+    def select_color_scheme(self, value):
+        self.color_mode = value
+        customtkinter.set_default_color_theme(self.color_mode)
+
+
+    # Set plot style for First
+    def selected_first_plot_type(self, value):
+        self.style_first['plot_type'] = value.lower()
+        self.grapher.plot_graph()
+
+    def selected_first_linewidth(self):
+        linewidth = int(self.first_linewidth.get())
+        self.style_first['linewidth'] = linewidth
+        self.grapher.plot_graph()
+
+    def selected_first_linestyle(self, value):
+        self.style_first['linestyle'] = value
+        self.grapher.plot_graph()
+
+    def selected_first_marker(self, value):
+        self.style_first['marker'] = value
+        self.grapher.plot_graph()
+
+    def selected_first_markersize(self):
+        s = int(self.first_markersize.get())
+        self.style_first['s'] = s
+        self.grapher.plot_graph()
+
     # Handle button of color selection
     def select_first_re(self):
         color = self.select_color()
         if not color:
             return
         self.btn_first_color_re.configure(fg_color = color)
-        self.style_first['color_re']
-        self.grapher.draw()
+        self.style_first['color_re'] = color
+        self.grapher.plot_graph()
 
     def select_first_im(self):
         color = self.select_color()
         if not color:
             return
         self.btn_first_color_im.configure(fg_color = color)
-        self.style_first['color_im']
-        self.grapher.draw()
+        self.style_first['color_im'] = color
+        self.grapher.plot_graph()
+
+    # Set plot style for Second
+    def selected_second_plot_type(self, value):
+        self.style_second['plot_type'] = value.lower()
+        self.grapher.plot_graph()
+
+    def selected_second_linewidth(self):
+        linewidth = int(self.second_linewidth.get())
+        self.style_second['linewidth'] = linewidth
+        self.grapher.plot_graph()
+
+    def selected_second_linestyle(self, value):
+        self.style_second['linestyle'] = value
+        self.grapher.plot_graph()
+
+    def selected_second_marker(self, value):
+        self.style_second['marker'] = value
+        self.grapher.plot_graph()
+
+    def selected_second_markersize(self):
+        s = int(self.second_markersize.get())
+        self.style_second['s'] = s
+        self.grapher.plot_graph()
 
     def select_second_re(self):
         color = self.select_color()
         if not color:
             return
-        self.btn_first_color_re.configure(fg_color = color)
-        self.style_second['color_re']
-        self.grapher.draw()
+        self.btn_second_color_re.configure(fg_color = color)
+        self.style_second['color_re'] = color
+        self.grapher.plot_graph()
 
     def select_second_im(self):
         color = self.select_color()
         if not color:
             return
         self.btn_second_color_im.configure(fg_color = color)
-        self.style_second['color_im']
-        self.grapher.draw()
+        self.style_second['color_im'] = color
+        self.grapher.plot_graph()
+
+    # Set plot style for Result
+    def selected_result_plot_type(self, value):
+        self.style_result['plot_type'] = value.lower()
+        self.grapher.plot_graph()
+    def selected_result_linewidth(self):
+        linewidth = int(self.result_linewidth.get())
+        self.style_result['linewidth'] = linewidth
+        self.grapher.plot_graph()
+
+    def selected_result_linestyle(self, value):
+        self.style_result['linestyle'] = value
+        self.grapher.plot_graph()
+
+    def selected_result_marker(self, value):
+        self.style_result['marker'] = value
+        self.grapher.plot_graph()
+
+    def selected_result_markersize(self):
+        s = int(self.result_markersize.get())
+        self.style_result['s'] = s
+        self.grapher.plot_graph()
 
     def select_result_re(self):
         color = self.select_color()
         if not color:
             return
         self.btn_result_color_re.configure(fg_color = color)
-        self.style_result['color_re']
-        self.grapher.draw()
+        self.style_result['color_re'] = color
+        self.grapher.plot_graph()
 
     def select_result_im(self):
         color = self.select_color()
         if not color:
             return
         self.btn_result_color_im.configure(fg_color = color)
-        self.style_result['color_im']
-        self.grapher.draw()
-
-
-
+        self.style_result['color_im'] = color
+        self.grapher.plot_graph()
 
     def select_color(self):
         """
@@ -198,6 +277,9 @@ class PreferencesApp:
         return selected_color
 
     def appearence(self, value):
+        print(value)
+        self.grapher.update_plot_style(value.lower())
+
         pass
 
 

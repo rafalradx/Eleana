@@ -15,8 +15,8 @@ from assets.Error import Error
 from subprogs.ascii_file_preview.ascii_file_preview import AsciFilePreview
 from subprogs.table.table import CreateFromTable
 class Load:
-    def __init__(self, app_instance, eleana_instance):
-        self.eleana = eleana_instance
+    def __init__(self, app_instance):
+        self.eleana = app_instance.eleana
         self.app = app_instance
 
     @classmethod
@@ -317,12 +317,12 @@ class Load:
                               message=f"Cannot load data from {list}.", icon="cancel")
 
 class Save:
-    def __init__(self, eleana_instance):
-        self.eleana = eleana_instance
+    def __init__(self, app_instance):
+        self.eleana = app_instance.eleana
 
     @classmethod
     def save_preferences(cls, eleana, app, grapher):
-        ''' Save graph preferences in .EleanaPy/graph_prefs.pic '''
+        ''' Save graph preferences in .EleanaPy/preferences.pic '''
         try:
             # Create object to store preferences
             preferences = Preferences(app, grapher)
@@ -348,7 +348,7 @@ class Save:
             Error.show(info="Cannot save settings", details=e)
             return None
 
-    @classmethod
+
     def save_eleana_paths(self, show_error=False):
         '''Save self.eleana.paths to .EleanaPy user folder'''
         try:
@@ -359,9 +359,7 @@ class Save:
         except Exception as e:
             if show_error:
                 Error.show(info = "Cannot save config paths.pic file", details = e)
-    @classmethod
-    def save_last_project_list(self):
-        pass
+
     def save_project(self, save_current=False):
         ''' Save project to a file '''
         init_dir = Path(self.eleana.paths.get('last_project_dir', Path.home()))
@@ -428,8 +426,8 @@ class Save:
         return filename
 
 class Export:
-    def __init__(self, eleana_instance):
-        self.eleana = eleana_instance
+    def __init__(self, app_instance):
+        self.eleana = app_instance.eleana
     def csv(self, which = 'first', filename=None):
         if filename == None:
             if which == 'first' and self.eleana.selections['first'] < 0:
@@ -511,7 +509,6 @@ class Export:
             name_x = data.parameters.get('name_x', 'X') + " [" + data.parameters.get('unit_x', 'a.u.') + "]"
             name_y = data.parameters.get('name_y', 'Y') + " [" + data.parameters.get('unit_y', 'a.u') + "]"
             header = str(name_x) + ", " + str(name_y)
-            #try:
             with open(filename, 'a') as exported_csv:
                 exported_csv.write(header)
                 i = 0
@@ -519,8 +516,6 @@ class Export:
                     row = "\n" + str(x[i]) + ", " + str(y[i])
                     exported_csv.write(row)
                     i += 1
-            # except:
-            #     return {'error': True, 'desc': f'Could not save {filename.name} file.'}
 
     def group_csv(self, group):
         directory = filedialog.askdirectory()
@@ -578,8 +573,8 @@ class Preferences:
     ''' This class is used to create preferences'''
     def __init__(self, app, grapher):
         # Define App settings
-        self.ctk_appearence_mode = app.ctk_appearence_mode
-        self.ctk_set_default_color_theme = app.ctk_set_default_color_theme
+        self.gui_appearence = app.gui_appearence
+        self.color_theme = app.color_theme
 
         # Define Grapher settings
         self.style_first = grapher.style_first

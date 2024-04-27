@@ -10,8 +10,8 @@
     </containerlayout>
     <child>
       <object class="customtkinter.CTkFrame" id="frame1">
-        <property name="corner_radius">0</property>
         <property name="height">200</property>
+        <property name="padding">0</property>
         <property name="width">400</property>
         <layout manager="grid">
           <property name="column">0</property>
@@ -25,11 +25,9 @@
         <child>
           <object class="customtkinter.CTkTabview" id="tabs" named="True">
             <property name="border_width">2</property>
-            <property name="corner_radius">5</property>
+            <property name="corner_radius">4</property>
             <layout manager="grid">
               <property name="column">0</property>
-              <property name="padx">10</property>
-              <property name="pady">10</property>
               <property name="row">0</property>
               <property name="sticky">nsew</property>
             </layout>
@@ -79,6 +77,7 @@
                         <child>
                           <object class="customtkinter.CTkComboBox" id="gui_style_box" named="True">
                             <property name="command" type="command" cbtype="simple">select_gui_appearance</property>
+                            <property name="dropdown_text_font">TkFixedFont</property>
                             <property name="values">["system", "light", "dark"]</property>
                             <layout manager="grid">
                               <property name="column">1</property>

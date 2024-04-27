@@ -14,9 +14,9 @@ Example usage in main Eleana.py:
 This will create 3 positions in the list of Second combobox
 '''
 class Update:
-    def __init__(self, app_instance, eleana_instance, main_menu_instance):
+    def __init__(self, app_instance, main_menu_instance):
         self.app = app_instance
-        self.eleana = eleana_instance
+        self.eleana = app_instance.eleana
         self.main_menu = main_menu_instance
 
     def last_projects_menu(self):

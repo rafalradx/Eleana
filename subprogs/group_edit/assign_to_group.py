@@ -10,12 +10,12 @@ PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "assign_to_group.ui"
 
 class Groupassign:
-    def __init__(self, master = None, eleana_instance = None, which = 'first', window_title = "Add new group"):
+    def __init__(self, master = None, which = 'first', window_title = "Add new group"):
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)
         self.master = master.mainwindow
-        self.eleana = eleana_instance
+        self.eleana = master.eleana
         self.response = None
         self.app = master
         # Main widget
@@ -23,7 +23,6 @@ class Groupassign:
         builder.connect_callbacks(self)
         # Reference to master window and eleana instance and response variable
         ''' Do not modify the code until this part'''
-
 
         # Set the window properties to modal mode
         self.mainwindow.grab_set()  # Set as modal

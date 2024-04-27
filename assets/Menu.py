@@ -2,9 +2,9 @@ import tkinter as tk
 from pathlib import Path
 
 class MainMenu:
-    def __init__(self, app_instance, eleana_instance):
+    def __init__(self, app_instance):
         self.app = app_instance
-        self.eleana = eleana_instance
+        self.eleana = app_instance.eleana
         self.icons = self.eleana.paths['pixmaps']
 
         ''' Styling of the menu '''
@@ -39,6 +39,8 @@ class MainMenu:
         self.icon_import_emx = self.prepare_icon("import_emx.png")
         self.icon_import_adani = self.prepare_icon("import_adani.png")
         self.icon_edit_par = self.prepare_icon("edit_par.png")
+        self.icon_integrate_region = self.prepare_icon("integrate_region.png")
+        self.icon_statistics = self.prepare_icon("statistics.png")
 
         ''' Menu Bar'''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth_bar, activeborderwidth=self.borderwidth)
@@ -95,7 +97,6 @@ class MainMenu:
 
         # - SEPARATOR -
         self.menu_file.add_separator()
-
 
         # Export
         self.menu_export = tk.Menu(self.menu_file, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
@@ -169,17 +170,55 @@ class MainMenu:
         # - Graph Preferences
         self.menu_edit.add_command(label="Preferences", command = self.app.preferences, image=self.icon_graphPrefs, compound="left")
 
+        ''' Menu ANALYSIS '''
+
+        # ANALYSIS
+        self.menu_analysis = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                            activebackground=self.activebg, activeforeground=self.activefg,
+                            borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.main_menu.add_cascade(label="Analysis", menu=self.menu_analysis, image=self.icon_dropdown, compound="left")
+
+        #  - Integrate region
+        self.menu_analysis.add_command(label="Integrate region", command=self.app.quick_paste,
+                                  image=self.icon_integrate_region, compound="left")
+        self.menu_analysis.add_command(label="Statistics", command=self.app.quick_paste,
+                                   image=self.icon_statistics, compound="left")
+
+        ''' Menu MODIFICATIONS '''
+        self.menu_modifications = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                                     activebackground=self.activebg, activeforeground=self.activefg,
+                                     borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.main_menu.add_cascade(label="Modifications", menu=self.menu_modifications, image=self.icon_dropdown, compound="left")
+        # - Position
+
+        ''' Menu EPR '''
+        self.menu_EPR = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                                          activebackground=self.activebg, activeforeground=self.activefg,
+                                          borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.main_menu.add_cascade(label="EPR", menu=self.menu_EPR, image=self.icon_dropdown,
+                                   compound="left")
+
+        ''' Menu HELP '''
+        self.menu_help = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                                activebackground=self.activebg, activeforeground=self.activefg,
+                                borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.main_menu.add_cascade(label="Help", menu=self.menu_help, image=self.icon_dropdown,
+                                   compound="left")
+        # - About
+        self.menu_help.add_command(label="About", command=self.app.quick_paste,
+                                       image=self.icon_statistics, compound="left")
+
 
     def prepare_icon(self, filename):
-        ''' This method prepares icon photoimage that is named "filename" '''
-        icon_file = Path(self.icons, filename)
-        icon = tk.PhotoImage(file=icon_file)
-        return icon
+            ''' This method prepares icon photoimage that is named "filename" '''
+            icon_file = Path(self.icons, filename)
+            icon = tk.PhotoImage(file=icon_file)
+            return icon
 
 class ContextMenu:
-    def __init__(self, app_instance, eleana_instance):
+    def __init__(self, app_instance):
         self.app = app_instance
-        self.eleana = eleana_instance
+        self.eleana = app_instance.eleana
 
         ''' Styling of the context menu '''
         self.bg = '#505050'

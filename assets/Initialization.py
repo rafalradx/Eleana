@@ -1,13 +1,14 @@
+from assets.LoadSave import Load
 from pathlib import Path
 import tkinter as tk
 import customtkinter as ctk
 import pickle
 
 class Init:
-    def __init__(self, app, eleana_instance, grapher_instance, main_menu_instance):
-        self.app = app
-        self.eleana = eleana_instance
-        self.grapher = grapher_instance
+    def __init__(self, app_instance, main_menu_instance):
+        self.app = app_instance
+        self.eleana = app_instance.eleana
+        self.grapher = app_instance.grapher
         self.main_menu = main_menu_instance
 
     def main_window(self):
@@ -25,8 +26,17 @@ class Init:
         self.app.mainwindow.title('new project - Eleana')
 
         # Set color modes for GUI
-        ctk.set_default_color_theme(self.app.ctk_set_default_color_theme)
-        ctk.set_appearance_mode(self.app.ctk_appearence_mode)
+        settings = Load.load_preferences(self.eleana)
+        if not settings:
+            self.app.color_theme = 'dark-blue'
+            self.app.gui_appearence = 'dark'
+        else:
+            mode = settings.gui_appearence
+            ctk.set_appearance_mode(mode)
+            self.app.gui_appearence = mode
+            color = settings.color_theme
+            ctk.set_default_color_theme(color)
+            self.app.color_theme = color
 
         # ---------------------- Set default values in GUI -------
         self.app.sel_group.configure(values=['All'])

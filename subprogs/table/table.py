@@ -19,9 +19,9 @@ class CreateFromTable:
         self.master = master
         self.eleana = eleana_app
         self.builder = builder = pygubu.Builder()
-
         builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)
+
         # Main widget
         self.mainwindow = builder.get_object("toplevel1", master)
         builder.connect_callbacks(self)

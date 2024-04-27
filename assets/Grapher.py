@@ -1,17 +1,18 @@
-from assets.LoadSave import Load, Save
+from assets.LoadSave import Load
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib
 import mplcursors
+import customtkinter as ctk
 from modules.CTkListbox import CTkListbox
 matplotlib.use('TkAgg')
 
 class GraphPreferences:
-    def __init__(self, app_instance, eleana_instance):
+    def __init__(self, app_instance):
         self.app = app_instance
-        self.eleana = eleana_instance
+        self.eleana = app_instance.eleana
 
         ''' CURSOR DEFINITIONS '''
         # Create avaliable cursor modes: hov - enable hover,
@@ -46,19 +47,24 @@ class GraphPreferences:
                 self.style_first = preferences.style_first
                 self.style_second = preferences.style_second
                 self.style_result = preferences.style_result
+
         except Exception as e:
             print('Unable to read preferences.pic file.')
             print(e)
             self.default_settings()
-        plt.style.use(self.plt_style)
+        try:
+            plt.style.use(self.plt_style)
+        except:
+            self.plt_style =  'Solarize_Light2'
+            plt.style.use(self.plt_style)
 
     def default_settings(self):
         self.plt_style = 'Solarize_Light2'
-        self.style_first = {'plot_type': 'line',
+        self.style_first = {'plot_type': 'scatter',
                             'linewidth': 3,
                             'linestyle':'solid',
                             'marker': '.',
-                            's': 5,
+                            's': 30,
                             'color_re': "#d53422",
                             'color_im': "#ef6f74"
                             }
@@ -78,6 +84,7 @@ class GraphPreferences:
                              'color_re': '#108d3d',
                              'color_im': '#32ab5d'
                              }
+        ctk.set_appearance_mode('light')
 
     def set_cursor_modes(self):
         ''' This function creates list of cursor
@@ -89,12 +96,12 @@ class GraphPreferences:
         self.app.sel_cursor_mode.set('None')
 
 class Grapher(GraphPreferences):
-    def __init__(self, app_instance, eleana_instance):
+    def __init__(self, app_instance):
         # Initialize GraphPreferences
-        super().__init__(app_instance, eleana_instance)
+        super().__init__(app_instance)
         ''' Initialize app, eleana and graphs objects (fig, canvas, toolbar)'''
         self.app = app_instance
-        self.eleana = eleana_instance
+        self.eleana = app_instance.eleana
         self.plt = plt
         self.mplcursors = mplcursors
         self.cursor = None
@@ -118,6 +125,13 @@ class Grapher(GraphPreferences):
         self.scale1 = {'x': [], 'y': []}
 
     '''Methods for the Grapher class '''
+
+    def update_plot_style(self, new_style):
+        """ Update plot style """
+        self.plt_style = new_style
+        plt.style.use(self.plt_style)
+        self.plot_graph()
+
     def clear_plot(self):
         self.ax.clear()
         self.canvas.draw()
