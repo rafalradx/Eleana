@@ -37,6 +37,8 @@ list_of_subprogs.append(['group_assign', 'cancel'])
 from subprogs.user_input.single_dialog import SingleDialog
 list_of_subprogs.append(['single_dialog', 'cancel'])
 from subprogs.select_data.select_data import SelectData
+list_of_subprogs.append(['select_items', 'cancel'])
+from subprogs.select_data.select_items import SelectItems
 list_of_subprogs.append(['select_data', 'cancel'])
 from subprogs.notepad.notepad import Notepad
 list_of_subprogs.append(['notepad', 'cancel'])
@@ -899,6 +901,7 @@ class MainApp:
             pass
         # Create numbered name if similar exists in the Result Dataset
         spectrum.name = self.generate_name_suffix(spectrum.name, list_of_results)
+
         # Send to result and update lists
         self.eleana.results_dataset.append(spectrum)
         update.list_in_combobox('sel_result')
@@ -1236,6 +1239,47 @@ class MainApp:
         group_assign = Groupassign(app, 'second')
         response = group_assign.get()
 
+    def create_simple_static_plot(self):
+        '''
+        Get data from the current graph and create a new data for simple graph
+        that will be used to display independet matplotlib window
+        '''
+        simple_plot = self.grapher.get_static_plot_data()
+        if not simple_plot:
+            info = CTkMessagebox(title="Info", message="Error occurred or there is no data for graph creation.")
+            return
+        dialog = SingleDialog(master=app, title='Enter a name for the graph', label='Enter the graph name', text='')
+        name = dialog.get()
+        if not name:
+            return
+        simple_plot['name'] = name
+        self.eleana.static_plots.append(simple_plot)
+        main_menu.create_showplots_menu()
+
+    def delete_simple_static_plot(self):
+        '''
+        Opens window to ask which plots
+        from created Static Plots will be removed
+        '''
+        plots = self.eleana.static_plots
+        if not plots:
+            return
+        av_plots = []
+        for plot in plots:
+            av_plots.append(plot['name_nr'])
+        self.select_items = SelectItems(master=app.mainwindow, title='Select plots',
+                                  items=av_plots)
+        names = self.select_items.get()
+        if not names:
+            return
+        to_delete = []
+        for name in names:
+            to_delete.append(names.index(name))
+        to_delete.sort(reverse=True)
+        for i in to_delete:
+            self.eleana.static_plots.pop(i)
+        main_menu.create_showplots_menu()
+
     '''***********************************************
     *           GRAPH SWITCHES AND BUTTONS           *
     ***********************************************'''
@@ -1411,10 +1455,10 @@ eleana = Eleana()
 app = MainApp(eleana)  # This is GUI
 grapher = Grapher(app)
 app.set_grapher(grapher)
-load = Load(app)
+main_menu = MainMenu(app)
+load = Load(app, main_menu)
 save = Save(app)
 export = Export(app)
-main_menu = MainMenu(app)
 init = Init(app, main_menu)
 context_menu = ContextMenu(app)
 update = Update(app, main_menu)  # This contains methods for update things like lists, settings, gui, groups etc.

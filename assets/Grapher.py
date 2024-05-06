@@ -2,10 +2,12 @@ from assets.LoadSave import Load
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 import mplcursors
 import customtkinter as ctk
+import copy
 from modules.CTkListbox import CTkListbox
 matplotlib.use('TkAgg')
 
@@ -659,3 +661,82 @@ class Grapher(GraphPreferences):
             self.ax.plot(x, y)
             i +=1
         self.canvas.draw()
+
+    ''' 
+    Methods to handle Static Plots that are created as snaphots of
+    the main graph.
+    '''
+    def get_static_plot_data(self):
+        '''
+         This takes the current content of the main graph and creates
+         copy of the data to use for create window with simple copy
+         of the graph.
+        '''
+        def _axes_title():
+            x_label = copy.copy(self.ax.get_xlabel())
+            y_label = copy.copy(self.ax.get_ylabel())
+            return x_label, y_label
+        def _axes_range():
+            x_lim = copy.copy(self.ax.get_xlim())
+            y_lim = copy.copy(self.ax.get_ylim())
+            return x_lim, y_lim
+        def _legend():
+            legend = self.ax.get_legend()
+            legend_info = []
+            if legend:
+                handles, labels = self.ax.get_legend_handles_labels()
+                for handle in handles:
+                    label = handle.get_label()
+                    color = handle.get_color()
+                    linestyle = handle.get_linestyle()
+                    linewidth = handle.get_linewidth()
+                    marker = handle.get_marker()
+                    markersize = handle.get_markersize()
+                    legend_info.append((label, {'color': color, 'linestyle': linestyle, 'linewidth': linewidth,
+                                                'marker': marker, 'markersize': markersize}))
+            return legend_info
+        def _xydata(i):
+            lines = self.ax.get_lines()
+            line = lines[i]
+            x_data = copy.copy(line.get_xdata())
+            x_data = tuple(x_data)
+            y_data = copy.copy(line.get_ydata())
+            y_data = tuple(y_data)
+            return x_data, y_data
+
+        plot_data = {'x_title': _axes_title()[0],
+                     'y_title': _axes_title()[1],
+                     'x_lim': _axes_range()[0],
+                     'y_lim': _axes_range()[1],
+                     'legend': _legend(),
+                     }
+        lines = self.ax.get_lines()
+        if lines:
+            x_data = []
+            y_data = []
+            for i, line in enumerate(lines):
+                x, y = _xydata(i)
+                x_data.append(x)
+                y_data.append(y)
+            plot_data['x'] = tuple(x_data)
+            plot_data['y'] = tuple(y_data)
+        else:
+            return None
+        return plot_data
+
+    def show_static_graph_window(self, numer_of_plot:int):
+        static_plot_data = self.eleana.static_plots[numer_of_plot]
+        fig, ax = plt.subplots()
+        #fig.canvas.set_window_title("new name")
+        plt.title(static_plot_data['name_nr'])
+        i = 0
+        while i <= 2:
+            x = static_plot_data['x'][i]
+            y = static_plot_data['y'][i]
+            style = static_plot_data['legend'][i][1]
+            label = static_plot_data['legend'][i][0]
+            ax.plot(x,y, label = label, **style)
+            i += 1
+        plt.legend()
+        plt.show()
+

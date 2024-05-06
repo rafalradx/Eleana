@@ -92,7 +92,6 @@ class Update:
 
     def dataset_list(self):
         ''' It scans the whole dataset, create numbered names, collects groups and assigns to groups'''
-
         i = 0
         while i < len(self.eleana.dataset):
             # Replace forbiden marks

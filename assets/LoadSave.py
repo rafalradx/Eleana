@@ -15,10 +15,10 @@ from assets.Error import Error
 from subprogs.ascii_file_preview.ascii_file_preview import AsciFilePreview
 from subprogs.table.table import CreateFromTable
 class Load:
-    def __init__(self, app_instance):
+    def __init__(self, app_instance, menu_instance):
         self.eleana = app_instance.eleana
         self.app = app_instance
-
+        self.menu = menu_instance
     @classmethod
     def load_preferences(cls, eleana):
         ''' Load saved graph settings from home/.EleanaPy/graph_prefs.pic'''
@@ -55,6 +55,7 @@ class Load:
 
     def load_project(self, recent=None):
         ''' This method loads projects created by Eleana'''
+
         def _update_last_projects(filename):
             last_projects = self.eleana.paths['last_projects']
             filename = str(filename)
@@ -81,6 +82,9 @@ class Load:
             filename = Path(recent)
         if not filename:
             return None
+
+
+
         # Extract project into temporary directory /tmp/eleana_extracted_project
         tmp_folder = 'eleana_extracted_project' + str(random.randint(0,1000))
         extract_dir = Path(self.eleana.paths['tmp_dir'], tmp_folder)
@@ -122,10 +126,14 @@ class Load:
                     self.eleana.groupsHierarchy = copy.deepcopy(loaded_object.groupsHierarchy)
                     self.eleana.notes = copy.deepcopy(loaded_object.notes)
                     self.eleana.selections = copy.deepcopy(loaded_object.selections)
+                    self.eleana.static_plots = copy.deepcopy(loaded_object.static_plots)
                     _update_last_projects(filename)
+                    self.menu.create_showplots_menu()
                 else:
                     self.eleana.dataset.extend(copy.deepcopy(loaded_object.dataset))
                     self.eleana.results_dataset.extend(copy.deepcopy(loaded_object.results_dataset))
+                    self.eleana.static_plots.extend(copy.deepcopy(loaded_object.static_plots))
+                    self.menu.create_showplots_menu()
                     _update_last_projects(filename)
             # If success return True
             else:
@@ -134,7 +142,9 @@ class Load:
                 self.eleana.groupsHierarchy = copy.deepcopy(loaded_object.groupsHierarchy)
                 self.eleana.notes = copy.deepcopy(loaded_object.notes)
                 self.eleana.selections = copy.deepcopy(loaded_object.selections)
+                self.eleana.static_plots = copy.deepcopy(loaded_object.static_plots)
                 _update_last_projects(filename)
+                self.menu.create_showplots_menu()
             return True
         except Exception as e:
             Error.show(info="Cannot load the project file", details=e)
@@ -388,13 +398,7 @@ class Save:
             Error.show(info="Cannot create the project file", details=e)
             return None
         project_information = {'project version':'1.0'}
-        project_to_save = Project_1(
-            dataset=self.eleana.dataset,
-            results_dataset=self.eleana.results_dataset,
-            groupsHierarchy=self.eleana.groupsHierarchy,
-            notes=self.eleana.notes,
-            selections=self.eleana.selections
-        )
+        project_to_save = Project_1(self.eleana)
         working_filename = Path(working_folder, 'project_1')
         working_information = Path(working_folder, 'info.txt')
         try:
@@ -558,17 +562,13 @@ class Export:
 
 class Project_1:
     ''' Create object used to save/load Eleana projects ver. 1'''
-    def __init__(self,
-                 dataset: list,
-                 results_dataset: list,
-                 groupsHierarchy:dict,
-                 notes: str,
-                 selections: dict):
-        self.dataset = dataset
-        self.results_dataset = results_dataset
-        self.groupsHierarchy = groupsHierarchy
-        self.notes = notes
-        self.selections = selections
+    def __init__(self, eleana):
+        self.dataset = eleana.dataset
+        self.results_dataset = eleana.results_dataset
+        self.groupsHierarchy = eleana.groupsHierarchy
+        self.notes = eleana.notes
+        self.selections = eleana.selections
+        self.static_plots = eleana.static_plots
 class Preferences:
     ''' This class is used to create preferences'''
     def __init__(self, app, grapher):

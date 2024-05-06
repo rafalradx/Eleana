@@ -41,6 +41,9 @@ class MainMenu:
         self.icon_edit_par = self.prepare_icon("edit_par.png")
         self.icon_integrate_region = self.prepare_icon("integrate_region.png")
         self.icon_statistics = self.prepare_icon("statistics.png")
+        self.icon_create_static_plot = self.prepare_icon("create_static_plot.png")
+        self.icon_delete_static_plot = self.prepare_icon("delete_static_plot.png")
+        self.icon_static_plot = self.prepare_icon("static_plot.png")
 
         ''' Menu Bar'''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth_bar, activeborderwidth=self.borderwidth)
@@ -198,6 +201,25 @@ class MainMenu:
         self.main_menu.add_cascade(label="EPR", menu=self.menu_EPR, image=self.icon_dropdown,
                                    compound="left")
 
+        ''' Menu Plots '''
+        self.menu_plots = tk.Menu(self.main_menu, tearoff=1, bg=self.bg, fg=self.fg, font=self.font,
+                                 activebackground=self.activebg, activeforeground=self.activefg,
+                                 borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.main_menu.add_cascade(label="Plots", menu=self.menu_plots, image=self.icon_dropdown,
+                                   compound="left")
+        # - Create plot
+        self.menu_plots.add_command(label="Create plot", command=self.app.create_simple_static_plot,
+                                    image=self.icon_create_static_plot, compound="left")
+
+        # - Delete plot
+        self.menu_plots.add_command(label="Delete plot", command=self.app.delete_simple_static_plot,
+                                    image=self.icon_delete_static_plot, compound="left")
+
+        # -Separator
+        self.menu_plots.add_separator()
+
+        # ---- ENTRIES IN menu_showPlots ARE GENERATED DYNAMICALLY
+
         ''' Menu HELP '''
         self.menu_help = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                 activebackground=self.activebg, activeforeground=self.activefg,
@@ -208,12 +230,47 @@ class MainMenu:
         self.menu_help.add_command(label="About", command=self.app.quick_paste,
                                        image=self.icon_statistics, compound="left")
 
-
     def prepare_icon(self, filename):
             ''' This method prepares icon photoimage that is named "filename" '''
             icon_file = Path(self.icons, filename)
             icon = tk.PhotoImage(file=icon_file)
             return icon
+
+    def create_showplots_menu(self):
+        '''
+        Take list of created plots and add to self.menu_showPlots.
+        Remove the self.menu_showPlots if the list in self.eleana.static_plots is empty
+        '''
+
+        # Remove the current submenu and check if there are plots in the self.eleana.static_plots
+        # If not then return
+        try:
+            self.menu_plots.delete("Show plot")
+        except:
+            pass
+        if not self.eleana.static_plots:
+            return
+        # Create new menu
+        self.menu_showPlots = tk.Menu(self.menu_file, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                                      activebackground=self.activebg, activeforeground=self.activefg,
+                                      borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.menu_plots.add_cascade(label="Show plot", menu=self.menu_showPlots, image=self.icon_dropdown,
+                                    compound="left")
+        # Scan the content of self.eleana.static_plots to populate menu items
+        i = 0
+        while i < len(self.eleana.static_plots):
+            # Replace forbiden marks
+            name = self.eleana.static_plots[i]['name']
+            name = name.replace('.', '-')
+            name = name.replace(',', '-')
+            name = name.replace('/', '-')
+            name = name.replace(':', '-')
+            self.eleana.static_plots[i]['name'] = name
+            new_name_nr = str(i + 1) + '. ' + name
+            self.eleana.static_plots[i]['name_nr'] = new_name_nr
+            self.menu_showPlots.add_command(label=new_name_nr, command=lambda position=i: self.app.grapher.show_static_graph_window(position),
+                                       image=self.icon_static_plot, compound="left")
+            i += 1
 
 class ContextMenu:
     def __init__(self, app_instance):
