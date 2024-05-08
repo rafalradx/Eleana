@@ -1,9 +1,9 @@
-from assets.LoadSave import Load
+from assets.LoadSave import Load, Save
 from pathlib import Path
 import tkinter as tk
 import customtkinter as ctk
 import pickle
-
+from subprogs.preferences.preferences import PreferencesApp
 class Init:
     def __init__(self, app_instance, main_menu_instance):
         self.app = app_instance
@@ -30,6 +30,9 @@ class Init:
         if not settings:
             self.app.color_theme = 'dark-blue'
             self.app.gui_appearence = 'dark'
+            preferences = PreferencesApp(self.app)
+            preferences.ok()
+            Save.save_preferences(self.eleana, self.app, self.grapher)
         else:
             mode = settings.gui_appearence
             ctk.set_appearance_mode(mode)

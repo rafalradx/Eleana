@@ -687,13 +687,16 @@ class Grapher(GraphPreferences):
                 handles, labels = self.ax.get_legend_handles_labels()
                 for handle in handles:
                     label = handle.get_label()
-                    color = handle.get_color()
-                    linestyle = handle.get_linestyle()
-                    linewidth = handle.get_linewidth()
-                    marker = handle.get_marker()
-                    markersize = handle.get_markersize()
-                    legend_info.append((label, {'color': color, 'linestyle': linestyle, 'linewidth': linewidth,
-                                                'marker': marker, 'markersize': markersize}))
+                    try:
+                        color = handle.get_color()
+                        linestyle = handle.get_linestyle()
+                        linewidth = handle.get_linewidth()
+                        marker = handle.get_marker()
+                        markersize = handle.get_markersize()
+                        legend_info.append((label, {'color': color, 'linestyle': linestyle, 'linewidth': linewidth,
+                                                    'marker': marker, 'markersize': markersize}))
+                    except:
+                        legend_info.append(None)
             return legend_info
         def _xydata(i):
             lines = self.ax.get_lines()
@@ -703,6 +706,8 @@ class Grapher(GraphPreferences):
             y_data = copy.copy(line.get_ydata())
             y_data = tuple(y_data)
             return x_data, y_data
+
+        print("This function must be replaced by other. There is bug that throws error when preferences were not set before. Line 710 in Graphere.py")
 
         plot_data = {'x_title': _axes_title()[0],
                      'y_title': _axes_title()[1],
@@ -727,15 +732,23 @@ class Grapher(GraphPreferences):
     def show_static_graph_window(self, numer_of_plot:int):
         static_plot_data = self.eleana.static_plots[numer_of_plot]
         fig, ax = plt.subplots()
-        #fig.canvas.set_window_title("new name")
         plt.title(static_plot_data['name_nr'])
         i = 0
         while i <= 2:
-            x = static_plot_data['x'][i]
-            y = static_plot_data['y'][i]
-            style = static_plot_data['legend'][i][1]
-            label = static_plot_data['legend'][i][0]
-            ax.plot(x,y, label = label, **style)
+            try:
+                x = static_plot_data['x'][i]
+                y = static_plot_data['y'][i]
+                style = static_plot_data['legend'][i][1]
+                label = static_plot_data['legend'][i][0]
+            except:
+                label = None
+                style = None
+                x = ()
+                y = ()
+            if not style:
+                ax.plot(x,y, label = label)
+            else:
+                ax.plot(x, y, label=label, **style)
             i += 1
         plt.legend()
         plt.show()

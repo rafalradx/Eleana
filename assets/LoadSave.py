@@ -21,7 +21,7 @@ class Load:
         self.menu = menu_instance
     @classmethod
     def load_preferences(cls, eleana):
-        ''' Load saved graph settings from home/.EleanaPy/graph_prefs.pic'''
+        ''' Load saved graph settings from home/.EleanaPy/preferences.pic'''
         try:
             filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'preferences.pic')
             # Read paths.pic
