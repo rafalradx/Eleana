@@ -388,7 +388,6 @@ class Grapher(GraphPreferences):
         _mode = self.current_cursor_mode['label']
         if _mode == "Crosshair":
             x, y = sel.target
-            #sel.annotation.set_text(f'x: {x:.2f}\ny1: {y:.2f}')
             sel.annotation.set_text('')
             # Remove previous crosshairs
             for extra in sel.extras:
@@ -408,8 +407,7 @@ class Grapher(GraphPreferences):
     def cursor_on_off(self):
         def _show_annotation_list(self):
             self.app.annotationsFrame.grid()
-            self.annotationlist = CTkListbox(self.app.annotationsFrame, command=self.updateAnnotationList,
-                                             multiple_selection=True, height=300)
+            self.annotationlist = CTkListbox(self.app.annotationsFrame, command=self.updateAnnotationList, multiple_selection=True, height=300)
             self.annotationlist.grid(column=0, row=0, sticky="nsew")
         self.free_move_binding_id = None
         self.click_binding_id = None
@@ -419,10 +417,8 @@ class Grapher(GraphPreferences):
                     self.cursor.remove_selection(sel)
         except:
             pass
-
         index = self.app.sel_cursor_mode._values.index(crs_mode)
         self.current_cursor_mode = self.cursor_modes[index]
-
         if index == 0:
             # Switch off mplcursors
             self.app.btn_clear_cursors.grid_remove()
@@ -439,21 +435,18 @@ class Grapher(GraphPreferences):
                                                  hover=self.current_cursor_mode['hov'])
             self.cursor.connect("add", self.annotation_create)
             self.cursor.connect("remove", self.annotation_removed)
-
         elif index == 5:
             # Free select
             self.app.btn_clear_cursors.grid()
             _show_annotation_list(self)
             # Switch on Free point selections
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
-
         elif index == 6:
             # Crosshair
             _show_annotation_list(self)
             self.cursor = self.mplcursors.cursor(self.ax, multiple=False, hover=True)
             self.cursor.connect("add", self.mplcursor_crosshair)
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
-
         else:
             if hasattr(self.cursor, "events"):
                 # Switch off mplcursor
@@ -487,7 +480,6 @@ class Grapher(GraphPreferences):
             text = ' '
             self.ax.annotate(text, xy=point_selected, arrowprops={})
             self.canvas.draw()
-
         elif (event.inaxes is not None and self.app.sel_cursor_mode.get() == 'Free select' and event.button == 3):
             # Remove annotation when right mouse button is clicked
             x, y = event.xdata, event.ydata
@@ -495,8 +487,7 @@ class Grapher(GraphPreferences):
             ylim = self.ax.get_ylim()
             x_span = abs(xlim[1]-xlim[0])
             y_span = abs(ylim[1]-ylim[0])
-
-            tolerance = 0.05  # Tolerancja dla porównania współrzędnych
+            tolerance = 0.05  # Tolerance for coordinates clicked
             for annotation in self.ax.texts:
                 x_diff = abs(annotation.xy[0] - x)
                 y_diff = abs(annotation.xy[1] - y)
@@ -512,12 +503,10 @@ class Grapher(GraphPreferences):
         curve = sel.artist.get_label()
         x = sel.target[0]
         y = sel.target[1]
-
         # Get curve index
         curve_type, index, stk_index = self.indexCurveForAnnot(curve)
         point = [x,y]
         current_nr = 0
-
         if self.cursor_annotations:
             last_annotation = self.cursor_annotations[-1]
             current_nr = last_annotation.get('nr', 0) + 1
