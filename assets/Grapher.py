@@ -2,7 +2,7 @@ from assets.LoadSave import Load
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
-import numpy as np
+from assets.Plots import Staticplotwindow
 import matplotlib.pyplot as plt
 import matplotlib
 import mplcursors
@@ -356,7 +356,7 @@ class Grapher(GraphPreferences):
         self.cursor_on_off()
 
     def draw(self):
-        ''' Puts the selected curves on the graph'''
+        ''' Put the selected curves on the graph'''
         self.ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1),
                        fancybox=False, shadow=False, ncol=5)
         # Handle autoscaling
@@ -661,84 +661,98 @@ class Grapher(GraphPreferences):
          copy of the data to use for create window with simple copy
          of the graph.
         '''
-        def _axes_title():
-            x_label = copy.copy(self.ax.get_xlabel())
-            y_label = copy.copy(self.ax.get_ylabel())
-            return x_label, y_label
-        def _axes_range():
-            x_lim = copy.copy(self.ax.get_xlim())
-            y_lim = copy.copy(self.ax.get_ylim())
-            return x_lim, y_lim
-        def _legend():
-            legend = self.ax.get_legend()
-            legend_info = []
-            if legend:
-                handles, labels = self.ax.get_legend_handles_labels()
-                for handle in handles:
-                    label = handle.get_label()
-                    try:
-                        color = handle.get_color()
-                        linestyle = handle.get_linestyle()
-                        linewidth = handle.get_linewidth()
-                        marker = handle.get_marker()
-                        markersize = handle.get_markersize()
-                        legend_info.append((label, {'color': color, 'linestyle': linestyle, 'linewidth': linewidth,
-                                                    'marker': marker, 'markersize': markersize}))
-                    except:
-                        legend_info.append(None)
-            return legend_info
-        def _xydata(i):
-            lines = self.ax.get_lines()
-            line = lines[i]
-            x_data = copy.copy(line.get_xdata())
-            x_data = tuple(x_data)
-            y_data = copy.copy(line.get_ydata())
-            y_data = tuple(y_data)
-            return x_data, y_data
+        x_lim = copy.copy(self.ax.get_xlim())
+        y_lim = copy.copy(self.ax.get_ylim())
+        x_scale = copy.copy(self.ax.get_xscale())
+        y_scale = copy.copy(self.ax.get_yscale())
+        inverted_x = copy.copy(self.inverted_x_axis)
+        plot_data = {'name': 'Static plot',
+                    'x_title':'Abscissa [a.u.]',
+                    'y_title':'Ordinate [a.u.]',
+                    'x_scale': x_scale,
+                    'y_scale': y_scale,
+                    'x_lim': x_lim,
+                    'y_lim': y_lim,
+                    'inverted_x':inverted_x,
+                    'curves':[]
+                  }
 
-        print("This function must be replaced by other. There is bug that throws error when preferences were not set before. Line 710 in Graphere.py")
+        # Add first RE
+        curve = {'legend':None,'x':None,'re_y':None, 'im_y':None, 'style':None,'disp':None}
+        data = self.data_for_plot('first')
+        # If indexed is True replace X values with consecutive points
+        if bool(self.app.check_indexed_x.get()):
+            length = len(data['x']) + 1
+            data['x'] = [i for i in range(1, length)]
+        first_shown = True if len(data['x']) > 0 else False
+        if first_shown:
+            axis_title = self.axis_title('first')
+            plot_data['x_title'] = copy.copy(axis_title['x_title'])
+            plot_data['y_title'] = copy.copy(axis_title['y_title'])
+            curve['legend'] = copy.copy(self.create_legend('first'))
+            curve['style'] = copy.copy(self.style_first)
+            curve['x'] = copy.copy(data['x'])
+            curve['re_y'] = copy.copy(data['re_y'])
+            curve['im_y'] = copy.copy(data['im_y'])
+            curve['disp'] = copy.copy(self.eleana.selections['f_cpl'])
+            if data['complex'] and self.eleana.selections['f_cpl'] == 'im':
+                curve['re_y'] = None
+            elif data['complex'] and self.eleana.selections['f_cpl'] == 're':
+                curve['im_y'] = None
+        plot_data['curves'].append(curve)
 
-        plot_data = {'x_title': _axes_title()[0],
-                     'y_title': _axes_title()[1],
-                     'x_lim': _axes_range()[0],
-                     'y_lim': _axes_range()[1],
-                     'legend': _legend(),
-                     }
-        lines = self.ax.get_lines()
-        if lines:
-            x_data = []
-            y_data = []
-            for i, line in enumerate(lines):
-                x, y = _xydata(i)
-                x_data.append(x)
-                y_data.append(y)
-            plot_data['x'] = tuple(x_data)
-            plot_data['y'] = tuple(y_data)
-        else:
-            return None
+        # Add SECOND
+        curve = {'legend': None, 'x': None, 're_y': None, 'im_y': None, 'style': None, 'disp': None}
+        data = self.data_for_plot('second')
+        # If indexed is True replace X values with consecutive points
+        if bool(self.app.check_indexed_x.get()):
+            length = len(data['x']) + 1
+            data['x'] = [i for i in range(1, length)]
+        second_shown = True if len(data['x']) > 0 else False
+        if second_shown:
+            axis_title = self.axis_title('second')
+            plot_data['x_title'] = copy.copy(axis_title['x_title'])
+            plot_data['y_title'] = copy.copy(axis_title['y_title'])
+            curve['legend'] = copy.copy(self.create_legend('second'))
+            curve['style'] = copy.copy(self.style_second)
+            curve['x'] = copy.copy(data['x'])
+            curve['re_y'] = copy.copy(data['re_y'])
+            curve['im_y'] = copy.copy(data['im_y'])
+            curve['disp'] = copy.copy(self.eleana.selections['s_cpl'])
+            if data['complex'] and self.eleana.selections['s_cpl'] == 'im':
+                curve['re_y'] = None
+            elif data['complex'] and self.eleana.selections['s_cpl'] == 're':
+                curve['im_y'] = None
+        plot_data['curves'].append(curve)
+
+        # Add result
+        data = self.data_for_plot('result')
+        # If indexed is True replace X values with consecutive points
+        if bool(self.app.check_indexed_x.get()):
+            length = len(data['x']) + 1
+            data['x'] = [i for i in range(1, length)]
+        result_shown = True if len(data['x']) > 0 else False
+        if result_shown:
+            axis_title = self.axis_title('result')
+            plot_data['x_title'] = copy.copy(axis_title['x_title'])
+            plot_data['y_title'] = copy.copy(axis_title['y_title'])
+            curve['legend'] = copy.copy(self.create_legend('result'))
+            curve['style'] = copy.copy(self.style_result)
+            curve['x'] = copy.copy(data['x'])
+            curve['re_y'] = copy.copy(data['re_y'])
+            curve['im_y'] = copy.copy(data['im_y'])
+            curve['disp'] = copy.copy(self.eleana.selections['r_cpl'])
+            if data['complex'] and self.eleana.selections['r_cpl'] == 'im':
+                curve['re_y'] = None
+            elif data['complex'] and self.eleana.selections['r_cpl'] == 're':
+                curve['im_y'] = None
+        plot_data['curves'].append(curve)
         return plot_data
 
     def show_static_graph_window(self, numer_of_plot:int):
-        static_plot_data = self.eleana.static_plots[numer_of_plot]
-        fig, ax = plt.subplots()
-        plt.title(static_plot_data['name_nr'])
-        i = 0
-        while i <= 2:
-            try:
-                x = static_plot_data['x'][i]
-                y = static_plot_data['y'][i]
-                style = static_plot_data['legend'][i][1]
-                label = static_plot_data['legend'][i][0]
-            except:
-                label = None
-                style = None
-                x = ()
-                y = ()
-            if not style:
-                ax.plot(x,y, label = label)
-            else:
-                ax.plot(x, y, label=label, **style)
-            i += 1
-        plt.legend()
-        plt.show()
-
+        '''
+        Opens window containing a static plot stored in self.eleana.static_plots.
+        This function is activated by dynamically created menu in Plots --> Show plots
+        '''
+        plot_data = self.eleana.static_plots[numer_of_plot]
+        self.static_plot = Staticplotwindow(self.app.mainwindow, plot_data)

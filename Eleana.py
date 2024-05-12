@@ -1244,16 +1244,16 @@ class MainApp:
         Get data from the current graph and create a new data for simple graph
         that will be used to display independet matplotlib window
         '''
-        simple_plot = self.grapher.get_static_plot_data()
-        if not simple_plot:
-            info = CTkMessagebox(title="Info", message="Error occurred or there is no data for graph creation.")
+        static_plot = self.grapher.get_static_plot_data()
+        if not static_plot:
+            info = CTkMessagebox(title="Info", message="An error occurred or there is no data for graph creation.")
             return
         dialog = SingleDialog(master=app, title='Enter a name for the graph', label='Enter the graph name', text='')
         name = dialog.get()
         if not name:
             return
-        simple_plot['name'] = name
-        self.eleana.static_plots.append(simple_plot)
+        static_plot['name'] = name
+        self.eleana.static_plots.append(static_plot)
         main_menu.create_showplots_menu()
 
     def delete_simple_static_plot(self):
