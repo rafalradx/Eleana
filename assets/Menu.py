@@ -344,7 +344,6 @@ class ContextMenu:
     def show_context_menu_first(self, event):
         self.context_menu_first.tk_popup(event.x_root, event.y_root)
 
-
     def show_context_menu_second(self, event):
         self.context_menu_second.tk_popup(event.x_root, event.y_root)
 

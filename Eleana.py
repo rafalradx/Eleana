@@ -1202,6 +1202,14 @@ class MainApp:
                     exec(close_cmd)
                 except:
                     pass
+            # Close all static_plot windows from self.eleana.active_static_windows
+            if self.eleana.active_static_plot_windows:
+                for window_nr in self.eleana.active_static_plot_windows:
+                    close_cmd = "self.grapher.static_plot_" + str(window_nr) + ".cancel()"
+                    try:
+                        exec(close_cmd)
+                    except:
+                        print("Error: " + close_cmd)
             self.mainwindow.destroy()
 
     def notes(self):
@@ -1453,9 +1461,9 @@ def get_index_by_name(selected_value_text):
 # Create general main instances for the program
 eleana = Eleana()
 app = MainApp(eleana)  # This is GUI
-grapher = Grapher(app)
-app.set_grapher(grapher)
 main_menu = MainMenu(app)
+grapher = Grapher(app, main_menu)
+app.set_grapher(grapher)
 load = Load(app, main_menu)
 save = Save(app)
 export = Export(app)

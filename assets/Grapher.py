@@ -98,11 +98,12 @@ class GraphPreferences:
         self.app.sel_cursor_mode.set('None')
 
 class Grapher(GraphPreferences):
-    def __init__(self, app_instance):
+    def __init__(self, app_instance, main_menu):
         # Initialize GraphPreferences
         super().__init__(app_instance)
         ''' Initialize app, eleana and graphs objects (fig, canvas, toolbar)'''
         self.app = app_instance
+        self.main_menu = main_menu
         self.eleana = app_instance.eleana
         self.plt = plt
         self.mplcursors = mplcursors
@@ -726,6 +727,7 @@ class Grapher(GraphPreferences):
         plot_data['curves'].append(curve)
 
         # Add result
+        curve = {'legend': None, 'x': None, 're_y': None, 'im_y': None, 'style': None, 'disp': None}
         data = self.data_for_plot('result')
         # If indexed is True replace X values with consecutive points
         if bool(self.app.check_indexed_x.get()):
@@ -749,10 +751,20 @@ class Grapher(GraphPreferences):
         plot_data['curves'].append(curve)
         return plot_data
 
-    def show_static_graph_window(self, numer_of_plot:int):
+    def show_static_graph_window(self, number_of_plot:int):
         '''
         Opens window containing a static plot stored in self.eleana.static_plots.
         This function is activated by dynamically created menu in Plots --> Show plots
         '''
-        plot_data = self.eleana.static_plots[numer_of_plot]
-        self.static_plot = Staticplotwindow(self.app.mainwindow, plot_data)
+
+        if not self.eleana.active_static_plot_windows:
+            window_nr = 0
+        else:
+            last = self.eleana.active_static_plot_windows[-1]
+            window_nr = last + 1
+        self.eleana.active_static_plot_windows.append(window_nr)
+        command = "self.static_plot_" + str(window_nr) + " = Staticplotwindow(number_of_plot, self.eleana.static_plots, self.app.mainwindow)"
+        print(command)
+        print(self.eleana.active_static_plot_windows)
+        exec(command)
+        self.main_menu.create_showplots_menu()

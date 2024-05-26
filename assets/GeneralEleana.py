@@ -13,6 +13,7 @@ class Eleana:
         self.assignmentToGroups = {'<group-list/>': ['All']} # <-- This keeps information about which data from dataset is assigned to particular group
         self.groupsHierarchy = {}                       # <-- This store information about which group belongs to other
         self.static_plots = []                          # This contains a list of created simple static plots
+        self.active_static_plot_windows = []
 
         # Attribute "notes" contains general notes edited by Edit --> Notes in RTF
         self.notes = ""
