@@ -259,7 +259,7 @@ class MainMenu:
         # Scan the content of self.eleana.static_plots to populate menu items
         i = 0
         while i < len(self.eleana.static_plots):
-            # Replace forbiden marks
+            # Replace forbidden marks
             name = self.eleana.static_plots[i]['name']
             name = name.replace('.', '-')
             name = name.replace(',', '-')

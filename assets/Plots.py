@@ -13,9 +13,11 @@ PROJECT_UI = PROJECT_PATH / "ui" / "StaticPlotWindow.ui"
 
 
 class Staticplotwindow:
-    def __init__(self, static_plot_index, eleana_static_plots, master):
+    def __init__(self, window_nr, static_plot_index, eleana_static_plots, eleana_active_static_plots, master):
+        self.window_nr = window_nr
         self.plot_nr = static_plot_index
         self.static_plots = eleana_static_plots
+        self.active_static_plots = eleana_active_static_plots
         matplotlib.use('TkAgg')
         self.plot_data = eleana_static_plots[self.plot_nr]
         self.builder = builder = pygubu.Builder()
@@ -60,6 +62,9 @@ class Staticplotwindow:
         else:
             self.check_on_top.deselect()
 
+        # Call Cancel function when close window clicked
+        self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
+
         comment = self.plot_data.get("comment", None)
         if comment:
             self.commentField.insert(0.0, comment)
@@ -73,6 +78,7 @@ class Staticplotwindow:
 
     def cancel(self, event=None):
         self.response = None
+        self.active_static_plots.remove(self.window_nr)
         self.mainwindow.destroy()
 
     def run(self):

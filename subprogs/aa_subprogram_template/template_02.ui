@@ -17,40 +17,49 @@
         <containerlayout manager="grid">
           <property name="anchor">s</property>
           <property type="col" id="0" name="weight">1</property>
-          <property type="col" id="1" name="weight">1</property>
           <property type="row" id="0" name="weight">1</property>
         </containerlayout>
         <child>
           <object class="customtkinter.CTkFrame" id="ctkframe3">
             <layout manager="grid">
               <property name="column">0</property>
-              <property name="columnspan">2</property>
               <property name="row">0</property>
               <property name="sticky">nsew</property>
             </layout>
           </object>
         </child>
         <child>
-          <object class="customtkinter.CTkButton" id="ctkbutton1" named="True">
-            <property name="command" type="command" cbtype="simple">ok_clicked</property>
-            <property name="text" translatable="yes">OK</property>
+          <object class="customtkinter.CTkFrame" id="ctkframe2">
+            <property name="corner_radius">0</property>
             <layout manager="grid">
               <property name="column">0</property>
-              <property name="padx">10</property>
-              <property name="pady">10</property>
               <property name="row">1</property>
+              <property name="sticky">nsew</property>
             </layout>
-          </object>
-        </child>
-        <child>
-          <object class="customtkinter.CTkButton" id="ctkbutton2" named="True">
-            <property name="text" translatable="yes">Cancel</property>
-            <layout manager="grid">
-              <property name="column">1</property>
-              <property name="padx">10</property>
-              <property name="pady">10</property>
-              <property name="row">1</property>
-            </layout>
+            <child>
+              <object class="customtkinter.CTkButton" id="ctkbutton1" named="True">
+                <property name="command" type="command" cbtype="simple">ok_clicked</property>
+                <property name="text" translatable="yes">OK</property>
+                <layout manager="grid">
+                  <property name="column">0</property>
+                  <property name="padx">10</property>
+                  <property name="pady">10</property>
+                  <property name="row">0</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="customtkinter.CTkButton" id="ctkbutton2" named="True">
+                <property name="command" type="command" cbtype="simple">cancel</property>
+                <property name="text" translatable="yes">Cancel</property>
+                <layout manager="grid">
+                  <property name="column">1</property>
+                  <property name="padx">10</property>
+                  <property name="pady">10</property>
+                  <property name="row">0</property>
+                </layout>
+              </object>
+            </child>
           </object>
         </child>
       </object>
