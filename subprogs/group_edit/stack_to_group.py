@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import pathlib
 import pygubu
+import copy
 from subprogs.group_edit.add_group import Groupcreate
 from assets.DataClasses import Single2D
 PROJECT_PATH = pathlib.Path(__file__).parent
@@ -45,7 +46,6 @@ class StackToGroup:
         if self.mainwindow.winfo_exists():
             self.master.wait_window(self.mainwindow)
         return self.response
-
     def run(self):
         self.display_data_groups()
         self.mainwindow.mainloop()
@@ -53,15 +53,15 @@ class StackToGroup:
     ''' END OF MANDATORY METHODS '''
     def quit(self, event = None):
         self.mainwindow.destroy()
+
     def assign_to_existing(self):
         group = self.sel_group.get()
         self.unfold_stack(group)
-        pass
+
     def assign_to_new(self):
         group_create = Groupcreate(self.mainwindow, self.eleana)
         new_group = group_create.get()
         self.unfold_stack(new_group)
-        pass
 
     def unfold_stack(self, group):
         dt = self.eleana.dataset[self.index]
@@ -96,6 +96,8 @@ class StackToGroup:
         text = "NAME: " + data_name
         self.name_label.configure(text=text)
 
+    def cancel(self):
+        self.quit()
 
 if __name__ == "__main__":
     app = StackToGroupApp()

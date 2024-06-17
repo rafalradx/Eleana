@@ -43,9 +43,8 @@ def close_app():
 def load_main():
     try:
         subprocess.run([interpreter, "Eleana.py"])
-
     except Exception as e:
-        print("Error:")
+        print("Error starting Eleana")
 
 
 def update_progress():

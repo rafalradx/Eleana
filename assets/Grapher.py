@@ -1,15 +1,17 @@
-from assets.LoadSave import Load
+from LoadSave import Load
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
-from assets.Plots import Staticplotwindow
 import matplotlib.pyplot as plt
 import matplotlib
 import mplcursors
 import customtkinter as ctk
 import copy
-from modules.CTkListbox import CTkListbox
+from CTkListbox import CTkListbox
+# Make matplotlib to use tkinter
 matplotlib.use('TkAgg')
+# Remove CTRL+S shortcut to allow open 'Save' by pressing CTRL+S
+matplotlib.rcParams['keymap.save'] = ''
 
 class GraphPreferences:
     def __init__(self, app_instance):
@@ -62,8 +64,8 @@ class GraphPreferences:
 
     def default_settings(self):
         self.plt_style = 'Solarize_Light2'
-        self.style_first = {'plot_type': 'scatter',
-                            'linewidth': 3,
+        self.style_first = {'plot_type': 'line',
+                            'linewidth': 2,
                             'linestyle':'solid',
                             'marker': '.',
                             's': 30,
@@ -71,7 +73,7 @@ class GraphPreferences:
                             'color_im': "#ef6f74"
                             }
         self.style_second = {'plot_type': 'line',
-                             'linewidth': 3,
+                             'linewidth': 2,
                              'linestyle': 'solid',
                              's': 5,
                              'marker':'.',
@@ -79,7 +81,7 @@ class GraphPreferences:
                              'color_im': '#07bbed'
                              }
         self.style_result = {'plot_type': 'line',
-                             'linewidth': 3,
+                             'linewidth': 2,
                              'linestyle': 'solid',
                              's': 5,
                              'marker': '.',

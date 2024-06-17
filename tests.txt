@@ -1,0 +1,4 @@
+BUGS:
+1. Save
+    Po zaimportowaniu widma i wcisnięciu CTRL S wyświetla się okno do zapisu obrazka PNG zamiast Projektu
+

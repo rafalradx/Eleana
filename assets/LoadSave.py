@@ -83,8 +83,6 @@ class Load:
         if not filename:
             return None
 
-
-
         # Extract project into temporary directory /tmp/eleana_extracted_project
         tmp_folder = 'eleana_extracted_project' + str(random.randint(0,1000))
         extract_dir = Path(self.eleana.paths['tmp_dir'], tmp_folder)
@@ -109,9 +107,18 @@ class Load:
                 shutil.rmtree(path_to_project.parent)
             except:
                 pass
-            # Write values to eleana attributes
+
+            # Make copy in case of errors
+            copy_of_eleana_dataset = copy.deepcopy(self.eleana.dataset)
+            copy_of_eleana_results_dataset = copy.deepcopy(self.eleana.results_dataset)
+            copy_of_eleana_groupsHierarchy = copy.deepcopy(self.eleana.groupsHierarchy)
+            copy_of_eleana_notes = copy.deepcopy(self.eleana.notes)
+            copy_of_eleana_selections = copy.deepcopy(self.eleana.selections)
+            copy_of_eleana_static_plots = copy.deepcopy(self.eleana.static_plots)
+
             # Check if dataset is empty
             if len(self.eleana.dataset) > 0:
+                # DATASET NOT EMPTY
                 question = CTkMessagebox(title="Dataset is not empty",
                                          message="There is data in the dataset. Choose what you want to",
                                          icon="question", option_3="Append to the dataset",
@@ -137,6 +144,7 @@ class Load:
                     _update_last_projects(filename)
             # If success return True
             else:
+                # DATASET IS EMPTY
                 self.eleana.dataset = copy.deepcopy(loaded_object.dataset)
                 self.eleana.results_dataset = copy.deepcopy(loaded_object.results_dataset)
                 self.eleana.groupsHierarchy = copy.deepcopy(loaded_object.groupsHierarchy)
@@ -148,6 +156,13 @@ class Load:
             return True
         except Exception as e:
             Error.show(info="Cannot load the project file", details=e)
+            # Restore Eleana project values from the state before loading
+            self.eleana.dataset = copy_of_eleana_dataset
+            self.eleana.results_dataset = copy_of_eleana_results_dataset
+            self.eleana.groupsHierarchy = copy_of_eleana_groupsHierarchy
+            self.eleana.notes = copy_of_eleana_notes
+            self.eleana.selections = copy_of_eleana_selections
+            self.eleana.static_plots = copy_of_eleana_static_plots
             return None
 
     # Import EPR

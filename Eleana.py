@@ -1,66 +1,73 @@
-#!/usr/bin/python3
-
-# Import Python Modules
+# Import basic modules and add ./modules to sys.path
+from pathlib import Path
+import sys
 import copy
 import io
-import pathlib
 import re
-import sys
-from pathlib import Path
+
+# Set paths for modules
+PROJECT_PATH = Path(__file__).parent
+PROJECT_UI = PROJECT_PATH / "Eleana_interface.ui"
+MODULES = PROJECT_PATH / "modules"
+ASSETS = PROJECT_PATH / "assets"
+SUBPROGS = PROJECT_PATH / "subprogs"
+VERSION = 1
+INTERPRETER = sys.executable
+DEVEL = True
+sys.path.insert(0, str(MODULES))
+sys.path.insert(0, str(ASSETS))
+sys.path.insert(0, str(SUBPROGS))
+
+# Import External modules required
 import numpy as np
 import pandas
-import pygubu
 import pyperclip
 
-# Third-party modules fin Eleana project
-from modules.CTkListbox import *
-from modules.CTkMessagebox import CTkMessagebox
+# Import modules from ./modules folder
+import pygubu
+from CTkListbox import CTkListbox
+from CTkMessagebox import CTkMessagebox
 
 # Import Eleana specific classes
-from assets.GeneralEleana import Eleana
-from assets.LoadSave import Load, Save, Export
-from assets.Initialization import Init
-from assets.Grapher import Grapher
-from assets.Update import Update
-from assets.Menu import ContextMenu, MainMenu
-from assets.Sounds import Sound
-from assets.Error import Error
+from GeneralEleana import Eleana
+from LoadSave import Load, Save, Export
+from Initialization import Init
+from Grapher import Grapher
+from Update import Update
+from Menu import ContextMenu, MainMenu
+from Sounds import Sound
+from Error import Error
 
 # Import Eleana subprograms and windows
+# append.(['name of instance without self., 'Command to close']
 list_of_subprogs = []
-from subprogs.group_edit.add_group import Groupcreate
+from group_edit.add_group import Groupcreate
 list_of_subprogs.append(['group_create', 'cancel'])
-from subprogs.group_edit.stack_to_group import StackToGroup
-list_of_subprogs.append(['stack_to_group', 'cancel'])
-from subprogs.group_edit.assign_to_group import Groupassign
+from group_edit.assign_to_group import Groupassign
 list_of_subprogs.append(['group_assign', 'cancel'])
-from subprogs.user_input.single_dialog import SingleDialog
+from user_input.single_dialog import SingleDialog
 list_of_subprogs.append(['single_dialog', 'cancel'])
-from subprogs.select_data.select_data import SelectData
+from select_data.select_data import SelectData
 list_of_subprogs.append(['select_items', 'cancel'])
-from subprogs.select_data.select_items import SelectItems
+from select_data.select_items import SelectItems
 list_of_subprogs.append(['select_data', 'cancel'])
-from subprogs.notepad.notepad import Notepad
+from notepad.notepad import Notepad
 list_of_subprogs.append(['notepad', 'cancel'])
-from subprogs.table.table import CreateFromTable
+from table.table import CreateFromTable
 list_of_subprogs.append(['spreadsheet', 'cancel'])
-from subprogs.edit_parameters.edit_parameters import EditParameters
+from edit_parameters.edit_parameters import EditParameters
 list_of_subprogs.append(['edit_par', 'cancel'])
-from subprogs.modify.modify import ModifyData
+from modify.modify import ModifyData
 list_of_subprogs.append(['modify_data', 'cancel'])
-from subprogs.group_edit.move_to_group import MoveToGroup
+from group_edit.move_to_group import MoveToGroup
 list_of_subprogs.append(['move_to_group', 'cancel'])
-from subprogs.preferences.preferences import PreferencesApp
+from preferences.preferences import PreferencesApp
 list_of_subprogs.append(['prefereces', 'cancel'])
+from group_edit.stack_to_group import StackToGroup
+list_of_subprogs.append(['convert_stack_to_group', 'cancel'])
+
 # Widgets used by main application
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
-
-PROJECT_PATH = pathlib.Path(__file__).parent
-PROJECT_UI = PROJECT_PATH / "Eleana_interface.ui"
-VERSION = 1
-INTERPRETER = sys.executable  # <-- Python version for subprocesses
-
-DEVEL = True
 
 class MainApp:
     def __init__(self, eleana_instance, master=None):
@@ -85,9 +92,14 @@ class MainApp:
         self.sel_first = builder.get_object("sel_first", self.mainwindow)
         self.sel_second = builder.get_object("sel_second", self.mainwindow)
         self.sel_result = builder.get_object("sel_result", self.mainwindow)
+
+        # Frames must be configured due to a bug in Pygubu
+        self.selectionsFrame = builder.get_object("selectionsFrame", self.mainwindow)
+        self.groupFrame = builder.get_object("groupFrame", self.mainwindow)
+        self.rightFrame = builder.get_object("rightFrame", self.mainwindow)
+        self.graphButtons = builder.get_object('graphButtons', self.mainwindow)
         self.listFrame = builder.get_object("listFrame", self.mainwindow)
         self.listFrame.grid_remove()
-        self.groupFrame = builder.get_object("groupFrame", self.mainwindow)
         self.firstFrame = builder.get_object("firstFrame", self.mainwindow)
         self.secondFrame = builder.get_object("secondFrame", self.mainwindow)
         self.resultFrame = builder.get_object("resultFrame", self.mainwindow)
@@ -127,17 +139,14 @@ class MainApp:
         self.log_field = builder.get_object('log_field', self.mainwindow)
 
         # Paned windows
-        try:
-            self.panedwindow2 = builder.get_object('panedwindow2', self.mainwindow)
-            self.panedwindow4 = builder.get_object('panedwindow4', self.mainwindow)
-            self.pane5 = builder.get_object('pane5', self.mainwindow)
-            self.pane9 = builder.get_object('pane9', self.mainwindow)
-        except:
-            print('Unable to resize paned window.')
+        self.panedwindow2 = builder.get_object('panedwindow2', self.mainwindow)
+        self.panedwindow4 = builder.get_object('panedwindow4', self.mainwindow)
+        self.pane5 = builder.get_object('pane5', self.mainwindow)
+        self.pane9 = builder.get_object('pane9', self.mainwindow)
 
         # Keyboard bindings
         self.mainwindow.bind("<Control-c>", self.copy_to_clipboard)
-        self.mainwindow.bind("<Control-s>", self.save_as)
+        self.mainwindow.bind("<Control-s>", self.save_current)
         self.mainwindow.bind("<Control-q>", self.close_application)
         self.mainwindow.bind("<Control-o>", self.load_project)
         self.mainwindow.bind("<Control-v>", self.quick_paste)
@@ -183,6 +192,7 @@ class MainApp:
         self.repeated_items = []
         comparison_mode = bool(self.switch_comparison.get())
         if comparison_mode:
+            self.graphButtons.grid_remove()
             self.firstFrame.grid_remove()
             self.secondFrame.grid_remove()
             self.resultFrame.grid_remove()
@@ -227,6 +237,7 @@ class MainApp:
             self.list_selected()
         else:
             self.listFrame.grid_remove()
+            self.graphButtons.grid()
             self.firstFrame.grid()
             self.secondFrame.grid()
             self.swapFrame.grid()
@@ -1065,7 +1076,10 @@ class MainApp:
         self.eleana.paths['last_project_dir'] = Path(recent).parent
         self.grapher.plot_graph()
 
-    def save_as(self, filename = None):
+    def save_as(self, event=None, filename = None):
+        title = self.mainwindow.title()[:-9].strip()
+        if title == 'new project':
+            filename = None
         file_saved = save.save_project(filename)
         if not file_saved:
             return
@@ -1252,6 +1266,9 @@ class MainApp:
         Get data from the current graph and create a new data for simple graph
         that will be used to display independet matplotlib window
         '''
+        if bool(self.switch_comparison.get()) == True:
+            info = CTkMessagebox(title="Info", message="This function is not yet available for comparison view.")
+            return
         static_plot = self.grapher.get_static_plot_data()
         if not static_plot:
             info = CTkMessagebox(title="Info", message="An error occurred or there is no data for graph creation.")
@@ -1335,10 +1352,10 @@ class MainApp:
         if not data.type == 'stack 2D':
             CTkMessagebox(title="Conversion to group", message="The data you selected is not a 2D stack")
         else:
-            self.stack_to_group = StackToGroup(app, which)
-            response = self.stack_to_group.get()
+            self.convert_stack_to_group = StackToGroup(app, which)
+            response = self.convert_stack_to_group.get()
             if response == None:
-                return
+                 return
             update.dataset_list()
             update.group_list()
             update.all_lists()

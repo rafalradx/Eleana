@@ -73,6 +73,7 @@ class CreateFromTable:
                                                          ("ods", "*.ods"),
                                                          ("All files", "*.*")])
         if len(filename) == 0:
+            self.cancel()
             return 'cancel'
 
         self.eleana.paths['last_import_dir'] = str(Path(filename).parent)
