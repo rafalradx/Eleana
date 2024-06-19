@@ -26,9 +26,6 @@ class Update:
             self.eleana.paths['last_projects'] = [last]
             self.last_projects_menu()
             Save.save_settings_paths(self.eleana)
-
-        icon_file = Path(self.eleana.paths['pixmaps'], 'x.png')
-        icon_clear = tk.PhotoImage(file=icon_file)
         list_for_menu = []
         i = 1
         for each in self.eleana.paths['last_projects']:
@@ -38,13 +35,12 @@ class Update:
             i += 1
         recent_menu = self.main_menu.menu_recent
         recent_menu.delete(0, tk.END)
+        icon_file = Path(self.eleana.paths['pixmaps'], 'project.png')
+        icon_clear = tk.PhotoImage(file=icon_file)
         for label in list_for_menu:
             def create_command(l):
                 return lambda: self.app.load_recent(l)
-            icon_file = Path(self.eleana.paths['pixmaps'], 'x.png')
-            icon_clear = tk.PhotoImage(file=icon_file)
             recent_menu.add_command(label=label, image=icon_clear, compound="left", command=create_command(label))
-
         # Separator and clear
         recent_menu.add_separator()
         recent_menu.add_command(label='Keep only last', image=icon_clear, compound="left", command=_clear_recent_list)

@@ -1076,18 +1076,18 @@ class MainApp:
         self.eleana.paths['last_project_dir'] = Path(recent).parent
         self.grapher.plot_graph()
 
-    def save_as(self, event=None, filename = None):
-        title = self.mainwindow.title()[:-9].strip()
-        if title == 'new project':
-            filename = None
+    def save_as(self, filename = None):
         file_saved = save.save_project(filename)
         if not file_saved:
             return
         else:
             last_projects = self.eleana.paths['last_projects']
-            last_projects.insert(0, str(file_saved.name))
-        # Remove duplications and limit the list to 10 items
-        last_projects = list(set(last_projects))
+            saved_path_string = str(file_saved)
+            if saved_path_string in last_projects:
+                index = last_projects.index(saved_path_string)
+                del last_projects[index]
+            last_projects.insert(0, str(saved_path_string))
+        last_projects = last_projects[:20]
         # Write the list to eleana.paths
         self.eleana.paths['last_projects'] = last_projects
         self.eleana.paths['last_project_dir'] = Path(last_projects[0]).parent
@@ -1096,12 +1096,13 @@ class MainApp:
         update.last_projects_menu()
         app.mainwindow.title(Path(last_projects[0]).name[:-4] + ' - Eleana')
 
-    def save_current(self):
+    def save_current(self, event=None):
         win_title = self.mainwindow.title()
         if win_title == 'new project - Eleana':
             self.save_as(filename = None)
         else:
             file = win_title[:-9].strip()
+            file = file + '.ele'
             filename = Path(self.eleana.paths['last_project_dir'], file)
             self.save_as(filename)
 

@@ -44,6 +44,8 @@ class MainMenu:
         self.icon_create_static_plot = self.prepare_icon("create_static_plot.png")
         self.icon_delete_static_plot = self.prepare_icon("delete_static_plot.png")
         self.icon_static_plot = self.prepare_icon("static_plot.png")
+        self.icon_export_first = self.prepare_icon("export_first.png")
+        self.icon_export_group = self.prepare_icon("export_group.png")
 
         ''' Menu Bar'''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth_bar, activeborderwidth=self.borderwidth)
@@ -107,10 +109,10 @@ class MainMenu:
                                    borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
         self.menu_file.add_cascade(label="Export", menu=self.menu_export, image=self.icon_export, compound="left")
         # - Export first
-        self.menu_export.add_command(label="Export First", command=self.app.export_first, image=self.icon_exit,
+        self.menu_export.add_command(label="Export First", command=self.app.export_first, image=self.icon_export_first,
                                    compound="left")
         # - Export group
-        self.menu_export.add_command(label="Export Group", command=self.app.export_group, image=self.icon_exit,
+        self.menu_export.add_command(label="Export Group", command=self.app.export_group, image=self.icon_export_group,
                                    compound="left", accelerator="Ctrl+Q")
 
         # - SEPARATOR -
