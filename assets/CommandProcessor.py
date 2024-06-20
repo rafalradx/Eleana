@@ -36,7 +36,7 @@ class CommandProcessor:
 
                     }
 
-        eleana_gui_commands = {autoscale_X}
+        eleana_gui_commands =
         # Combine all dictionaries into one
         self.cmd_dictionary = {**eleana_variables, **eleana_simple_comands}
 
@@ -46,6 +46,20 @@ class CommandProcessor:
         # References to main eleana objects
         self.app = app_instance
         self.eleana = app_instance.eleana
+
+    def create_parser(self):
+        '''Create parser for script that will use argparse to modify script'''
+        parser = argparse.ArgumentParser(description="Command processor")
+        subparsers = parser.add_subparsers(dest='command')
+
+        load_parser = subparsers.add_parser('load')
+        load_parser.add_argument('filename', type=str, help='The filename to load')
+        load_parser.add_argument('-format', type=str, help='The format of the project', default='default_format')
+
+        save_parser = subparsers.add_parser('save')
+        save_parser.add_argument('filename', type=str, help='The filename to save')
+
+        return parser
 
     def process_script(self, script):
         def _transcription(line):
