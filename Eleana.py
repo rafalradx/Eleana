@@ -37,6 +37,7 @@ from Update import Update
 from Menu import ContextMenu, MainMenu
 from Sounds import Sound
 from Error import Error
+from CommandProcessor import CommandProcessor
 
 # Import Eleana subprograms and windows
 # append.(['name of instance without self., 'Command to close']
@@ -1495,6 +1496,11 @@ init.main_window()
 init.paths(update)
 init.folders()
 init.graph()
+
+# Command Line and tests
+cmd = CommandProcessor(app)
+
+
 
 # Create Graph canvas
 grapher.plot_graph()
