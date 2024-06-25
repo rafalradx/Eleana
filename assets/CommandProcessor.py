@@ -1,44 +1,52 @@
 import re
 import argparse
+
 '''
 Schemat działania:
 tekst skryptu --> podział na linie --> argparse i utworzenie komend --> zamiana nazw własnych na eleana -->
 konwersja liniii na tekst
 '''
+
+
 class CommandProcessor:
     ''' Contains methods to parse command lines'''
 
     def __init__(self, app_instance=None):
         # Dictionary of commands
         eleana_variables = {
-                    "$f":           "self.eleana.selections['first']",
-                    "$f_sub":       "self.eleana.selections['f_stk']",
-                    "$f_disp":      "self.eleana.selections['f_dsp']",
-                    "$f_cpl":       "self.eleana.selections['f_cpl']",
+            "$f": "self.eleana.selections['first']",
+            "$f_sub": "self.eleana.selections['f_stk']",
+            "$f_disp": "self.eleana.selections['f_dsp']",
+            "$f_cpl": "self.eleana.selections['f_cpl']",
 
-                    "$s":           "self.eleana.selections['second']",
-                    "$s_sub":       "self.eleana.selections['s_stk']",
-                    "$s_disp":      "self.eleana.selections['s_dsp']",
-                    "$s_cpl":       "self.eleana.selections['s_cpl']",
+            "$s": "self.eleana.selections['second']",
+            "$s_sub": "self.eleana.selections['s_stk']",
+            "$s_disp": "self.eleana.selections['s_dsp']",
+            "$s_cpl": "self.eleana.selections['s_cpl']",
 
-                    "$r":           "self.eleana.selections['result']",
-                    "$r_sub":       "self.eleana.selections['r_stk']",
-                    "$r_disp":      "self.eleana.selections['r_dsp']",
-                    "$r_cpl":       "self.eleana.selections[r_cpl]",
+            "$r": "self.eleana.selections['result']",
+            "$r_sub": "self.eleana.selections['r_stk']",
+            "$r_disp": "self.eleana.selections['r_dsp']",
+            "$r_cpl": "self.eleana.selections['r_cpl']",
 
-                    "$g":           "self.eleana.selections['group']",
+            "$g": "self.eleana.selections['group']",
 
-                    "$dataset":     "self.eleana.dataset",
-                    "$results":     "self.eleana.results_dataset",
-                    "$notes":       "self.eleana.notes",
-                    "$lastproject": "self.eleana.paths['last_project']",
-                    "$projectpath": "self.eleana.paths['last_project_dir']",
+            "$dataset": "self.eleana.dataset",
+            "$results": "self.eleana.results_dataset",
+            "$notes": "self.eleana.notes",
+            "$lastproject": "self.eleana.paths['last_project']",
+            "$projectpath": "self.eleana.paths['last_project_dir']",
+        }
 
-                    }
+        eleana_gui_buttons = {
+            "$g+": "self.app.group_down_clicked()",
+            "$g-": "self.app.group_up_clicked()",
+            "$f+": "self.app.first_up_clicked()",
+            "$f-": "self.app.first_down_clicked()"
+        }
 
-        eleana_gui_commands =
         # Combine all dictionaries into one
-        self.cmd_dictionary = {**eleana_variables, **eleana_simple_comands}
+        self.cmd_dictionary = {**eleana_variables, **eleana_gui_buttons}
 
         # Create references to main objects
         if not app_instance:
@@ -64,8 +72,8 @@ class CommandProcessor:
     def process_script(self, script):
         def _transcription(line):
             ''' Replaces the simple commands to eleana compatible '''
-            for substring, replacement in self.cmd_dictionary.items():
-                pattern = re.compile(re.escape(substring), re.IGNORECASE)
+            for substring, replacement in sorted(self.cmd_dictionary.items(), key=lambda x: -len(x[0])):
+                pattern = re.compile(r'(?<![\w\d])' + re.escape(substring) + r'(?![\w\d])', re.IGNORECASE)
                 line = pattern.sub(replacement, line)
             return line
 
@@ -81,9 +89,16 @@ class CommandProcessor:
         print(script)
 
 
-
 # Run
 if __name__ == "__main__":
     cmd = CommandProcessor()
-    script = "To jest niesmienione\n $F = 'dUżE'\n to znowu takie same\n$g = 4\n$LastProject"
+    script = """
+
+    # First
+    i = $f
+        $f+
+    $f-
+    b = $f
+
+    """
     cmd.process_script(script)

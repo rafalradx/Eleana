@@ -8,6 +8,8 @@ import mplcursors
 import customtkinter as ctk
 import copy
 from CTkListbox import CTkListbox
+from Plots import Staticplotwindow
+
 # Make matplotlib to use tkinter
 matplotlib.use('TkAgg')
 # Remove CTRL+S shortcut to allow open 'Save' by pressing CTRL+S
@@ -767,5 +769,4 @@ class Grapher(GraphPreferences):
         self.eleana.active_static_plot_windows.append(window_nr)
         command = "self.static_plot_" + str(window_nr) + " = Staticplotwindow(window_nr, number_of_plot, self.eleana.static_plots, self.eleana.active_static_plot_windows, self.app.mainwindow)"
         exec(command)
-        print('Active plots: ', self.eleana.active_static_plot_windows)
         self.main_menu.create_showplots_menu()

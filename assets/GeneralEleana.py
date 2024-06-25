@@ -31,7 +31,7 @@ class Eleana:
              'last_export_dir':''
              }
 
-        # Attribute selection is the basic storage of the settings obtainted from states in GUI
+        # Attribute selection is the basic storage of the settings obtained from states in GUI
         # Description:
         # group  --> The name of selected group in Group combobox in object: app.sel_group
         #
