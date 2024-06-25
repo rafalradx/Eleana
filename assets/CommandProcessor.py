@@ -7,13 +7,12 @@ tekst skryptu --> podział na linie --> argparse i utworzenie komend --> zamiana
 konwersja liniii na tekst
 '''
 
-
 class CommandProcessor:
     ''' Contains methods to parse command lines'''
 
     def __init__(self, app_instance=None):
         # Dictionary of commands
-        eleana_variables = {
+        self.eleana_variables = {
             "$f": "self.eleana.selections['first']",
             "$f_sub": "self.eleana.selections['f_stk']",
             "$f_disp": "self.eleana.selections['f_dsp']",
@@ -38,7 +37,7 @@ class CommandProcessor:
             "$projectpath": "self.eleana.paths['last_project_dir']",
         }
 
-        eleana_gui_buttons = {
+        self.eleana_gui_buttons = {
             "$g+": "self.app.group_down_clicked()",
             "$g-": "self.app.group_up_clicked()",
             "$f+": "self.app.first_up_clicked()",
@@ -46,7 +45,23 @@ class CommandProcessor:
         }
 
         # Combine all dictionaries into one
-        self.cmd_dictionary = {**eleana_variables, **eleana_gui_buttons}
+        self.cmd_dictionary = {**self.eleana_variables, **self.eleana_gui_buttons}
+
+        # Dictionary for argparse commands
+        self.argparse_commands = {
+            'load': {
+                'args': [('filename', str, 'The filename to load')],
+                'kwargs': {'-format': (str, 'The format of the project', 'default_format')}
+            },
+
+            'save': {
+                'args': [('filename', str, 'The filename to save')],
+                'kwargs': {}
+            }
+        }
+
+        # Create parser
+        self.parser = self.create_parser()
 
         # Create references to main objects
         if not app_instance:
@@ -60,12 +75,12 @@ class CommandProcessor:
         parser = argparse.ArgumentParser(description="Command processor")
         subparsers = parser.add_subparsers(dest='command')
 
-        load_parser = subparsers.add_parser('load')
-        load_parser.add_argument('filename', type=str, help='The filename to load')
-        load_parser.add_argument('-format', type=str, help='The format of the project', default='default_format')
-
-        save_parser = subparsers.add_parser('save')
-        save_parser.add_argument('filename', type=str, help='The filename to save')
+        for command, params in self.argparse_commands.items():
+            cmd_parser = subparsers.add_parser(command)
+            for arg_name, arg_type, arg_help in params['args']:
+                cmd_parser.add_argument(arg_name, type=arg_type, help=arg_help)
+            for kwarg_name, (kwarg_type, kwarg_help, kwarg_default) in params['kwargs'].items():
+                cmd_parser.add_argument(kwarg_name, type=kwarg_type, help=kwarg_help, default=kwarg_default)
 
         return parser
 
@@ -77,28 +92,60 @@ class CommandProcessor:
                 line = pattern.sub(replacement, line)
             return line
 
+        def _argparse_analyse(line_for_argparse, indent):
+            ''' Parse the line using argparse and convert to method call '''
+            args = line_for_argparse.split()
+            if not args:
+                return line_for_argparse  # Return the line unchanged if there are no arguments
+
+            if args[0] in self.argparse_commands:
+                try:
+                    parsed_args = self.parser.parse_args(args)
+                    if parsed_args.command == 'load':
+                        return f'{indent}self.loadproject(file="{parsed_args.filename}", type="{parsed_args.format}")'
+                    elif parsed_args.command == 'save':
+                        return f'{indent}self.saveproject(file="{parsed_args.filename}")'
+                except SystemExit:
+                    # Ignore argparse errors
+                    return f'{indent}{line_for_argparse}'
+            else:
+                return f'{indent}{line_for_argparse}'
+
         # Divide script into lines
         lines = script.split('\n')
         # Scan each line and argparse
         transcript_lines = []
         for line in lines:
-            transcript_lines.append(_transcription(line))
+            if line.strip():  # Check if the line is not empty
+                indent = re.match(r'\s*', line).group(0)
+                # Transcript eleana variables and gui commands
+                transcripted_line = _transcription(line.strip())
+                # Argparse lines
+                parsed_line = _argparse_analyse(transcripted_line, indent)
+                transcript_lines.append(parsed_line)
+            else:
+                transcript_lines.append(line)  # Preserve empty lines
 
         # Create script from lines
-        script = "\n".join(transcript_lines)
-        print(script)
+        parsed_script = "\n".join(transcript_lines)
+        return parsed_script
 
 
 # Run
 if __name__ == "__main__":
     cmd = CommandProcessor()
     script = """
-
-    # First
-    i = $f
-        $f+
-    $f-
-    b = $f
-
+# First
+i = $f
+$f+
+$f-
+b = $f
+while i>1:
+    load 
+    i+=1
+save file.ele
+for i in variable:
+    lines.append(i)
     """
-    cmd.process_script(script)
+    skrypt = cmd.process_script(script)
+    print(skrypt)
