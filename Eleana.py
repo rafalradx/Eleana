@@ -20,7 +20,7 @@ sys.path.insert(0, str(SUBPROGS))
 
 # Import External modules required
 import numpy as np
-import pandas
+#import pandas
 import pyperclip
 
 # Import modules from ./modules folder
