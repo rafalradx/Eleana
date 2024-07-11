@@ -1,5 +1,6 @@
 import customtkinter as ctk
 
+
 class CTkSpinbox(ctk.CTkFrame):
     def __init__(self,
                  master: any,
@@ -53,12 +54,18 @@ class CTkSpinbox(ctk.CTkFrame):
 
         # counter entry
         self.counter_var = ctk.IntVar(value=self.start_value)
+
+        # Add validation command
+        vcmd = (self.register(self.validate_entry), '%P')
+
         self.counter = ctk.CTkEntry(self,
                                     textvariable=self.counter_var,
                                     font=self.font,
                                     text_color=self.text_color,
                                     justify='center',
-                                    corner_radius = self.button_corner_radius)
+                                    validate='key',
+                                    validatecommand=vcmd,
+                                    corner_radius=self.button_corner_radius)
         self.counter.bind('<Return>', self.update_counter)
 
         # decrement button
@@ -115,6 +122,16 @@ class CTkSpinbox(ctk.CTkFrame):
         if self.state == 'disabled':
             self.disable()
 
+    def validate_entry(self, new_value):
+        '''Validates the entry field to allow only integers and floats.'''
+        if new_value == "":
+            return True
+        try:
+            float(new_value)
+            return True
+        except ValueError:
+            return False
+
     def decrement_counter(self):
         '''Decrements the value of the counter by the step value.'''
         self.counter_var.set(self.counter_var.get() - self.step_value)
@@ -139,7 +156,7 @@ class CTkSpinbox(ctk.CTkFrame):
                 self.counter_var.set(self.counter_var.get() + self.scroll_value)
             self.update_counter(None)
 
-    def scroll_up(self, event= None):
+    def scroll_up(self, event=None):
         '''Increments/Decrements the value of the counter by the scroll value depending on scroll direction.'''
         if self.state == 'normal':
             self.counter_var.set(self.counter_var.get() + self.scroll_value)
@@ -184,7 +201,7 @@ class CTkSpinbox(ctk.CTkFrame):
     def update_counter(self, event):
         '''Updates the counter variable and calls the counter command.'''
         try:
-            value = int(self.counter_var.get())
+            value = float(self.counter_var.get())
         except ValueError:
             value = self.min_value
 
@@ -232,12 +249,15 @@ class CTkSpinbox(ctk.CTkFrame):
                 self.disable()
         super().configure(**kwargs)
 
+
 # Test the CTkSpinbox
 if __name__ == "__main__":
     import customtkinter as ctk
 
+
     def print_label(count):
         print(count)
+
 
     window = ctk.CTk()
     window.geometry('200x150')
