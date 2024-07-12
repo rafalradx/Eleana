@@ -58,7 +58,8 @@ class MainMenu:
 
         # FILE
         self.menu_file = tk.Menu(self.main_menu, tearoff=0, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        self.main_menu.add_cascade(label="File", menu=self.menu_file, image = self.icon_dropdown, compound="left")
+        #self.main_menu.add_cascade(label="File", menu=self.menu_file, image = self.icon_dropdown, compound="left")
+        self.main_menu.add_cascade(label=" File ", menu=self.menu_file)
 
         # - Load project
         self.menu_file.add_command(label="Load project", command=self.app.load_project, image = self.icon_load_project, compound="left", accelerator="Ctrl+O")
@@ -132,7 +133,8 @@ class MainMenu:
         self.menu_edit = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                  activebackground=self.activebg, activeforeground=self.activefg,
                                  borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        self.main_menu.add_cascade(label="Edit", menu=self.menu_edit, image = self.icon_dropdown, compound="left")
+        #self.main_menu.add_cascade(label="Edit", menu=self.menu_edit, image = self.icon_dropdown, compound="left")
+        self.main_menu.add_cascade(label=" Edit ", menu=self.menu_edit)
 
         self.menu_spreadsheet = tk.Menu(self.menu_edit, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                  activebackground=self.activebg, activeforeground=self.activefg,
@@ -186,7 +188,8 @@ class MainMenu:
         self.menu_analysis = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                             activebackground=self.activebg, activeforeground=self.activefg,
                             borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        self.main_menu.add_cascade(label="Analysis", menu=self.menu_analysis, image=self.icon_dropdown, compound="left")
+        #self.main_menu.add_cascade(label="Analysis", menu=self.menu_analysis, image=self.icon_dropdown, compound="left")
+        self.main_menu.add_cascade(label=" Analysis ", menu=self.menu_analysis)
 
         #  - Integrate region
         self.menu_analysis.add_command(label="Integrate region", command=self.app.quick_paste,
@@ -198,22 +201,25 @@ class MainMenu:
         self.menu_modifications = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                      activebackground=self.activebg, activeforeground=self.activefg,
                                      borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        self.main_menu.add_cascade(label="Modifications", menu=self.menu_modifications, image=self.icon_dropdown, compound="left")
-        # - Position
+        #self.main_menu.add_cascade(label="Modifications", menu=self.menu_modifications, image=self.icon_dropdown, compound="left")
+        self.main_menu.add_cascade(label=" Modifications ", menu=self.menu_modifications)
+
 
         ''' Menu EPR '''
         self.menu_EPR = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                           activebackground=self.activebg, activeforeground=self.activefg,
                                           borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        self.main_menu.add_cascade(label="EPR", menu=self.menu_EPR, image=self.icon_dropdown,
-                                   compound="left")
+        #self.main_menu.add_cascade(label="EPR", menu=self.menu_EPR, image=self.icon_dropdown, compound="left")
+        self.main_menu.add_cascade(label=" EPR ", menu=self.menu_EPR)
 
         ''' Menu Plots '''
         self.menu_plots = tk.Menu(self.main_menu, tearoff=1, bg=self.bg, fg=self.fg, font=self.font,
                                  activebackground=self.activebg, activeforeground=self.activefg,
                                  borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        self.main_menu.add_cascade(label="Plots", menu=self.menu_plots, image=self.icon_dropdown,
-                                   compound="left")
+        #self.main_menu.add_cascade(label="Plots", menu=self.menu_plots, image=self.icon_dropdown, compound="left")
+        self.main_menu.add_cascade(label="Plots", menu=self.menu_plots)
+
+
         # - Create plot
         self.menu_plots.add_command(label="Create plot", command=self.app.create_simple_static_plot,
                                     image=self.icon_create_static_plot, compound="left")
@@ -231,8 +237,9 @@ class MainMenu:
         self.menu_help = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                 activebackground=self.activebg, activeforeground=self.activefg,
                                 borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        self.main_menu.add_cascade(label="Help", menu=self.menu_help, image=self.icon_dropdown,
-                                   compound="left")
+        #self.main_menu.add_cascade(label="Help", menu=self.menu_help, image=self.icon_dropdown, compound="left")
+        self.main_menu.add_cascade(label="Help", menu=self.menu_help)
+
         # - About
         self.menu_help.add_command(label="About", command=self.app.quick_paste,
                                        image=self.icon_statistics, compound="left")
@@ -357,4 +364,3 @@ class ContextMenu:
     def show_context_menu_result(self, event):
         self.context_menu_result.tk_popup(event.x_root, event.y_root)
         print('Context menu')
-

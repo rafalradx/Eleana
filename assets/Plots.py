@@ -13,13 +13,14 @@ PROJECT_UI = PROJECT_PATH / "ui" / "StaticPlotWindow.ui"
 
 
 class Staticplotwindow:
-    def __init__(self, window_nr, static_plot_index, eleana_static_plots, eleana_active_static_plots, master):
+    def __init__(self, window_nr, static_plot_index, eleana_static_plots, eleana_active_static_plots, master, main_menu):
         self.window_nr = window_nr
         self.plot_nr = static_plot_index
         self.static_plots = eleana_static_plots
         self.active_static_plots = eleana_active_static_plots
         matplotlib.use('TkAgg')
         self.plot_data = eleana_static_plots[self.plot_nr]
+        self.main_menu = main_menu
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)
@@ -156,6 +157,7 @@ class Staticplotwindow:
         response = msg.get()
         if response == "Yes":
             del self.static_plots[self.plot_nr]
+            self.main_menu.create_showplots_menu()
             self.cancel()
 
 if __name__ == "__main__":

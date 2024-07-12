@@ -767,6 +767,6 @@ class Grapher(GraphPreferences):
             last = self.eleana.active_static_plot_windows[-1]
             window_nr = last + 1
         self.eleana.active_static_plot_windows.append(window_nr)
-        command = "self.static_plot_" + str(window_nr) + " = Staticplotwindow(window_nr, number_of_plot, self.eleana.static_plots, self.eleana.active_static_plot_windows, self.app.mainwindow)"
+        command = "self.static_plot_" + str(window_nr) + " = Staticplotwindow(window_nr, number_of_plot, self.eleana.static_plots, self.eleana.active_static_plot_windows, self.app.mainwindow, self.main_menu)"
         exec(command)
         self.main_menu.create_showplots_menu()

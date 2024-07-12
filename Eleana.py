@@ -1482,6 +1482,8 @@ eleana = Eleana()
 app = MainApp(eleana)  # This is GUI
 main_menu = MainMenu(app)
 grapher = Grapher(app, main_menu)
+
+
 app.set_grapher(grapher)
 load = Load(app, main_menu)
 save = Save(app)
