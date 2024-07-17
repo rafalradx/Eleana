@@ -1,16 +1,10 @@
 import re
 import argparse
 
-'''
-Schemat działania:
-tekst skryptu --> podział na linie --> argparse i utworzenie komend --> zamiana nazw własnych na eleana -->
-konwersja liniii na tekst
-'''
-
 class CommandProcessor:
     ''' Contains methods to parse command lines'''
 
-    def __init__(self, app_instance=None):
+    def __init__(self):
 
         # DICTIONARIES
         # ---- Eleana variables ----
@@ -32,15 +26,20 @@ class CommandProcessor:
             "$results": "self.eleana.results_dataset",
             "$notes": "self.eleana.notes",
             "$lastproject": "self.eleana.paths['last_project']",
-            "$projectpath": "self.eleana.paths['last_project_dir']",
+            "$projectpath": "self.eleana.paths['last_project_dir']"
         }
 
         # --- Eleana actions on GUI
         self.eleana_gui_buttons = {
-            "$g+": "self.app.group_down_clicked()",
-            "$g-": "self.app.group_up_clicked()",
-            "$f+": "self.app.first_up_clicked()",
-            "$f-": "self.app.first_down_clicked()"
+            "$g+": "self.group_down_clicked()",
+            "$g-": "self.group_up_clicked()",
+            "$f+": "self.first_up_clicked()",
+            "$f-": "self.first_down_clicked()",
+            "$s+": "self.second_up_clicked()",
+            "$s-": "self.second_down_clicked()",
+            "$r+": "self.result_up_clicked()",
+            "$r-": "self.result_down_clicked()",
+
         }
 
         # Combining Eleana dictionaries into one
@@ -61,12 +60,11 @@ class CommandProcessor:
             'save': {
                 'args': [('filename', str, 'The filename to save')],
                 'kwargs': {}
-            }
+            },
         }
 
         # Create parser
         self.parser = self.create_parser()
-
 
     def create_parser(self):
         '''Create parser for script that will use argparse'''

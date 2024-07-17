@@ -6,6 +6,7 @@ import tkinter as tk
 from assets.Observer import Observer
 from modules.CTkMessagebox import CTkMessagebox
 from assets.Sounds import Sound
+from widgets.CTKSpinbox import CTkSpinbox
 #from subprogs.progress_bar.progress_bar import ProgressBar
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "modify.ui"
@@ -35,6 +36,10 @@ class ModifyData:
         self.sel_x_oper = builder.get_object("sel_x_oper", self.master)
         self.sel_y_oper = builder.get_object("sel_y_oper", self.master)
         self.sel_z_oper = builder.get_object("sel_z_oper", self.master)
+        self.x_axisFrame = builder.get_object("xaxisFrema", self.master)
+        self.y_axisFrame = builder.get_object("ctkframe14", self.master)
+        self.z_axisFrame = builder.get_object("ctkframe17", self.master)
+
         self.spinbox_x = builder.get_object("spinbox_x", self.master)
         self.spinbox_y = builder.get_object("spinbox_y", self.master)
         self.spinbox_z = builder.get_object("spinbox_z", self.master)
@@ -42,10 +47,22 @@ class ModifyData:
         self.processFrame.grid_remove()
         self.progress_bar = builder.get_object("progress_bar", self.master)
 
+
+
+        self.spinbox_x.grid_remove()
+        self.spinbox_y.grid_remove()
+        self.spinbox_z.grid_remove()
         # Configure spinbox validation
-        self.spinbox_x.config(validate='key', validatecommand=(self.master.register(self.validate_spinbox), '%P'))
-        self.spinbox_y.config(validate='key', validatecommand=(self.master.register(self.validate_spinbox), '%P'))
-        self.spinbox_z.config(validate='key', validatecommand=(self.master.register(self.validate_spinbox), '%P'))
+        # self.spinbox_x.configure(validate='key', validatecommand=(self.master.register(self.validate_spinbox), '%P'))
+        # self.spinbox_y.config(validate='key', validatecommand=(self.master.register(self.validate_spinbox), '%P'))
+        # self.spinbox_z.config(validate='key', validatecommand=(self.master.register(self.validate_spinbox), '%P'))
+
+        self.spinbox_x = CTkSpinbox(self.x_axisFrame, command=self.ok_clicked)
+        self.spinbox_x.grid(column = 0, row=3, sticky="nsew", padx=5, pady=5)
+        self.spinbox_y = CTkSpinbox(self.y_axisFrame, command=self.ok_clicked)
+        self.spinbox_y.grid(column=0, row=3, sticky="nsew", padx=5, pady=5)
+        self.spinbox_z = CTkSpinbox(self.z_axisFrame, command=self.ok_clicked)
+        self.spinbox_z.grid(column=0, row=3, sticky="nsew", padx=5, pady=5)
 
         # Set comboboxes to None
         self.sel_x_oper.set("None")
@@ -113,9 +130,17 @@ class ModifyData:
     def set_step(self):
     # Set the step for spinbox according to the radio buttons
         current_step = self.step.get()
-        self.spinbox_x.config(increment = current_step)
-        self.spinbox_y.config(increment=current_step)
-        self.spinbox_z.config(increment=current_step)
+        self.spinbox_x.scroll_value = current_step
+        self.spinbox_x.step_value = current_step
+
+        self.spinbox_y.scroll_value = current_step
+        self.spinbox_y.step_value = current_step
+
+        self.spinbox_z.scroll_value = current_step
+        self.spinbox_z.step_value = current_step
+
+    #self.spinbox_y.config(increment=current_step)
+        #self.spinbox_z.config(increment=current_step)
 
     def set_spinbox_starting_value(self):
     # Set default values in spinboxes

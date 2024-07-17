@@ -7,6 +7,7 @@ class CTkHorizontalSlider(CTkFrame):
     def __init__(self, title='', direction = 'ver', range=[0,1], master=None, app_instance=None, **kw):
         self.app = app_instance
         self.direction = direction
+
         super(CTkHorizontalSlider, self).__init__(master, **kw)
         self.sliderFrame = CTkFrame(self)
         self.sliderFrame.grid_columnconfigure(0, weight=2)

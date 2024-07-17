@@ -69,12 +69,14 @@ list_of_subprogs.append(['convert_stack_to_group', 'cancel'])
 
 # Widgets used by main application
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
+from widgets.CTKSpinbox import CTkSpinbox
 
 class MainApp:
-    def __init__(self, eleana_instance, master=None):
+    def __init__(self, eleana_instance, command_processor, master=None):
         # Initialize eleana
         self.eleana = eleana_instance
         self.notify = self.eleana.notify_on
+        self.commandprocessor = command_processor
 
         # START BUILDER
         self.builder = builder = pygubu.Builder()
@@ -201,8 +203,10 @@ class MainApp:
             self.listFrame.grid(column=0, row=2, rowspan=3)
             self.listbox = CTkListbox(self.listFrame, command=self.list_selected, multiple_selection=True, height=400)
             self.listbox.grid(column=0, columnspan=1, rowspan=4, padx=4, pady=4, row=0, sticky="nsew")
+
             self.ver_slider = CTkHorizontalSlider('Vertical separation', 'vsep', [0, 1], self.listFrame, self)
             self.ver_slider.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=5, sticky="nsew")
+
             self.hor_slider = CTkHorizontalSlider('Horizontal separation', 'hsep', [-1, 1], self.listFrame, self)
             self.hor_slider.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=8, sticky="nsew")
             self.ver_slider.factor.delete(0, 'end')
@@ -1449,10 +1453,13 @@ class MainApp:
             new_log = '\n>>> ' + command
             self.log_field.insert("end", new_log)
             self.command_line.delete(0, "end")
+            error, executable_command = self.commandprocessor.process_script(command)
+            print(command)
+            print(executable_command)
             stdout_backup = sys.stdout
             sys.stdout = io.StringIO()
             try:
-                eval(command, globals(), locals())
+                eval(executable_command, globals(), locals())
                 output = sys.stdout.getvalue()
             except Exception as e:
                 output = f"Error: {e}"
@@ -1479,7 +1486,8 @@ def get_index_by_name(selected_value_text):
 
 # Create general main instances for the program
 eleana = Eleana()
-app = MainApp(eleana)  # This is GUI
+cmd = CommandProcessor()
+app = MainApp(eleana, cmd)  # This is GUI
 main_menu = MainMenu(app)
 grapher = Grapher(app, main_menu)
 
@@ -1500,8 +1508,6 @@ init.folders()
 init.graph()
 
 # Command Line and tests
-cmd = CommandProcessor(app)
-
 
 
 # Create Graph canvas
