@@ -5,7 +5,8 @@ class CustomDoubleVar(ctk.DoubleVar):
     def get(self):
         try:
             try:
-                return float(self._tk.globalgetvar(self._name))
+                val_temp = float(self._tk.globalgetvar(self._name))
+                return val_temp
             except:
                 return 0.0
         except TclError:
