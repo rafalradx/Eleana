@@ -49,8 +49,6 @@ class ModifyData:
         self.processFrame.grid_remove()
         self.progress_bar = builder.get_object("progress_bar", self.master)
 
-
-
         self.spinbox_x.grid_remove()
         self.spinbox_y.grid_remove()
         self.spinbox_z.grid_remove()
@@ -97,7 +95,6 @@ class ModifyData:
         # Create observer
         self.observer = Observer(self.eleana, self)
 
-
         # Get data to modify
         self.get_data(start = True)
 
@@ -124,7 +121,7 @@ class ModifyData:
     # Close the application
         self.response = None
         # Unregister observer
-        self.eleana.detach(self)
+        self.eleana.detach(self.observer)
         self.mainwindow.destroy()
 
     def run(self):

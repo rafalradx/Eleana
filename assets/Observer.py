@@ -64,6 +64,12 @@ to notify subprogram in Notify instance.
    the event of changes in eleana.selections['first'] using the setter.
    If you don't you the setter then the changes in the value will not be notified.
 
+7. Upon closing the subscriber you must detach the self.observer from the list of registered observers
+   in eleana._observers list. Otherwise the observer will still work even if the subscriber window is closed:
+
+        self.eleana.detach(self.observer)
+
+   This will remove the created observers and the data_changed() method will no longer be triggered.
 '''
 
 class Observer:
