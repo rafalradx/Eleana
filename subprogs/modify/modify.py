@@ -6,10 +6,12 @@ import tkinter as tk
 from assets.Observer import Observer
 from modules.CTkMessagebox import CTkMessagebox
 from assets.Sounds import Sound
-from widgets.CTKSpinbox import CTkSpinbox
+from CTkSpinbox import CTkSpinbox
 #from subprogs.progress_bar.progress_bar import ProgressBar
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "modify.ui"
+
+from Observer import Observer
 
 class ModifyData:
     def __init__(self, references, which = 'first'): # instances master, eleana=None, grapher=None, app=None ):
@@ -65,8 +67,8 @@ class ModifyData:
         self.spinbox_z.grid(column=0, row=3, sticky="nsew", padx=5, pady=5)
 
         # Set comboboxes to None
-        self.sel_x_oper.set("None")
-        self.sel_y_oper.set("None")
+        self.sel_x_oper.set("Add (+)")
+        self.sel_y_oper.set("Subtract (-)")
         self.sel_z_oper.set("None")
 
         # References to radiobuttons
@@ -95,6 +97,7 @@ class ModifyData:
         # Create observer
         self.observer = Observer(self.eleana, self)
 
+
         # Get data to modify
         self.get_data(start = True)
 
@@ -104,9 +107,11 @@ class ModifyData:
         # Set current position in Results Dataset
         self.result_index = len(self.eleana.results_dataset)
 
+        self.eleana.notify_on = True
     ''' STANDARD METHODS TO HANDLE WINDOW BEHAVIOR '''
     def data_changed(self):
-    # This is trigerred by the observer
+        print("Triggered by observer")
+        # This is trigerred by the observer
         self.get_data()
         self.perform_calculations()
 

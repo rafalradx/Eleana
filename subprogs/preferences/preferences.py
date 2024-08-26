@@ -5,7 +5,8 @@ import customtkinter
 import copy
 import matplotlib.pyplot as plt
 
-from modules.CTkColorPicker import AskColor
+from CTkColorPicker import AskColor
+from CTkSpinbox import CTkSpinbox
 
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "preferences.ui"
@@ -19,6 +20,36 @@ class PreferencesApp:
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)
+
+        self.matplotlib_styles = {
+                                "default": "default",
+                                "classic": "classic",
+                                "solarize light": "Solarize_Light2",
+                                "bmh": "bmh",
+                                "dark background":"dark_background",
+                                "fast": "fast",
+                                "five thirty eight": "fivethirtyeight",
+                                "ggplot": "ggplot",
+                                "grayscale": "grayscale",
+                                "seaborn bright": "seaborn-v0_8-bright",
+                                "seaborn": "seaborn-v0_8",
+                                "seaborn colorblind": "seaborn-v0_8-colorblind",
+                                "seaborn dark": "seaborn-v0_8-dark",
+                                "seaborn dark palette": "seaborn-v0_8-dark-palette",
+                                "seaborn dark grid": "seaborn-v0_8-darkgrid",
+                                "seaborn deep": "seaborn-v0_8-deep",
+                                "seaborn muted": "seaborn-v0_8-muted",
+                                "seaborn notebook": "seaborn-v0_8-notebook",
+                                "seaborn paper": "seaborn-v0_8-paper",
+                                "seaborn pastel": "seaborn-v0_8-pastel",
+                                "seaborn poster": "seaborn-v0_8-poster",
+                                "seaborn talk": "seaborn-v0_8-talk",
+                                "seaborn ticks": "seaborn-v0_8-ticks",
+                                "seaborn white": "seaborn-v0_8-white",
+                                "seaborn whitegrid": "seaborn-v0_8-whitegrid",
+                                "tableau colorblind": "tableau-colorblind10"
+                                }
+
         # Main widget
         self.mainwindow = builder.get_object("toplevel1", self.master)
         builder.connect_callbacks(self)
@@ -71,6 +102,17 @@ class PreferencesApp:
 
         self.response = None
         self.on_start()
+
+        # Set values for graph_general_box
+        styles = tuple(self.matplotlib_styles.keys())
+        self.graph_general_box.configure(values=styles)
+
+
+        # Replace tkinter spinboxes with ctkspinbox
+        self.ctkframe9 = builder.get_object("ctkframe9", self.mainwindow)
+        self.first_linewidth.grid_remove()
+        self.first_linewidth = CTkSpinbox(self.ctkframe9, command=self.selected_first_linewidth, min_value=1)
+        self.first_linewidth.grid(column=1, row=0, sticky="ew", padx=0)
 
     ''' STANDARD METHODS TO HANDLE WINDOW BEHAVIOR '''
     def get(self):
@@ -277,10 +319,13 @@ class PreferencesApp:
         return selected_color
 
     def appearence(self, value):
-        print(value)
-        self.grapher.update_plot_style(value.lower())
+        style = self.matplotlib_styles[value]
+        if style:
+            self.grapher.update_plot_style(style)
+        else:
+            print(value)
+        return
 
-        pass
 
 
 if __name__ == "__main__":

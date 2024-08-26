@@ -37,7 +37,7 @@ to notify subprogram in Notify instance.
         eleana = Eleana()    <-- This creates instance
         eleana.set_selections(2)
 
-    This will involve setter, set the value to 2 and invoke
+    This will involve setter, sets the value to 2 and invoke
     eleana.notify() method.
 
 4. Now you must create subscriber that will receive the notification.

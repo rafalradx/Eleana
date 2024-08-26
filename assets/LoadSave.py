@@ -14,11 +14,13 @@ from assets.DataClasses import createFromElexsys, createFromEMX, createFromShima
 from assets.Error import Error
 from subprogs.ascii_file_preview.ascii_file_preview import AsciFilePreview
 from subprogs.table.table import CreateFromTable
+
 class Load:
-    def __init__(self, app_instance, menu_instance):
-        self.eleana = app_instance.eleana
-        self.app = app_instance
+    def __init__(self, menu_instance):
         self.menu = menu_instance
+        self.app = self.menu.app
+        self.eleana = self.app.eleana
+
     @classmethod
     def load_preferences(cls, eleana):
         ''' Load saved graph settings from home/.EleanaPy/preferences.pic'''

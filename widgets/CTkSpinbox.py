@@ -1,17 +1,16 @@
 import customtkinter as ctk
-from tkinter import TclError
-
+import threading
 
 class CTkSpinbox(ctk.CTkFrame):
     def __init__(self,
                  master: any,
                  width: int = 100,
                  height: int = 30,
-                 start_value: float = 0,
-                 min_value: float = -1000000,
-                 max_value: float = 1000000,
-                 step_value: float = 1,
-                 scroll_value: float = 5,
+                 start_value: float = 0.0,
+                 min_value: float = -1000000000000.0,
+                 max_value: float = 1000000000000.0,
+                 step_value: float = 1.0,
+                 scroll_value: float = 5.0,
                  variable: any = None,
                  font: tuple = ('X', 12),
                  fg_color: str = None,
@@ -19,13 +18,14 @@ class CTkSpinbox(ctk.CTkFrame):
                  text_color: str = ('Black', 'White'),
                  button_color: str = ('#BBB', '#444'),
                  button_hover_color: str = ('#AAA', '#555'),
-                 border_width: int = 1,
-                 corner_radius: int = 0,
+                 border_width: int = 2,
+                 corner_radius: int = 5,
                  button_corner_radius: int = 0,
-                 button_border_width: int = 1,
+                 button_border_width: int = 2,
                  button_border_color: str = ('#AAA', '#555'),
                  state: str = 'normal',
-                 command: any = None):
+                 command: any = None,
+                 wait_for: float = 0.05):  # Add wait_for parameter
         super().__init__(master,
                          height=height,
                          width=width,
@@ -52,9 +52,10 @@ class CTkSpinbox(ctk.CTkFrame):
         self.button_border_color = button_border_color
         self.state = state
         self.command = command
-        self.button_font: tuple = ('Arial', 14)
-        self.scroll_update_id = None
-        self.last_valid_value = self.start_value  # Last valid value
+        self.manual_input = False  # Track if the input was manual
+
+        self.update_timer = None  # Timer for delayed update
+        self.wait_for = wait_for  # Set wait_for to delay the update
 
         # counter entry
         self.counter_var = ctk.DoubleVar(value=self.start_value)
@@ -75,8 +76,8 @@ class CTkSpinbox(ctk.CTkFrame):
 
         # decrement button
         self.decrement = ctk.CTkButton(self,
-                                       text='▼',
-                                       font=self.button_font,
+                                       text='-',
+                                       font=self.font,
                                        text_color=self.text_color,
                                        fg_color=self.button_color,
                                        hover_color=self.button_hover_color,
@@ -90,8 +91,8 @@ class CTkSpinbox(ctk.CTkFrame):
 
         # increment button
         self.increment = ctk.CTkButton(self,
-                                       text='▲',
-                                       font=self.button_font,
+                                       text='+',
+                                       font=self.font,
                                        text_color=self.text_color,
                                        fg_color=self.button_color,
                                        hover_color=self.button_hover_color,
@@ -111,9 +112,9 @@ class CTkSpinbox(ctk.CTkFrame):
         self.grid_propagate(False)
 
         # layout
-        self.counter.grid(row=0, column=0, sticky='ew', padx=(2, 0), pady=2)
-        self.increment.grid(row=0, column=1, sticky='news', padx=0, pady=2)
-        self.decrement.grid(row=0, column=2, sticky='news', padx=(0, 2), pady=2)
+        self.counter.grid(row=0, column=0, sticky='ew', padx=(4, 0), pady=4)
+        self.increment.grid(row=0, column=1, sticky='news', padx=0, pady=4)
+        self.decrement.grid(row=0, column=2, sticky='news', padx=(0, 4), pady=4)
 
         # scroll bind
         # FOR WINDOWS
@@ -128,70 +129,78 @@ class CTkSpinbox(ctk.CTkFrame):
             self.disable()
 
     def validate_entry(self, new_value):
-        '''Validates the entry field to allow only integers and floats.'''
+        '''Validates the entry field to allow only floats.'''
         if new_value == "":
             return True
         try:
             float(new_value)
+            self.manual_input = True
             return True
         except ValueError:
             return False
 
+    def round_value(self, value):
+        '''Rounds the value to the same precision as step_value.'''
+        precision = len(str(self.step_value).split('.')[1]) if '.' in str(self.step_value) else 0
+        return round(value, precision)
+
     def decrement_counter(self):
         '''Decrements the value of the counter by the step value.'''
-        self.counter_var.set(self.counter_var.get() - self.step_value)
-        self.update_counter(None)
+        new_value = self.counter_var.get() - self.step_value
+        self.counter_var.set(self.round_value(new_value))
+        self.manual_input = False
+        self.schedule_update()
 
     def increment_counter(self):
         '''Increments the value of the counter by the step value.'''
-        self.counter_var.set(self.counter_var.get() + self.step_value)
-        self.update_counter(None)
+        new_value = self.counter_var.get() + self.step_value
+        self.counter_var.set(self.round_value(new_value))
+        self.manual_input = False
+        self.schedule_update()
 
     def scroll(self, scroll):
-        '''Handles mouse wheel scrolling to increment or decrement the value.'''
+        '''Increments/Decrements the value of the counter by the scroll value depending on scroll direction.
+
+            THIS IS FOR WINDOWS
+        '''
         if self.state == 'normal':
             dirn = 1 if scroll.delta > 0 else -1
-            if dirn == -1:
-                self.counter_var.set(self.counter_var.get() - self.scroll_value)
-            else:
-                self.counter_var.set(self.counter_var.get() + self.scroll_value)
-
-            # Cancel previous scheduled update if exists
-            if self.scroll_update_id:
-                self.after_cancel(self.scroll_update_id)
-
-            # Schedule update
-            self.scroll_update_id = self.after(50, self.update_counter, None)
+            new_value = self.counter_var.get() + dirn * self.scroll_value
+            self.counter_var.set(self.round_value(new_value))
+            self.manual_input = False
+            self.schedule_update()
 
     def scroll_up(self, event=None):
-        '''Handles scroll up for Linux.'''
+        '''Increments the value of the counter by the scroll value.'''
         if self.state == 'normal':
-            self.counter_var.set(self.counter_var.get() + self.scroll_value)
-            if self.scroll_update_id:
-                self.after_cancel(self.scroll_update_id)
-            self.scroll_update_id = self.after(50, self.update_counter, None)
+            new_value = self.counter_var.get() + self.scroll_value
+            self.counter_var.set(self.round_value(new_value))
+            self.manual_input = False
+            self.schedule_update()
 
     def scroll_down(self, event=None):
-        '''Handles scroll down for Linux.'''
+        '''Decrements the value of the counter by the scroll value.'''
         if self.state == 'normal':
-            self.counter_var.set(self.counter_var.get() - self.scroll_value)
-            if self.scroll_update_id:
-                self.after_cancel(self.scroll_update_id)
-            self.scroll_update_id = self.after(50, self.update_counter, None)
+            new_value = self.counter_var.get() - self.scroll_value
+            self.counter_var.set(self.round_value(new_value))
+            self.manual_input = False
+            self.schedule_update()
+
+    def schedule_update(self):
+        '''Schedules an update of the counter after a delay.'''
+        if self.update_timer:
+            self.update_timer.cancel()
+        self.update_timer = threading.Timer(self.wait_for, self.update_counter, [None])
+        self.update_timer.start()
 
     def get(self):
         '''Returns the value of the counter.'''
-        try:
-            value = float(self.counter_var.get())
-        except TclError:
-            value = self.min_value
-        if not value:
-            value = 0.0
-        return value
+        return self.counter_var.get()
 
     def set(self, value):
         '''Sets the counter to a particular value.'''
-        self.counter_var.set(max(min(value, self.max_value), self.min_value))
+        self.counter_var.set(self.round_value(max(min(value, self.max_value), self.min_value)))
+        self.manual_input = False
 
     def disable(self):
         '''Disables the functionality of the counter.'''
@@ -208,37 +217,46 @@ class CTkSpinbox(ctk.CTkFrame):
         self.counter.configure(state='normal')
 
     def bind(self, key, function, add=True):
-        '''binds a key to a function.'''
-
+        '''Binds a key to a function.'''
         super().bind(key, function, add)
         self.counter.bind(key, function, add)
         self.increment.bind(key, function, add)
         self.decrement.bind(key, function, add)
 
-    def update_counter(self, event=None):
+    def update_counter(self, event):
         '''Updates the counter variable and calls the counter command.'''
-        try:
-            value = float(self.counter_var.get())
-            self.last_valid_value = value  # Update last valid value
-        except (ValueError, TclError):
-            value = self.last_valid_value  # Use last valid value if current value is invalid
+        if self.update_timer:
+            self.update_timer.cancel()
+            self.update_timer = None
 
-        float_nr = str(self.step_value)
-        if '.' in float_nr:
-            splitted = float_nr.split('.')[1]
-            after_dot = len(splitted)
-            value = round(value, after_dot)
+        if self.manual_input:
+            try:
+                value = float(self.counter_var.get())
+            except ValueError:
+                value = self.min_value
         else:
-            value = int(value)
-        self.counter_var.set(max(min(value, self.max_value), self.min_value))
+            try:
+                value = float(self.counter_var.get())
+                value = self.round_value(value)
+            except ValueError:
+                value = self.min_value
+
+        # Ensure the value is within bounds
+        value = max(min(value, self.max_value), self.min_value)
+
+        # Set the counter variable to the adjusted value
+        self.counter_var.set(value)
+
+        # Update the variable if provided
         if self.variable:
-            self.variable.set(self.counter_var.get())
+            self.variable.set(value)
+
+        # Call the command if provided
         if self.command:
-            self.command(self.counter_var.get())
+            self.command(value)
 
     def configure(self, **kwargs):
         '''Update widget values.'''
-
         # conditions
         for value in ['font', 'text_color', 'button_color', 'button_hover_color', 'button_corner_radius',
                       'button_border_color', 'button_border_width']:
@@ -246,23 +264,23 @@ class CTkSpinbox(ctk.CTkFrame):
                 new_value = kwargs.pop(value)
                 if value not in ['font', 'button_corner_radius']:
                     if value not in ['button_hover_color', 'button_color', 'button_corner_radius']:
-                        self.counter.configure({value: new_value})
+                        exec(f"self.counter.configure({value} = '{new_value}')")
                     value = {'button_color': 'fg_color'}[value] if value in ['button_color',
                                                                              'button_corner_radius'] else value
-                    self.increment.configure({value: new_value})
-                    self.decrement.configure({value: new_value})
+                    exec(f"self.increment.configure({value} = '{new_value}')")
+                    exec(f"self.decrement.configure({value} = '{new_value}')")
                 else:
                     value = {'button_corner_radius': 'corner_radius'}[value] if value in ['button_color',
                                                                                           'button_corner_radius'] else value
-                    self.increment.configure({value: new_value})
-                    self.decrement.configure({value: new_value})
+                    exec(f"self.increment.configure({value} = {new_value})")
+                    exec(f"self.decrement.configure({value} = {new_value})")
                     if value == 'font':
-                        self.counter.configure({value: new_value})
+                        exec(f"self.counter.configure({value} = {new_value})")
 
-        for value in ['min_value', 'max_value', 'step_value', 'scroll_value', 'variable']:
+        for value in ['min_value', 'max_value', 'step_value', 'scroll_value', 'variable', 'wait_for']:
             if value in kwargs:
                 new_value = kwargs.pop(value)
-                setattr(self, value, new_value)
+                exec(f'self.{value} = {new_value}')
 
         if 'command' in kwargs:
             self.command = kwargs.pop('command')
@@ -272,29 +290,26 @@ class CTkSpinbox(ctk.CTkFrame):
                 self.enable()
             elif self.state == 'disabled':
                 self.disable()
-
         super().configure(**kwargs)
-
 
 # Test the CTkSpinbox
 if __name__ == "__main__":
-    app = ctk.CTk()
-    app.geometry('600x400')
+    def print_label(count):
+        print(count)
 
+    window = ctk.CTk()
+    window.geometry('200x150')
 
-    def on_value_change(value):
-        print(f'Spinbox value changed to: {value}')
+    spin_var = ctk.DoubleVar()
+    spinbox = CTkSpinbox(window,
+                         start_value=10.0,
+                         min_value=0.0,
+                         max_value=20.0,
+                         step_value=0.1,
+                         scroll_value=0.1,
+                         variable=spin_var,
+                         command=print_label)
 
+    spinbox.pack(expand=True, fill='x')  # Use fill='x' to make it expand horizontally
 
-    spinbox = CTkSpinbox(app,
-                         width=150,
-                         height=30,
-                         start_value=10,
-                         min_value=0,
-                         max_value=100,
-                         step_value=1,
-                         scroll_value=5,
-                         command=on_value_change)
-    spinbox.grid(row=0, column=0, padx=20, pady=20)
-
-    app.mainloop()
+    window.mainloop()

@@ -6,8 +6,8 @@ import tempfile
 
 class Eleana:
     # Main attributes associated with data gathered in the programe
-    def __init__(self):
-        self.version = 1.0
+    def __init__(self, version):
+        self.version = version
         self.dataset = []                               # <-- This variable keeps all spectra available in Eleana. It is a list of objects
         self.results_dataset = []                       # <-- This keeps data containing results
         self.assignmentToGroups = {'<group-list/>': ['All']} # <-- This keeps information about which data from dataset is assigned to particular group
@@ -23,8 +23,6 @@ class Eleana:
              'home_dir': Path.home(),
              'tmp_dir': tempfile.gettempdir(),
              'pixmaps': Path(Path(__file__).resolve().parent, "../pixmaps"),
-             'ui': Path(Path(__file__).resolve().parent, "../pixmaps"),
-             'assets': Path(Path(__file__).resolve().parent, ""),
              'last_import_dir': '',
              'last_project_dir': '',
              'last_projects': [],
@@ -99,6 +97,16 @@ class Eleana:
         if selected_value_text in numbered_names:
             index = numbered_names.index(selected_value_text)
             return index
+
+    def get_index_by_name(self, selected_value_text):
+        ''' Function returns index in dataset of spectrum
+            having the name_nr '''
+        i = 0
+        while i < len(self.dataset):
+            name = self.dataset[i].name_nr
+            if name == selected_value_text:
+                return i
+            i += 1
 
     def getDataFromSelection(self, first_second_or_results: str):
         # This method returns X, reY, imY and boolean complex depending on values in eleana.selections

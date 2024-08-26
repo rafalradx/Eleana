@@ -1,5 +1,6 @@
 import tkinter as tk
 from pathlib import Path
+from LoadSave import Save
 
 class MainMenu:
     def __init__(self, app_instance):
@@ -52,7 +53,8 @@ class MainMenu:
         self.icon_create_static_plot = self.prepare_icon("x.png")
         self.icon_delete_static_plot = self.prepare_icon("x.png")
         self.icon_static_plot = self.prepare_icon("x.png")
-        ''' Menu Bar'''
+
+        ''' BUILD MENU '''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth_bar, activeborderwidth=self.borderwidth)
         self.app.mainwindow.config(menu=self.main_menu)
 
@@ -250,6 +252,32 @@ class MainMenu:
             icon = tk.PhotoImage(file=icon_file)
             return icon
 
+    def last_projects_menu(self):
+        ''' Updates list of the recently loaded or saved projects and adds the list to the main menu'''
+        def _clear_recent_list():
+            last = self.eleana.paths['last_projects'][0]
+            self.eleana.paths['last_projects'] = [last]
+            self.last_projects_menu()
+            Save.save_settings_paths(self.eleana)
+        list_for_menu = []
+        i = 1
+        for each in self.eleana.paths['last_projects']:
+            item = Path(each)
+            item = str(i) + '. ' + item.name
+            list_for_menu.append(item)
+            i += 1
+        recent_menu = self.menu_recent
+        recent_menu.delete(0, tk.END)
+        icon_file = Path(self.eleana.paths['pixmaps'], 'project.png')
+        icon_clear = tk.PhotoImage(file=icon_file)
+        for label in list_for_menu:
+            def create_command(l):
+                return lambda: self.app.load_recent(l)
+            recent_menu.add_command(label=label, image=icon_clear, compound="left", command=create_command(label))
+        # Separator and clear
+        recent_menu.add_separator()
+        recent_menu.add_command(label='Keep only last', image=icon_clear, compound="left", command=_clear_recent_list)
+
     def create_showplots_menu(self):
         '''
         Take list of created plots and add to self.menu_showPlots.
@@ -285,6 +313,8 @@ class MainMenu:
             self.menu_showPlots.add_command(label=new_name_nr, command=lambda position=i: self.app.grapher.show_static_graph_window(position),
                                        image=self.icon_static_plot, compound="left")
             i += 1
+
+
 
 class ContextMenu:
     def __init__(self, app_instance):

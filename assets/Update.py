@@ -14,36 +14,11 @@ Example usage in main Eleana.py:
 This will create 3 positions in the list of Second combobox
 '''
 class Update:
-    def __init__(self, app_instance, main_menu_instance):
-        self.app = app_instance
-        self.eleana = app_instance.eleana
-        self.main_menu = main_menu_instance
+    def __init__(self, main_menu):
+        self.main_menu = main_menu
+        self.app = main_menu.app
+        self.eleana = self.app.eleana
 
-    def last_projects_menu(self):
-        ''' Updates list of the recently loaded or saved projects and adds the list to the main menu'''
-        def _clear_recent_list():
-            last = self.eleana.paths['last_projects'][0]
-            self.eleana.paths['last_projects'] = [last]
-            self.last_projects_menu()
-            Save.save_settings_paths(self.eleana)
-        list_for_menu = []
-        i = 1
-        for each in self.eleana.paths['last_projects']:
-            item = Path(each)
-            item = str(i) + '. ' + item.name
-            list_for_menu.append(item)
-            i += 1
-        recent_menu = self.main_menu.menu_recent
-        recent_menu.delete(0, tk.END)
-        icon_file = Path(self.eleana.paths['pixmaps'], 'project.png')
-        icon_clear = tk.PhotoImage(file=icon_file)
-        for label in list_for_menu:
-            def create_command(l):
-                return lambda: self.app.load_recent(l)
-            recent_menu.add_command(label=label, image=icon_clear, compound="left", command=create_command(label))
-        # Separator and clear
-        recent_menu.add_separator()
-        recent_menu.add_command(label='Keep only last', image=icon_clear, compound="left", command=_clear_recent_list)
 
     def group_list(self):
         ''' This scans for groups and creates assignments in eleana.assignmentToGroups'''
@@ -247,7 +222,6 @@ class Update:
         if len(self.eleana.dataset) == 0 or first.type != "stack 2D" or is_first_none:
             self.app.firstStkFrame.grid_remove()
             self.app.firstComplex.grid_remove()
-
 
         elif first.type == "stack 2D":
             self.app.firstStkFrame.grid(row=2, column=0)

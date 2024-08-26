@@ -5,22 +5,27 @@ import copy
 import io
 import re
 
-# Set paths for modules
+# Set paths for assets, modules, subprogs and widgets
 PROJECT_PATH = Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "Eleana_interface.ui"
 MODULES = PROJECT_PATH / "modules"
 ASSETS = PROJECT_PATH / "assets"
 SUBPROGS = PROJECT_PATH / "subprogs"
-VERSION = 1
+WIDGETS = PROJECT_PATH / "widgets"
+PIXMAPS = PROJECT_PATH / "pixmaps"
+
+ELEANA_VERSION = 1
 INTERPRETER = sys.executable
 DEVEL = True
+
 sys.path.insert(0, str(MODULES))
 sys.path.insert(0, str(ASSETS))
 sys.path.insert(0, str(SUBPROGS))
+sys.path.insert(0,str(WIDGETS))
 
 # Import External modules required
 import numpy as np
-#import pandas
+import pandas
 import pyperclip
 
 # Import modules from ./modules folder
@@ -29,9 +34,9 @@ from CTkListbox import CTkListbox
 from CTkMessagebox import CTkMessagebox
 
 # Import Eleana specific classes
-from GeneralEleana import Eleana
+from Eleana import Eleana
 from LoadSave import Load, Save, Export
-from Initialization import Init
+from Init import Init
 from Grapher import Grapher
 from Update import Update
 from Menu import ContextMenu, MainMenu
@@ -69,7 +74,6 @@ list_of_subprogs.append(['convert_stack_to_group', 'cancel'])
 
 # Widgets used by main application
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
-from widgets.CTKSpinbox import CTkSpinbox
 
 class MainApp:
     def __init__(self, eleana_instance, command_processor, master=None):
@@ -275,7 +279,7 @@ class MainApp:
             previous_selection = self.comparison_settings['indexes']
             self.repeated_items.extend(selected_items)
             for each in selected_items:
-                index = int(get_index_by_name(each))
+                index = int(self.eleana.get_index_by_name(each))
                 type = self.eleana.dataset[index].type
                 name_nr = self.eleana.dataset[index].name_nr
                 if name_nr in set(self.repeated_items):
@@ -292,7 +296,7 @@ class MainApp:
                     return
             items_list = []
             for each in selected_items:
-                items_list.append(int(get_index_by_name(each)))
+                items_list.append(int(self.eleana.get_index_by_name(each)))
             items_list.sort()
             self.comparison_settings['indexes'] = tuple(items_list)
             self.separate_plots_by()
@@ -476,7 +480,6 @@ class MainApp:
         if current_position in list_of_items:
             index = list_of_items.index(current_position)
         else:
-            print('Index in sel_first not found.')
             return
         try:
             new_position = list_of_items[index + 1]
@@ -490,6 +493,7 @@ class MainApp:
         self.grapher.plot_graph()
 
     def first_selected(self, selected_value_text):
+        #self.eleana.notify_on = True
         if selected_value_text == 'None':
             self.eleana.set_selections('first', -1)
             self.firstComplex.grid_remove()
@@ -687,6 +691,7 @@ class MainApp:
             self.firstComplex.grid_remove()
         if first_pos == 'None':
             self.secondComplex.grid_remove()
+
         self.sel_first.set(second_pos)
         self.sel_second.set(first_pos)
         self.first_selected(second_pos)
@@ -701,7 +706,7 @@ class MainApp:
         current = self.sel_second.get()
         if current == 'None':
             return
-        index = get_index_by_name(current)
+        index = self.eleana.get_index_by_name(current)
         spectrum = copy.deepcopy(self.eleana.dataset[index])
 
         # Check the name if the same already exists in eleana.result_dataset
@@ -906,7 +911,7 @@ class MainApp:
         current = self.sel_first.get()
         if current == 'None':
             return
-        index = get_index_by_name(current)
+        index = self.eleana.get_index_by_name(current)
         spectrum = copy.deepcopy(self.eleana.dataset[index])
         # Check the name if the same already exists in eleana.result_dataset
         list_of_results = []
@@ -968,7 +973,7 @@ class MainApp:
             names = list(names)
         indexes = []
         for each in names:
-            index = get_index_by_name(each)
+            index = self.eleana.get_index_by_name(each)
             indexes.append(index)
         return indexes
 
@@ -1050,7 +1055,7 @@ class MainApp:
         name = path_to_file.name
         app.mainwindow.title(name + ' - Eleana')
         self.eleana.paths['last_project_dir'] = str(Path(path_to_file).parent)
-        update.last_projects_menu()
+        main_menu.last_projects_menu()
         try:
             selected_value_text = self.eleana.dataset[self.eleana.selections['first']].name_nr
             self.first_selected(selected_value_text)
@@ -1098,7 +1103,7 @@ class MainApp:
         self.eleana.paths['last_project_dir'] = Path(last_projects[0]).parent
         Save.save_settings_paths(self.eleana)
         # Perform update to place the item into menu
-        update.last_projects_menu()
+        main_menu.last_projects_menu()
         app.mainwindow.title(Path(last_projects[0]).name[:-4] + ' - Eleana')
 
     def save_current(self, event=None):
@@ -1472,34 +1477,25 @@ class MainApp:
     def copy_to_clipboard(self, event):
         print('Copy to clipboard. (1395)')
 
-def get_index_by_name(selected_value_text):
-    ''' Function returns index in dataset of spectrum
-        having the name_nr '''
-    i = 0
-    while i < len(eleana.dataset):
-        name = eleana.dataset[i].name_nr
-        if name == selected_value_text:
-            return i
-        i += 1
-
 ''' STARTING THE APPLICATION '''
 
 # Create general main instances for the program
-eleana = Eleana()
+eleana = Eleana(ELEANA_VERSION)
+sound = Sound()
 cmd = CommandProcessor()
+
+# Create GUI
 app = MainApp(eleana, cmd)  # This is GUI
 main_menu = MainMenu(app)
-grapher = Grapher(app, main_menu)
-
-
+grapher = Grapher(main_menu)
 app.set_grapher(grapher)
-load = Load(app, main_menu)
+
+load = Load(main_menu)
 save = Save(app)
 export = Export(app)
-init = Init(app, main_menu)
+init = Init(main_menu)
 context_menu = ContextMenu(app)
-update = Update(app, main_menu)  # This contains methods for update things like lists, settings, gui, groups etc.
-sound = Sound()
+update = Update(main_menu)  # This contains methods for update things like lists, settings, gui, groups etc.
 
 # Initialize basic settings: geometry, icon, graph, binding, etc
 init.main_window()
@@ -1508,7 +1504,6 @@ init.folders()
 init.graph()
 
 # Command Line and tests
-
 
 # Create Graph canvas
 grapher.plot_graph()
@@ -1519,7 +1514,7 @@ update.all_lists()
 # Set graph Frame scalable
 app.graphFrame.columnconfigure(0, weight=1)
 app.graphFrame.rowconfigure(0, weight=1)
-update.last_projects_menu()
+main_menu.last_projects_menu()
 
 # Run
 if __name__ == "__main__":

@@ -16,9 +16,9 @@ matplotlib.use('TkAgg')
 matplotlib.rcParams['keymap.save'] = ''
 
 class GraphPreferences:
-    def __init__(self, app_instance):
-        self.app = app_instance
-        self.eleana = app_instance.eleana
+    def __init__(self, main_menu):
+        self.app = main_menu.app
+        self.eleana = self.app.eleana
 
         ''' CURSOR DEFINITIONS '''
         # Create avaliable cursor modes: hov - enable hover,
@@ -102,13 +102,13 @@ class GraphPreferences:
         self.app.sel_cursor_mode.set('None')
 
 class Grapher(GraphPreferences):
-    def __init__(self, app_instance, main_menu):
+    def __init__(self, main_menu):
         # Initialize GraphPreferences
-        super().__init__(app_instance)
+        super().__init__(main_menu)
         ''' Initialize app, eleana and graphs objects (fig, canvas, toolbar)'''
-        self.app = app_instance
         self.main_menu = main_menu
-        self.eleana = app_instance.eleana
+        self.app = main_menu.app
+        self.eleana = self.app.eleana
         self.plt = plt
         self.mplcursors = mplcursors
         self.cursor = None
@@ -359,6 +359,8 @@ class Grapher(GraphPreferences):
         self.draw()
         # Create cursor
         self.cursor_on_off()
+        # Activate the observer
+        self.eleana.notify_on = True
 
     def draw(self):
         ''' Put the selected curves on the graph'''

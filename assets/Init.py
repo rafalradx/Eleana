@@ -4,20 +4,21 @@ import tkinter as tk
 import customtkinter as ctk
 import pickle
 from subprogs.preferences.preferences import PreferencesApp
-class Init:
-    def __init__(self, app_instance, main_menu_instance):
-        self.app = app_instance
-        self.eleana = app_instance.eleana
-        self.grapher = app_instance.grapher
-        self.main_menu = main_menu_instance
 
+class Init:
+    def __init__(self, main_menu):
+        self.main_menu = main_menu
+        self.app = self.main_menu.app
+        self.eleana = self.app.eleana
+        self.grapher = self.app.grapher
+     
     def main_window(self):
         '''This method sets properties of the main window'''
 
         width = self.app.mainwindow.winfo_screenwidth()  # Get screen width
         height = self.app.mainwindow.winfo_screenheight()  # Get screen height
         self.app.mainwindow.geometry('800x800')
-        #app.mainwindow.geometry(str(width) + 'x' + str(height) + "+0+0")  # Set geometry to max
+        self.app.mainwindow.geometry(str(width) + 'x' + str(height) + "+0+0")  # Set geometry to max
 
         # Add icon to the top window bar form pixmaps folder
         top_window_icon = Path(self.eleana.paths['pixmaps'], "eleana_top_window.png")
