@@ -80,7 +80,7 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         self.parameters = working_parameters
         self.comment = ''
 class Spectrum_complex:
-    def __init__(self, name, x_axis: list, dta: list, dsc: dict):
+    def __init__(self, name, x_axis, dta: list, dsc: dict):
         self.parameters = {'title': '', 'unit_x': '', 'name_x': '', 'name_y': '', 'MwFreq': '', 'ModAmp': '',
                            'ModFreq': '',
                            'ConvTime': '', 'SweepTime': '', 'TimeConst': '', 'RESO': '', 'Power': '', 'PowerAtten': '',
@@ -106,7 +106,7 @@ class Spectrum_complex:
                 pass
         self.parameters = working_parameters
         self.y = y
-        self.x = x_axis
+        self.x = np.array(x_axis)
         self.name = name
         self.complex = True
         self.type = 'single 2D'
@@ -114,6 +114,8 @@ class Spectrum_complex:
         self.name_nr = ''
         self.groups = ['All']
         self.comment = ''
+
+
 def createFromElexsys(filename: str) -> object:
     elexsys_DTA = Path(filename[:-3]+'DTA')
     elexsys_DSC = Path(filename[:-3]+'DSC')

@@ -317,6 +317,7 @@ class MainMenu:
 
 
 class ContextMenu:
+    ''' Create shortcut menu triggered by right mouse button'''
     def __init__(self, app_instance):
         self.app = app_instance
         self.eleana = app_instance.eleana
@@ -364,24 +365,29 @@ class ContextMenu:
 
     def build_menu_first(self):
         '''This creates positions for FIRST context menu '''
+        self.context_menu_first.add_command(label="Rename", command=lambda: self.app.rename_data('first'))
+        self.context_menu_first.add_command(label="Delete", command=lambda: self.app.delete_data('first'))
+        self.context_menu_first.add_command(label="Duplicate", command=lambda: self.app.duplicate_data('first'))
         self.context_menu_first.add_command(label="Assign to group", command=self.app.first_to_group)
         self.context_menu_first.add_command(label="Convert stack to group", command=lambda: self.app.stack_to_group('first'))
-        self.context_menu_first.add_command(label="Rename", command=lambda: self.app.rename_data('first'))
         self.context_menu_first.add_command(label="Edit comment", command=lambda: self.app.edit_comment('first'))
         self.context_menu_first.add_command(label="Edit parameters", command = lambda: self.app.edit_parameters('first'))
 
     def build_menu_second(self):
         '''This creates positions for SECOND context menu '''
+        self.context_menu_second.add_command(label="Rename", command=lambda: self.app.rename_data('second'))
+        self.context_menu_second.add_command(label="Delete", command=lambda: self.app.delete_data('second'))
+        self.context_menu_second.add_command(label="Duplicate", command=lambda: self.app.duplicate_data('second'))
         self.context_menu_second.add_command(label="Assign to group", command=self.app.second_to_group)
         self.context_menu_second.add_command(label="Convert stack to group", command=lambda: self.app.stack_to_group('second'))
-        self.context_menu_second.add_command(label="Rename", command=lambda: self.app.rename_data('second'))
         self.context_menu_second.add_command(label="Edit comment", command=lambda: self.app.edit_comment('second'))
         self.context_menu_second.add_command(label="Edit parameters", command=lambda: self.app.edit_parameters('second'))
 
     def build_menu_result(self):
         '''This creates positions for SECOND context menu '''
         self.context_menu_result.add_command(label="Rename", command=lambda: self.app.rename_data('result'))
-        self.context_menu_result.add_command(label="Result 2")
+        self.context_menu_result.add_command(label="Delete", command=lambda: self.app.delete_data('result'))
+        self.context_menu_second.add_command(label="Duplicate", command=lambda: self.app.duplicate_data('result'))
 
     def show_context_menu_group(self, event):
         self.context_menu_group.tk_popup(event.x_root, event.y_root)

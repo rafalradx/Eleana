@@ -963,7 +963,7 @@ class MainApp:
         return name
 
     ''' *****************************************
-    *            METHODS FOR MAIN MENU          *
+    *            METHODS FOR MENU               *
     ******************************************'''
 
     def get_indexes_by_name(self, names = None) -> list:
@@ -977,18 +977,21 @@ class MainApp:
             indexes.append(index)
         return indexes
 
-    def delete_selected_data(self):
+    def delete_selected_data(self, index_to_delete=None):
         av_data = self.sel_first._values
         av_data.pop(0)
-        # Open dialog
-        self.select_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'],
+        # Open dialog if index_to_delete was not set
+        if not index_to_delete:
+            self.select_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'],
                                       items=av_data)
-        response = self.select_data.get()
-        if response == None:
-            return
-        # Get indexes of selected data to remove
-        indexes = self.get_indexes_by_name(response)
-        # Delete data with selected indexes
+            response = self.select_data.get()
+            if response == None:
+                return
+            # Get indexes of selected data to remove
+            indexes = self.get_indexes_by_name(response)
+        # Delete data with selected indexes or given by index_to_delete
+        else:
+            indexes = [index_to_delete]
         indexes.sort(reverse=True)
         for each in indexes:
             eleana.dataset.pop(each)
@@ -1003,6 +1006,53 @@ class MainApp:
         update.all_lists()
         update.gui_widgets()
         self.comparison_view()
+
+    def delete_data(self, which):
+        if which == 'result':
+            self.delete_sel_result()
+            return
+        index = self.eleana.selections[which]
+        if index < 0:
+            return
+        dialog = CTkMessagebox(title="Delete",
+                                    message=f"Do you want to delete data selected in {which}?",
+                                    icon="warning", option_1="No", option_2="Yes")
+        response = dialog.get()
+        if response == 'No':
+            return
+        self.delete_selected_data(index)
+
+    def duplicate_data(self, which):
+        index = self.eleana.selections[which]
+        if index < 0:
+            return
+        if which == 'result':
+            new_data = copy.deepcopy(self.eleana.results_dataset[index])
+        else:
+            new_data = copy.deepcopy(self.eleana.dataset[index])
+        dialog = SingleDialog(master = self, title = 'Enter', label = 'New name', text = new_data.name)
+        name = dialog.get()
+
+        if not name:
+            info = CTkMessagebox(title='', message='Name cannot be empty')
+            return
+        dataset = []
+        try:
+            if which == 'result':
+                for each in self.eleana.result_dataset:
+                    dataset.append(each.name)
+            else:
+                for each in self.eleana.result_dataset:
+                    dataset.append(each.name)
+        except:
+            pass
+        new_data.name = self.generate_name_suffix(name, dataset)
+        if which == 'result':
+            self.eleana.result_dataset.append(new_data)
+        else:
+            self.eleana.dataset.append(new_data)
+        update.dataset_list()
+        update.all_lists()
 
     def clear_results(self):
         quit_dialog = CTkMessagebox(title="Clear results",

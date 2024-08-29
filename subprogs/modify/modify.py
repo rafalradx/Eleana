@@ -107,7 +107,6 @@ class ModifyData:
         self.eleana.notify_on = True
     ''' STANDARD METHODS TO HANDLE WINDOW BEHAVIOR '''
     def data_changed(self):
-        print("Triggered by observer")
         # This is trigerred by the observer
         self.get_data()
         self.perform_calculations()

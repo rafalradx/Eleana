@@ -225,11 +225,10 @@ class Update:
 
         elif first.type == "stack 2D":
             self.app.firstStkFrame.grid(row=2, column=0)
-            self.app.f_stk.configure(values=first.parameters['stk_names'])
+            self.app.f_stk.configure(values=first.stk_names)
             entry_index = int(self.eleana.selections['f_stk'])
-            entry = first.parameters['stk_names'][entry_index]
+            entry = first.stk_names[entry_index]
             self.app.f_stk.set(value=entry)
-
         try:
             if first.complex and first_nr >= 0:
                 self.app.firstComplex.grid()
@@ -243,9 +242,9 @@ class Update:
 
         elif second.type == "stack 2D":
             self.app.secondStkFrame.grid(row=2, column=0)
-            self.app.s_stk.configure(values=second.parameters['stk_names'])
+            self.app.s_stk.configure(values=second.stk_names)
             entry_index = int(self.eleana.selections['s_stk'])
-            entry = second.parameters['stk_names'][entry_index]
+            entry = second.stk_names[entry_index]
             self.app.s_stk.set(value=entry)
         try:
             if second.complex and second_nr >= 0:
@@ -265,7 +264,7 @@ class Update:
 
         elif result.type == "stack 2D":
             self.app.resultStkFrame.grid(row=2, column=0)
-            self.app.r_stk.configure(values=result.parameters['stk_names'])
+            self.app.r_stk.configure(values=result.stk_names)
 
         if result.complex:
             self.app.resultComplex.grid()
