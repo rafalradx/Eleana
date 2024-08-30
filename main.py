@@ -43,10 +43,14 @@ from Menu import ContextMenu, MainMenu
 from Sounds import Sound
 from Error import Error
 from CommandProcessor import CommandProcessor
+from DataClasses import Stack
+
 
 # Import Eleana subprograms and windows
 # append.(['name of instance without self., 'Command to close']
 list_of_subprogs = []
+from normalize.Normalize import Normalize
+list_of_subprogs.append(['normalize', 'cancel'])
 from group_edit.add_group import Groupcreate
 list_of_subprogs.append(['group_create', 'cancel'])
 from group_edit.assign_to_group import Groupassign
@@ -445,11 +449,64 @@ class MainApp:
 
     def convert_group_to_stack(self, all = False):
         if all:
-            print("Convert whole group. To Do (426)")
-            quit()
+            # Convert whole data in the group to a stack
+            indexes = self.eleana.get_indexes_from_group()
         else:
-            print("Convert selected. To Do (428)")
-            quit()
+            # Ask to select
+            av_data = self.sel_first._values
+            av_data.pop(0)
+            selected_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'],
+                                      items=av_data)
+            response = selected_data.get()
+            if response == None:
+                return
+            indexes = [self.eleana.get_index_by_name(i) for i in response]
+        # Check if data are of the same type
+        template = self.eleana.dataset[indexes[0]]
+        new_stack = {}
+        stk_names = []
+        list_of_y = []
+        for i in indexes:
+            compared = self.eleana.dataset[i]
+            stk_name = str(i+1) + '_' + template.name
+            stk_names.append(stk_name)
+            y = compared.y
+            list_of_y.append(y)
+            parameters = template.parameters
+            comment = ''
+            if template.type != compared.type:
+                info = CTkMessagebox(title='Convert to a Stack', message='At least one of the data elements is of a different type (for example, 2D and 3D).')
+                return
+            if template.complex != compared.complex:
+                info = CTkMessagebox(title='Convert to a Stack', message='At least one of the data elements has a different type of numbers (for example, real and complex).')
+                return
+            if template.x.size != compared.x.size:
+                info = CTkMessagebox(title='Convert to a Stack', message='At least one of the data elements has a different number of points. You can convert the data to a stack only if all of them are the same size.')
+                return
+            if not np.array_equal(template.x, compared.x):
+                dialog = CTkMessagebox(title="Convert to Stack", message="The x-axes of the selected items are not identical. You may still proceed, but the differing axes will be replaced with the x-axis from the first item in the list.", icon="warning", option_1="Cancel", option_2="OK")
+                response = dialog.get()
+                if response == 'Cancel':
+                    return
+        # Now create a stack
+        name = self.eleana.selections['group'] + ':TO_STACK'
+        x = template.x
+        y = np.array(list_of_y)
+        new_stack = {'parameters':parameters,
+                'name':name,
+                'stk_names':stk_names,
+                'x':x,
+                'y':y,
+                'origin':'converted from group',
+                'type':'stack 2D',
+                'name_nr':'',
+                'comment':'',
+                'complex':template.complex,
+                'groups':'All',
+                }
+        created_stack = Stack(new_stack)
+        self.add_to_results(created_stack)
+
     def first_show(self):
         self.eleana.set_selections('f_dsp', bool(self.check_first_show.get()))
         selection = self.sel_first.get()
@@ -708,7 +765,9 @@ class MainApp:
             return
         index = self.eleana.get_index_by_name(current)
         spectrum = copy.deepcopy(self.eleana.dataset[index])
+        self.add_to_results(spectrum)
 
+    def add_to_results(self, spectrum):
         # Check the name if the same already exists in eleana.result_dataset
         list_of_results = []
         try:
@@ -962,10 +1021,6 @@ class MainApp:
             name = name + '_#' + str(last_number + 1)
         return name
 
-    ''' *****************************************
-    *            METHODS FOR MENU               *
-    ******************************************'''
-
     def get_indexes_by_name(self, names = None) -> list:
         if not names:
             return
@@ -976,6 +1031,14 @@ class MainApp:
             index = self.eleana.get_index_by_name(each)
             indexes.append(index)
         return indexes
+
+    ''' *****************************************
+    *            METHODS FOR MENU               *
+    ******************************************'''
+
+    def normalize(self):
+        ''' Perform normalization of the amplitutes'''
+        self.normalize = Normalize(self.mainwindow)
 
     def delete_selected_data(self, index_to_delete=None):
         av_data = self.sel_first._values

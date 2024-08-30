@@ -137,6 +137,24 @@ class Grapher(GraphPreferences):
         """ Update plot style """
         self.plt_style = new_style
         plt.style.use(self.plt_style)
+        # Reset pyplot
+        self.plt = plt
+        self.mplcursors = mplcursors
+        self.cursor = None
+
+        # Recreate canvas
+        self.fig = Figure(figsize=(8, 4), dpi=100)
+        self.ax = self.fig.add_subplot(111)
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.app.graphFrame)
+        self.canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+        self.canvas.draw()
+
+        # Recreate toolbar
+        self.toolbar = NavigationToolbar2Tk(self.canvas, self.app.graphFrame, pack_toolbar=False)
+        self.toolbar.update()
+        self.toolbar.grid(row=1, column=0, sticky="ew")
+
+        # Plot graph
         self.plot_graph()
 
     def clear_plot(self):

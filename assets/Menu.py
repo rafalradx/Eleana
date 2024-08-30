@@ -47,7 +47,7 @@ class MainMenu:
         # self.icon_static_plot = self.prepare_icon("static_plot.png")
         self.icon_export_first = self.prepare_icon("export_first.png")
         self.icon_export_group = self.prepare_icon("export_group.png")
-
+        self.icon_normalize = self.prepare_icon("normalize.png")
         self.icon_integrate_region = self.prepare_icon("x.png")
         self.icon_statistics = self.prepare_icon("x.png")
         self.icon_create_static_plot = self.prepare_icon("x.png")
@@ -206,6 +206,9 @@ class MainMenu:
         #self.main_menu.add_cascade(label="Modifications", menu=self.menu_modifications, image=self.icon_dropdown, compound="left")
         self.main_menu.add_cascade(label=" Modifications ", menu=self.menu_modifications)
 
+        # - Normalize amplitude
+        self.menu_modifications.add_command(label="Normalize amplitude", command=self.app.normalize,
+                                       image=self.icon_normalize, compound="left")
 
         ''' Menu EPR '''
         self.menu_EPR = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
@@ -313,8 +316,6 @@ class MainMenu:
             self.menu_showPlots.add_command(label=new_name_nr, command=lambda position=i: self.app.grapher.show_static_graph_window(position),
                                        image=self.icon_static_plot, compound="left")
             i += 1
-
-
 
 class ContextMenu:
     ''' Create shortcut menu triggered by right mouse button'''

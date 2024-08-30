@@ -17,6 +17,20 @@ class Single2D:
         self.name_nr = ''
         self.comment = data.get('comment', '')
 
+class Stack:
+    def __init__(self, data: dict):
+        self.parameters: dict = data['parameters']
+        self.groups: list = data['groups']
+        self.x: np.ndarray = np.array(data['x'])
+        self.y: np.ndarray = np.array(data['y'])
+        self.name: str = data['name']
+        self.complex = data.get('complex', False)
+        self.type = 'stack 2D'
+        self.origin = data.get('origin', '')
+        self.name_nr = ''
+        self.comment = data.get('comment', '')
+        self.stk_names = data['stk_names']
+
 class Spectrum_CWEPR:
     def __init__(self, name, x_axis: list, dta: list, dsc: dict, format="elexsys"):
         self.parameters = {'title': '', 'unit_x': 'G', 'name_x': 'Field', 'name_y': 'Intensity', 'MwFreq': '', 'ModAmp': '', 'ModFreq': '',

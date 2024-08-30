@@ -13,8 +13,6 @@ PROJECT_UI = PROJECT_PATH / "preferences.ui"
 
 class PreferencesApp:
     def __init__(self, app_instance):
-        #master, grapher, color_theme, appearance_mode):
-
         self.grapher = app_instance.grapher
         self.master = app_instance.mainwindow
         self.builder = builder = pygubu.Builder()

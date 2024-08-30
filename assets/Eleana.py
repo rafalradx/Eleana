@@ -107,13 +107,25 @@ class Eleana:
             if name == selected_value_text:
                 return i
             i += 1
+    def get_indexes_from_group(self):
+        ''' Return list of indexes in self.dataset
+            that belongs to the current group '''
+        indexes = []
+        group = self.selections['group']
+        if group == 'All':
+            for data in self.dataset:
+                index = self.get_index_by_name(data.name_nr)
+                indexes.append(index)
+        else:
+            indexes = self.assignmentToGroups[group]
+        return indexes
 
     def getDataFromSelection(self, first_second_or_results: str):
-        # This method returns X, reY, imY and boolean complex depending on values in eleana.selections
-        # Argument first_second_or_results is string 'first' for First selection
-        #                                            'second' for Second selection
-        #                                            'result' for Results selection
-
+        '''Returns X, reY, imY and boolean complex depending on values in self.selections
+           Argument first_second_or_results is string 'first' for First selection
+                                                      'second' for Second selection
+                                                      'result' for Results selection
+        '''
         selection = self.selections
         if first_second_or_results == 'first':
             index_main = selection['first']     # Get index from dataset
@@ -198,7 +210,8 @@ class Eleana:
         path_to_file = Path(Eleana.paths['tmp_dir'], filename)
         with open(path_to_file) as file:
             file_content = file.read()
-        return file_content  #
+        return file_content
+
 
 
 if __name__ == "__main__":
