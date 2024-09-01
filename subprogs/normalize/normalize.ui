@@ -113,9 +113,10 @@
                 </child>
                 <child>
                   <object class="customtkinter.CTkLabel" id="ctklabel2">
-                    <property name="state">normal</property>
-                    <property name="text" translatable="yes">NOTE: Normalization of the complex data 
-is performed by dividing each complex number by its magnitude</property>
+                    <property name="text" translatable="yes">NOTE: Normalization of complex data is performed by dividing each 
+complex number by its magnitude.
+For a stack of data, amplitudes will be normalized 
+relative to the maximum amplitude.</property>
                     <layout manager="grid">
                       <property name="column">0</property>
                       <property name="row">3</property>

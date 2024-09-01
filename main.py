@@ -85,6 +85,7 @@ class MainApp:
         self.eleana = eleana_instance
         self.notify = self.eleana.notify_on
         self.commandprocessor = command_processor
+        self.devel = DEVEL
 
         # START BUILDER
         self.builder = builder = pygubu.Builder()
@@ -322,6 +323,7 @@ class MainApp:
         new_group = group_list[index]
         self.sel_group.set(new_group)
         self.group_selected(new_group)
+
 
     def group_up_clicked(self):
         current_group = self.sel_group.get()
@@ -1038,7 +1040,7 @@ class MainApp:
 
     def normalize(self):
         ''' Perform normalization of the amplitutes'''
-        self.normalize = Normalize(self.mainwindow)
+        self.normalize = Normalize(self, which = 'first')
 
     def delete_selected_data(self, index_to_delete=None):
         av_data = self.sel_first._values

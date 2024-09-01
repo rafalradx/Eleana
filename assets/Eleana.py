@@ -4,6 +4,8 @@ import numpy as np
 from pathlib import Path
 import tempfile
 
+DEVEL = True
+
 class Eleana:
     # Main attributes associated with data gathered in the programe
     def __init__(self, version):
@@ -85,8 +87,12 @@ class Eleana:
         if variable == None or value == None:
             return
         self.selections[variable] = value
-        if self.notify_on and variable != 'result':
+        if variable == 'result' or variable == 'r_stk':
+            return
+        if self.notify_on:
             self.notify()
+            if DEVEL:
+                print('Eleana.py: Activate observer')
     # End of methods for observers --------------------
 
     def name_nr_to_index(self, selected_value_text):
