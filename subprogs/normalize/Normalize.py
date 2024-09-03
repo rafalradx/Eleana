@@ -9,31 +9,30 @@ from CTkSpinbox import CTkSpinbox
 from Observer import Observer
 
 class Normalize(NormalizeUI):
-    ''' --- COPY FROM HERE --- '''
+    ''' --- IN YOUR NEW COPY AND PASTE FROM HERE --- '''
     def __init__(self, application, which = 'first', batch_mode = False):
+            # Create references
         self.app = application
         self.master = self.app.mainwindow
         self.eleana = self.app.eleana
         self.grapher = self.app.grapher
         self.which = which
-        # Switch off the batch mode
+            # Create batch mode state
         self.batch = batch_mode
-        if not batch_mode:
+        # Do not build window if batch mode is true
+        if not self.batch:
             super().__init__(self.master)
-        # Create observer
+            # Create observer
         self.observer = Observer(self.eleana, self)
-        # Get data to modify
+            # Initialize data to modify
         self.get_data(start=True)
-
-        # Set current position in Results Dataset
+            # Set current position in Results Dataset
         self.result_index = len(self.eleana.results_dataset)
         self.eleana.notify_on = True
         self.configure_window()
 
     def get(self):
-        ''' Returns response to the main application after
-            close
-        '''
+        ''' Returns self.response to the main application after close '''
         if self.mainwindow.winfo_exists():
             self.master.wait_window(self.mainwindow)
         return self.response
@@ -41,6 +40,8 @@ class Normalize(NormalizeUI):
     def cancel(self, event=None):
         ''' Close the window without changes '''
         self.response = None
+        # Unregister observer
+        self.eleana.detach(self.observer)
         self.mainwindow.destroy()
 
     def get_data(self, start = False):
@@ -71,14 +72,14 @@ class Normalize(NormalizeUI):
         return True
 
     def ok_clicked(self, value):
-        ''' Trigger perform_calculation for the
+        ''' Triggers 'perform_calculation' for the
             current data selected in first or second
-            Name of this function must match the command in the button OK
+            Name of this function must match the command in the button "OK"
         '''
         self.perform_calculation()
 
     def process_group(self):
-        ''' Trigger perform_calculation for all
+        ''' Triggers 'perform_calculation' for all
             data in the current group.
             This should work without modifications
         '''
@@ -125,7 +126,6 @@ class Normalize(NormalizeUI):
         glob_max = np.max(max)
         print(glob_min)
         print(glob_max)
-
 
 if __name__ == "__main__":
     app = Normalize()

@@ -155,6 +155,7 @@ class MainApp:
         self.panedwindow4 = builder.get_object('panedwindow4', self.mainwindow)
         self.pane5 = builder.get_object('pane5', self.mainwindow)
         self.pane9 = builder.get_object('pane9', self.mainwindow)
+        #self.pane6 = builder.get_object('pane6', self.mainwindow)
 
         # Keyboard bindings
         self.mainwindow.bind("<Control-c>", self.copy_to_clipboard)
@@ -182,6 +183,7 @@ class MainApp:
         self.mainwindow.update_idletasks()
         self.panedwindow2.sashpos(0, 700)
         self.panedwindow4.sashpos(0, 300)
+        self.pane5.sashpos(0, 1000)
 
     def center_window(self, window, width, height):
         screen_width = window.winfo_screenwidth()

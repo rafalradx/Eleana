@@ -57,11 +57,11 @@ class ModifyData:
         # self.spinbox_y.config(validate='key', validatecommand=(self.master.register(self.validate_spinbox), '%P'))
         # self.spinbox_z.config(validate='key', validatecommand=(self.master.register(self.validate_spinbox), '%P'))
 
-        self.spinbox_x = CTkSpinbox(self.x_axisFrame, command=self.ok_clicked)
+        self.spinbox_x = CTkSpinbox(self.x_axisFrame, command=self.ok_clicked, wait_for=0.06)
         self.spinbox_x.grid(column = 0, row=3, sticky="nsew", padx=5, pady=5)
-        self.spinbox_y = CTkSpinbox(self.y_axisFrame, command=self.ok_clicked)
+        self.spinbox_y = CTkSpinbox(self.y_axisFrame, command=self.ok_clicked, wait_for=0.06)
         self.spinbox_y.grid(column=0, row=3, sticky="nsew", padx=5, pady=5)
-        self.spinbox_z = CTkSpinbox(self.z_axisFrame, command=self.ok_clicked)
+        self.spinbox_z = CTkSpinbox(self.z_axisFrame, command=self.ok_clicked, wait_for=0.06)
         self.spinbox_z.grid(column=0, row=3, sticky="nsew", padx=5, pady=5)
 
         # Set comboboxes to None
