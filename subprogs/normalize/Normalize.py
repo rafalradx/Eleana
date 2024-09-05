@@ -7,13 +7,13 @@ import numpy as np
 
 ''' For testing comment following imports 
     For use in application uncomment the following'''
-# from normalize.Normalizeui import NormalizeUI
-# from CTkSpinbox import CTkSpinbox
-# from Observer import Observer
+from normalize.Normalizeui import NormalizeUI
+from CTkSpinbox import CTkSpinbox
+from Observer import Observer
 
 ''' For testing uncomment the following imports 
     For use in application comment the following'''
-from Normalizeui import NormalizeUI
+# from Normalizeui import NormalizeUI
 
 class Normalize(NormalizeUI):
     ''' --- IN YOUR NEW COPY AND PASTE FROM HERE --- '''
@@ -88,7 +88,10 @@ class Normalize(NormalizeUI):
         self.result_index = self.eleana.selections['result']
         self.result_data = self.eleana.results_dataset[self.result_index]
         return True
-
+    def data_changed(self):
+        # This is trigerred by the observer
+        self.get_data()
+        self.perform_calculation()
     def ok_clicked(self, value):
         ''' Triggers 'perform_calculation' for the
             current data selected in first or second
@@ -135,44 +138,52 @@ class Normalize(NormalizeUI):
         ''' Method that calculates something in your subprogram
             This must be prepared for a single data
             But you must check if it works for
-            all possible data types
+            all possible data types.
+            normalize_to, y_data and/or x_data are required
+            only for testing the function
         '''
+        def _add_to_result(self, y_data=None, x_data=None):
+            if y_data:
+                self.original_data.y = y_data
+            if x_data:
+                self.original_data.x = x_data
+
         if not normalize_to:
             normalize_to = float(self.spinbox.get())
             y_data = self.original_data.y
             x_data = self.original_data.x
         ''' PUT YOUR CODE BELOW '''
+
         list_of_max = []
-        if y_data:
-            for data in y_data:
-                if data:
-                    min = np.min(data)
-                    max = np.max(data)
-                    delta = float(max - min)
-                    list_of_max.append(delta)
-                    amplitude = sorted(list_of_max, reverse=True)[0]
-                else:
+        list_of_processed_data = []
+        for data in y_data:
+            if data.size == 0:
+                amplitude = None
+            else:
+                if np.iscomplexobj(data):
+                    data = np.abs(data)
+                min = np.min(data)
+                max = np.max(data)
+                delta = float(max - min)
+                list_of_max.append(delta)
+                amplitude = sorted(list_of_max, reverse=True)[0]
+                if amplitude == 0:
                     amplitude = None
-                    continue
-        else:
-            amplitude = None
-        print(amplitude)
-        # min = np.min(y_data)
-        # max = np.max(y_data)
-        #
-        # glob_min = np.min(min)
-        # glob_max = np.max(max)
-        # print(glob_min)
-        # print(glob_max)
+            if amplitude:
+                y_data = y_data / amplitude
+            list_of_processed_data.append(y_data)
+        y_data = np.array(y_data)
+        _add_to_result(y_data)
+
 
 if __name__ == "__main__":
     subprogram = Normalize()
     # Test calculations
-    y_data = np.array([])
-    # y_data = np.array([
-    #                       [1,2,3],
-    #                       [7.1,61.2,81.6],
-    #                       [1,2,3]
-    #                       ])
+    # y_data = np.array([])
+    y_data = np.array([
+                          [1 + 4j,2 + 2j,3 + 8j],
+                          [7.1,61.2,81.6],
+                          [1,2,3]
+                          ])
     subprogram.perform_calculation(normalize_to = 5, y_data = y_data)
 
