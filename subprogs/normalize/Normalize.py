@@ -13,7 +13,7 @@ from Observer import Observer
 
 ''' For testing uncomment the following imports 
     For use in application comment the following'''
-# from Normalizeui import NormalizeUI
+#from Normalizeui import NormalizeUI
 
 class Normalize(NormalizeUI):
     ''' --- IN YOUR NEW COPY AND PASTE FROM HERE --- '''
@@ -92,6 +92,13 @@ class Normalize(NormalizeUI):
         # This is trigerred by the observer
         self.get_data()
         self.perform_calculation()
+
+    def update_result_data(self, y=None, x=None):
+        if y is not None:
+            self.result_data.re_y = y
+        if x is not None:
+            self.result_data.x = x
+
     def ok_clicked(self, value):
         ''' Triggers 'perform_calculation' for the
             current data selected in first or second
@@ -130,9 +137,6 @@ class Normalize(NormalizeUI):
                                   step_value=0.02, scroll_value=0.01, start_value=1)
         self.spinbox.grid(column=0, row=0, sticky='ew')
 
-    ''' """""""""""""""""""""""""""""""""""""""""""""
-                --- TO HERE --- 
-    """""""""""""""""""""""""""""""""""""""""""""""""'''
 
     def perform_calculation(self, normalize_to = None, y_data = None, x_data = None):
         ''' Method that calculates something in your subprogram
@@ -142,48 +146,65 @@ class Normalize(NormalizeUI):
             normalize_to, y_data and/or x_data are required
             only for testing the function
         '''
-        def _add_to_result(self, y_data=None, x_data=None):
-            if y_data:
-                self.original_data.y = y_data
-            if x_data:
-                self.original_data.x = x_data
 
         if not normalize_to:
             normalize_to = float(self.spinbox.get())
             y_data = self.original_data.y
             x_data = self.original_data.x
-        ''' PUT YOUR CODE BELOW '''
 
-        list_of_max = []
-        list_of_processed_data = []
-        for data in y_data:
-            if data.size == 0:
-                amplitude = None
-            else:
-                if np.iscomplexobj(data):
-                    data = np.abs(data)
-                min = np.min(data)
-                max = np.max(data)
-                delta = float(max - min)
-                list_of_max.append(delta)
-                amplitude = sorted(list_of_max, reverse=True)[0]
-                if amplitude == 0:
-                    amplitude = None
-            if amplitude:
-                y_data = y_data / amplitude
-            list_of_processed_data.append(y_data)
-        y_data = np.array(y_data)
-        _add_to_result(y_data)
+        # Process data in Y
+        if y_data is not None:
+            if y_data.shape[0] == 0:
+                # If np.array is empty - return
+                return
+            if len(y_data.shape) == 2:
+                ''' FOR STACK 2D '''
+                # Find global maximum amplitude
+                amplitudes = []
+                for data in y_data:
+                    amplitude = self.calc_amplitude(data)
+                    amplitudes.append(amplitude)
+                amplitude = sorted(amplitudes, reverse=True)[0]
+
+                # Normalize all spectra in y_data
+                processed_y = np.array([])
+                for data in y_data:
+                    single_y = data / amplitude * normalize_to
+                    single_y = np.array(single_y)
+                    processed_y = np.append(processed_y, single_y)
+
+            elif len(y_data.shape) == 1:
+                ''' FOR SINGLE DATA'''
+                amplitude = self.calc_amplitude(y_data)
+                single_y = y_data / amplitude * normalize_to
+                processed_y = np.array(single_y)
+        self.update_result_data(y = processed_y)
+
+    def calc_amplitude(self, y):
+        ''' This is function that performs calculation
+            on a single Y data (also for stack)
+            You must define your calculations here
+        '''
+        if np.iscomplexobj(y):
+            y = np.abs(y)
+        min = np.min(y)
+        max = np.max(y)
+        amplitude = float(max - min)
+        return amplitude
 
 
 if __name__ == "__main__":
     subprogram = Normalize()
     # Test calculations
-    # y_data = np.array([])
+    # y_data = np.array([
+    #                     [-5, 3, 5, 3 ,6 ,5 ],
+    #                     [-4, 3,-4, 3, 7, 2 ]
+    #                     ])
+
     y_data = np.array([
-                          [1 + 4j,2 + 2j,3 + 8j],
-                          [7.1,61.2,81.6],
-                          [1,2,3]
-                          ])
-    subprogram.perform_calculation(normalize_to = 5, y_data = y_data)
+                        [-5+1j, 3+1j, 5+1j, 3+1j, 6+2j, 5+1j],
+                        [-4+1j, 3+1j, -4+1j, 3+1, 7+1j, 2+1j]
+                    ])
+
+    subprogram.perform_calculation(normalize_to = 1, y_data = y_data)
 
