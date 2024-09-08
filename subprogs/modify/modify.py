@@ -140,8 +140,6 @@ class ModifyData:
         self.spinbox_z.scroll_value = current_step
         self.spinbox_z.step_value = current_step
 
-    #self.spinbox_y.config(increment=current_step)
-        #self.spinbox_z.config(increment=current_step)
 
     def set_spinbox_starting_value(self):
     # Set default values in spinboxes

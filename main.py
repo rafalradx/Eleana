@@ -554,12 +554,12 @@ class MainApp:
         self.grapher.plot_graph()
 
     def first_selected(self, selected_value_text):
-        #self.eleana.notify_on = True
         if selected_value_text == 'None':
             self.eleana.set_selections('first', -1)
             self.firstComplex.grid_remove()
             self.firstStkFrame.grid_remove()
             self.grapher.plot_graph()
+            return
         i = 0
         while i < len(self.eleana.dataset):
             name = self.eleana.dataset[i].name_nr
@@ -970,8 +970,13 @@ class MainApp:
         self.sel_result.set('None')
         self.grapher.plot_graph()
 
-    def first_to_result(self):
-        current = self.sel_first.get()
+    def first_to_result(self, name = None):
+        if name is not None:
+            current = name
+            skip_grapher = True
+        else:
+            current = self.sel_first.get()
+            skip_grapher = False
         if current == 'None':
             return
         index = self.eleana.get_index_by_name(current)
@@ -995,6 +1000,8 @@ class MainApp:
         position = list_of_results[-1]
         self.sel_result.set(position)
         self.result_selected(position)
+        if skip_grapher:
+            return
         self.grapher.plot_graph()
 
     def generate_name_suffix(self, name, list_of_results):
@@ -1121,11 +1128,15 @@ class MainApp:
         update.dataset_list()
         update.all_lists()
 
-    def clear_results(self):
-        quit_dialog = CTkMessagebox(title="Clear results",
+    def clear_results(self, skip_question = False):
+        if skip_question:
+            response = "Yes"
+        else:
+            quit_dialog = CTkMessagebox(title="Clear results",
                                     message="Are you sure you want to clear the entire dataset in the results?",
                                     icon="warning", option_1="No", option_2="Yes")
-        response = quit_dialog.get()
+            response = quit_dialog.get()
+
         if response == "Yes":
             self.eleana.results_dataset = []
             self.eleana.selections['result'] = -1

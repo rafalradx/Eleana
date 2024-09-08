@@ -56,14 +56,13 @@ class Spectrum_CWEPR:
                 pass
         self.parameters = working_par
         self.x = np.array(x_axis)
-        self.re_y = np.array(dta)
+        self.y = np.array(dta)
         self.comment = ''
 
 class Spectra_CWEPR_stack(Spectrum_CWEPR):
     def __init__(self, name, x_axis: list, dta: list, dsc: dict, ygf, format='elexsys'):
         super().__init__(name, x_axis, dta, dsc)
         working_parameters = self.parameters
-        del self.re_y
         fill_missing_keys = ['name_z', 'unit_z', 'name_x', 'unit_x', 'name_y', 'unit_y']
         for key in fill_missing_keys:
             try:

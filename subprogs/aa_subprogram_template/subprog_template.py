@@ -7,15 +7,16 @@ import numpy as np
 
 ''' For testing comment following imports 
     For use in application uncomment the following'''
-from normalize.Normalizeui import NormalizeUI
-from CTkSpinbox import CTkSpinbox
 from Observer import Observer
+from normalize.Normalizeui import THE_UI  # Here replace THE_UI with the class containing pygubu interface
+from CTkSpinbox import CTkSpinbox         # If you use spinbox then leave this import
+
 
 ''' For testing uncomment the following imports 
     For use in application comment the following'''
-#from Normalizeui import NormalizeUI
+#from Normalizeui import THE_UI
 
-class Normalize(NormalizeUI):
+class Normalize(THE_UI):
     ''' THIS IS STANDARD PART THAT SHOULD BE COPIED WITHOUT MODIFICATIONS '''
     def __init__(self, app  = None, which = 'first', batch_mode = False):
         if app:
