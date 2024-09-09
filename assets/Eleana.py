@@ -65,6 +65,12 @@ class Eleana:
         self._observers = []
         self.notify_on = False
 
+        # Define ranges for setting color span
+        self.color_span = {'color': 'gray',
+                           'alfa': 0.5,
+                           'ranges': []
+                           }
+
     ''' ***************************** 
      *         OBSERVER METHODS      *
      ******************************'''

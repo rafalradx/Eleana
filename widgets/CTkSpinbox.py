@@ -133,7 +133,7 @@ class CTkSpinbox(ctk.CTkFrame):
     def validate_entry(self, new_value):
         '''Validates the entry field to allow only floats.'''
         if new_value == "":
-            return True
+            return False
         try:
             float(new_value)
             self.manual_input = True

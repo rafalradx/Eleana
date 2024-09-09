@@ -809,6 +809,7 @@ class MainApp:
             self.resultComplex.grid_remove()
             self.resultStkFrame.grid_remove()
             self.grapher.plot_graph()
+            return
         i = 0
         while i < len(self.eleana.results_dataset):
             name = self.eleana.results_dataset[i].name

@@ -397,12 +397,28 @@ class Grapher(GraphPreferences):
         if self.inverted_x_axis:
             self.ax.invert_xaxis()
 
+        # Draw color span
+        self.set_color_span()
         # Draw canvas
         self.canvas.draw()
 
         # Connect changes in scales due to ZOOM or MOVE
         self.ax.callbacks.connect('ylim_changed', self.on_ylim_changed)
         self.ax.callbacks.connect('xlim_changed', self.on_xlim_changed)
+
+    def set_color_span(self):
+        ''' Prints the ranges selected on graph according to defined
+            selections in self.eleana.color_span
+        '''
+        ranges = self.eleana.color_span['ranges']
+        alfa = self.eleana.color_span['alfa']
+        color = self.eleana.color_span['color']
+        if ranges:
+            for range in ranges:
+                min = range[0]
+                max = range[1]
+                self.ax.axvspan(min, max, alfa=alfa, color=color)
+
 
     '''**********************************
     *                                   *
