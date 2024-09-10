@@ -33,7 +33,8 @@ class GraphPreferences:
                         {'label': 'Selection of points', 'hov': False, 'annot':True, 'a_txt': False, 'multip':True, 'store': True},
                         {'label': 'Numbered selections', 'hov':False, 'annot':True, 'a_txt': True, 'multip':True, 'store': True, 'nr': True},
                         {'label': 'Free select'},
-                        {'label': 'Crosshair', 'hov':True, 'a_txt':True, 'annot':True, 'multip':False, 'store': False}
+                        {'label': 'Crosshair', 'hov':True, 'a_txt':True, 'annot':True, 'multip':False, 'store': False},
+                        {'label': 'Range select', 'hov':False, 'annot':True, 'a_txt': True, 'multip':True, 'store': True, 'nr': True}
                             ]
         # Scale settings
         self.inverted_x_axis = False
@@ -266,7 +267,6 @@ class Grapher(GraphPreferences):
     def plot_graph(self):
         ''' This method plots the basic working plot with First,Second,Result'''
         self.ax.clear()
-
         # Add first
         data = self.data_for_plot('first')
         # If indexed is True replace X values with consecutive points
@@ -398,7 +398,7 @@ class Grapher(GraphPreferences):
             self.ax.invert_xaxis()
 
         # Draw color span
-        self.set_color_span()
+        self.show_color_span()
         # Draw canvas
         self.canvas.draw()
 
@@ -406,18 +406,18 @@ class Grapher(GraphPreferences):
         self.ax.callbacks.connect('ylim_changed', self.on_ylim_changed)
         self.ax.callbacks.connect('xlim_changed', self.on_xlim_changed)
 
-    def set_color_span(self):
+    def show_color_span(self):
         ''' Prints the ranges selected on graph according to defined
             selections in self.eleana.color_span
         '''
         ranges = self.eleana.color_span['ranges']
-        alfa = self.eleana.color_span['alfa']
+        alpha = self.eleana.color_span['alpha']
         color = self.eleana.color_span['color']
         if ranges:
             for range in ranges:
                 min = range[0]
                 max = range[1]
-                self.ax.axvspan(min, max, alfa=alfa, color=color)
+                self.ax.axvspan(min, max, alpha=alpha, color=color)
 
 
     '''**********************************
@@ -448,8 +448,15 @@ class Grapher(GraphPreferences):
     def cursor_on_off(self):
         def _show_annotation_list(self):
             self.app.annotationsFrame.grid()
+            self.app.annotationsFrame.grid_columnconfigure(0, weight=1)  # Kolumna 0
+            self.app.annotationsFrame.grid_rowconfigure(0, weight=1)  # Wiersz 0
             self.annotationlist = CTkListbox(self.app.annotationsFrame, command=self.updateAnnotationList, multiple_selection=True, height=300)
             self.annotationlist.grid(column=0, row=0, sticky="nsew")
+            self.app.infoframe.grid()
+            self.app.infoframe.grid_columnconfigure(0, weight=1)
+            self.app.infoframe.grid_rowconfigure(0, weight=1)
+            self.app.info.grid()
+
         self.free_move_binding_id = None
         self.click_binding_id = None
         crs_mode = self.current_cursor_mode['label']
@@ -467,6 +474,7 @@ class Grapher(GraphPreferences):
                 self.cursor.events["add"].disconnect()
                 self.cursor = None
             self.app.annotationsFrame.grid_remove()
+            self.app.infoframe.grid_remove()
         elif index > 0 and index < 5:
             # Switch on the mplcursors
             self.app.btn_clear_cursors.grid()
@@ -476,6 +484,8 @@ class Grapher(GraphPreferences):
                                                  hover=self.current_cursor_mode['hov'])
             self.cursor.connect("add", self.annotation_create)
             self.cursor.connect("remove", self.annotation_removed)
+            self.app.info.configure(text='LEFT CLICK - select point\nRIGHT CLICK - delete selected point')
+
         elif index == 5:
             # Free select
             self.app.btn_clear_cursors.grid()
@@ -484,10 +494,20 @@ class Grapher(GraphPreferences):
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
         elif index == 6:
             # Crosshair
+            self.app.btn_clear_cursors.grid()
             _show_annotation_list(self)
             self.cursor = self.mplcursors.cursor(self.ax, multiple=False, hover=True)
             self.cursor.connect("add", self.mplcursor_crosshair)
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
+        elif index == 7:
+            # Range select
+            self.app.btn_clear_cursors.grid()
+            _show_annotation_list(self)
+            self.cursor = self.mplcursors.cursor(self.ax, multiple=False, hover=True)
+            self.cursor.connect("add", self.mplcursor_crosshair)
+            self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.range_clicked)
+            self.app.info.configure(text='LEFT CLICK - select the beginning of the range\nSECOND LEFT CLICK - select the end of the range\nRIGHT CLICK INSIDE THE RANGE - delete the range under the cursor')
+
         else:
             if hasattr(self.cursor, "events"):
                 # Switch off mplcursor
@@ -537,6 +557,53 @@ class Grapher(GraphPreferences):
             self.canvas.draw()
         else:
             return
+    def range_clicked(self, sel):
+        x = float(sel.xdata)
+        y = float(sel.ydata)
+        if sel.button == 1:
+            # Add point
+            if self.eleana.color_span['status'] == 0:
+                # Define first point in the range
+                self.eleana.color_span['start'] = x
+                self.eleana.color_span['status'] = 1
+            elif self.eleana.color_span['status'] == 1:
+                # Define second point and add range to the 'ranges' and merge if necessary
+                self.eleana.color_span['end'] = x
+                x1 = copy.copy(self.eleana.color_span['start'])
+                x2 = copy.copy(self.eleana.color_span['end'])
+                range = [x1, x2]
+                range = sorted(range)
+                self.eleana.color_span['ranges'].append(range)
+                self.eleana.color_span['status'] = 0
+
+                # Merge ranges if necessary
+                ranges = self.eleana.color_span['ranges']
+                ranges.sort(key=lambda x: x[0])
+                merged_ranges = [ranges[0]]
+                for current in ranges[1:]:
+                    last_merged = merged_ranges[-1]
+                    if current[0] <= last_merged[1]:
+                        merged_ranges[-1] = [last_merged[0], max(last_merged[1], current[1])]
+                    else:
+                        merged_ranges.append(current)
+                self.eleana.color_span['ranges'] = merged_ranges
+        elif sel.button == 3:
+            # Remove range
+            if self.eleana.color_span['ranges'] is not None:
+                self.eleana.color_span['status'] = 0
+                ranges = self.eleana.color_span['ranges']
+                i = 0
+                while i < len(ranges):
+                    range = self.eleana.color_span['ranges'][i]
+                    if (range[0] >= x and range[1] <= x) or (range[0] <= x and range[1] >= x):
+                        del self.eleana.color_span['ranges'][i]
+                        break
+                    i+=1
+        i = 0
+        while i < len(self.eleana.color_span['ranges']):
+            self.annotationlist.insert(i, self.eleana.color_span['ranges'][i])
+            i += 1
+        self.plot_graph()
 
     def annotation_create(self, sel):
         ''' This creates annotations on the graph and add selected

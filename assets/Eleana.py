@@ -66,10 +66,18 @@ class Eleana:
         self.notify_on = False
 
         # Define ranges for setting color span
+        #       color - defines the color of the selection
+        #       alpha - defines transparency level
+        #       ranges - contain min and max of selected ranges
+        #       status - is the current clicking operations: 0 - wait for first click
+        #                                                    1 - first X point was clicked
+        #
         self.color_span = {'color': 'gray',
-                           'alfa': 0.5,
-                           'ranges': []
-                           }
+                           'alpha': 0.5,
+                           'ranges': [],
+                           'status':0,
+                           'start':0,
+                           'end':0}
 
     ''' ***************************** 
      *         OBSERVER METHODS      *

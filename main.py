@@ -141,6 +141,9 @@ class MainApp:
         self.sel_cursor_mode = builder.get_object('sel_cursor_mode', self.mainwindow)
         self.check_invert_x = builder.get_object('check_invert_x', self.mainwindow)
         self.btn_clear_cursors = builder.get_object("btn_clear_cursors", self.mainwindow)
+        self.info = builder.get_object('info', self.mainwindow)
+        self.infoframe = builder.get_object('infoframe', self.mainwindow)
+        self.infoframe.grid_remove()
 
         # Command line
         self.command_line = builder.get_object('command_line', self.mainwindow)
