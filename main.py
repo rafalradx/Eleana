@@ -1482,7 +1482,7 @@ class MainApp:
         self.grapher.clear_all_annotations(True)
         self.grapher.current_cursor_mode['label'] = value
         self.grapher.plot_graph()
-
+        self.grapher.cursor_on_off()
     '''***********************************************
     *           METHODS FOR CONTEXT MENU             *
     ***********************************************'''

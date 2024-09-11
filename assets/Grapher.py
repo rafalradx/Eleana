@@ -376,7 +376,9 @@ class Grapher(GraphPreferences):
         # Draw Graph
         self.draw()
         # Create cursor
-        self.cursor_on_off()
+        #if not keep_annotation_list:
+        #    pass
+        #    self.cursor_on_off()
         # Activate the observer
         self.eleana.notify_on = True
 
@@ -473,6 +475,7 @@ class Grapher(GraphPreferences):
             if hasattr(self.cursor, "events"):
                 self.cursor.events["add"].disconnect()
                 self.cursor = None
+                self.cursor_binding_id = None
             self.app.annotationsFrame.grid_remove()
             self.app.infoframe.grid_remove()
         elif index > 0 and index < 5:
@@ -501,13 +504,14 @@ class Grapher(GraphPreferences):
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
         elif index == 7:
             # Range select
-            self.app.btn_clear_cursors.grid()
+            self.app.btn_clear_cursors.grid_remove()
             _show_annotation_list(self)
-            self.cursor = self.mplcursors.cursor(self.ax, multiple=False, hover=True)
-            self.cursor.connect("add", self.mplcursor_crosshair)
+            #self.cursor = self.mplcursors.cursor(self.ax, multiple=False, hover=True)
+            #self.cursor.connect("add", self.mplcursor_crosshair)
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.range_clicked)
-            self.app.info.configure(text='LEFT CLICK - select the beginning of the range\nSECOND LEFT CLICK - select the end of the range\nRIGHT CLICK INSIDE THE RANGE - delete the range under the cursor')
-
+            self.app.info.configure(text='  LEFT CLICK - select the beginning \n  of the range\n  SECOND LEFT CLICK - select the end of the range\n  RIGHT CLICK INSIDE THE RANGE - delete \n  the range under the cursor')
+            self.eleana.color_span['ranges'] = []
+            self.eleana.color_span['status'] = 0
         else:
             if hasattr(self.cursor, "events"):
                 # Switch off mplcursor
@@ -557,10 +561,42 @@ class Grapher(GraphPreferences):
             self.canvas.draw()
         else:
             return
+
     def range_clicked(self, sel):
+        ''' Create range entry in self.eleana.color_span to generate
+            area between clicked positions.
+        '''
+
+        def exclude_range(excluded_range):
+            tab = self.eleana.color_span['ranges']
+            zkr = excluded_range
+            result = []
+            zkr_start, zkr_end = zkr
+            for start, end in tab:
+                # Przypadek 1: Przedział całkowicie poza zakresem zkr, dodajemy bez zmian
+                if end < zkr_start or start > zkr_end:
+                    result.append([start, end])
+                # Przypadek 2: Przedział całkowicie zawarty w zkr, pomijamy go
+                elif start >= zkr_start and end <= zkr_end:
+                    continue
+                # Przypadek 3: Zkr przecina początek przedziału
+                elif start < zkr_start and end > zkr_start and end <= zkr_end:
+                    result.append([start, zkr_start])
+                # Przypadek 4: Zkr przecina koniec przedziału
+                elif start >= zkr_start and start < zkr_end and end > zkr_end:
+                    result.append([zkr_end, end])
+                # Przypadek 5: Zkr przecina środek przedziału, dzielimy go na dwa
+                elif start < zkr_start and end > zkr_end:
+                    result.append([start, zkr_start])
+                    result.append([zkr_end, end])
+            return result
+
+
+        if self.app.sel_cursor_mode.get() != 'Range select':
+            return
         x = float(sel.xdata)
         y = float(sel.ydata)
-        if sel.button == 1:
+        if sel.button == 1: # Left button
             # Add point
             if self.eleana.color_span['status'] == 0:
                 # Define first point in the range
@@ -575,7 +611,6 @@ class Grapher(GraphPreferences):
                 range = sorted(range)
                 self.eleana.color_span['ranges'].append(range)
                 self.eleana.color_span['status'] = 0
-
                 # Merge ranges if necessary
                 ranges = self.eleana.color_span['ranges']
                 ranges.sort(key=lambda x: x[0])
@@ -587,7 +622,8 @@ class Grapher(GraphPreferences):
                     else:
                         merged_ranges.append(current)
                 self.eleana.color_span['ranges'] = merged_ranges
-        elif sel.button == 3:
+                self.updateAnnotationList()
+        elif sel.button == 3: # Right button
             # Remove range
             if self.eleana.color_span['ranges'] is not None:
                 self.eleana.color_span['status'] = 0
@@ -599,10 +635,24 @@ class Grapher(GraphPreferences):
                         del self.eleana.color_span['ranges'][i]
                         break
                     i+=1
-        i = 0
-        while i < len(self.eleana.color_span['ranges']):
-            self.annotationlist.insert(i, self.eleana.color_span['ranges'][i])
-            i += 1
+                self.updateAnnotationList()
+        # elif sel.button == 2: # Wheel button
+        #     # Add point
+        #     if self.eleana.color_span['status'] == 0:
+        #         print('Add first rmove point')
+        #         # Define first point in the range
+        #         self.eleana.color_span['start'] = x
+        #         self.eleana.color_span['status'] = 1
+        #     else:
+        #         min = self.eleana.color_span['start']
+        #         max = x
+        #         range = [min,max]
+        #         excluded_range = sorted(range)
+        #         # Exclude range
+        #         ranges = exclude_range(excluded_range)
+        #         self.eleana.color_span['ranges'] = ranges
+        #         self.eleana.color_span['status'] = 0
+        #         self.updateAnnotationList()
         self.plot_graph()
 
     def annotation_create(self, sel):
@@ -646,6 +696,7 @@ class Grapher(GraphPreferences):
 
     def clear_all_annotations(self, skip=None):
         self.cursor_annotations = []
+        self.eleana.color_span['ranges'] = []
         try:
             self.clearAnnotationList()
         except:
@@ -667,21 +718,35 @@ class Grapher(GraphPreferences):
     def updateAnnotationList(self, action=None):
         self.clearAnnotationList()
         list_of_annotations = []
-        for each in self.cursor_annotations:
-            nr = each['nr']
-            curve = each['curve']
-            point_x = each['point'][0]
-            point_y = each['point'][1]
-            if nr < 10:
-                nr = '#0' + str(nr)
-            else:
-                nr = '#' + str(nr)
-            entry = nr + ' | ' + str(curve) + ' (' + str(round(point_x,2)) + ', ' + str(round(point_y, 2)) + ')'
-            list_of_annotations.append(entry)
+        if self.app.sel_cursor_mode.get() != 'Range select':
+            for each in self.cursor_annotations:
+                nr = each['nr']
+                curve = each['curve']
+                point_x = each['point'][0]
+                point_y = each['point'][1]
+                if nr < 10:
+                    nr = '#0' + str(nr)
+                else:
+                    nr = '#' + str(nr)
+                entry = nr + ' | ' + str(curve) + ' (' + str(round(point_x,2)) + ', ' + str(round(point_y, 2)) + ')'
+                list_of_annotations.append(entry)
+        else:
+            i = 0
+            for each in self.eleana.color_span['ranges']:
+                if i < 10:
+                    nr = '#0' + str(i)
+                else:
+                    nr = '#' + str(i)
+                min = str(each[0])
+                max = str(each[0])
+                entry = f"{nr}:  [{min} <---> {max}]"
+                list_of_annotations.append(entry)
+                i+=1
         i = 0
         while i < len(list_of_annotations):
             self.annotationlist.insert(i, list_of_annotations[i])
             i += 1
+
     def indexCurveForAnnot(self, curve):
         if self.app.sel_cursor_mode.get() == "Free select":
             return

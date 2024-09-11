@@ -73,7 +73,7 @@ class Eleana:
         #                                                    1 - first X point was clicked
         #
         self.color_span = {'color': 'gray',
-                           'alpha': 0.5,
+                           'alpha': 0.2,
                            'ranges': [],
                            'status':0,
                            'start':0,
