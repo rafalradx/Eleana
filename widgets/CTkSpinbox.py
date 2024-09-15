@@ -1,7 +1,17 @@
-
-
+import sys
+import io
 import customtkinter as ctk
+import tkinter as tk
 import threading
+
+class SilentStdErr(io.TextIOBase):
+    def write(self, message):
+        # Ignore all messages
+        pass
+
+    def flush(self):
+        pass
+
 
 class CTkSpinbox(ctk.CTkFrame):
     def __init__(self,
@@ -78,7 +88,7 @@ class CTkSpinbox(ctk.CTkFrame):
 
         # decrement button
         self.decrement = ctk.CTkButton(self,
-                                       text='-',
+                                       text='▼',
                                        font=self.font,
                                        text_color=self.text_color,
                                        fg_color=self.button_color,
@@ -93,7 +103,7 @@ class CTkSpinbox(ctk.CTkFrame):
 
         # increment button
         self.increment = ctk.CTkButton(self,
-                                       text='+',
+                                       text='▲',
                                        font=self.font,
                                        text_color=self.text_color,
                                        fg_color=self.button_color,
@@ -133,7 +143,8 @@ class CTkSpinbox(ctk.CTkFrame):
     def validate_entry(self, new_value):
         '''Validates the entry field to allow only floats.'''
         if new_value == "":
-            return False
+            self.counter_var.set(0)
+            return True
         try:
             float(new_value)
             self.manual_input = True

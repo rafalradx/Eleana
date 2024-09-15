@@ -1,20 +1,22 @@
 #!/usr/bin/python3
-import pathlib
-import tkinter as tk
-import pygubu
+
+''' For testing the subprog set this True
+    For use in Main App set this False
+'''
+TEST = False
+# ---------------
+if not TEST:
+    from normalize.Normalizeui import NormalizeUI
+    from CTkSpinbox import CTkSpinbox
+    from Observer import Observer
+else:
+    from Normalizeui import NormalizeUI
+
+# Import What you need
 import copy
 import numpy as np
 
-''' For testing comment following imports 
-    For use in application uncomment the following'''
-from normalize.Normalizeui import NormalizeUI
-from CTkSpinbox import CTkSpinbox
-from Observer import Observer
-
-''' For testing uncomment the following imports 
-    For use in application comment the following'''
-#from Normalizeui import NormalizeUI
-
+# Your Class
 class Normalize(NormalizeUI):
     ''' THIS IS STANDARD PART THAT SHOULD BE COPIED WITHOUT MODIFICATIONS '''
     def __init__(self, app  = None, which = 'first', batch_mode = False):
@@ -46,13 +48,15 @@ class Normalize(NormalizeUI):
             self.get_data(start=True)
             # Set current position in Results Dataset
             self.result_index = len(self.eleana.results_dataset)
+    ''' END OF STANDARD PART '''
 
     def configure_window(self):
         # Configure Window
-        self.mainwindow.title('Normalize amplitude')
-        self.mainwindow.attributes('-topmost', True)
+        self.mainwindow.title('Normalize amplitude')   # Title of the Window Bar
+        self.mainwindow.attributes('-topmost', True)   # True - always on top
 
-        # Replace tk Spinbox with CTkSpinbox
+        # The custom modification of the window
+        # HERE: Replace tk Spinbox with CTkSpinbox
         self.spinboxFrame = self.builder.get_object('spinboxFrame', self.mainwindow)
         self.spinbox = self.builder.get_object('spinbox', self.mainwindow)
         self.spinbox.grid_remove()
@@ -60,9 +64,9 @@ class Normalize(NormalizeUI):
                                   step_value=0.02, scroll_value=0.01, start_value=1)
         self.spinbox.grid(column=0, row=0, sticky='ew')
 
-
     def perform_calculation(self, normalize_to = None, y_data = None, x_data = None):
-        ''' Method that calculates something in your subprogram
+        ''' MODIFY THIS ACCORDING TO WHAT YOU WANT TO CALCULATE
+            Method that calculates something in your subprogram
             This must be prepared for a single data
             But you must check if it works for
             all possible data types.
@@ -110,23 +114,25 @@ class Normalize(NormalizeUI):
         '''
         if np.iscomplexobj(y):
             y = np.abs(y)
-        min = np.min(y)
-        max = np.max(y)
-        amplitude = float(max - min)
+        min_ = np.min(y)
+        max_ = np.max(y)
+        amplitude = float(max_ - min_)
         return amplitude
 
-    # -----------------------------------------------------------
-    # -----------------------------------------------------------
-    # -----------------------------------------------------------
-    # -----------------------------------------------------------
-    # -----------------------------------------------------------
+
+
+
+
+
+
+    # -----------------------------------------------------
+    # -----------------------------------------------------
     def get(self):
         ''' Returns self.response to the main application after close '''
         ''' COPY THIS FUNCTION AS IT IS '''
         if self.mainwindow.winfo_exists():
             self.master.wait_window(self.mainwindow)
         return self.response
-
     def cancel(self, event=None):
         ''' Close the window without changes '''
         ''' COPY THIS FUNCTION AS IT IS '''
@@ -134,7 +140,6 @@ class Normalize(NormalizeUI):
         # Unregister observer
         self.eleana.detach(self.observer)
         self.mainwindow.destroy()
-
     def get_data(self, start = False):
         ''' Makes a copy of the selected data
             and stores it in self.original_data.
@@ -163,24 +168,31 @@ class Normalize(NormalizeUI):
         self.result_data = self.eleana.results_dataset[self.result_index]
         if start:
             self.perform_calculation()
-
     def data_changed(self):
         ''' Activate getting new data when selection changed'''
         ''' COPY THIS FUNCTION AS IT IS '''
         # This is trigerred by the observer
         self.get_data()
         self.perform_calculation()
-
     def update_result_data(self, y=None, x=None):
         ''' Put the modified data from y and x
             into result_dataset and replot
         '''
         ''' COPY THIS FUNCTION AS IT IS '''
         if y is not None:
-            self.result_data.y = y
+            if not TEST:
+                self.result_data.y = y
+            else:
+                print('Result Y:')
+                print(y)
         if x is not None:
-            self.result_data.x = x
-        self.grapher.plot_graph()
+            if not TEST:
+                self.result_data.x = x
+            else:
+                print('Result X:')
+                print(x)
+        if not TEST:
+            self.grapher.plot_graph()
 
     def ok_clicked(self, value = None):
         ''' Triggers 'perform_calculation' for the
@@ -189,7 +201,6 @@ class Normalize(NormalizeUI):
         '''
         ''' COPY THIS FUNCTION AS IT IS '''
         self.perform_calculation()
-
     def process_group(self):
         ''' Triggers 'perform_calculation' for all
             data in the current group.
@@ -198,7 +209,6 @@ class Normalize(NormalizeUI):
         ''' COPY THIS FUNCTION AS IT IS '''
         self.app.clear_results(skip_question=True)
         self.mainwindow.config(cursor='watch')
-
         spectra = copy.copy(self.app.sel_first._values)
         current_first_sel = self.eleana.selections['first']
         del spectra[0]
@@ -211,22 +221,19 @@ class Normalize(NormalizeUI):
             self.perform_calculation()
             i+=1
         self.mainwindow.config(cursor='')
+    # -----------------------------------------------------
+    # -----------------------------------------------------
 
 
-    # -----------------------------------------------------
-    # -----------------------------------------------------
-    # -----------------------------------------------------
-    # -----------------------------------------------------
-    # -----------------------------------------------------
+
+
+
+
+
 
 if __name__ == "__main__":
-    ''' Use this for testing'''
+    ''' DEFINE HERE YOUR TESTING '''
     subprogram = Normalize()
-    # Test calculations
-    # y_data = np.array([
-    #                     [-5, 3, 5, 3 ,6 ,5 ],
-    #                     [-4, 3,-4, 3, 7, 2 ]
-    #                     ])
 
     y_data = np.array([
                         [-5+1j, 3+1j, 5+1j, 3+1j, 6+2j, 5+1j],

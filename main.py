@@ -1,10 +1,16 @@
+import sys
+# BASIC CONFIGURATION
+ELEANA_VERSION = 1              # Set the Eleana version. This will be stored in self.eleana.version
+INTERPRETER = sys.executable    # Defines python version
+DEVEL = True                    # For final product set to False - no errors will be displayed or print commands
+                                # For development set to True. This is stored in self.eleana.devel_mode
+
 # Import basic modules and add ./modules to sys.path
 from pathlib import Path
-import sys
 import copy
 import io
 import re
-
+import os
 # Set paths for assets, modules, subprogs and widgets
 PROJECT_PATH = Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "Eleana_interface.ui"
@@ -13,10 +19,6 @@ ASSETS = PROJECT_PATH / "assets"
 SUBPROGS = PROJECT_PATH / "subprogs"
 WIDGETS = PROJECT_PATH / "widgets"
 PIXMAPS = PROJECT_PATH / "pixmaps"
-
-ELEANA_VERSION = 1
-INTERPRETER = sys.executable
-DEVEL = True
 
 sys.path.insert(0, str(MODULES))
 sys.path.insert(0, str(ASSETS))
@@ -45,10 +47,12 @@ from Error import Error
 from CommandProcessor import CommandProcessor
 from DataClasses import Stack
 
-
 # Import Eleana subprograms and windows
 # append.(['name of instance without self., 'Command to close']
+
 list_of_subprogs = []
+from integrate_region.IntegrateRegion import IntegrateRegion
+list_of_subprogs.append(['integrate_region', 'cancel'])
 from normalize.Normalize import Normalize
 list_of_subprogs.append(['normalize', 'cancel'])
 from group_edit.add_group import Groupcreate
@@ -1051,8 +1055,17 @@ class MainApp:
     *            METHODS FOR MENU               *
     ******************************************'''
 
+    # --------------------------------------------
+    # MENU: Analysis
+    # --------------------------------------------
+    def integrate_region(self):
+        ''' Integration of the selected range '''
+        self.sel_graph_cursor('Range select')
+        self.sel_cursor_mode.set('Range select')
+        self.integrate_region = IntegrateRegion(self, which = 'first')
+
     def normalize(self):
-        ''' Perform normalization of the amplitutes'''
+        ''' Normalization of the amplitutes'''
         self.normalize = Normalize(self, which = 'first')
 
     def delete_selected_data(self, index_to_delete=None):
@@ -1483,6 +1496,7 @@ class MainApp:
         self.grapher.current_cursor_mode['label'] = value
         self.grapher.plot_graph()
         self.grapher.cursor_on_off()
+
     '''***********************************************
     *           METHODS FOR CONTEXT MENU             *
     ***********************************************'''
@@ -1612,7 +1626,21 @@ class MainApp:
 ''' STARTING THE APPLICATION '''
 
 # Create general main instances for the program
-eleana = Eleana(ELEANA_VERSION)
+if not DEVEL:
+    # Switch off the error display in final product
+    if os.name == 'posix':  # Unix/Linux/macOS
+        sys.stderr = open(os.devnull, 'w')
+    elif os.name == 'nt':  # Windows
+        sys.stderr = open('nul', 'w')
+
+eleana = Eleana(version = ELEANA_VERSION, devel = DEVEL)
+if not DEVEL:
+    # Switch off the error display in final product
+    if os.name == 'posix':  # Unix/Linux/macOS
+        sys.stderr = open(os.devnull, 'w')
+    elif os.name == 'nt':  # Windows
+        sys.stderr = open('nul', 'w')
+
 sound = Sound()
 cmd = CommandProcessor()
 

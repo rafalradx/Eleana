@@ -194,8 +194,9 @@ class MainMenu:
         self.main_menu.add_cascade(label=" Analysis ", menu=self.menu_analysis)
 
         #  - Integrate region
-        self.menu_analysis.add_command(label="Integrate region", command=self.app.quick_paste,
+        self.menu_analysis.add_command(label="Integrate region", command=self.app.integrate_region,
                                   image=self.icon_integrate_region, compound="left")
+        #  - Statistics
         self.menu_analysis.add_command(label="Statistics", command=self.app.quick_paste,
                                    image=self.icon_statistics, compound="left")
 

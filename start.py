@@ -42,10 +42,9 @@ def close_app():
 
 def load_main():
     try:
-        subprocess.run([interpreter, "Eleana.py"])
+        subprocess.run([interpreter, "main.py"])
     except Exception as e:
         print("Error starting Eleana")
-
 
 def update_progress():
     if app.progress_var.get() >= 100:
@@ -53,7 +52,7 @@ def update_progress():
         load_thread.start()
     else:
         app.progress_var.set(app.progress_var.get() + 1)
-        app.mainwindow.after(10, update_progress)
+        app.mainwindow.after(5, update_progress)
 
 if __name__ == "__main__":
     app = SplashScreenApp()
