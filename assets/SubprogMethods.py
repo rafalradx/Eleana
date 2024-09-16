@@ -3,7 +3,7 @@ import copy
 import numpy as np
 
 class SubMethods():
-    def __init__(self, app=None, which='first'):
+    def __init__(self, app=None, which='first', use_second = False):
         # Set get_from_region to use selected range for data
         self.get_from_region = True
         if app:
@@ -18,6 +18,7 @@ class SubMethods():
             self.grapher = None
         # Set to which selection 'First' or 'Second'
         self.which = which
+        self.use_second = use_second
         # Do not build window if app is not defined
         if self.app:
             # Create window
@@ -68,6 +69,18 @@ class SubMethods():
         # Create reference to data in results
         self.result_index = self.eleana.selections['result']
         self.result_data = self.eleana.results_dataset[self.result_index]
+        # Take second data if needed
+        if self.use_second:
+            if self.which == 'first':
+                index2 = self.eleana.selections['second']
+                if index2 == -1:
+                    index2 = None
+            else:
+                index2 = self.eleana.selections['first']
+                if index2 == -1:
+                    index2 = None
+            if index2:
+                self.original_data2 = copy.deepcopy(self.eleana.dataset[index2])
         if self.get_from_region:
             self.extract_region()
         if start:
@@ -124,17 +137,35 @@ class SubMethods():
         ranges = self.eleana.color_span['ranges']
         if not ranges:
             return
-        x = self.original_data.x
-        y = self.original_data.y
-        is_2D = len(y.shape) == 2
-        indexes = []
-        for range_ in ranges:
-            idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
-            indexes.extend(idx.tolist())
-        extracted_x = x[indexes]
-        if is_2D:
-            extracted_y = y[:, indexes]
-        else:
-            extracted_y = y[indexes]
-        self.original_data.x = extracted_x
-        self.original_data.y = extracted_y
+        if self.original_data:
+            x = self.original_data.x
+            y = self.original_data.y
+            is_2D = len(y.shape) == 2
+            indexes = []
+            for range_ in ranges:
+                idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
+                indexes.extend(idx.tolist())
+            extracted_x = x[indexes]
+            if is_2D:
+                extracted_y = y[:, indexes]
+            else:
+                extracted_y = y[indexes]
+            self.original_data.x = extracted_x
+            self.original_data.y = extracted_y
+        if self.original_data2:
+            # Extract for second
+            if self.use_second:
+                x = self.original_data2.x
+                y = self.original_data2.y
+                is_2D = len(y.shape) == 2
+                indexes = []
+                for range_ in ranges:
+                    idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
+                    indexes.extend(idx.tolist())
+                extracted_x = x[indexes]
+                if is_2D:
+                    extracted_y = y[:, indexes]
+                else:
+                    extracted_y = y[indexes]
+                self.original_data2.x = extracted_x
+                self.original_data2.y = extracted_y
