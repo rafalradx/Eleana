@@ -97,8 +97,8 @@
                       </object>
                     </child>
                     <child>
-                      <object class="customtkinter.CTkEntry" id="ctkentry1">
-                        <property name="state">disabled</property>
+                      <object class="customtkinter.CTkEntry" id="field_value" named="True">
+                        <property name="state">normal</property>
                         <property name="text" translatable="yes">ctkentry1</property>
                         <layout manager="grid">
                           <property name="column">1</property>

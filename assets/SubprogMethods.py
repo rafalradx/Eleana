@@ -1,10 +1,13 @@
 from assets.Observer import Observer
 import copy
 import numpy as np
+from Error import Error
 
 class SubMethods():
     def __init__(self, app=None, which='first', use_second = False):
         # Set get_from_region to use selected range for data
+        self.original_data = None
+        self.original_data2 = None
         self.get_from_region = True
         if app:
             self.app = app
@@ -50,37 +53,42 @@ class SubMethods():
         # Get data from selections First or Second
         if self.eleana.selections[self.which] >= 0:
             index = self.eleana.selections[self.which]
-            # Copy data from first to results using the method in app
-            if start:
+            if not start:
                 self.eleana.notify_on = False
-            else:
-                self.eleana.notify_on = True
             if self.which == 'second':
                 self.app.second_to_result()
             else:
                 self.app.first_to_result()
-            self.eleana.notify_on = False
         else:
             self.original_data = None
             self.result_data = None
             return False
-        # Create reference to original data
-        self.original_data = copy.deepcopy(self.eleana.dataset[index])
+
+        if self.use_second:
+            # --- TWO DATA ARE NEEDED ---
+            index = self.eleana.selections['first']
+            index2 = self.eleana.selections['second']
+            if index == -1:
+                if self.app:
+                    Error.show(info='No first data selected', details='')
+                self.original_data = None
+                return False
+            elif self.eleana.selections['second'] == -1:
+                if self.app:
+                    Error.show(info='No second data selected', details='')
+                self.original_data2 = None
+                return False
+            self.original_data2 = copy.deepcopy(self.eleana.dataset[index2])
+            self.original_data = copy.deepcopy(self.eleana.dataset[index])
+        else:
+            # --- ONLY ONE DATA IS NEEDED ---
+            # Create reference to original data
+            self.original_data = copy.deepcopy(self.eleana.dataset[index])
+            self.original_data2 = None
         # Create reference to data in results
         self.result_index = self.eleana.selections['result']
         self.result_data = self.eleana.results_dataset[self.result_index]
-        # Take second data if needed
-        if self.use_second:
-            if self.which == 'first':
-                index2 = self.eleana.selections['second']
-                if index2 == -1:
-                    index2 = None
-            else:
-                index2 = self.eleana.selections['first']
-                if index2 == -1:
-                    index2 = None
-            if index2:
-                self.original_data2 = copy.deepcopy(self.eleana.dataset[index2])
+
         if self.get_from_region:
             self.extract_region()
         if start:
@@ -117,10 +125,12 @@ class SubMethods():
 
     def process_group(self):
         ''' Triggers 'perform_calculation' for all data in the current group. '''
+        if self.create_report:
+            self.collected_reports = []
         self.app.clear_results(skip_question=True)
         self.mainwindow.config(cursor='watch')
         spectra = copy.copy(self.app.sel_first._values)
-        current_first_sel = self.eleana.selections['first']
+        #current_first_sel = self.eleana.selections['first']
         del spectra[0]
         i = 0
         for spectrum in spectra:
@@ -128,9 +138,19 @@ class SubMethods():
             index = self.eleana.get_index_by_name(spectrum)
             self.original_data = copy.deepcopy(self.eleana.dataset[index])
             self.result_data = self.eleana.results_dataset[i]
-            self.perform_calculation()
+            if self.create_report:
+                to_report = self.perform_calculation()
+                self.collected_reports.append(to_report)
+            else:
+                self.perform_calculation()
             i += 1
         self.mainwindow.config(cursor='')
+        if self.create_report:
+            self.show_report()
+
+    def show_report(self):
+        print('Collected Reports')
+        print(self.collected_reports)
 
     def extract_region(self):
         ''' Extract data on the basis of selected ranges in self.eleana.color_span['ranges'] '''
