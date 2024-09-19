@@ -15,7 +15,7 @@ PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "table.ui"
 
 class CreateFromTable:
-    def __init__(self, eleana_app, master=None, df = None, name = None, group = None, loadOnStart = None):
+    def __init__(self, eleana_app, master=None, df = None, name = None, group = None, loadOnStart = None, window_title = None):
         self.master = master
         self.eleana = eleana_app
         self.builder = builder = pygubu.Builder()
@@ -25,10 +25,12 @@ class CreateFromTable:
         # Main widget
         self.mainwindow = builder.get_object("toplevel1", master)
         builder.connect_callbacks(self)
+        if not window_title:
+            window_title = 'Create data from table'
 
         # References
         self.tableFrame = builder.get_object("tableFrame", master)
-        self.mainwindow.title("Create data from table")
+        self.mainwindow.title(window_title)
         self.entry_name = builder.get_object("entry_name", master)
         self.entry_group = builder.get_object("entry_group", master)
         self.x_axis_name = builder.get_object("x_axis_name", master)

@@ -1,7 +1,7 @@
 from assets.Observer import Observer
 import copy
 import numpy as np
-from Error import Error
+from assets.Error import Error
 
 class SubMethods():
     def __init__(self, app=None, which='first', use_second = False):
@@ -149,6 +149,7 @@ class SubMethods():
             self.show_report()
 
     def show_report(self):
+
         print('Collected Reports')
         print(self.collected_reports)
 

@@ -375,7 +375,10 @@ class Grapher(GraphPreferences):
 
         # Draw Graph
         self.draw()
-
+        # Create cursor
+        #if not keep_annotation_list:
+        #    pass
+        #    self.cursor_on_off()
         # Activate the observer
         self.eleana.notify_on = True
 
@@ -397,7 +400,6 @@ class Grapher(GraphPreferences):
             self.ax.invert_xaxis()
 
         # Draw color span
-        #if self.app.sel_cursor_mode.get() == "Range select":
         self.show_color_span()
         # Draw canvas
         self.canvas.draw()
@@ -418,6 +420,7 @@ class Grapher(GraphPreferences):
                 min = range[0]
                 max = range[1]
                 self.ax.axvspan(min, max, alpha=alpha, color=color)
+
 
     '''**********************************
     *                                   *
@@ -445,11 +448,11 @@ class Grapher(GraphPreferences):
             sel.extras[1].set_xdata([x, x])
 
     def cursor_on_off(self):
-        def _show_annotation_list():
+        def _show_annotation_list(self):
             self.app.annotationsFrame.grid()
-            self.app.annotationsFrame.grid_columnconfigure(0, weight=1)
-            self.app.annotationsFrame.grid_rowconfigure(0, weight=1)
-            self.annotationlist = CTkListbox(self.app.annotationsFrame, command=self.updateAnnotationList, disable_selection=True, height=300)
+            self.app.annotationsFrame.grid_columnconfigure(0, weight=1)  # Kolumna 0
+            self.app.annotationsFrame.grid_rowconfigure(0, weight=1)  # Wiersz 0
+            self.annotationlist = CTkListbox(self.app.annotationsFrame, command=self.updateAnnotationList, multiple_selection=True, height=300)
             self.annotationlist.grid(column=0, row=0, sticky="nsew")
             self.app.infoframe.grid()
             self.app.infoframe.grid_columnconfigure(0, weight=1)
@@ -478,7 +481,7 @@ class Grapher(GraphPreferences):
         elif index > 0 and index < 5:
             # Switch on the mplcursors
             self.app.btn_clear_cursors.grid()
-            _show_annotation_list()
+            _show_annotation_list(self)
             self.cursor = self.mplcursors.cursor(self.ax,
                                                  multiple=self.current_cursor_mode['multip'],
                                                  hover=self.current_cursor_mode['hov'])
@@ -489,20 +492,22 @@ class Grapher(GraphPreferences):
         elif index == 5:
             # Free select
             self.app.btn_clear_cursors.grid()
-            _show_annotation_list()
+            _show_annotation_list(self)
             # Switch on Free point selections
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
         elif index == 6:
             # Crosshair
             self.app.btn_clear_cursors.grid()
-            _show_annotation_list()
+            _show_annotation_list(self)
             self.cursor = self.mplcursors.cursor(self.ax, multiple=False, hover=True)
             self.cursor.connect("add", self.mplcursor_crosshair)
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
         elif index == 7:
             # Range select
             self.app.btn_clear_cursors.grid_remove()
-            _show_annotation_list()
+            _show_annotation_list(self)
+            #self.cursor = self.mplcursors.cursor(self.ax, multiple=False, hover=True)
+            #self.cursor.connect("add", self.mplcursor_crosshair)
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.range_clicked)
             self.app.info.configure(text='  LEFT CLICK - select the beginning \n  of the range\n  SECOND LEFT CLICK - select the end of the range\n  RIGHT CLICK INSIDE THE RANGE - delete \n  the range under the cursor')
             self.eleana.color_span['ranges'] = []
@@ -562,7 +567,7 @@ class Grapher(GraphPreferences):
             area between clicked positions.
         '''
 
-        def _exclude_range(excluded_range):
+        def exclude_range(excluded_range):
             tab = self.eleana.color_span['ranges']
             zkr = excluded_range
             result = []
@@ -586,28 +591,12 @@ class Grapher(GraphPreferences):
                     result.append([zkr_end, end])
             return result
 
-        def _merge():
-            ranges = self.eleana.color_span['ranges']
-            ranges.sort(key=lambda x: x[0])  # Sortowanie zakresów po pierwszym elemencie
-            merged_ranges = [ranges[0]]  # Inicjalizacja listy z pierwszym zakresem
-
-            for current in ranges[1:]:
-                last_merged = merged_ranges[-1]
-
-                # Jeśli zakresy nachodzą na siebie, scal je
-                if current[0] <= last_merged[1]:
-                    merged_ranges[-1] = [last_merged[0], max(last_merged[1], current[1])]
-                else:
-                    # Jeśli nie, dodaj aktualny zakres
-                    merged_ranges.append(current)
-
-            return merged_ranges
 
         if self.app.sel_cursor_mode.get() != 'Range select':
             return
         x = float(sel.xdata)
         y = float(sel.ydata)
-        if sel.button == 1:  # Left button
+        if sel.button == 1: # Left button
             # Add point
             if self.eleana.color_span['status'] == 0:
                 # Define first point in the range
@@ -623,10 +612,18 @@ class Grapher(GraphPreferences):
                 self.eleana.color_span['ranges'].append(range)
                 self.eleana.color_span['status'] = 0
                 # Merge ranges if necessary
-                merged_ranges = _merge()
+                ranges = self.eleana.color_span['ranges']
+                ranges.sort(key=lambda x: x[0])
+                merged_ranges = [ranges[0]]
+                for current in ranges[1:]:
+                    last_merged = merged_ranges[-1]
+                    if current[0] <= last_merged[1]:
+                        merged_ranges[-1] = [last_merged[0], max(last_merged[1], current[1])]
+                    else:
+                        merged_ranges.append(current)
                 self.eleana.color_span['ranges'] = merged_ranges
                 self.updateAnnotationList()
-        elif sel.button == 3:  # Right button
+        elif sel.button == 3: # Right button
             # Remove range
             if self.eleana.color_span['ranges'] is not None:
                 self.eleana.color_span['status'] = 0
@@ -637,26 +634,25 @@ class Grapher(GraphPreferences):
                     if (range[0] >= x and range[1] <= x) or (range[0] <= x and range[1] >= x):
                         del self.eleana.color_span['ranges'][i]
                         break
-                    i += 1
+                    i+=1
                 self.updateAnnotationList()
-        elif sel.button == 2:  # Wheel button
-            # Add point
-            if self.eleana.color_span['status'] == 0:
-                # Define first point in the range
-                self.eleana.color_span['start'] = x
-                self.eleana.color_span['status'] = 1
-            elif self.eleana.color_span['status'] == 1:
-                min_range = self.eleana.color_span['start']
-                max_range = x
-                range = [min_range, max_range]
-                excluded_range = sorted(range)
-                # Exclude range
-                ranges = _exclude_range(excluded_range)
-                self.eleana.color_span['ranges'] = ranges
-                merged_ranges = _merge()
-                self.eleana.color_span['ranges'] = merged_ranges
-                self.eleana.color_span['status'] = 0
-                self.updateAnnotationList()
+        # elif sel.button == 2: # Wheel button
+        #     # Add point
+        #     if self.eleana.color_span['status'] == 0:
+        #         print('Add first rmove point')
+        #         # Define first point in the range
+        #         self.eleana.color_span['start'] = x
+        #         self.eleana.color_span['status'] = 1
+        #     else:
+        #         min = self.eleana.color_span['start']
+        #         max = x
+        #         range = [min,max]
+        #         excluded_range = sorted(range)
+        #         # Exclude range
+        #         ranges = exclude_range(excluded_range)
+        #         self.eleana.color_span['ranges'] = ranges
+        #         self.eleana.color_span['status'] = 0
+        #         self.updateAnnotationList()
         self.plot_graph()
 
     def annotation_create(self, sel):

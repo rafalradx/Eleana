@@ -5,13 +5,14 @@ from assets.SubprogMethods import SubMethods
 from assets.Error import Error
 
 # Change the line below to match your folder in subprogs and UI file
-from integrate_region.IntegrateRegionui import IntegrateRegionUI as WindowGUI
+#from integrate_region.IntegrateRegionui import IntegrateRegionUI as WindowGUI
+from IntegrateRegionui import IntegrateRegionUI as WindowGUI
 
 TITLE = 'Integrate region'  # <--- TITLE OF THE WINDOW
 ON_TOP = True               # <--- IF TRUE THE WINDOW WILL BE ALWAYS ON TOP
 REGIONS = True              # <--- IF TRUE THE DATA WILL BE EXTRACTED FROM REGIONS IN SELF.ELEANA.COLOR_SPAN
 TWO_SETS = False            # <--- IF TRUE THEN FIRST AND SECOND DATA WILL BE AVAILABLE
-REPORT = True               # <--- IF TRUE THEN RAPORT WILL BE CREATED AFTER CALCULATIONS
+REPORT = True               # <--- IF TRUE THEN REPORT WILL BE CREATED AFTER CALCULATIONS
 
 class IntegrateRegion(SubMethods, WindowGUI):
     ''' THIS IS STANDARD PART THAT SHOULD BE COPIED WITHOUT MODIFICATIONS '''
@@ -102,5 +103,15 @@ class IntegrateRegion(SubMethods, WindowGUI):
         self.update_result_data(x = x_data, y = y_cal)
 
 if __name__ == "__main__":
+    TEST_SUBPROG = True
+    ir = IntegrateRegion()
+    ir.collected_reports = {'headers':  ['nazwa', 'zakres','wartość1', 'wartość2'],
+                            ol1'
+                            'nazwa':    ['widmo 1', 'widmo 2', 'widmo 3'],
+                            'zakres':   [2,3,4],
+                            'wartosc1': []
+
+                            }
+    ir.show_report()
     pass
 
