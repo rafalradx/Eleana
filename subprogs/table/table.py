@@ -15,7 +15,7 @@ PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "table.ui"
 
 class CreateFromTable:
-    def __init__(self, eleana_app, master=None, df = None, name = None, group = None, loadOnStart = None, window_title = None):
+    def __init__(self, eleana_app, master=None, list2D = None, df = None, name = None, group = None, loadOnStart = None, window_title = None):
         self.master = master
         self.eleana = eleana_app
         self.builder = builder = pygubu.Builder()
@@ -55,7 +55,7 @@ class CreateFromTable:
         self.sel_rey_axis.set(self.headers[2])
         self.sel_imy_axis.set(self.headers[0])
 
-        self.generate_table(df)
+        self.generate_table(df, list2D)
 
         self.response = None
         self.mainwindow.bind("<Escape>", self.cancel)
@@ -170,16 +170,20 @@ class CreateFromTable:
 
     def edit_parameters(self):
         info = CTkMessagebox(title = "Edit parameters", message="This option is not implmented yet. Please edit pratmeters after addition of the data.")
-    def generate_table(self, df):
-        self.table = Sheet(self.tableFrame)
-        column_names = df.columns.tolist()
-        table_data =  df.values.tolist()
-        self.table.set_sheet_data(table_data)
-        self.table.headers(column_names)
-        self.table.grid(row=0, column=0, sticky="nswe")
+    def generate_table(self, df=None, list2D=None):
+        if df:
+            self.table = Sheet(self.tableFrame)
+            column_names = df.columns.tolist()
+            table_data =  df.values.tolist()
+            self.table.set_sheet_data(table_data)
+            self.table.headers(column_names)
+            self.table.grid(row=0, column=0, sticky="nswe")
 
-        self.table.change_theme(ctk.get_appearance_mode())
-        self.table.enable_bindings( "ctrl_select", "all", "right_click_popup_menu")
+            self.table.change_theme(ctk.get_appearance_mode())
+            self.table.enable_bindings( "ctrl_select", "all", "right_click_popup_menu")
+        elif list2D:
+            print('table.py - generate_table')
+            return
 
     def get_data_from_column(self, column_name):
         index = self.sel_x_axis._values.index(column_name)

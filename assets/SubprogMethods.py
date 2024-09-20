@@ -2,7 +2,7 @@ from assets.Observer import Observer
 import copy
 import numpy as np
 from assets.Error import Error
-
+from subprogs.table
 class SubMethods():
     def __init__(self, app=None, which='first', use_second = False):
         # Set get_from_region to use selected range for data
@@ -33,7 +33,10 @@ class SubMethods():
             self.get_data(start=True)
             # Set current position in Results Dataset
             self.result_index = len(self.eleana.results_dataset)
-
+        if self.create_report:
+            self.collected_reports = {}
+            self.collected_reports['headers'] = []
+            self.collected_reports['rows'] = []
     def get(self):
         ''' Returns self.response to the main application after close '''
         if self.mainwindow.winfo_exists():
@@ -63,7 +66,6 @@ class SubMethods():
             self.original_data = None
             self.result_data = None
             return False
-
         if self.use_second:
             # --- TWO DATA ARE NEEDED ---
             index = self.eleana.selections['first']
@@ -148,10 +150,26 @@ class SubMethods():
         if self.create_report:
             self.show_report()
 
+    def add_to_report(self, headers = None, row = None):
+        ''' Add headers for columns and or aditional row to the report'''
+        if headers:
+            self.collected_reports['headers'] = headers
+        if rows:
+            self.collected_reports['rows'].append(row)
+
     def show_report(self):
+        ''' Display report as Table a table'''
+        if not self.collected_reports():
+            if self.eleana.devel_mode:
+                print("There is no reports in self.collected_reports")
+            return
+        data = self.collected_reports['data']
+        headers = self.collected_reports['headers']
+
 
         print('Collected Reports')
-        print(self.collected_reports)
+        print(self.collected_reports['headers'])
+        print(self.collected_reports['data'])
 
     def extract_region(self):
         ''' Extract data on the basis of selected ranges in self.eleana.color_span['ranges'] '''

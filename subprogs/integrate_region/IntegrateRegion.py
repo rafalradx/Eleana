@@ -106,11 +106,10 @@ if __name__ == "__main__":
     TEST_SUBPROG = True
     ir = IntegrateRegion()
     ir.collected_reports = {'headers':  ['nazwa', 'zakres','wartość1', 'wartość2'],
-                            ol1'
-                            'nazwa':    ['widmo 1', 'widmo 2', 'widmo 3'],
-                            'zakres':   [2,3,4],
-                            'wartosc1': []
-
+                            'rows':[['widmo 2',2,3,4],
+                                    ['widmo 3',2,6,5],
+                                    ['widmo 4',10,43,54]
+                                    ]
                             }
     ir.show_report()
     pass
