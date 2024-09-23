@@ -2,7 +2,8 @@ from assets.Observer import Observer
 import copy
 import numpy as np
 from assets.Error import Error
-from subprogs.table
+from subprogs.table.table import CreateFromTable
+
 class SubMethods():
     def __init__(self, app=None, which='first', use_second = False):
         # Set get_from_region to use selected range for data
@@ -33,10 +34,7 @@ class SubMethods():
             self.get_data(start=True)
             # Set current position in Results Dataset
             self.result_index = len(self.eleana.results_dataset)
-        if self.create_report:
-            self.collected_reports = {}
-            self.collected_reports['headers'] = []
-            self.collected_reports['rows'] = []
+
     def get(self):
         ''' Returns self.response to the main application after close '''
         if self.mainwindow.winfo_exists():
@@ -125,14 +123,12 @@ class SubMethods():
         '''
         self.perform_calculation()
 
-    def process_group(self):
+    def process_group(self, headers = None):
         ''' Triggers 'perform_calculation' for all data in the current group. '''
-        if self.create_report:
-            self.collected_reports = []
+        self.consecutive_number = 1
         self.app.clear_results(skip_question=True)
         self.mainwindow.config(cursor='watch')
         spectra = copy.copy(self.app.sel_first._values)
-        #current_first_sel = self.eleana.selections['first']
         del spectra[0]
         i = 0
         for spectrum in spectra:
@@ -142,34 +138,39 @@ class SubMethods():
             self.result_data = self.eleana.results_dataset[i]
             if self.create_report:
                 to_report = self.perform_calculation()
-                self.collected_reports.append(to_report)
+                if not to_report:
+                    print('perform_calculations() did not return row to add to the report')
+                if len(to_report) != len(self.collected_reports['headers']):
+                    print('Error. The number of headers is different than number of columns in the report')
+                self.add_to_report(row = to_report)
             else:
                 self.perform_calculation()
             i += 1
+            self.consecutive_number+=1
         self.mainwindow.config(cursor='')
         if self.create_report:
             self.show_report()
 
     def add_to_report(self, headers = None, row = None):
-        ''' Add headers for columns and or aditional row to the report'''
+        ''' Add headers for columns and or additional row to the report'''
         if headers:
             self.collected_reports['headers'] = headers
-        if rows:
+        if row:
             self.collected_reports['rows'].append(row)
 
     def show_report(self):
         ''' Display report as Table a table'''
-        if not self.collected_reports():
+        if not self.collected_reports:
             if self.eleana.devel_mode:
                 print("There is no reports in self.collected_reports")
             return
-        data = self.collected_reports['data']
+        rows = self.collected_reports['rows']
         headers = self.collected_reports['headers']
 
 
         print('Collected Reports')
-        print(self.collected_reports['headers'])
-        print(self.collected_reports['data'])
+        print(headers)
+        print(rows)
 
     def extract_region(self):
         ''' Extract data on the basis of selected ranges in self.eleana.color_span['ranges'] '''

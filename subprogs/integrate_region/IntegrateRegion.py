@@ -5,14 +5,15 @@ from assets.SubprogMethods import SubMethods
 from assets.Error import Error
 
 # Change the line below to match your folder in subprogs and UI file
-#from integrate_region.IntegrateRegionui import IntegrateRegionUI as WindowGUI
-from IntegrateRegionui import IntegrateRegionUI as WindowGUI
+from integrate_region.IntegrateRegionui import IntegrateRegionUI as WindowGUI
+#from IntegrateRegionui import IntegrateRegionUI as WindowGUI
 
 TITLE = 'Integrate region'  # <--- TITLE OF THE WINDOW
 ON_TOP = True               # <--- IF TRUE THE WINDOW WILL BE ALWAYS ON TOP
 REGIONS = True              # <--- IF TRUE THE DATA WILL BE EXTRACTED FROM REGIONS IN SELF.ELEANA.COLOR_SPAN
 TWO_SETS = False            # <--- IF TRUE THEN FIRST AND SECOND DATA WILL BE AVAILABLE
 REPORT = True               # <--- IF TRUE THEN REPORT WILL BE CREATED AFTER CALCULATIONS
+HEADERS = ['Nr', 'Name', 'Double Integral', 'Integral Value'] # <--- Define names of columns in the Report
 
 class IntegrateRegion(SubMethods, WindowGUI):
     ''' THIS IS STANDARD PART THAT SHOULD BE COPIED WITHOUT MODIFICATIONS '''
@@ -22,6 +23,7 @@ class IntegrateRegion(SubMethods, WindowGUI):
             WindowGUI.__init__(self, app.mainwindow)
         self.get_from_region = REGIONS
         self.create_report = REPORT
+        self.collected_reports = {'headers':HEADERS, 'rows':[]}
         # Use second data
         self.use_second = TWO_SETS
         SubMethods.__init__(self, app=app, which=which, use_second=self.use_second)
@@ -59,6 +61,7 @@ class IntegrateRegion(SubMethods, WindowGUI):
         else:
             x_data = self.original_data.x
             y_data = self.original_data.y
+            name_nr = self.original_data.name_nr
 
         # Process data in Y
         if y_data is not None:
@@ -66,7 +69,7 @@ class IntegrateRegion(SubMethods, WindowGUI):
                 # If np.array is empty - return
                 if self.eleana.devel_mode:
                     print('Integrate region -> perform_calculation(): Empty Y')
-                return
+                return None
 
             if len(y_data.shape) == 1:
                 y_cal = cumulative_trapezoid(y_data, x_data, initial=0)
@@ -75,28 +78,32 @@ class IntegrateRegion(SubMethods, WindowGUI):
                     y_data = cumulative_trapezoid(y_cal, x_data, initial=0)
                     integral = trapezoid(y_cal, x_data)
                     y_cal = y_data
+                    return [self.consecutive_number, name_nr, double, integral]
+                else:
+                    return None
 
-        #     elif len(y_data.shape) == 2:
-        #         single_report = {'name_nr':'',
-        #                          'name_stk':'',
-        #                          'double':False,
-        #                          'integral':0}
-        #         report = []
-        #         i = 0
-        #         name_nr = self.original_data.name_nr
-        #         list_of_processed_y = []
-        #         for each_y in y_data:
-        #             name_stk = self.original_data.stk_names[i]
-        #             double = double_integration
-        #             y_cal = cumulative_trapezoid(y_data, x_data, initial=0)
-        #             integral = trapezoid(y_data, x_data)
-        #             if self.check_double_integration.get():
-        #                 y_data = cumulative_trapezoid(y_cal, x_data, initial=0)
-        #                 integral = trapezoid(y_cal, x_data)
-        #                 y_cal = y_data
-        #             list_of_processed_y.append(y_cal)
-        #             y_cal = np.array(list_of_processed_y)
-        #
+
+
+            # elif len(y_data.shape) == 2:
+            #     self.create_report = True
+            #     i = 0
+            #     name_nr = self.original_data.name_nr
+            #     list_of_processed_y = []
+            #     for each_y in y_data:
+            #         name_stk = self.original_data.stk_names[i]
+            #         double = double_integration
+            #         name_to_report = name +'|'+ name_stk
+            #         y_cal = cumulative_trapezoid(y_data, x_data, initial=0)
+            #         integral = trapezoid(y_data, x_data)
+            #         if self.check_double_integration.get():
+            #             y_data = cumulative_trapezoid(y_cal, x_data, initial=0)
+            #             integral = trapezoid(y_cal, x_data)
+            #             y_cal = y_data
+            #         list_of_processed_y.append(y_cal)
+            #         y_cal = np.array(list_of_processed_y)
+            #         i+=1
+            #         return [i+1, name_to_report, double, integral]
+            #
         self.field_value.delete(0, 'end')
         self.field_value.insert(0, str(integral))
         # Leve the following line here
