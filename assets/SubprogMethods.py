@@ -5,11 +5,12 @@ from assets.Error import Error
 from subprogs.table.table import CreateFromTable
 
 class SubMethods():
-    def __init__(self, app=None, which='first', use_second = False):
+    def __init__(self, app=None, which='first', use_second = False, stack_sep = True):
         # Set get_from_region to use selected range for data
         self.original_data = None
         self.original_data2 = None
         self.get_from_region = True
+        self.consecutive_number = None
         if app:
             self.app = app
             self.master = self.app.mainwindow
@@ -23,6 +24,7 @@ class SubMethods():
         # Set to which selection 'First' or 'Second'
         self.which = which
         self.use_second = use_second
+        self.stack_sep = stack_sep
         # Do not build window if app is not defined
         if self.app:
             # Create window
@@ -88,17 +90,16 @@ class SubMethods():
         # Create reference to data in results
         self.result_index = self.eleana.selections['result']
         self.result_data = self.eleana.results_dataset[self.result_index]
-
         if self.get_from_region:
             self.extract_region()
         if start:
-            self.perform_calculation()
+            self.ok_clicked()
 
     def data_changed(self):
         ''' Activate get_data when selection changed.
             This is triggered by the Observer.   '''
         self.get_data()
-        self.perform_calculation()
+        self.ok_clicked()
 
     def update_result_data(self, y=None, x=None):
         ''' Move calculated data in y and x to self.eleana.result_dataset. '''
@@ -121,7 +122,34 @@ class SubMethods():
         ''' Triggers 'perform_calculation' when Calc/Ok button is clicked.
             The button must have command = ok_clicked
         '''
-        self.perform_calculation()
+
+        if self.original_data.type.lower() == "stack 2d":
+            if self.stack_sep:
+                # Store current create_report status
+                create_report = copy.copy(self.create_report)
+                i_stk = 0
+                self.create_report = True
+                for each in self.original_data.stk_names:
+                    name_ = self.original_data.name_nr + '/' + each
+                    x_ = self.original_data.x
+                    y_ = self.original_data.y[i_stk]
+                    z_ = self.original_data.z
+                    calc_result_row = self.perform_calculation(x_data = x_, y_data = y_, z_data = z_, name = name_, stk_index = i_stk)
+                    self.add_to_report(row = calc_result_row)
+                    i_stk+=1
+                # Restore create_report_setings
+                self.create_report = create_report
+            else:
+                name_ = self.original_data.name_nr
+                x_ = self.original_data.x
+                y_ = self.original_data.y
+                calc_result_row = self.perform_calculation(x_data = x_, y_data = y_, z_data = None, name = name_, stk_index = None)
+                if self.create_report:
+                    self.add_to_report(row = calc_result_row)
+            self.show_report()
+        elif self.original_data.type.lower() == 'single 2d':
+            calc_result_row = self.perform_calculation(name = self.original_data.name_nr, y_data = self.original_data.y, x_data = self.original_data.x)
+            self.add_to_report(row=calc_result_row)
 
     def process_group(self, headers = None):
         ''' Triggers 'perform_calculation' for all data in the current group. '''
@@ -156,7 +184,18 @@ class SubMethods():
         if headers:
             self.collected_reports['headers'] = headers
         if row:
-            self.collected_reports['rows'].append(row)
+            if len(row) != len(self.collected_reports['headers']):
+                if self.eleana.devel_mode:
+                    print('The number of columns does not equal the column headers:')
+                    print('headers = ', self.collected_reports['headers'])
+                    print('row = ', row)
+            else:
+                processed_row = []
+                for item in row:
+                    if item is None:
+                        item = ''
+                    processed_row.append(item)
+                self.collected_reports['rows'].append(processed_row)
 
     def show_report(self):
         ''' Display report as Table a table'''

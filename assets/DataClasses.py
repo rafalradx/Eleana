@@ -10,6 +10,7 @@ class Single2D:
         self.groups: list = data['groups']
         self.x: np.ndarray = np.array(data['x'])
         self.y: np.ndarray = np.array(data['y'])
+        self.z = None
         self.name: str = data['name']
         self.complex = data.get('complex', False)
         self.type = 'single 2D'
@@ -30,6 +31,11 @@ class Stack:
         self.name_nr = ''
         self.comment = data.get('comment', '')
         self.stk_names = data['stk_names']
+        z_axis = data.get('z', None)
+        if not z_axis:
+            self.z = None
+        else:
+            self.z = np.array(z_axis)
 
 class Spectrum_CWEPR:
     def __init__(self, name, x_axis: list, dta: list, dsc: dict, format="elexsys"):
@@ -57,6 +63,7 @@ class Spectrum_CWEPR:
         self.parameters = working_par
         self.x = np.array(x_axis)
         self.y = np.array(dta)
+        self.z = None
         self.comment = ''
 
 class Spectra_CWEPR_stack(Spectrum_CWEPR):
@@ -82,10 +89,13 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
             i += 1
         list_of_y_array = np.array(list_of_y)
         working_stk_names = []
+        z_axis = []
         # Create in stack names:
         for each in ygf:
             name = working_parameters.get('name_z', '') + ' ' + str(each) + ' ' + working_parameters.get('unit_z', '')
             working_stk_names.append(name)
+            z_axis.append(each)
+        self.z = np.array(z_axis)
         self.stk_names = working_stk_names
         self.y = list_of_y_array
         self.type = 'stack 2D'
@@ -93,6 +103,7 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         self.origin = 'CWEPR'
         self.parameters = working_parameters
         self.comment = ''
+
 class Spectrum_complex:
     def __init__(self, name, x_axis, dta: list, dsc: dict):
         self.parameters = {'title': '', 'unit_x': '', 'name_x': '', 'name_y': '', 'MwFreq': '', 'ModAmp': '',
@@ -128,7 +139,7 @@ class Spectrum_complex:
         self.name_nr = ''
         self.groups = ['All']
         self.comment = ''
-
+        self.z = None
 
 def createFromElexsys(filename: str) -> object:
     elexsys_DTA = Path(filename[:-3]+'DTA')

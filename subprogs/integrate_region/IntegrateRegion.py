@@ -13,7 +13,12 @@ ON_TOP = True               # <--- IF TRUE THE WINDOW WILL BE ALWAYS ON TOP
 REGIONS = True              # <--- IF TRUE THE DATA WILL BE EXTRACTED FROM REGIONS IN SELF.ELEANA.COLOR_SPAN
 TWO_SETS = False            # <--- IF TRUE THEN FIRST AND SECOND DATA WILL BE AVAILABLE
 REPORT = True               # <--- IF TRUE THEN REPORT WILL BE CREATED AFTER CALCULATIONS
-HEADERS = ['Nr', 'Name', 'Double Integral', 'Integral Value'] # <--- Define names of columns in the Report
+STACK_SEP = True            # <--- IF TRUE THEN EACH DATA IS A STACK WILL BE CALCULATED SEPARATELY
+                            #      WHEN FALSE THEN YOU MUST CREATE A METHOD THAT CALCS OF THE WHOLE STACK
+REPORT_HEADERS = ['Nr', 'Name', 'Double Integral', 'Integral Value'] # <--- Define names of columns in the Report
+
+
+
 
 class IntegrateRegion(SubMethods, WindowGUI):
     ''' THIS IS STANDARD PART THAT SHOULD BE COPIED WITHOUT MODIFICATIONS '''
@@ -23,10 +28,10 @@ class IntegrateRegion(SubMethods, WindowGUI):
             WindowGUI.__init__(self, app.mainwindow)
         self.get_from_region = REGIONS
         self.create_report = REPORT
-        self.collected_reports = {'headers':HEADERS, 'rows':[]}
+        self.collected_reports = {'headers':REPORT_HEADERS, 'rows':[]}
         # Use second data
         self.use_second = TWO_SETS
-        SubMethods.__init__(self, app=app, which=which, use_second=self.use_second)
+        SubMethods.__init__(self, app=app, which=which, use_second=self.use_second, stack_sep = STACK_SEP)
     def configure_window(self):
         # Configure Window if app is defined
         self.mainwindow.title(TITLE)
@@ -38,13 +43,21 @@ class IntegrateRegion(SubMethods, WindowGUI):
         self.check_double_integration = self.builder.get_object('check_double', self.mainwindow)
         self.field_value = self.builder.get_object('field_value', self.mainwindow)
 
+
     def set_double_integration(self):
         double_integration = self.check_double_integration.get()
         if self.eleana.devel_mode:
             print('Double integration set: ', str(double_integration))
-        self.perform_calculation(double = double_integration)
+        self.ok_clicked()
 
-    def perform_calculation(self, double = False, original_data= None, y_data=None, x_data=None):
+    def perform_calculation(self,   original_data = None,
+                                    name = None,
+                                    stk_index = None,
+                                    y_data = None,
+                                    x_data = None,
+                                    z_data = None,
+                                    double=None):
+
         ''' MODIFY THIS ACCORDING TO WHAT YOU WANT TO CALCULATE
             Method that calculates something in your subprogram
             This must be prepared for a single data
@@ -53,61 +66,76 @@ class IntegrateRegion(SubMethods, WindowGUI):
             normalize_to, y_data and/or x_data are required
             only for testing the function
         '''
+        # When self.original_data contain data class then ignore x_data, y_data
+        # and other parameters sent to this function
+        if self.original_data:
+            x_data = self.original_data.x
+            y_data = self.original_data.y
+            z_data = self.original_data.z
+            name = self.original_data.name_nr
+        #if not x_data or not y_data:
+        #    Error.show(title = 'Empty set', info='It looks like there is no y data or x data to perform calculations')
+
+        x_cal = x_data
+        y_cal = y_data
+        z_cal = z_data
+        name_cal = name
+
+        ''' HERE STARTS YOUR CODE 
+        --------------------------
+        Use:
+            x_data:  contains data for x axis
+            y_data:  contains data for y axis (can be complex)
+            z_data:  contains data for z axis if there is a stack
+        After calculation put calculated data:
+            y_cal:  the results of calculations on y_data
+            x_cal:  the result of calculations on x_data
+            z_cal:  the result of calculations on z_data
+        '''
 
         if not double:
             double_integration = self.check_double_integration.get()
-        if not self.original_data:
-            return
-        else:
-            x_data = self.original_data.x
-            y_data = self.original_data.y
-            name_nr = self.original_data.name_nr
+        y_cal = cumulative_trapezoid(y_data, x_data, initial=0)
+        integral = trapezoid(y_data,x_data)
+        if double_integration:
+            y_cal2 = cumulative_trapezoid(y_cal, x_data, initial=0)
+            integral = trapezoid(y_cal, x_data)
+            y_cal = y_cal2
 
-        # Process data in Y
-        if y_data is not None:
-            if y_data.shape[0] == 0:
-                # If np.array is empty - return
-                if self.eleana.devel_mode:
-                    print('Integrate region -> perform_calculation(): Empty Y')
-                return None
-
-            if len(y_data.shape) == 1:
-                y_cal = cumulative_trapezoid(y_data, x_data, initial=0)
-                integral = trapezoid(y_data,x_data)
-                if self.check_double_integration.get():
-                    y_data = cumulative_trapezoid(y_cal, x_data, initial=0)
-                    integral = trapezoid(y_cal, x_data)
-                    y_cal = y_data
-                    return [self.consecutive_number, name_nr, double, integral]
-                else:
-                    return None
-
-
-
-            # elif len(y_data.shape) == 2:
-            #     self.create_report = True
-            #     i = 0
-            #     name_nr = self.original_data.name_nr
-            #     list_of_processed_y = []
-            #     for each_y in y_data:
-            #         name_stk = self.original_data.stk_names[i]
-            #         double = double_integration
-            #         name_to_report = name +'|'+ name_stk
-            #         y_cal = cumulative_trapezoid(y_data, x_data, initial=0)
-            #         integral = trapezoid(y_data, x_data)
-            #         if self.check_double_integration.get():
-            #             y_data = cumulative_trapezoid(y_cal, x_data, initial=0)
-            #             integral = trapezoid(y_cal, x_data)
-            #             y_cal = y_data
-            #         list_of_processed_y.append(y_cal)
-            #         y_cal = np.array(list_of_processed_y)
-            #         i+=1
-            #         return [i+1, name_to_report, double, integral]
-            #
+        # Update values in GUI widgets
         self.field_value.delete(0, 'end')
         self.field_value.insert(0, str(integral))
-        # Leve the following line here
-        self.update_result_data(x = x_data, y = y_cal)
+
+        # Construct line for the report
+        to_result_row = [self.consecutive_number, name_cal, double_integration, integral]
+        # Upadte results of the calculations
+        self.update_result_data(y = y_cal, x = x_cal)
+        return to_result_row
+'''
+
+------------------------------------------------------------------------------
+----         Trzeba poprawić procedury obliczeń dla Stack                 ----
+----         Przy stack 2D pojawia sie integral zamiast pojedyncza wartość----
+----         to pojawia się array. To trzeba rozwiązać chyba w SubprogMethods
+----         W metodzie ok_clicked
+
+
+'''
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
     TEST_SUBPROG = True

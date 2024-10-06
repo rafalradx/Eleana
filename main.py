@@ -2,7 +2,7 @@ import sys
 # BASIC CONFIGURATION
 ELEANA_VERSION = 1              # Set the Eleana version. This will be stored in self.eleana.version
 INTERPRETER = sys.executable    # Defines python version
-DEVEL = False                    # For final product set to False - no errors will be displayed or print commands
+DEVEL = True                    # For final product set to False - no errors will be displayed or print commands
                                 # For development set to True. This is stored in self.eleana.devel_mode
 
 # Import basic modules and add ./modules to sys.path
