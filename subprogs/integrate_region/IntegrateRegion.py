@@ -50,6 +50,11 @@ class IntegrateRegion(SubMethods, WindowGUI):
             print('Double integration set: ', str(double_integration))
         self.ok_clicked()
 
+
+    def perform_command_line_calc(self):
+        print('Command line calculation')
+        pass
+
     def perform_calculation(self,   original_data = None,
                                     name = None,
                                     stk_index = None,
@@ -68,7 +73,8 @@ class IntegrateRegion(SubMethods, WindowGUI):
         '''
         # When self.original_data contain data class then ignore x_data, y_data
         # and other parameters sent to this function
-        if self.original_data:
+
+        if self.original_data and self.app is None:
             x_data = self.original_data.x
             y_data = self.original_data.y
             z_data = self.original_data.z
@@ -115,10 +121,9 @@ class IntegrateRegion(SubMethods, WindowGUI):
 
 ------------------------------------------------------------------------------
 ----         Trzeba poprawić procedury obliczeń dla Stack                 ----
-----         Przy stack 2D pojawia sie integral zamiast pojedyncza wartość----
-----         to pojawia się array. To trzeba rozwiązać chyba w SubprogMethods
-----         W metodzie ok_clicked
-
+----         Przy stack 2D pojawia się błąd w Grapherze. Prawdopodobnie
+            brakuje danych w widmie obliczonym ze stack.
+            Dla pojedynczego wydaje się działać ok
 
 '''
 
