@@ -3,6 +3,7 @@ import copy
 import numpy as np
 from assets.Error import Error
 from subprogs.table.table import CreateFromTable
+import pandas
 
 class SubMethods():
     def __init__(self, app=None, which='first', use_second = False, stack_sep = True):
@@ -25,6 +26,7 @@ class SubMethods():
         self.which = which
         self.use_second = use_second
         self.stack_sep = stack_sep
+        self.consecutive_number = 1
         # Do not build window if app is not defined
         if self.app:
             # Create window
@@ -92,8 +94,8 @@ class SubMethods():
         self.result_data = self.eleana.results_dataset[self.result_index]
         if self.get_from_region:
             self.extract_region()
-        if start:
-            self.ok_clicked()
+        #if start:
+        #    self.ok_clicked()
 
     def data_changed(self):
         ''' Activate get_data when selection changed.
@@ -103,9 +105,14 @@ class SubMethods():
 
     def update_result_data(self, y=None, x=None):
         ''' Move calculated data in y and x to self.eleana.result_dataset. '''
+
+        # Update results if there was a single data
         if y is not None:
             if self.app:
-                self.result_data.y = y
+                if self.original_data.type.lower() == "stack 2d":
+                    self.result_data.y[self.i_stk]  = y
+                else:
+                    self.result_data.y = y
             else:
                 print('Result Y:')
                 print(y)
@@ -122,21 +129,25 @@ class SubMethods():
         ''' Triggers 'perform_calculation' when Calc/Ok button is clicked.
             The button must have command = ok_clicked
         '''
-
         if self.original_data.type.lower() == "stack 2d":
             if self.stack_sep:
                 # Store current create_report status
+                self.mainwindow.config(cursor='watch')
                 create_report = copy.copy(self.create_report)
-                i_stk = 0
+                self.i_stk = 0
                 self.create_report = True
                 for each in self.original_data.stk_names:
                     name_ = self.original_data.name_nr + '/' + each
                     x_ = self.original_data.x
-                    y_ = self.original_data.y[i_stk]
-                    z_ = self.original_data.z
-                    calc_result_row = self.perform_calculation(x_data = x_, y_data = y_, z_data = z_, name = name_, stk_index = i_stk)
-                    self.add_to_report(row = calc_result_row)
-                    i_stk+=1
+                    y_ = self.original_data.y[self.i_stk]
+                    z_ = self.original_data.z[self.i_stk]
+                    calc_result_row = self.perform_calculation(x_data = x_, y_data = y_, z_data = z_, name = name_, stk_index = self.i_stk)
+                    try:
+                        self.add_to_report(row = calc_result_row)
+                    except ValueError:
+                        break
+                    self.i_stk+=1
+                    self.consecutive_number+=1
                 # Restore create_report_setings
                 self.create_report = create_report
             else:
@@ -146,6 +157,7 @@ class SubMethods():
                 calc_result_row = self.perform_calculation(x_data = x_, y_data = y_, z_data = None, name = name_, stk_index = None)
                 if self.create_report:
                     self.add_to_report(row = calc_result_row)
+            self.mainwindow.config(cursor='')
             self.show_report()
         elif self.original_data.type.lower() == 'single 2d':
             calc_result_row = self.perform_calculation(name = self.original_data.name_nr, y_data = self.original_data.y, x_data = self.original_data.x)
@@ -153,31 +165,37 @@ class SubMethods():
 
     def process_group(self, headers = None):
         ''' Triggers 'perform_calculation' for all data in the current group. '''
+        self.collected_reports['rows'] = []
         self.consecutive_number = 1
         self.app.clear_results(skip_question=True)
         self.mainwindow.config(cursor='watch')
         spectra = copy.copy(self.app.sel_first._values)
         del spectra[0]
         i = 0
+        keep_selections = copy.deepcopy(self.eleana.selections)
         for spectrum in spectra:
             self.app.first_to_result(name=spectrum)
             index = self.eleana.get_index_by_name(spectrum)
+            self.eleana.selections['first'] = index
             self.original_data = copy.deepcopy(self.eleana.dataset[index])
             self.result_data = self.eleana.results_dataset[i]
-            if self.create_report:
-                to_report = self.perform_calculation()
-                if not to_report:
-                    print('perform_calculations() did not return row to add to the report')
-                if len(to_report) != len(self.collected_reports['headers']):
-                    print('Error. The number of headers is different than number of columns in the report')
-                self.add_to_report(row = to_report)
-            else:
-                self.perform_calculation()
+            self.ok_clicked()
+            # if self.create_report:
+            #     to_report = self.perform_calculation()
+            #     if not to_report:
+            #         print('perform_calculations() did not return row to add to the report')
+            #     if len(to_report) != len(self.collected_reports['headers']):
+            #         print('Error. The number of headers is different than number of columns in the report')
+            #     self.ok_clicked()
+            #     self.add_to_report(row = to_report)
+            # else:
+            #     self.ok_clicked()
             i += 1
             self.consecutive_number+=1
         self.mainwindow.config(cursor='')
         if self.create_report:
             self.show_report()
+        self.eleana.selections = keep_selections
 
     def add_to_report(self, headers = None, row = None):
         ''' Add headers for columns and or additional row to the report'''
@@ -186,9 +204,11 @@ class SubMethods():
         if row:
             if len(row) != len(self.collected_reports['headers']):
                 if self.eleana.devel_mode:
+                    Error.show(title="Error in report creating.", info="The number of column headers is different than provided columns in row. See console for details")
                     print('The number of columns does not equal the column headers:')
                     print('headers = ', self.collected_reports['headers'])
                     print('row = ', row)
+                    raise ValueError
             else:
                 processed_row = []
                 for item in row:
@@ -205,11 +225,9 @@ class SubMethods():
             return
         rows = self.collected_reports['rows']
         headers = self.collected_reports['headers']
-
-
-        print('Collected Reports')
-        print(headers)
-        print(rows)
+        df = pandas.DataFrame(rows, columns=headers)
+        table = CreateFromTable(window_title="Results of integration", eleana_app=self.eleana, master=self.mainwindow, df=df)
+        response = table.get()
 
     def extract_region(self):
         ''' Extract data on the basis of selected ranges in self.eleana.color_span['ranges'] '''

@@ -15,7 +15,7 @@ TWO_SETS = False            # <--- IF TRUE THEN FIRST AND SECOND DATA WILL BE AV
 REPORT = True               # <--- IF TRUE THEN REPORT WILL BE CREATED AFTER CALCULATIONS
 STACK_SEP = True            # <--- IF TRUE THEN EACH DATA IS A STACK WILL BE CALCULATED SEPARATELY
                             #      WHEN FALSE THEN YOU MUST CREATE A METHOD THAT CALCS OF THE WHOLE STACK
-REPORT_HEADERS = ['Nr', 'Name', 'Double Integral', 'Integral Value'] # <--- Define names of columns in the Report
+REPORT_HEADERS = ['Nr', 'Name', 'Parameter values \n for consecutive data in stack', 'Integral Value'] # <--- Define names of columns in the Report
 
 
 
@@ -45,9 +45,6 @@ class IntegrateRegion(SubMethods, WindowGUI):
 
 
     def set_double_integration(self):
-        double_integration = self.check_double_integration.get()
-        if self.eleana.devel_mode:
-            print('Double integration set: ', str(double_integration))
         self.ok_clicked()
 
 
@@ -113,7 +110,7 @@ class IntegrateRegion(SubMethods, WindowGUI):
         self.field_value.insert(0, str(integral))
 
         # Construct line for the report
-        to_result_row = [self.consecutive_number, name_cal, double_integration, integral]
+        to_result_row = [self.consecutive_number, name_cal, z_cal, integral]
         # Upadte results of the calculations
         self.update_result_data(y = y_cal, x = x_cal)
         return to_result_row
