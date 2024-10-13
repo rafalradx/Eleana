@@ -6,17 +6,25 @@ from subprogs.table.table import CreateFromTable
 import pandas
 
 class SubMethods():
-    def __init__(self, app=None, which='first', use_second = False, stack_sep = True):
+    def __init__(self, app=None, which='first', use_second = False, stack_sep = True, data_label = None, work_on_start = False):
         # Set get_from_region to use selected range for data
         self.original_data = None
         self.original_data2 = None
         self.get_from_region = True
-        self.consecutive_number = None
+        self.consecutive_number = 1
+        self.data_name_widget = None
+        self.show_stk_report = True
+        self.work_on_start = work_on_start
         if app:
             self.app = app
             self.master = self.app.mainwindow
             self.eleana = self.app.eleana
             self.grapher = self.app.grapher
+            if data_label is not None:
+                data_label_text = "self._data_label__ = self.builder.get_object(" + data_label + ", self.mainwindow)"
+                exec(data_label_text)
+            else:
+                self._data_label__ = None
         else:
             self.app = None
             self.master = None
@@ -26,7 +34,6 @@ class SubMethods():
         self.which = which
         self.use_second = use_second
         self.stack_sep = stack_sep
-        self.consecutive_number = 1
         # Do not build window if app is not defined
         if self.app:
             # Create window
@@ -94,14 +101,15 @@ class SubMethods():
         self.result_data = self.eleana.results_dataset[self.result_index]
         if self.get_from_region:
             self.extract_region()
-        #if start:
-        #    self.ok_clicked()
+        if self.work_on_start:
+            self.perform_single_calculations()
+
 
     def data_changed(self):
         ''' Activate get_data when selection changed.
             This is triggered by the Observer.   '''
         self.get_data()
-        self.ok_clicked()
+        self.perform_single_calculations()
 
     def update_result_data(self, y=None, x=None):
         ''' Move calculated data in y and x to self.eleana.result_dataset. '''
@@ -125,10 +133,11 @@ class SubMethods():
         if self.app:
             self.grapher.plot_graph()
 
-    def ok_clicked(self, value=None):
-        ''' Triggers 'perform_calculation' when Calc/Ok button is clicked.
-            The button must have command = ok_clicked
-        '''
+    def perform_single_calculations(self, value=None):
+        if self.original_data is None:
+            if self._data_label__ is not None:
+                self._data_label__.configure(text = '')
+            return
         if self.original_data.type.lower() == "stack 2d":
             if self.stack_sep:
                 # Store current create_report status
@@ -141,32 +150,41 @@ class SubMethods():
                     x_ = self.original_data.x
                     y_ = self.original_data.y[self.i_stk]
                     z_ = self.original_data.z[self.i_stk]
-                    calc_result_row = self.perform_calculation(x_data = x_, y_data = y_, z_data = z_, name = name_, stk_index = self.i_stk)
+                    if self._data_label__ is not None:
+                        self._data_label__.configure(text = name_)
+                    calc_result_row = self.calculate(x_data = x_, y_data = y_, z_data = z_, name = name_, stk_index = self.i_stk)
                     try:
                         self.add_to_report(row = calc_result_row)
                     except ValueError:
                         break
                     self.i_stk+=1
-                    self.consecutive_number+=1
+                    self.consecutive_number += 1
                 # Restore create_report_setings
                 self.create_report = create_report
             else:
                 name_ = self.original_data.name_nr
                 x_ = self.original_data.x
                 y_ = self.original_data.y
+                if self._data_label__ is not None:
+                    self._data_label__.configure(text=name_)
                 calc_result_row = self.perform_calculation(x_data = x_, y_data = y_, z_data = None, name = name_, stk_index = None)
                 if self.create_report:
                     self.add_to_report(row = calc_result_row)
             self.mainwindow.config(cursor='')
-            self.show_report()
+            if self.show_stk_report:
+                self.show_report()
         elif self.original_data.type.lower() == 'single 2d':
-            calc_result_row = self.perform_calculation(name = self.original_data.name_nr, y_data = self.original_data.y, x_data = self.original_data.x)
+            name_ = self.original_data.name_nr
+            if self._data_label__ is not None:
+                self._data_label__.configure(text=name_)
+            calc_result_row = self.calculate(name = self.original_data.name_nr, y_data = self.original_data.y, x_data = self.original_data.x)
             self.add_to_report(row=calc_result_row)
 
-    def process_group(self, headers = None):
+    def perform_group_calculations(self, headers = None):
         ''' Triggers 'perform_calculation' for all data in the current group. '''
-        self.collected_reports['rows'] = []
         self.consecutive_number = 1
+        self.show_stk_report = False
+        self.collected_reports['rows'] = []
         self.app.clear_results(skip_question=True)
         self.mainwindow.config(cursor='watch')
         spectra = copy.copy(self.app.sel_first._values)
@@ -179,17 +197,7 @@ class SubMethods():
             self.eleana.selections['first'] = index
             self.original_data = copy.deepcopy(self.eleana.dataset[index])
             self.result_data = self.eleana.results_dataset[i]
-            self.ok_clicked()
-            # if self.create_report:
-            #     to_report = self.perform_calculation()
-            #     if not to_report:
-            #         print('perform_calculations() did not return row to add to the report')
-            #     if len(to_report) != len(self.collected_reports['headers']):
-            #         print('Error. The number of headers is different than number of columns in the report')
-            #     self.ok_clicked()
-            #     self.add_to_report(row = to_report)
-            # else:
-            #     self.ok_clicked()
+            self.perform_single_calculations()
             i += 1
             self.consecutive_number+=1
         self.mainwindow.config(cursor='')
@@ -228,6 +236,10 @@ class SubMethods():
         df = pandas.DataFrame(rows, columns=headers)
         table = CreateFromTable(window_title="Results of integration", eleana_app=self.eleana, master=self.mainwindow, df=df)
         response = table.get()
+
+    def clear_report(self):
+        self.collected_reports['rows'] = []
+        self.consecutive_number = 0
 
     def extract_region(self):
         ''' Extract data on the basis of selected ranges in self.eleana.color_span['ranges'] '''

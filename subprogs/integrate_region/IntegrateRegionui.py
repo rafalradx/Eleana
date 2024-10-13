@@ -52,10 +52,16 @@ class IntegrateRegionUI:
     def ok_clicked(self):
         pass
 
-    def cancel(self):
+    def process_group_clicked(self):
         pass
 
-    def process_group(self):
+    def show_report_clicked(self):
+        pass
+
+    def clear_report_clicked(self):
+        pass
+
+    def cancel(self):
         pass
 
 

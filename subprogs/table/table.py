@@ -15,7 +15,7 @@ PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "table.ui"
 
 class CreateFromTable:
-    def __init__(self, eleana_app, master=None, list2D = None, df = None, name = None, group = None, loadOnStart = None, window_title = None):
+    def __init__(self, eleana_app, master=None, list2D = None, df = None, name = None, group = None, loadOnStart = None, window_title = None, default_x_axis = None, default_y_axis = None):
         self.master = master
         self.eleana = eleana_app
         self.builder = builder = pygubu.Builder()
@@ -40,6 +40,10 @@ class CreateFromTable:
         self.sel_x_axis = builder.get_object('sel_x_axis', master)
         self.sel_rey_axis = builder.get_object('sel_rey_axis', master)
         self.sel_imy_axis = builder.get_object('sel_imy_axis', master)
+        if default_x_axis:
+            self.sel_x_axis.set(default_x_axis)
+        if default_y_axis:
+            self.sel_y_axis.set(default_y_axis)
 
         if name:
             self.entry_name.insert(0, name)

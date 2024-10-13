@@ -8,16 +8,18 @@ from assets.Error import Error
 from integrate_region.IntegrateRegionui import IntegrateRegionUI as WindowGUI
 #from IntegrateRegionui import IntegrateRegionUI as WindowGUI
 
-TITLE = 'Integrate region'  # <--- TITLE OF THE WINDOW
-ON_TOP = True               # <--- IF TRUE THE WINDOW WILL BE ALWAYS ON TOP
-REGIONS = True              # <--- IF TRUE THE DATA WILL BE EXTRACTED FROM REGIONS IN SELF.ELEANA.COLOR_SPAN
-TWO_SETS = False            # <--- IF TRUE THEN FIRST AND SECOND DATA WILL BE AVAILABLE
-REPORT = True               # <--- IF TRUE THEN REPORT WILL BE CREATED AFTER CALCULATIONS
-STACK_SEP = True            # <--- IF TRUE THEN EACH DATA IS A STACK WILL BE CALCULATED SEPARATELY
-                            #      WHEN FALSE THEN YOU MUST CREATE A METHOD THAT CALCS OF THE WHOLE STACK
+TITLE = 'Integrate region'              # <--- TITLE OF THE WINDOW
+WORK_ON_START = False                   # <--- IF TRUE THEN CALCULATION ON CURRENT SELECTED DATA IS PERFORMED ON WINDOW OPENING
+ON_TOP = True                           # <--- IF TRUE THE WINDOW WILL BE ALWAYS ON TOP
+REGIONS = True                          # <--- IF TRUE THE DATA WILL BE EXTRACTED FROM REGIONS IN SELF.ELEANA.COLOR_SPAN
+TWO_SETS = False                        # <--- IF TRUE THEN FIRST AND SECOND DATA WILL BE AVAILABLE FOR CALCULATIONS
+REPORT = True                           # <--- IF TRUE THEN REPORT WILL BE CREATED AFTER CALCULATIONS
+STACK_SEP = True                        # <--- IF TRUE THEN EACH DATA IS A STACK WILL BE CALCULATED SEPARATELY
+                                        #      WHEN FALSE THEN YOU MUST CREATE A METHOD THAT CALCS OF THE WHOLE STACK
+                                        # ||| CREATE NAME OF COLUMS FOR REPORT TO BE CREATED
 REPORT_HEADERS = ['Nr', 'Name', 'Parameter values \n for consecutive data in stack', 'Integral Value'] # <--- Define names of columns in the Report
-
-
+DATA_LABEL_WIDGET = 'data_label'        # <--- ID OF THE LABEL WIDGET WHERE NAME OF CURRENTLY SELECTED DATA WILL APPEAR.
+                                        #      THE LABEL MUST EXIST IN THE GUI. IF NOT USED SET THIS TO NONE
 
 
 class IntegrateRegion(SubMethods, WindowGUI):
@@ -31,7 +33,7 @@ class IntegrateRegion(SubMethods, WindowGUI):
         self.collected_reports = {'headers':REPORT_HEADERS, 'rows':[]}
         # Use second data
         self.use_second = TWO_SETS
-        SubMethods.__init__(self, app=app, which=which, use_second=self.use_second, stack_sep = STACK_SEP)
+        SubMethods.__init__(self, app=app, which=which, use_second=self.use_second, stack_sep = STACK_SEP, data_label = DATA_LABEL_WIDGET, work_on_start = WORK_ON_START)
     def configure_window(self):
         # Configure Window if app is defined
         self.mainwindow.title(TITLE)
@@ -44,21 +46,32 @@ class IntegrateRegion(SubMethods, WindowGUI):
         self.field_value = self.builder.get_object('field_value', self.mainwindow)
 
 
-    def set_double_integration(self):
-        self.ok_clicked()
+    # STANDARD METHODS FOR BUTTON EVENTS ON CLICK
+    def ok_clicked(self):
+        self.consecutive_number += 1
+        self.perform_single_calculations()      # <-- This is standard function in SubprogMethods
 
+    def process_group_clicked(self):
+        self.perform_group_calculations()        # <-- This is standard function in SubprogMethods
+    def show_report_clicked(self):
+        self.show_report()                       # <-- This is standard function in SubprogMethods
+    def set_double_integration(self):
+        self.perform_single_calculations()       # <-- This is standard function in SubprogMethods
+
+    def clear_report_clicked(self):
+        self.clear_report()                      # <-- This is standard function in SubprogMethods
 
     def perform_command_line_calc(self):
         print('Command line calculation')
         pass
 
-    def perform_calculation(self,   original_data = None,
-                                    name = None,
-                                    stk_index = None,
-                                    y_data = None,
-                                    x_data = None,
-                                    z_data = None,
-                                    double=None):
+    def calculate(self, original_data = None,
+                        name = None,
+                        stk_index = None,
+                        y_data = None,
+                        x_data = None,
+                        z_data = None,
+                        double=None):
 
         ''' MODIFY THIS ACCORDING TO WHAT YOU WANT TO CALCULATE
             Method that calculates something in your subprogram
