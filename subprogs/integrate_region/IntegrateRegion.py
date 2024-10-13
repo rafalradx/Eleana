@@ -8,18 +8,24 @@ from assets.Error import Error
 from integrate_region.IntegrateRegionui import IntegrateRegionUI as WindowGUI
 #from IntegrateRegionui import IntegrateRegionUI as WindowGUI
 
+
+''' SUBPROG SETTINGS '''
+
+
 TITLE = 'Integrate region'              # <--- TITLE OF THE WINDOW
-WORK_ON_START = False                   # <--- IF TRUE THEN CALCULATION ON CURRENT SELECTED DATA IS PERFORMED ON WINDOW OPENING
+WORK_ON_START = False                   # <--- IF TRUE THEN CALCULATION ON CURRENT SELECTED DATA IS PERFORMED UPON OPENING OF THE SUBPROG
 ON_TOP = True                           # <--- IF TRUE THE WINDOW WILL BE ALWAYS ON TOP
 REGIONS = True                          # <--- IF TRUE THE DATA WILL BE EXTRACTED FROM REGIONS IN SELF.ELEANA.COLOR_SPAN
 TWO_SETS = False                        # <--- IF TRUE THEN FIRST AND SECOND DATA WILL BE AVAILABLE FOR CALCULATIONS
 REPORT = True                           # <--- IF TRUE THEN REPORT WILL BE CREATED AFTER CALCULATIONS
-STACK_SEP = True                        # <--- IF TRUE THEN EACH DATA IS A STACK WILL BE CALCULATED SEPARATELY
+STACK_SEP = True                        # <--- IF TRUE THEN EACH DATA IN A STACK WILL BE CALCULATED SEPARATELY
                                         #      WHEN FALSE THEN YOU MUST CREATE A METHOD THAT CALCS OF THE WHOLE STACK
                                         # ||| CREATE NAME OF COLUMS FOR REPORT TO BE CREATED
+DATA_LABEL_WIDGET = 'data_label'        # <--- ID OF THE LABEL WIDGET WHERE NAME OF CURRENTLY SELECTED DATA WILL APPEAR. THE LABEL MUST EXIST IN THE GUI. IF NOT USED SET THIS TO NONE
 REPORT_HEADERS = ['Nr', 'Name', 'Parameter values \n for consecutive data in stack', 'Integral Value'] # <--- Define names of columns in the Report
-DATA_LABEL_WIDGET = 'data_label'        # <--- ID OF THE LABEL WIDGET WHERE NAME OF CURRENTLY SELECTED DATA WILL APPEAR.
-                                        #      THE LABEL MUST EXIST IN THE GUI. IF NOT USED SET THIS TO NONE
+
+
+''' END OF SUBPROG SETTINGS '''
 
 
 class IntegrateRegion(SubMethods, WindowGUI):
@@ -45,12 +51,9 @@ class IntegrateRegion(SubMethods, WindowGUI):
         self.check_double_integration = self.builder.get_object('check_double', self.mainwindow)
         self.field_value = self.builder.get_object('field_value', self.mainwindow)
 
-
     # STANDARD METHODS FOR BUTTON EVENTS ON CLICK
     def ok_clicked(self):
-        self.consecutive_number += 1
         self.perform_single_calculations()      # <-- This is standard function in SubprogMethods
-
     def process_group_clicked(self):
         self.perform_group_calculations()        # <-- This is standard function in SubprogMethods
     def show_report_clicked(self):
@@ -65,14 +68,7 @@ class IntegrateRegion(SubMethods, WindowGUI):
         print('Command line calculation')
         pass
 
-    def calculate(self, original_data = None,
-                        name = None,
-                        stk_index = None,
-                        y_data = None,
-                        x_data = None,
-                        z_data = None,
-                        double=None):
-
+    def calculate(self, original_data = None, name = None, stk_index = None, y_data = None, x_data = None, z_data = None, double=None):
         ''' MODIFY THIS ACCORDING TO WHAT YOU WANT TO CALCULATE
             Method that calculates something in your subprogram
             This must be prepared for a single data

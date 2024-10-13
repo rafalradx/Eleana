@@ -155,7 +155,8 @@
                                             <property name="fg_color">#505050</property>
                                             <property name="font">{Arial} 14 {bold}</property>
                                             <property name="height">20</property>
-                                            <property name="text" translatable="yes">+</property>
+                                            <property name="hover">False</property>
+                                            <property name="text" translatable="yes">▲</property>
                                             <property name="width">20</property>
                                             <layout manager="grid">
                                               <property name="column">1</property>
@@ -173,7 +174,7 @@
                                             <property name="fg_color">#505050</property>
                                             <property name="font">{Arial} 14 {bold}</property>
                                             <property name="height">20</property>
-                                            <property name="text" translatable="yes">-</property>
+                                            <property name="text" translatable="yes">▼</property>
                                             <property name="width">20</property>
                                             <layout manager="grid">
                                               <property name="column">2</property>
@@ -306,9 +307,9 @@
                                                 <property name="command" type="command" cbtype="simple">first_up_clicked</property>
                                                 <property name="corner_radius">0</property>
                                                 <property name="fg_color">#505050</property>
-                                                <property name="font">{Arial} 14 {bold}</property>
+                                                <property name="font">{Bitstream Charter} 14 {bold}</property>
                                                 <property name="height">20</property>
-                                                <property name="text" translatable="yes">+</property>
+                                                <property name="text" translatable="yes">▲</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">2</property>
@@ -327,7 +328,7 @@
                                                 <property name="fg_color">#505050</property>
                                                 <property name="font">{Arial} 14 {bold}</property>
                                                 <property name="height">20</property>
-                                                <property name="text" translatable="yes">-</property>
+                                                <property name="text" translatable="yes">▼</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">3</property>
@@ -349,7 +350,6 @@
                                         <property name="command" type="command" cbtype="simple">first_selected</property>
                                         <property name="corner_radius">5</property>
                                         <property name="fg_color">#505050</property>
-                                        <property name="font">{Arial} 12 {}</property>
                                         <property name="text_color">#ced9d9</property>
                                         <property name="values">['None']</property>
                                         <property name="width">200</property>
@@ -411,11 +411,14 @@
                                             <child>
                                               <object class="customtkinter.CTkButton" id="f_stk_up" named="True">
                                                 <property name="command" type="command" cbtype="simple">f_stk_up_clicked</property>
+                                                <property name="compound">left</property>
                                                 <property name="corner_radius">0</property>
                                                 <property name="fg_color">#505050</property>
-                                                <property name="font">{Arial} 14 {bold}</property>
+                                                <property name="font">{Arial} 9 {}</property>
                                                 <property name="height">20</property>
-                                                <property name="text" translatable="yes">+</property>
+                                                <property name="hover">False</property>
+                                                <property name="state">normal</property>
+                                                <property name="text" translatable="yes">▲</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">0</property>
@@ -433,7 +436,7 @@
                                                 <property name="fg_color">#505050</property>
                                                 <property name="font">{Arial} 14 {bold}</property>
                                                 <property name="height">20</property>
-                                                <property name="text" translatable="yes">-</property>
+                                                <property name="text" translatable="yes">▼</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">1</property>
@@ -632,7 +635,8 @@
                                                 <property name="fg_color">#505050</property>
                                                 <property name="font">{Arial} 14 {bold}</property>
                                                 <property name="height">20</property>
-                                                <property name="text" translatable="yes">+</property>
+                                                <property name="hover">False</property>
+                                                <property name="text" translatable="yes">▲</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">1</property>
@@ -650,7 +654,7 @@
                                                 <property name="fg_color">#505050</property>
                                                 <property name="font">{Arial} 14 {bold}</property>
                                                 <property name="height">20</property>
-                                                <property name="text" translatable="yes">-</property>
+                                                <property name="text" translatable="yes">▼</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">2</property>
@@ -719,7 +723,7 @@
                                             <property name="fg_color">#505050</property>
                                             <property name="font">{Arial} 14 {bold}</property>
                                             <property name="height">20</property>
-                                            <property name="text" translatable="yes">+</property>
+                                            <property name="text" translatable="yes">▲</property>
                                             <property name="width">20</property>
                                             <layout manager="grid">
                                               <property name="column">1</property>
@@ -737,7 +741,7 @@
                                             <property name="fg_color">#505050</property>
                                             <property name="font">{Arial} 14 {bold}</property>
                                             <property name="height">20</property>
-                                            <property name="text" translatable="yes">-</property>
+                                            <property name="text" translatable="yes">▲</property>
                                             <property name="width">20</property>
                                             <layout manager="grid">
                                               <property name="column">2</property>
@@ -1037,7 +1041,7 @@
                                                 <property name="fg_color">#505050</property>
                                                 <property name="font">{Arial} 14 {bold}</property>
                                                 <property name="height">20</property>
-                                                <property name="text" translatable="yes">+</property>
+                                                <property name="text" translatable="yes">▲</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">0</property>
@@ -1055,7 +1059,7 @@
                                                 <property name="fg_color">#505050</property>
                                                 <property name="font">{Arial} 14 {bold}</property>
                                                 <property name="height">20</property>
-                                                <property name="text" translatable="yes">-</property>
+                                                <property name="text" translatable="yes">▼</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">1</property>
@@ -1224,6 +1228,7 @@
                                   <object class="customtkinter.CTkFrame" id="listFrame" named="True">
                                     <property name="corner_radius">0</property>
                                     <property name="height">2</property>
+                                    <property name="width">2</property>
                                     <layout manager="grid">
                                       <property name="column">0</property>
                                       <property name="padx">4</property>

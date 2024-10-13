@@ -182,7 +182,6 @@ class SubMethods():
 
     def perform_group_calculations(self, headers = None):
         ''' Triggers 'perform_calculation' for all data in the current group. '''
-        self.consecutive_number = 1
         self.show_stk_report = False
         self.collected_reports['rows'] = []
         self.app.clear_results(skip_question=True)
@@ -239,7 +238,7 @@ class SubMethods():
 
     def clear_report(self):
         self.collected_reports['rows'] = []
-        self.consecutive_number = 0
+        self.consecutive_number = 1
 
     def extract_region(self):
         ''' Extract data on the basis of selected ranges in self.eleana.color_span['ranges'] '''
