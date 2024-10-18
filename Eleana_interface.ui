@@ -153,10 +153,10 @@
                                             <property name="command" type="command" cbtype="simple">group_up_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#505050</property>
-                                            <property name="font">{Arial} 14 {bold}</property>
                                             <property name="height">20</property>
-                                            <property name="hover">False</property>
+                                            <property name="state">normal</property>
                                             <property name="text" translatable="yes">▲</property>
+                                            <property name="text_color">#799da2</property>
                                             <property name="width">20</property>
                                             <layout manager="grid">
                                               <property name="column">1</property>
@@ -172,9 +172,9 @@
                                             <property name="command" type="command" cbtype="simple">group_down_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#505050</property>
-                                            <property name="font">{Arial} 14 {bold}</property>
                                             <property name="height">20</property>
                                             <property name="text" translatable="yes">▼</property>
+                                            <property name="text_color">#799da2</property>
                                             <property name="width">20</property>
                                             <layout manager="grid">
                                               <property name="column">2</property>
@@ -307,9 +307,8 @@
                                                 <property name="command" type="command" cbtype="simple">first_up_clicked</property>
                                                 <property name="corner_radius">0</property>
                                                 <property name="fg_color">#505050</property>
-                                                <property name="font">{Bitstream Charter} 14 {bold}</property>
-                                                <property name="height">20</property>
                                                 <property name="text" translatable="yes">▲</property>
+                                                <property name="text_color">#c6484c</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">2</property>
@@ -326,9 +325,9 @@
                                                 <property name="compound">none</property>
                                                 <property name="corner_radius">0</property>
                                                 <property name="fg_color">#505050</property>
-                                                <property name="font">{Arial} 14 {bold}</property>
                                                 <property name="height">20</property>
                                                 <property name="text" translatable="yes">▼</property>
+                                                <property name="text_color">#c6484c</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">3</property>
@@ -411,14 +410,14 @@
                                             <child>
                                               <object class="customtkinter.CTkButton" id="f_stk_up" named="True">
                                                 <property name="command" type="command" cbtype="simple">f_stk_up_clicked</property>
-                                                <property name="compound">left</property>
+                                                <property name="compound">right</property>
                                                 <property name="corner_radius">0</property>
                                                 <property name="fg_color">#505050</property>
-                                                <property name="font">{Arial} 9 {}</property>
                                                 <property name="height">20</property>
                                                 <property name="hover">False</property>
                                                 <property name="state">normal</property>
                                                 <property name="text" translatable="yes">▲</property>
+                                                <property name="text_color">#c6484c</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">0</property>
@@ -434,9 +433,9 @@
                                                 <property name="command" type="command" cbtype="simple">f_stk_down_clicked</property>
                                                 <property name="corner_radius">0</property>
                                                 <property name="fg_color">#505050</property>
-                                                <property name="font">{Arial} 14 {bold}</property>
                                                 <property name="height">20</property>
                                                 <property name="text" translatable="yes">▼</property>
+                                                <property name="text_color">#c6484c</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">1</property>
@@ -633,10 +632,9 @@
                                                 <property name="command" type="command" cbtype="simple">second_up_clicked</property>
                                                 <property name="corner_radius">0</property>
                                                 <property name="fg_color">#505050</property>
-                                                <property name="font">{Arial} 14 {bold}</property>
                                                 <property name="height">20</property>
-                                                <property name="hover">False</property>
                                                 <property name="text" translatable="yes">▲</property>
+                                                <property name="text_color">#20acdc</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">1</property>
@@ -652,9 +650,8 @@
                                                 <property name="command" type="command" cbtype="simple">second_down_clicked</property>
                                                 <property name="corner_radius">0</property>
                                                 <property name="fg_color">#505050</property>
-                                                <property name="font">{Arial} 14 {bold}</property>
-                                                <property name="height">20</property>
                                                 <property name="text" translatable="yes">▼</property>
+                                                <property name="text_color">#20acdc</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">2</property>
@@ -721,9 +718,9 @@
                                             <property name="command" type="command" cbtype="simple">s_stk_up_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#505050</property>
-                                            <property name="font">{Arial} 14 {bold}</property>
                                             <property name="height">20</property>
                                             <property name="text" translatable="yes">▲</property>
+                                            <property name="text_color">#20acdc</property>
                                             <property name="width">20</property>
                                             <layout manager="grid">
                                               <property name="column">1</property>
@@ -739,9 +736,8 @@
                                             <property name="command" type="command" cbtype="simple">s_stk_down_clicked</property>
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#505050</property>
-                                            <property name="font">{Arial} 14 {bold}</property>
-                                            <property name="height">20</property>
-                                            <property name="text" translatable="yes">▲</property>
+                                            <property name="text" translatable="yes">▼</property>
+                                            <property name="text_color">#20acdc</property>
                                             <property name="width">20</property>
                                             <layout manager="grid">
                                               <property name="column">2</property>
@@ -920,9 +916,9 @@
                                                 <property name="command" type="command" cbtype="simple">result_up_clicked</property>
                                                 <property name="corner_radius">0</property>
                                                 <property name="fg_color">#505050</property>
-                                                <property name="font">{Arial} 14 {bold}</property>
                                                 <property name="height">20</property>
-                                                <property name="text" translatable="yes">+</property>
+                                                <property name="text" translatable="yes">▲</property>
+                                                <property name="text_color">#3c9b59</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">1</property>
@@ -938,9 +934,9 @@
                                                 <property name="command" type="command" cbtype="simple">result_down_clicked</property>
                                                 <property name="corner_radius">0</property>
                                                 <property name="fg_color">#505050</property>
-                                                <property name="font">{Arial} 14 {bold}</property>
                                                 <property name="height">20</property>
-                                                <property name="text" translatable="yes">-</property>
+                                                <property name="text" translatable="yes">▼</property>
+                                                <property name="text_color">#3c9b59</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">2</property>
@@ -1039,9 +1035,9 @@
                                                 <property name="command" type="command" cbtype="simple">r_stk_up_clicked</property>
                                                 <property name="corner_radius">0</property>
                                                 <property name="fg_color">#505050</property>
-                                                <property name="font">{Arial} 14 {bold}</property>
                                                 <property name="height">20</property>
                                                 <property name="text" translatable="yes">▲</property>
+                                                <property name="text_color">#3c9b59</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">0</property>
@@ -1057,9 +1053,9 @@
                                                 <property name="command" type="command" cbtype="simple">r_stk_down_clicked</property>
                                                 <property name="corner_radius">0</property>
                                                 <property name="fg_color">#505050</property>
-                                                <property name="font">{Arial} 14 {bold}</property>
                                                 <property name="height">20</property>
                                                 <property name="text" translatable="yes">▼</property>
+                                                <property name="text_color">#3c9b59</property>
                                                 <property name="width">20</property>
                                                 <layout manager="grid">
                                                   <property name="column">1</property>

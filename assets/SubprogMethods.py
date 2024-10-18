@@ -20,6 +20,7 @@ class SubMethods():
             self.master = self.app.mainwindow
             self.eleana = self.app.eleana
             self.grapher = self.app.grapher
+            self.update = self.app.update
             if data_label is not None:
                 data_label_text = "self._data_label__ = self.builder.get_object(" + data_label + ", self.mainwindow)"
                 exec(data_label_text)
@@ -235,6 +236,9 @@ class SubMethods():
         df = pandas.DataFrame(rows, columns=headers)
         table = CreateFromTable(window_title="Results of integration", eleana_app=self.eleana, master=self.mainwindow, df=df)
         response = table.get()
+        self.update.dataset_list()
+        self.update.group_list()
+        self.update.all_lists()
 
     def clear_report(self):
         self.collected_reports['rows'] = []

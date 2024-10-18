@@ -173,7 +173,7 @@ class CreateFromTable:
             info = CTkMessagebox(title="", message="The data was added to the dataset.", icon="info")
 
     def edit_parameters(self):
-        info = CTkMessagebox(title = "Edit parameters", message="This option is not implmented yet. Please edit pratmeters after addition of the data.")
+        info = CTkMessagebox(title = "Edit parameters", message="This option is not implemented yet. Please edit parameters after addition of the data.")
     def generate_table(self, df=None, list2D=None):
         if df is not None:
             self.table = Sheet(self.tableFrame)

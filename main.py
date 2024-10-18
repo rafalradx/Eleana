@@ -186,6 +186,9 @@ class MainApp:
     def set_grapher(self, grapher):
         self.grapher = grapher
 
+    def set_update(self, update):
+        self.update = update
+
     def set_pane_height(self):
         self.mainwindow.update_idletasks()
         self.panedwindow2.sashpos(0, 700)
@@ -1656,6 +1659,7 @@ export = Export(app)
 init = Init(main_menu)
 context_menu = ContextMenu(app)
 update = Update(main_menu)  # This contains methods for update things like lists, settings, gui, groups etc.
+app.set_update(update)
 
 # Initialize basic settings: geometry, icon, graph, binding, etc
 init.main_window()
@@ -1670,6 +1674,7 @@ grapher.plot_graph()
 # Hide or show widgets in GUI
 update.gui_widgets()
 update.all_lists()
+
 
 # Set graph Frame scalable
 app.graphFrame.columnconfigure(0, weight=1)
