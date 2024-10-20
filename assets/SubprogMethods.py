@@ -6,7 +6,7 @@ from subprogs.table.table import CreateFromTable
 import pandas
 
 class SubMethods():
-    def __init__(self, app=None, which='first', use_second = False, stack_sep = True, data_label = None, work_on_start = False):
+    def __init__(self, app=None, which='first', use_second = False, stack_sep = True, data_label = None, work_on_start = False, window_title='', on_top = True):
         # Set get_from_region to use selected range for data
         self.original_data = None
         self.original_data2 = None
@@ -16,11 +16,15 @@ class SubMethods():
         self.show_stk_report = True
         self.work_on_start = work_on_start
         if app:
+            self.batch = False
+            self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
             self.app = app
             self.master = self.app.mainwindow
             self.eleana = self.app.eleana
             self.grapher = self.app.grapher
             self.update = self.app.update
+            self.mainwindow.title(window_title)
+            self.mainwindow.attributes('-topmost', on_top)
             if data_label is not None:
                 data_label_text = "self._data_label__ = self.builder.get_object(" + data_label + ", self.mainwindow)"
                 exec(data_label_text)
@@ -31,6 +35,7 @@ class SubMethods():
             self.master = None
             self.eleana = None
             self.grapher = None
+            self.batch = True
         # Set to which selection 'First' or 'Second'
         self.which = which
         self.use_second = use_second
@@ -105,14 +110,13 @@ class SubMethods():
         if self.work_on_start:
             self.perform_single_calculations()
 
-
     def data_changed(self):
         ''' Activate get_data when selection changed.
             This is triggered by the Observer.   '''
         self.get_data()
         self.perform_single_calculations()
 
-    def update_result_data(self, y=None, x=None):
+    def update_result_data(self, y=None, x=None, z=None):
         ''' Move calculated data in y and x to self.eleana.result_dataset. '''
 
         # Update results if there was a single data
@@ -131,9 +135,25 @@ class SubMethods():
             else:
                 print('Result X:')
                 print(x)
+        if z is not None:
+            if self.app:
+                self.result_data.z = z
+            else:
+                print('Result Z:')
+                print(z)
         if self.app:
             self.grapher.plot_graph()
-
+    def prep_calc_data(self, dataset, x_data, y_data, z_data, name):
+        if dataset and self.app is None:
+            x_data = self.original_data.x
+            y_data = self.original_data.y
+            z_data = self.original_data.z
+            name = self.original_data.name_nr
+        x_cal = x_data
+        y_cal = y_data
+        z_cal = z_data
+        name_cal = name
+        return x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal
     def perform_single_calculations(self, value=None):
         if self.original_data is None:
             if self._data_label__ is not None:
@@ -153,7 +173,7 @@ class SubMethods():
                     z_ = self.original_data.z[self.i_stk]
                     if self._data_label__ is not None:
                         self._data_label__.configure(text = name_)
-                    calc_result_row = self.calculate(x_data = x_, y_data = y_, z_data = z_, name = name_, stk_index = self.i_stk)
+                    calc_result_row = self.calculate(x = x_, y = y_, z = z_, name = name_, stk_index = self.i_stk)
                     try:
                         self.add_to_report(row = calc_result_row)
                     except ValueError:
@@ -168,7 +188,7 @@ class SubMethods():
                 y_ = self.original_data.y
                 if self._data_label__ is not None:
                     self._data_label__.configure(text=name_)
-                calc_result_row = self.perform_calculation(x_data = x_, y_data = y_, z_data = None, name = name_, stk_index = None)
+                calc_result_row = self.calculate_stack(x = x_, y = y_, z = None, name = name_, stk_index = None)
                 if self.create_report:
                     self.add_to_report(row = calc_result_row)
             self.mainwindow.config(cursor='')
@@ -178,7 +198,7 @@ class SubMethods():
             name_ = self.original_data.name_nr
             if self._data_label__ is not None:
                 self._data_label__.configure(text=name_)
-            calc_result_row = self.calculate(name = self.original_data.name_nr, y_data = self.original_data.y, x_data = self.original_data.x)
+            calc_result_row = self.calculate(name = self.original_data.name_nr, y = self.original_data.y, x = self.original_data.x)
             self.add_to_report(row=calc_result_row)
 
     def perform_group_calculations(self, headers = None):
@@ -234,7 +254,26 @@ class SubMethods():
         rows = self.collected_reports['rows']
         headers = self.collected_reports['headers']
         df = pandas.DataFrame(rows, columns=headers)
-        table = CreateFromTable(window_title="Results of integration", eleana_app=self.eleana, master=self.mainwindow, df=df)
+        default_x = self.collected_reports['default_x']
+        default_y = self.collected_reports['default_y']
+        group = self.eleana.selections['group']
+        x_unit = self.collected_reports['x_unit']
+        x_name = self.collected_reports['x_name']
+        y_name = self.collected_reports['y_name']
+        y_unit = self.collected_reports['y_unit']
+
+        table = CreateFromTable(window_title="Results of integration",
+                                eleana_app=self.eleana,
+                                master=self.mainwindow,
+                                df=df,
+                                name='Results of Integration',
+                                default_x_axis=default_x,
+                                default_y_axis=default_y,
+                                x_unit = x_unit,
+                                x_name = x_name,
+                                y_unit = y_unit,
+                                y_name = y_name,
+                                group=group)
         response = table.get()
         self.update.dataset_list()
         self.update.group_list()
