@@ -8,6 +8,7 @@ import pandas
 class SubMethods():
     def __init__(self, app=None, which='first', use_second = False, stack_sep = True, data_label = None, work_on_start = False, window_title='', on_top = True):
         # Set get_from_region to use selected range for data
+        #self.collected_reports = None
         self.original_data = None
         self.original_data2 = None
         self.get_from_region = True
@@ -144,11 +145,15 @@ class SubMethods():
         if self.app:
             self.grapher.plot_graph()
     def prep_calc_data(self, dataset, x_data, y_data, z_data, name):
+        if self.get_from_region:
+            self.extract_region()
         if dataset and self.app is None:
             x_data = self.original_data.x
             y_data = self.original_data.y
             z_data = self.original_data.z
             name = self.original_data.name_nr
+            if self.get_from_region:
+                self.extract_region()
         x_cal = x_data
         y_cal = y_data
         z_cal = z_data
@@ -283,7 +288,7 @@ class SubMethods():
         self.collected_reports['rows'] = []
         self.consecutive_number = 1
 
-    def extract_region(self):
+    def extract_region(self, x=None, y=None):
         ''' Extract data on the basis of selected ranges in self.eleana.color_span['ranges'] '''
         ranges = self.eleana.color_span['ranges']
         if not ranges:
