@@ -14,10 +14,10 @@ class Groupassign:
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)
-        self.master = master.mainwindow
-        self.eleana = master.eleana
-        self.response = None
         self.app = master
+        self.master = self.app.mainwindow
+        self.eleana = self.app.eleana
+        self.response = None
         # Main widget
         self.mainwindow = builder.get_object("toplevel1", self.master)
         builder.connect_callbacks(self)

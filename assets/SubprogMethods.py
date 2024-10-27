@@ -43,7 +43,7 @@ class SubMethods():
         self.stack_sep = stack_sep
         # Do not build window if app is not defined
         if self.app:
-            # Create window
+            # Configure Window
             self.configure_window()
             # Create observer
             self.observer = Observer(self.eleana, self)
@@ -106,14 +106,17 @@ class SubMethods():
         # Create reference to data in results
         self.result_index = self.eleana.selections['result']
         self.result_data = self.eleana.results_dataset[self.result_index]
-        if self.get_from_region:
-            self.extract_region()
+        # if self.get_from_region:
+        #     self.extract_region()
         if self.work_on_start:
             self.perform_single_calculations()
 
-    def data_changed(self):
+    def data_changed(self, variable=None):
         ''' Activate get_data when selection changed.
             This is triggered by the Observer.   '''
+        # If f_stk or s_stk variable is changed ignore Observer call
+        if variable == 'f_stk' or variable == 's_stk':
+            return
         self.get_data()
         self.perform_single_calculations()
 
@@ -145,8 +148,6 @@ class SubMethods():
         if self.app:
             self.grapher.plot_graph()
     def prep_calc_data(self, dataset, x_data, y_data, z_data, name):
-        if self.get_from_region:
-            self.extract_region()
         if dataset and self.app is None:
             x_data = self.original_data.x
             y_data = self.original_data.y
@@ -154,6 +155,8 @@ class SubMethods():
             name = self.original_data.name_nr
             if self.get_from_region:
                 self.extract_region()
+        if self.get_from_region:
+            x_data, y_data = self.extract_region(x = x_data, y = y_data)
         x_cal = x_data
         y_cal = y_data
         z_cal = z_data
@@ -288,7 +291,7 @@ class SubMethods():
         self.collected_reports['rows'] = []
         self.consecutive_number = 1
 
-    def extract_region(self, x=None, y=None):
+    def extract_region_in_dataset(self):
         ''' Extract data on the basis of selected ranges in self.eleana.color_span['ranges'] '''
         ranges = self.eleana.color_span['ranges']
         if not ranges:
@@ -325,3 +328,49 @@ class SubMethods():
                     extracted_y = y[indexes]
                 self.original_data2.x = extracted_x
                 self.original_data2.y = extracted_y
+
+    def extract_region(self, x=None, y=None):
+        ''' Extract data for pair (x,y) on the basis of selected ranges in self.eleana.color_span['ranges'] '''
+        ranges = self.eleana.color_span['ranges']
+        if not ranges:
+            return x,y
+        indexes = []
+        for range_ in ranges:
+            idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
+            indexes.extend(idx.tolist())
+        extracted_x = x[indexes]
+        extracted_y = y[indexes]
+        return extracted_x, extracted_y
+
+        # if self.original_data:
+        #     x = self.original_data.x
+        #     y = self.original_data.y
+        #     is_2D = len(y.shape) == 2
+        #     indexes = []
+        #     for range_ in ranges:
+        #         idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
+        #         indexes.extend(idx.tolist())
+        #     extracted_x = x[indexes]
+        #     if is_2D:
+        #         extracted_y = y[:, indexes]
+        #     else:
+        #         extracted_y = y[indexes]
+        #     self.original_data.x = extracted_x
+        #     self.original_data.y = extracted_y
+        # if self.original_data2:
+        #     # Extract for second
+        #     if self.use_second:
+        #         x = self.original_data2.x
+        #         y = self.original_data2.y
+        #         is_2D = len(y.shape) == 2
+        #         indexes = []
+        #         for range_ in ranges:
+        #             idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
+        #             indexes.extend(idx.tolist())
+        #         extracted_x = x[indexes]
+        #         if is_2D:
+        #             extracted_y = y[:, indexes]
+        #         else:
+        #             extracted_y = y[indexes]
+        #         self.original_data2.x = extracted_x
+        #         self.original_data2.y = extracted_y

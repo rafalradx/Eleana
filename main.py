@@ -51,6 +51,8 @@ from DataClasses import Stack
 # append.(['name of instance without self., 'Command to close']
 
 list_of_subprogs = []
+from distance_read.Distance_read import DistanceRead
+list_of_subprogs.append(['xy_distance', 'cancel'])
 from integrate_region.IntegrateRegion import IntegrateRegion
 list_of_subprogs.append(['integrate_region', 'cancel'])
 from normalize.Normalize import Normalize
@@ -1075,7 +1077,7 @@ class MainApp:
         av_data = self.sel_first._values
         av_data.pop(0)
         # Open dialog if index_to_delete was not set
-        if not index_to_delete:
+        if index_to_delete is None:
             self.select_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'],
                                       items=av_data)
             response = self.select_data.get()
@@ -1101,7 +1103,7 @@ class MainApp:
         update.gui_widgets()
         self.comparison_view()
 
-    def delete_data(self, which):
+    def delete_data(self, which, dialog=True):
         if which == 'result':
             self.delete_sel_result()
             return
@@ -1114,7 +1116,7 @@ class MainApp:
         response = dialog.get()
         if response == 'No':
             return
-        self.delete_selected_data(index)
+        self.delete_selected_data(index_to_delete=index)
 
     def duplicate_data(self, which):
         index = self.eleana.selections[which]
@@ -1409,7 +1411,7 @@ class MainApp:
     def first_to_group(self):
         if self.eleana.selections['first'] < 0:
             return
-        self.group_assign = Groupassign(app, eleana, 'first')
+        self.group_assign = Groupassign(master=app, which='first')
         response = self.group_assign.get()
         update.group_list()
         update.all_lists()
@@ -1417,7 +1419,7 @@ class MainApp:
     def second_to_group(self):
         if self.eleana.selections['second'] < 0:
             return
-        group_assign = Groupassign(app, 'second')
+        group_assign = Groupassign(master=app, which='second')
         response = group_assign.get()
 
     def create_simple_static_plot(self):
@@ -1463,6 +1465,13 @@ class MainApp:
         for i in to_delete:
             self.eleana.static_plots.pop(i)
         main_menu.create_showplots_menu()
+
+    def xy_distance(self):
+        self.sel_graph_cursor('Selection of points')
+        self.sel_cursor_mode.set('Selection of points')
+        self.xy_distance = DistanceRead(self, which = 'first')
+
+
 
     '''***********************************************
     *           GRAPH SWITCHES AND BUTTONS           *

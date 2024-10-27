@@ -1,0 +1,568 @@
+<?xml version='1.0' encoding='utf-8'?>
+<interface version="1.4" author="PygubuDesigner 0.39.3">
+  <project>
+    <settings>
+      <setting id="name">distance_read</setting>
+      <setting id="description">Window for normalize data</setting>
+      <setting id="module_name">DistanceRead</setting>
+      <setting id="template">application</setting>
+      <setting id="main_widget">toplevel1</setting>
+      <setting id="main_classname">DistanceRead</setting>
+      <setting id="main_menu" />
+      <setting id="output_dir">.</setting>
+      <setting id="output_dir2" />
+      <setting id="import_tkvariables">False</setting>
+      <setting id="use_ttk_styledefinition_file">False</setting>
+      <setting id="use_i18n">False</setting>
+      <setting id="all_ids_attributes">False</setting>
+      <setting id="generate_code_onsave">True</setting>
+      <setting id="use_window_centering_code">True</setting>
+      <setting id="ttk_style_definition_file" />
+    </settings>
+    <customwidgets />
+  </project>
+  <object class="tk.Toplevel" id="toplevel1">
+    <property name="height">200</property>
+    <property name="resizable">horizontally</property>
+    <property name="width">400</property>
+    <containerlayout manager="grid">
+      <property name="anchor">center</property>
+      <property type="col" id="0" name="weight">1</property>
+    </containerlayout>
+    <child>
+      <object class="customtkinter.CTkFrame" id="ctkframe1" named="True">
+        <layout manager="grid">
+          <property name="column">0</property>
+          <property name="row">0</property>
+          <property name="sticky">new</property>
+        </layout>
+        <containerlayout manager="grid">
+          <property type="col" id="0" name="weight">1</property>
+        </containerlayout>
+        <child>
+          <object class="customtkinter.CTkFrame" id="mainFrame" named="True">
+            <property name="corner_radius">0</property>
+            <layout manager="grid">
+              <property name="column">0</property>
+              <property name="row">0</property>
+              <property name="sticky">nsew</property>
+            </layout>
+            <containerlayout manager="grid">
+              <property type="col" id="0" name="weight">1</property>
+            </containerlayout>
+            <child>
+              <object class="customtkinter.CTkFrame" id="ctkframe2">
+                <property name="corner_radius">0</property>
+                <layout manager="grid">
+                  <property name="column">0</property>
+                  <property name="padx">0</property>
+                  <property name="pady">0</property>
+                  <property name="row">0</property>
+                  <property name="sticky">nsew</property>
+                </layout>
+                <containerlayout manager="grid">
+                  <property type="col" id="0" name="weight">1</property>
+                </containerlayout>
+                <child>
+                  <object class="customtkinter.CTkFrame" id="ctkframe4">
+                    <property name="corner_radius">0</property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="padx">8</property>
+                      <property name="pady">8</property>
+                      <property name="row">0</property>
+                      <property name="sticky">new</property>
+                    </layout>
+                    <containerlayout manager="grid">
+                      <property type="col" id="0" name="weight">1</property>
+                      <property type="col" id="1" name="weight">1</property>
+                    </containerlayout>
+                    <child>
+                      <object class="ttk.Separator" id="separator3">
+                        <property name="orient">horizontal</property>
+                        <layout manager="grid">
+                          <property name="column">0</property>
+                          <property name="columnspan">2</property>
+                          <property name="row">0</property>
+                          <property name="sticky">ew</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="customtkinter.CTkLabel" id="ctklabel1">
+                        <property name="text" translatable="yes">DATA:</property>
+                        <layout manager="grid">
+                          <property name="column">0</property>
+                          <property name="row">1</property>
+                          <property name="sticky">w</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="customtkinter.CTkLabel" id="data_label" named="True">
+                        <property name="cursor">arrow</property>
+                        <property name="text" translatable="yes"> </property>
+                        <layout manager="grid">
+                          <property name="column">1</property>
+                          <property name="padx">5</property>
+                          <property name="row">1</property>
+                          <property name="sticky">ew</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="ttk.Separator" id="separator2">
+                        <property name="orient">horizontal</property>
+                        <layout manager="grid">
+                          <property name="column">0</property>
+                          <property name="columnspan">2</property>
+                          <property name="row">2</property>
+                          <property name="sticky">ew</property>
+                        </layout>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="customtkinter.CTkFrame" id="ctkframe6">
+                    <property name="corner_radius">0</property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="columnspan">2</property>
+                      <property name="padx">8</property>
+                      <property name="pady">8</property>
+                      <property name="row">1</property>
+                      <property name="sticky">ew</property>
+                    </layout>
+                    <containerlayout manager="grid">
+                      <property type="col" id="0" name="weight">1</property>
+                    </containerlayout>
+                    <child>
+                      <object class="customtkinter.CTkFrame" id="X_frame" named="True">
+                        <property name="corner_radius">0</property>
+                        <layout manager="grid">
+                          <property name="column">0</property>
+                          <property name="row">0</property>
+                          <property name="sticky">new</property>
+                        </layout>
+                        <containerlayout manager="grid">
+                          <property type="col" id="0" name="weight">1</property>
+                          <property type="col" id="1" name="weight">1</property>
+                          <property type="col" id="2" name="weight">1</property>
+                        </containerlayout>
+                        <child>
+                          <object class="customtkinter.CTkFrame" id="ctkframe5">
+                            <property name="corner_radius">0</property>
+                            <layout manager="grid">
+                              <property name="column">0</property>
+                              <property name="row">0</property>
+                              <property name="sticky">nsew</property>
+                            </layout>
+                            <containerlayout manager="grid">
+                              <property type="col" id="0" name="weight">1</property>
+                            </containerlayout>
+                            <child>
+                              <object class="customtkinter.CTkLabel" id="ctklabel2">
+                                <property name="compound">top</property>
+                                <property name="text" translatable="yes">X1</property>
+                                <layout manager="grid">
+                                  <property name="column">0</property>
+                                  <property name="padx">4</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="customtkinter.CTkEntry" id="x1_entry" named="True">
+                                <property name="exportselection">true</property>
+                                <property name="font">TkDefaultFont</property>
+                                <layout manager="grid">
+                                  <property name="column">0</property>
+                                  <property name="padx">4</property>
+                                  <property name="pady">4</property>
+                                  <property name="row">1</property>
+                                  <property name="sticky">ew</property>
+                                </layout>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="customtkinter.CTkFrame" id="ctkframe7">
+                            <property name="corner_radius">0</property>
+                            <layout manager="grid">
+                              <property name="column">1</property>
+                              <property name="row">0</property>
+                              <property name="sticky">nsew</property>
+                            </layout>
+                            <containerlayout manager="grid">
+                              <property type="col" id="0" name="weight">1</property>
+                            </containerlayout>
+                            <child>
+                              <object class="customtkinter.CTkLabel" id="ctklabel3">
+                                <property name="text" translatable="yes">X2</property>
+                                <layout manager="grid">
+                                  <property name="column">0</property>
+                                  <property name="padx">4</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="customtkinter.CTkEntry" id="x2_entry" named="True">
+                                <layout manager="grid">
+                                  <property name="column">0</property>
+                                  <property name="padx">4</property>
+                                  <property name="pady">4</property>
+                                  <property name="row">1</property>
+                                  <property name="sticky">ew</property>
+                                </layout>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="customtkinter.CTkFrame" id="ctkframe8">
+                            <property name="corner_radius">0</property>
+                            <layout manager="grid">
+                              <property name="column">2</property>
+                              <property name="row">0</property>
+                              <property name="sticky">nsew</property>
+                            </layout>
+                            <containerlayout manager="grid">
+                              <property type="col" id="0" name="weight">1</property>
+                            </containerlayout>
+                            <child>
+                              <object class="customtkinter.CTkLabel" id="ctklabel4">
+                                <property name="text" translatable="yes">dX = X2-X1</property>
+                                <layout manager="grid">
+                                  <property name="column">0</property>
+                                  <property name="padx">4</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="customtkinter.CTkEntry" id="dx_entry" named="True">
+                                <layout manager="grid">
+                                  <property name="column">0</property>
+                                  <property name="padx">4</property>
+                                  <property name="pady">4</property>
+                                  <property name="row">1</property>
+                                  <property name="sticky">ew</property>
+                                </layout>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="customtkinter.CTkFrame" id="Y_frame" named="True">
+                        <property name="corner_radius">0</property>
+                        <layout manager="grid">
+                          <property name="column">0</property>
+                          <property name="row">1</property>
+                          <property name="sticky">new</property>
+                        </layout>
+                        <containerlayout manager="grid">
+                          <property type="col" id="0" name="weight">1</property>
+                          <property type="col" id="1" name="weight">1</property>
+                          <property type="col" id="2" name="weight">1</property>
+                        </containerlayout>
+                        <child>
+                          <object class="customtkinter.CTkFrame" id="ctkframe11">
+                            <property name="corner_radius">0</property>
+                            <layout manager="grid">
+                              <property name="column">0</property>
+                              <property name="row">0</property>
+                              <property name="sticky">nsew</property>
+                            </layout>
+                            <containerlayout manager="grid">
+                              <property type="col" id="0" name="weight">1</property>
+                            </containerlayout>
+                            <child>
+                              <object class="customtkinter.CTkLabel" id="ctklabel5">
+                                <property name="compound">top</property>
+                                <property name="text" translatable="yes">Y1</property>
+                                <layout manager="grid">
+                                  <property name="column">0</property>
+                                  <property name="padx">4</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="customtkinter.CTkEntry" id="y1_entry" named="True">
+                                <property name="exportselection">true</property>
+                                <property name="font">TkDefaultFont</property>
+                                <layout manager="grid">
+                                  <property name="column">0</property>
+                                  <property name="padx">4</property>
+                                  <property name="pady">4</property>
+                                  <property name="row">1</property>
+                                  <property name="sticky">ew</property>
+                                </layout>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="customtkinter.CTkFrame" id="ctkframe12">
+                            <property name="corner_radius">0</property>
+                            <layout manager="grid">
+                              <property name="column">1</property>
+                              <property name="row">0</property>
+                              <property name="sticky">nsew</property>
+                            </layout>
+                            <containerlayout manager="grid">
+                              <property type="col" id="0" name="weight">1</property>
+                            </containerlayout>
+                            <child>
+                              <object class="customtkinter.CTkLabel" id="ctklabel6">
+                                <property name="text" translatable="yes">Y2</property>
+                                <layout manager="grid">
+                                  <property name="column">0</property>
+                                  <property name="padx">4</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="customtkinter.CTkEntry" id="y2_entry" named="True">
+                                <layout manager="grid">
+                                  <property name="column">0</property>
+                                  <property name="padx">4</property>
+                                  <property name="pady">4</property>
+                                  <property name="row">1</property>
+                                  <property name="sticky">ew</property>
+                                </layout>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="customtkinter.CTkFrame" id="ctkframe13">
+                            <property name="corner_radius">0</property>
+                            <layout manager="grid">
+                              <property name="column">2</property>
+                              <property name="row">0</property>
+                              <property name="sticky">nsew</property>
+                            </layout>
+                            <containerlayout manager="grid">
+                              <property type="col" id="0" name="weight">1</property>
+                            </containerlayout>
+                            <child>
+                              <object class="customtkinter.CTkLabel" id="ctklabel7">
+                                <property name="text" translatable="yes">dY = Y2-Y1</property>
+                                <layout manager="grid">
+                                  <property name="column">0</property>
+                                  <property name="padx">4</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="customtkinter.CTkEntry" id="dy_entry" named="True">
+                                <layout manager="grid">
+                                  <property name="column">0</property>
+                                  <property name="padx">4</property>
+                                  <property name="pady">4</property>
+                                  <property name="row">1</property>
+                                  <property name="sticky">ew</property>
+                                </layout>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="customtkinter.CTkFrame" id="ctkframe10">
+                    <property name="corner_radius">0</property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="row">2</property>
+                      <property name="sticky">sew</property>
+                    </layout>
+                    <containerlayout manager="grid">
+                      <property type="col" id="0" name="weight">1</property>
+                      <property type="col" id="1" name="weight">1</property>
+                    </containerlayout>
+                    <child>
+                      <object class="ttk.Separator" id="separator1">
+                        <property name="orient">horizontal</property>
+                        <layout manager="grid">
+                          <property name="column">0</property>
+                          <property name="columnspan">2</property>
+                          <property name="row">0</property>
+                          <property name="sticky">ew</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="customtkinter.CTkCheckBox" id="check_track_minmax" named="True">
+                        <property name="command" type="command" cbtype="simple">set_track_minmax</property>
+                        <property name="text" translatable="yes">Keep Min/Max Tracking</property>
+                        <layout manager="grid">
+                          <property name="column">0</property>
+                          <property name="padx">8</property>
+                          <property name="pady">8</property>
+                          <property name="row">1</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="customtkinter.CTkButton" id="btn_findminmax" named="True">
+                        <property name="command" type="command" cbtype="simple">find_minmax_clicked</property>
+                        <property name="round_height_to_even_numbers">True</property>
+                        <property name="state">normal</property>
+                        <property name="text" translatable="yes">Find Min/Max</property>
+                        <layout manager="grid">
+                          <property name="column">1</property>
+                          <property name="row">1</property>
+                          <property name="sticky">w</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="ttk.Separator" id="separator4">
+                        <property name="orient">horizontal</property>
+                        <layout manager="grid">
+                          <property name="column">0</property>
+                          <property name="columnspan">2</property>
+                          <property name="row">2</property>
+                          <property name="sticky">ew</property>
+                        </layout>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="customtkinter.CTkFrame" id="btnframe" named="True">
+            <property name="corner_radius">0</property>
+            <layout manager="grid">
+              <property name="column">0</property>
+              <property name="columnspan">2</property>
+              <property name="row">1</property>
+              <property name="sticky">n</property>
+            </layout>
+            <containerlayout manager="grid">
+              <property type="col" id="0" name="weight">1</property>
+              <property type="col" id="1" name="weight">1</property>
+              <property type="col" id="2" name="weight">1</property>
+              <property type="col" id="all" name="weight">1</property>
+            </containerlayout>
+            <child>
+              <object class="customtkinter.CTkFrame" id="leftbuttonsframe" named="True">
+                <property name="corner_radius">0</property>
+                <layout manager="grid">
+                  <property name="column">0</property>
+                  <property name="row">0</property>
+                  <property name="sticky">nsew</property>
+                </layout>
+                <containerlayout manager="grid">
+                  <property type="col" id="0" name="weight">1</property>
+                </containerlayout>
+                <child>
+                  <object class="customtkinter.CTkButton" id="ctkbutton1" named="True">
+                    <property name="command" type="command" cbtype="simple">ok_clicked</property>
+                    <property name="text" translatable="yes">Calculate</property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="padx">8</property>
+                      <property name="pady">5</property>
+                      <property name="row">0</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="customtkinter.CTkButton" id="ctkbutton3" named="True">
+                    <property name="command" type="command" cbtype="simple">show_report_clicked</property>
+                    <property name="hover">False</property>
+                    <property name="text" translatable="yes">Show report</property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="padx">8</property>
+                      <property name="pady">5</property>
+                      <property name="row">1</property>
+                    </layout>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="customtkinter.CTkFrame" id="rightbuttonsframe" named="True">
+                <property name="corner_radius">0</property>
+                <layout manager="grid">
+                  <property name="column">1</property>
+                  <property name="row">0</property>
+                  <property name="sticky">nsew</property>
+                </layout>
+                <containerlayout manager="grid">
+                  <property type="col" id="0" name="weight">1</property>
+                </containerlayout>
+                <child>
+                  <object class="customtkinter.CTkButton" id="ctkbutton2" named="True">
+                    <property name="command" type="command" cbtype="simple">process_group_clicked</property>
+                    <property name="text" translatable="yes">Process group</property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="padx">8</property>
+                      <property name="pady">5</property>
+                      <property name="row">0</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
+                  <object class="customtkinter.CTkButton" id="ctkbutton4" named="True">
+                    <property name="command" type="command" cbtype="simple">clear_report_clicked</property>
+                    <property name="text" translatable="yes">Clear report</property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="padx">8</property>
+                      <property name="pady">5</property>
+                      <property name="row">1</property>
+                    </layout>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="customtkinter.CTkFrame" id="closeframe" named="True">
+                <property name="corner_radius">0</property>
+                <layout manager="grid">
+                  <property name="column">0</property>
+                  <property name="columnspan">2</property>
+                  <property name="row">1</property>
+                  <property name="sticky">nsew</property>
+                </layout>
+                <containerlayout manager="grid">
+                  <property type="col" id="0" name="weight">1</property>
+                </containerlayout>
+                <child>
+                  <object class="customtkinter.CTkButton" id="ctkbutton5" named="True">
+                    <property name="command" type="command" cbtype="simple">cancel</property>
+                    <property name="text" translatable="yes">Cancel</property>
+                    <layout manager="grid">
+                      <property name="column">0</property>
+                      <property name="padx">8</property>
+                      <property name="pady">5</property>
+                      <property name="row">0</property>
+                    </layout>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

@@ -93,9 +93,9 @@ class Eleana:
         except ValueError:
             pass
 
-    def notify(self):
+    def notify(self, variable=None):
         for observer in self._observers:
-            observer.update(self)
+            observer.update(self, variable=variable)
 
     # Setter for attributes that should be observed ---
     def set_selections(self, variable=None, value=None):
@@ -105,7 +105,7 @@ class Eleana:
         if variable == 'result' or variable == 'r_stk':
             return
         if self.notify_on:
-            self.notify()
+            self.notify(variable=variable)
             if self.devel_mode:
                 print('Eleana.py: Activate observer')
     # End of methods for observers --------------------

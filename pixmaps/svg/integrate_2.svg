@@ -18,11 +18,8 @@
    class="feather feather-git-merge"
    version="1.1"
    id="svg53"
-   sodipodi:docname="integrate_region.svg"
-   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
-   inkscape:export-filename="/home/marcin/PycharmProjects/Eleana/pixmaps/integrate_region.png"
-   inkscape:export-xdpi="124"
-   inkscape:export-ydpi="124">
+   sodipodi:docname="integrate_2.svg"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)">
   <metadata
      id="metadata59">
     <rdf:RDF>
@@ -60,29 +57,41 @@
   <path
      id="path956"
      style="fill:none;stroke:#aaaaaa;stroke-width:1.44155;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-     d="M 14.939602,4.784927 C 12.641494,5.1339503 11.249118,6.9507301 11.141042,9.0122106 10.706351,11.839194 10.948787,14.97998 9.4037471,17.367888 9.1058203,17.848801 8.6951655,18.310725 8.0282691,18.420423" />
+     d="M 11.729411,4.4027614 C 9.4313031,4.7517847 8.038927,6.5685645 7.9308509,8.630045 7.4961598,11.457028 7.7385962,14.597814 6.193556,16.985722 5.8956292,17.466635 5.4849744,17.928559 4.818078,18.038257" />
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-weight:normal;font-size:11.2012px;line-height:1.25;font-family:sans-serif;fill:#aaaaaa;fill-opacity:1;stroke:none;stroke-width:0.420045;stroke-opacity:1"
+     x="10.551983"
+     y="17.105318"
+     id="text966"
+     transform="scale(1.0344281,0.96671774)"><tspan
+       sodipodi:role="line"
+       id="tspan964"
+       x="10.551983"
+       y="17.105318"
+       style="fill:#aaaaaa;fill-opacity:1;stroke:none;stroke-width:0.420045;stroke-opacity:1">dx</tspan></text>
   <text
      xml:space="preserve"
      style="font-style:normal;font-weight:normal;font-size:5.1794px;line-height:1.25;font-family:sans-serif;fill:#aaaaaa;fill-opacity:1;stroke:none;stroke-width:0.194227;stroke-opacity:1"
-     x="16.337942"
-     y="6.7246761"
+     x="13.146287"
+     y="6.340291"
      id="text966-5"
      transform="scale(1.0058079,0.99422563)"><tspan
        sodipodi:role="line"
        id="tspan964-3"
-       x="16.337942"
-       y="6.7246761"
+       x="13.146287"
+       y="6.340291"
        style="font-weight:bold;fill:#aaaaaa;fill-opacity:1;stroke:none;stroke-width:0.194227;stroke-opacity:1">1</tspan></text>
   <text
      xml:space="preserve"
-     style="font-style:normal;font-weight:normal;font-size:5.12893px;line-height:1.25;font-family:sans-serif;fill:#aaaaaa;fill-opacity:1;stroke:none;stroke-width:0.192334;stroke-opacity:1"
-     x="3.4060297"
-     y="23.015034"
+     style="font-style:normal;font-weight:normal;font-size:4.2939px;line-height:1.25;font-family:sans-serif;fill:#aaaaaa;fill-opacity:1;stroke:none;stroke-width:0.161021;stroke-opacity:1"
+     x="1.2371423"
+     y="20.503214"
      id="text966-5-5"
-     transform="scale(1.1224868,0.89087909)"><tspan
+     transform="scale(1.0344281,0.96671774)"><tspan
        sodipodi:role="line"
        id="tspan964-3-6"
-       x="3.4060297"
-       y="23.015034"
-       style="font-weight:bold;fill:#aaaaaa;fill-opacity:1;stroke:none;stroke-width:0.192334;stroke-opacity:1">0</tspan></text>
+       x="1.2371423"
+       y="20.503214"
+       style="font-weight:bold;fill:#aaaaaa;fill-opacity:1;stroke:none;stroke-width:0.161021;stroke-opacity:1">0</tspan></text>
 </svg>

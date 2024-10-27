@@ -78,6 +78,6 @@ class Observer:
         self.observed = observed_instance
         self.subscriber = subscriber_instance
         self.observed.attach(self)
-    def update(self, subject):
+    def update(self, subject, variable=None):
         if subject == self.observed:
-            self.subscriber.data_changed()
+            self.subscriber.data_changed(variable=variable)

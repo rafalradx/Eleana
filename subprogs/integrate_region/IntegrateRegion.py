@@ -106,7 +106,6 @@ class IntegrateRegion(SubMethods, WindowGUI):
         else:
             print(info__)
 
-
     def calculate(self, dataset = None, name = None, stk_index = None, y = None, x = None, z = None,
                   double=None
                   ):

@@ -40,19 +40,15 @@ class MainMenu:
         self.icon_import_emx = self.prepare_icon("import_emx.png")
         self.icon_import_adani = self.prepare_icon("import_adani.png")
         self.icon_edit_par = self.prepare_icon("edit_par.png")
-        # self.icon_integrate_region = self.prepare_icon("integrate_region.png")
-        # self.icon_statistics = self.prepare_icon("statistics.png")
-        # self.icon_create_static_plot = self.prepare_icon("create_static_plot.png")
-        # self.icon_delete_static_plot = self.prepare_icon("delete_static_plot.png")
-        # self.icon_static_plot = self.prepare_icon("static_plot.png")
+        self.icon_integrate_region = self.prepare_icon("integrate_region.png")
+        self.icon_statistics = self.prepare_icon("statistics.png")
+        self.icon_create_static_plot = self.prepare_icon("create_static_plot.png")
+        self.icon_delete_static_plot = self.prepare_icon("delete_static_plot.png")
         self.icon_export_first = self.prepare_icon("export_first.png")
         self.icon_export_group = self.prepare_icon("export_group.png")
         self.icon_normalize = self.prepare_icon("normalize.png")
-        self.icon_integrate_region = self.prepare_icon("x.png")
-        self.icon_statistics = self.prepare_icon("x.png")
-        self.icon_create_static_plot = self.prepare_icon("x.png")
-        self.icon_delete_static_plot = self.prepare_icon("x.png")
-        self.icon_static_plot = self.prepare_icon("x.png")
+        self.icon_distance = self.prepare_icon("distance.png")
+        self.icon_static_plot = self.prepare_icon("static_plot.png")
 
         ''' BUILD MENU '''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth_bar, activeborderwidth=self.borderwidth)
@@ -192,6 +188,10 @@ class MainMenu:
                             borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
         #self.main_menu.add_cascade(label="Analysis", menu=self.menu_analysis, image=self.icon_dropdown, compound="left")
         self.main_menu.add_cascade(label=" Analysis ", menu=self.menu_analysis)
+
+        #  - Distance read
+        self.menu_analysis.add_command(label="Calculate XY Distance", command=self.app.xy_distance,
+                                       image=self.icon_distance, compound="left")
 
         #  - Integrate region
         self.menu_analysis.add_command(label="Integrate region", command=self.app.integrate_region,

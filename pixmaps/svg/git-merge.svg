@@ -1,1 +1,86 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#aaaaaa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather feather-git-merge"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="20"
+   height="20"
+   viewBox="0 0 24 24"
+   fill="none"
+   stroke="#aaaaaa"
+   stroke-width="1.5"
+   stroke-linecap="round"
+   stroke-linejoin="round"
+   class="feather feather-git-merge"
+   version="1.1"
+   id="svg53"
+   sodipodi:docname="git-merge.svg"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)">
+  <metadata
+     id="metadata59">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs57" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1128"
+     id="namedview55"
+     showgrid="false"
+     inkscape:zoom="15.7"
+     inkscape:cx="18.121775"
+     inkscape:cy="16.971973"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg53" />
+  <g
+     id="g950"
+     transform="matrix(0.98676557,0,0,0.92608273,28.397512,6.412936)">
+    <path
+       style="fill:none;stroke:#aaaaaa;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:2.4, 2.4;stroke-dashoffset:0;stroke-opacity:1"
+       d="m 1.6740457,13.449018 c 0,0 3.5428256,-1.670214 5.352455,-3.4798418 1.5467466,-1.546747 2.5321847,-6.4758813 4.7166733,-6.589284"
+       id="path108"
+       sodipodi:nodetypes="csc" />
+    <path
+       style="fill:none;stroke:#aaaaaa;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:2.4, 2.4;stroke-dashoffset:0;stroke-opacity:1"
+       d="m 21.812302,-6.6892332 c 0,0 -3.542826,1.6702136 -5.352455,3.4798414 -1.546747,1.546747 -2.532185,6.4758813 -4.716673,6.589284"
+       id="path108-7"
+       sodipodi:nodetypes="csc" />
+  </g>
+  <path
+     id="path956"
+     style="fill:none;stroke:#aaaaaa;stroke-width:1.44155;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     d="M 11.572591,4.8613602 C 9.2355563,5.2103835 7.6405565,7.0271633 7.3025654,9.0886438 6.5525836,11.915627 6.4447311,15.056413 4.6333698,17.444321 4.2818072,17.925234 3.8196344,18.387158 3.1405035,18.496856" />
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-weight:normal;font-size:11.2012px;line-height:1.25;font-family:sans-serif;fill:#aaaaaa;fill-opacity:1;stroke:none;stroke-width:0.420045;stroke-opacity:1"
+     x="10.034759"
+     y="17.105318"
+     id="text966"
+     transform="scale(1.0344281,0.96671774)"><tspan
+       sodipodi:role="line"
+       id="tspan964"
+       x="10.034759"
+       y="17.105318"
+       style="fill:#aaaaaa;fill-opacity:1;stroke:none;stroke-width:0.420045;stroke-opacity:1">dx</tspan></text>
+</svg>
