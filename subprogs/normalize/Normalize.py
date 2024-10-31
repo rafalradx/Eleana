@@ -168,7 +168,7 @@ class Normalize(NormalizeUI):
         self.result_data = self.eleana.results_dataset[self.result_index]
         if start:
             self.perform_calculation()
-    def data_changed(self):
+    def data_changed(self, variable=None, value=None):
         ''' Activate getting new data when selection changed'''
         ''' COPY THIS FUNCTION AS IT IS '''
         # This is trigerred by the observer

@@ -8,6 +8,7 @@ import mplcursors
 import customtkinter as ctk
 import copy
 from CTkListbox import CTkListbox
+from Observer import Observer
 from Plots import Staticplotwindow
 
 # Make matplotlib to use tkinter
@@ -134,6 +135,7 @@ class Grapher(GraphPreferences):
 
     '''Methods for the Grapher class '''
 
+    # Setter for attributes that should be observed ---
     def update_plot_style(self, new_style):
         """ Update plot style """
         self.plt_style = new_style
@@ -375,11 +377,6 @@ class Grapher(GraphPreferences):
 
         # Draw Graph
         self.draw()
-        # Create cursor
-        #if not keep_annotation_list:
-        #    pass
-        #    self.cursor_on_off()
-        # Activate the observer
         self.eleana.notify_on = True
 
     def draw(self):
@@ -545,6 +542,8 @@ class Grapher(GraphPreferences):
             text = ' '
             self.ax.annotate(text, xy=point_selected, arrowprops={})
             self.canvas.draw()
+            self.eleana.set_selections(variable='grapher_action', value='point_selected')
+
         elif (event.inaxes is not None and self.app.sel_cursor_mode.get() == 'Free select' and event.button == 3):
             # Remove annotation when right mouse button is clicked
             x, y = event.xdata, event.ydata
@@ -558,6 +557,7 @@ class Grapher(GraphPreferences):
                 y_diff = abs(annotation.xy[1] - y)
                 if x_diff < tolerance*x_span and y_diff < tolerance*y_span:
                     annotation.remove()
+                    self.eleana.set_selections(variable='grapher_action', value='point_removed')
             self.canvas.draw()
         else:
             return
@@ -567,29 +567,24 @@ class Grapher(GraphPreferences):
             area between clicked positions.
         '''
 
-        def exclude_range(excluded_range):
-            tab = self.eleana.color_span['ranges']
-            zkr = excluded_range
-            result = []
-            zkr_start, zkr_end = zkr
-            for start, end in tab:
-                # Przypadek 1: Przedział całkowicie poza zakresem zkr, dodajemy bez zmian
-                if end < zkr_start or start > zkr_end:
-                    result.append([start, end])
-                # Przypadek 2: Przedział całkowicie zawarty w zkr, pomijamy go
-                elif start >= zkr_start and end <= zkr_end:
-                    continue
-                # Przypadek 3: Zkr przecina początek przedziału
-                elif start < zkr_start and end > zkr_start and end <= zkr_end:
-                    result.append([start, zkr_start])
-                # Przypadek 4: Zkr przecina koniec przedziału
-                elif start >= zkr_start and start < zkr_end and end > zkr_end:
-                    result.append([zkr_end, end])
-                # Przypadek 5: Zkr przecina środek przedziału, dzielimy go na dwa
-                elif start < zkr_start and end > zkr_end:
-                    result.append([start, zkr_start])
-                    result.append([zkr_end, end])
-            return result
+        # def exclude_range(excluded_range):
+        #     tab = self.eleana.color_span['ranges']
+        #     zkr = excluded_range
+        #     result = []
+        #     zkr_start, zkr_end = zkr
+        #     for start, end in tab:
+        #         if end < zkr_start or start > zkr_end:
+        #             result.append([start, end])
+        #         elif start >= zkr_start and end <= zkr_end:
+        #             continue
+        #         elif start < zkr_start and end > zkr_start and end <= zkr_end:
+        #             result.append([start, zkr_start])
+        #         elif start >= zkr_start and start < zkr_end and end > zkr_end:
+        #             result.append([zkr_end, end])
+        #         elif start < zkr_start and end > zkr_end:
+        #             result.append([start, zkr_start])
+        #             result.append([zkr_end, end])
+        #     return result
 
 
         if self.app.sel_cursor_mode.get() != 'Range select':
@@ -602,6 +597,7 @@ class Grapher(GraphPreferences):
                 # Define first point in the range
                 self.eleana.color_span['start'] = x
                 self.eleana.color_span['status'] = 1
+                self.eleana.set_selections(variable='grapher_action', value='range_start')
             elif self.eleana.color_span['status'] == 1:
                 # Define second point and add range to the 'ranges' and merge if necessary
                 self.eleana.color_span['end'] = x
@@ -623,6 +619,7 @@ class Grapher(GraphPreferences):
                         merged_ranges.append(current)
                 self.eleana.color_span['ranges'] = merged_ranges
                 self.updateAnnotationList()
+                self.eleana.set_selections(variable='grapher_action', value='range_end')
         elif sel.button == 3: # Right button
             # Remove range
             if self.eleana.color_span['ranges'] is not None:
@@ -636,23 +633,7 @@ class Grapher(GraphPreferences):
                         break
                     i+=1
                 self.updateAnnotationList()
-        # elif sel.button == 2: # Wheel button
-        #     # Add point
-        #     if self.eleana.color_span['status'] == 0:
-        #         print('Add first rmove point')
-        #         # Define first point in the range
-        #         self.eleana.color_span['start'] = x
-        #         self.eleana.color_span['status'] = 1
-        #     else:
-        #         min = self.eleana.color_span['start']
-        #         max = x
-        #         range = [min,max]
-        #         excluded_range = sorted(range)
-        #         # Exclude range
-        #         ranges = exclude_range(excluded_range)
-        #         self.eleana.color_span['ranges'] = ranges
-        #         self.eleana.color_span['status'] = 0
-        #         self.updateAnnotationList()
+                self.eleana.set_selections(variable='grapher_action', value='range_removed')
         self.plot_graph()
 
     def annotation_create(self, sel):
@@ -679,6 +660,8 @@ class Grapher(GraphPreferences):
         sel.annotation.set_text(label)
         sel.annotation.set_visible(self.current_cursor_mode['annot'])
         self.updateAnnotationList(action ='add')
+        if self.current_cursor_mode['label'] != 'Continuous read XY':
+            self.eleana.set_selections(variable='grapher_action', value='annotation_create')
 
     def annotation_removed(self, event):
         ''' This deletes selected annotation from the graph
@@ -692,11 +675,13 @@ class Grapher(GraphPreferences):
         if point in points:
             index = points.index(point)
             self.cursor_annotations.pop(index)
+            self.eleana.set_selections(variable='grapher_action', value='annotation_removed')
             self.updateAnnotationList()
 
     def clear_all_annotations(self, skip=None):
         self.cursor_annotations = []
         self.eleana.color_span['ranges'] = []
+        self.eleana.set_selections(variable='grapher_action', value='annotations_cleared')
         try:
             self.clearAnnotationList()
         except:

@@ -73,11 +73,10 @@ to notify subprogram in Notify instance.
 '''
 
 class Observer:
-
     def __init__(self, observed_instance, subscriber_instance):
         self.observed = observed_instance
         self.subscriber = subscriber_instance
         self.observed.attach(self)
-    def update(self, subject, variable=None):
+    def update(self, subject, variable=None, value=None):
         if subject == self.observed:
-            self.subscriber.data_changed(variable=variable)
+            self.subscriber.data_changed(variable=variable, value=value)

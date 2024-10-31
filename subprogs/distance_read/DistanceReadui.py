@@ -46,7 +46,7 @@ class DistanceReadUI:
             self.center_map = self.mainwindow.bind("<Map>", self.center)
         self.mainwindow.mainloop()
 
-    def set_track_minmax(self):
+    def track_minmax_clicked(self):
         pass
 
     def find_minmax_clicked(self):

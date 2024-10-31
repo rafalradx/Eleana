@@ -31,6 +31,10 @@ REPORT_NAME_Y =  'dY Value'             # <--- NAME OF Y AXIS IN THE REPORT
 REPORT_UNIT_X = ''                      # <--- NAME OF X UNIT IN THE CREATED REPORT
 REPORT_UNIT_Y = ''                      # <--- NAME OF Y UNIT IN THE CREATED REPORT
 
+# Cursors on graph
+CURSOR_TYPE = 'Crosshair'               # <--- USE CURSORS: 'None', 'Continuous read XY', 'Selection of points with labels'
+                                        #       'Selection of points', 'Numbered selections', 'Free select', 'Crosshair', 'Range select'
+
 # ----------------------------------------------------------------------------------------------------
 #   -- Here starts obligatory part of the application                                               #|
 #   -- In general it should not be modified                                                         #|
@@ -43,7 +47,7 @@ else:                                                                           
 exec(cmd_to_import)                                                                                 #|
 from assets.Error import Error                                                                      #|
 from assets.SubprogMethods import SubMethods                                                        #|
-class DistanceRead(SubMethods, WindowGUI):                                                       #|
+class DistanceRead(SubMethods, WindowGUI):                                                          #|
     ''' THIS IS STANDARD CONSTRUCTOR THAT SHOULD NOT BE MODIFIED '''                                #|
     def __init__(self, app=None, which='first', batch_mode=False):                                  #|
         if app and not batch_mode:                                                                  #|
@@ -60,6 +64,10 @@ class DistanceRead(SubMethods, WindowGUI):                                      
                                   'x_unit':REPORT_UNIT_X, 'y_unit':REPORT_UNIT_Y}                   #|
         # Use second data                                                                           #|
         self.use_second = TWO_SETS                                                                  #|
+        if CURSOR_TYPE == 'None':
+            cursor_mode = None
+        else:
+            cursor_mode = {'type':CURSOR_TYPE, 'x':[], 'y':[], 'z':[]}
         SubMethods.__init__(self, app=app,                                                          #|
                             which=which,                                                            #|
                             use_second=self.use_second,                                             #|
@@ -67,7 +75,9 @@ class DistanceRead(SubMethods, WindowGUI):                                      
                             data_label = DATA_LABEL_WIDGET,                                         #|
                             work_on_start = WORK_ON_START,                                          #|
                             window_title = TITLE,                                                   #|
-                            on_top=ON_TOP)                                                          #|
+                            on_top=ON_TOP,                                                          #|
+                            cursor_mode = cursor_mode)                                              #|
+                                                                                                    #|
     # STANDARD METHODS FOR BUTTON EVENTS ON CLICK                                                   #|
     def ok_clicked(self):                                                                           #|
         ''' [-OK-] button                                                                           #|
@@ -105,10 +115,30 @@ class DistanceRead(SubMethods, WindowGUI):                                      
         self.y1_entry = self.builder.get_object('y1_entry', self.mainwindow)
         self.y2_entry = self.builder.get_object('y2_entry', self.mainwindow)
         self.dy_entry = self.builder.get_object('dy_entry', self.mainwindow)
-        self.keep_track = self.builder.get_object('check_track_minmax', self.mainwindow)
+        self.check_keep_track = self.builder.get_object('check_track_minmax', self.mainwindow)
+        self.keep_track = False
+        # Create validate methods for CTkEntries. Use this to enter only numbers in the entries
+        self.validate_command = (self.mainwindow.register(self.validate_number), '%P')
+        self.x1_entry.configure(validate="key", validatecommand=self.validate_command)
+        self.x2_entry.configure(validate="key", validatecommand=self.validate_command)
+        self.y1_entry.configure(validate="key", validatecommand=self.validate_command)
+        self.y2_entry.configure(validate="key", validatecommand=self.validate_command)
 
-    def set_double_integration(self):
-        self.perform_single_calculations()       # <-- This is method for custom button
+        # Set disabled field
+        self.dx_entry.configure(state='disabled')
+        self.dy_entry.configure(state='disabled')
+
+    def graph_action(self, variable=None, value=None):
+        ''' Do something when cursor action on graph was done '''
+        print('uhfu weuhfuhw fuhewfu qhuif')
+
+    def find_minmax_clicked(self):
+        print('Find min/max')
+
+    def track_minmax_clicked(self):
+        self.keep_track = self.check_keep_track.get()
+        if self.keep_track:
+            self.find_minmax_clicked()
 
     def calculate_stack(self, x, y, name, z = None, stk_index = None):
         ''' If STACK_SEP is False it means that data in stack should

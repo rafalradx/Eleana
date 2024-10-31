@@ -6,7 +6,7 @@ from subprogs.table.table import CreateFromTable
 import pandas
 
 class SubMethods():
-    def __init__(self, app=None, which='first', use_second = False, stack_sep = True, data_label = None, work_on_start = False, window_title='', on_top = True):
+    def __init__(self, app=None, which='first', use_second = False, stack_sep = True, data_label = None, work_on_start = False, window_title='', on_top = True, cursor_mode = None):
         # Set get_from_region to use selected range for data
         #self.collected_reports = None
         self.original_data = None
@@ -16,6 +16,7 @@ class SubMethods():
         self.data_name_widget = None
         self.show_stk_report = True
         self.work_on_start = work_on_start
+        self.subprog_cursor_mode = cursor_mode
         if app:
             self.batch = False
             self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
@@ -26,6 +27,11 @@ class SubMethods():
             self.update = self.app.update
             self.mainwindow.title(window_title)
             self.mainwindow.attributes('-topmost', on_top)
+            if self.subprog_cursor_mode is not None:
+                self.sel_graph_cursor(self.subprog_cursor_mode['']
+                self.sel_cursor_mode.set('Selection of points')
+
+
             if data_label is not None:
                 data_label_text = "self._data_label__ = self.builder.get_object(" + data_label + ", self.mainwindow)"
                 exec(data_label_text)
@@ -106,19 +112,20 @@ class SubMethods():
         # Create reference to data in results
         self.result_index = self.eleana.selections['result']
         self.result_data = self.eleana.results_dataset[self.result_index]
-        # if self.get_from_region:
-        #     self.extract_region()
         if self.work_on_start:
             self.perform_single_calculations()
 
-    def data_changed(self, variable=None):
+    def data_changed(self, variable=None, value=None):
         ''' Activate get_data when selection changed.
             This is triggered by the Observer.   '''
         # If f_stk or s_stk variable is changed ignore Observer call
         if variable == 'f_stk' or variable == 's_stk':
             return
-        self.get_data()
-        self.perform_single_calculations()
+        elif variable == 'grapher_action':
+            self.graph_action(variable, value)
+        else:
+            self.get_data()
+            self.perform_single_calculations()
 
     def update_result_data(self, y=None, x=None, z=None):
         ''' Move calculated data in y and x to self.eleana.result_dataset. '''
@@ -147,6 +154,7 @@ class SubMethods():
                 print(z)
         if self.app:
             self.grapher.plot_graph()
+
     def prep_calc_data(self, dataset, x_data, y_data, z_data, name):
         if dataset and self.app is None:
             x_data = self.original_data.x
@@ -162,6 +170,7 @@ class SubMethods():
         z_cal = z_data
         name_cal = name
         return x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal
+
     def perform_single_calculations(self, value=None):
         if self.original_data is None:
             if self._data_label__ is not None:
@@ -342,35 +351,18 @@ class SubMethods():
         extracted_y = y[indexes]
         return extracted_x, extracted_y
 
-        # if self.original_data:
-        #     x = self.original_data.x
-        #     y = self.original_data.y
-        #     is_2D = len(y.shape) == 2
-        #     indexes = []
-        #     for range_ in ranges:
-        #         idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
-        #         indexes.extend(idx.tolist())
-        #     extracted_x = x[indexes]
-        #     if is_2D:
-        #         extracted_y = y[:, indexes]
-        #     else:
-        #         extracted_y = y[indexes]
-        #     self.original_data.x = extracted_x
-        #     self.original_data.y = extracted_y
-        # if self.original_data2:
-        #     # Extract for second
-        #     if self.use_second:
-        #         x = self.original_data2.x
-        #         y = self.original_data2.y
-        #         is_2D = len(y.shape) == 2
-        #         indexes = []
-        #         for range_ in ranges:
-        #             idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
-        #             indexes.extend(idx.tolist())
-        #         extracted_x = x[indexes]
-        #         if is_2D:
-        #             extracted_y = y[:, indexes]
-        #         else:
-        #             extracted_y = y[indexes]
-        #         self.original_data2.x = extracted_x
-        #         self.original_data2.y = extracted_y
+    def validate_number(self, text):
+        ''' Validate the number in CtkEntry box'''
+        if text == "":  # Allow for empty field
+            return True
+        try:
+            float(text)  # Check to float conversion
+            return True  # If ok accept
+        except ValueError:
+            return False  # If conversion not possible decline
+
+    def set_cursor(self):
+        ''' Switch appropriate cursor on graph '''
+        if self.subprog_cursor_mode is not None:
+            self.app.sel_graph_cursor(cursor_mode)
+            self.app.sel_cursor_mode.set(cursor_mode)

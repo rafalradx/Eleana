@@ -105,6 +105,12 @@ class IntegrateRegion(SubMethods, WindowGUI):                                   
         self.check_double_integration = self.builder.get_object('check_double', self.mainwindow)
         self.field_value = self.builder.get_object('field_value', self.mainwindow)
 
+        # Create validate methods for CTkEntries. Use this to enter only numbers in the entries.
+        # Function self.validate_number is defined in SubprogMethods.py
+        # -- Here is an example for field_value
+        self.validate_command = (self.mainwindow.register(self.validate_number), '%P')
+        self.field_value.configure(validate="key", validatecommand=self.validate_command)
+
     def set_double_integration(self):
         self.perform_single_calculations()       # <-- This is method for custom button
 

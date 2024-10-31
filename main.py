@@ -1467,10 +1467,9 @@ class MainApp:
         main_menu.create_showplots_menu()
 
     def xy_distance(self):
-        self.sel_graph_cursor('Selection of points')
-        self.sel_cursor_mode.set('Selection of points')
+        #self.sel_graph_cursor('Selection of points')
+        #self.sel_cursor_mode.set('Selection of points')
         self.xy_distance = DistanceRead(self, which = 'first')
-
 
 
     '''***********************************************

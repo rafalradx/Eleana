@@ -175,7 +175,6 @@
                             <child>
                               <object class="customtkinter.CTkEntry" id="x1_entry" named="True">
                                 <property name="exportselection">true</property>
-                                <property name="font">TkDefaultFont</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
                                   <property name="padx">4</property>
@@ -404,7 +403,7 @@
                     </child>
                     <child>
                       <object class="customtkinter.CTkCheckBox" id="check_track_minmax" named="True">
-                        <property name="command" type="command" cbtype="simple">set_track_minmax</property>
+                        <property name="command" type="command" cbtype="simple">track_minmax_clicked</property>
                         <property name="text" translatable="yes">Keep Min/Max Tracking</property>
                         <layout manager="grid">
                           <property name="column">0</property>

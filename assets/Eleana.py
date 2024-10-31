@@ -93,13 +93,17 @@ class Eleana:
         except ValueError:
             pass
 
-    def notify(self, variable=None):
+    def notify(self, variable=None, value=None):
         for observer in self._observers:
-            observer.update(self, variable=variable)
+            observer.update(self, variable=variable, value=value)
 
     # Setter for attributes that should be observed ---
     def set_selections(self, variable=None, value=None):
         if variable == None or value == None:
+            return
+        if variable == 'grapher_action':
+            if self.notify_on:
+                self.notify(variable=variable, value=value)
             return
         self.selections[variable] = value
         if variable == 'result' or variable == 'r_stk':
@@ -108,6 +112,7 @@ class Eleana:
             self.notify(variable=variable)
             if self.devel_mode:
                 print('Eleana.py: Activate observer')
+
     # End of methods for observers --------------------
 
     def name_nr_to_index(self, selected_value_text):
