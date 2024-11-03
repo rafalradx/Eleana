@@ -28,9 +28,9 @@ class SubMethods():
             self.mainwindow.title(window_title)
             self.mainwindow.attributes('-topmost', on_top)
             if self.subprog_cursor_mode is not None:
-                self.sel_graph_cursor(self.subprog_cursor_mode['']
-                self.sel_cursor_mode.set('Selection of points')
-
+                self.app.sel_graph_cursor(self.subprog_cursor_mode['type'])
+                self.app.sel_cursor_mode.set(self.subprog_cursor_mode['type'])
+                self.grapher.cursor_limit = self.subprog_cursor_mode['limit']
 
             if data_label is not None:
                 data_label_text = "self._data_label__ = self.builder.get_object(" + data_label + ", self.mainwindow)"
@@ -70,6 +70,7 @@ class SubMethods():
         self.response = None
         # Unregister observer
         self.eleana.detach(self.observer)
+        self.grapher.cursor_limit = 0
         self.mainwindow.destroy()
 
     def get_data(self, start=False):
@@ -122,6 +123,17 @@ class SubMethods():
         if variable == 'f_stk' or variable == 's_stk':
             return
         elif variable == 'grapher_action':
+            limit = self.subprog_cursor_mode['limit']
+            annotations = self.grapher.cursor_annotations
+            if limit != 0:
+                if len(annotations) > limit:
+                    xy_ = self.grapher.cursor_annotations[0]['point']
+                    self.grapher.annotation_removed(xy = xy_)
+                    self.grapher.plot_graph()
+                    self.grapher.cursor_on_off()
+                    #first_annotation = self.grapher.cursor.annotations[0]
+                    #first_annotation.remove()  # Usuń z wykresu
+                    #self.grapher.cursor.annotations.pop(0)
             self.graph_action(variable, value)
         else:
             self.get_data()

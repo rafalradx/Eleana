@@ -34,7 +34,7 @@ REPORT_UNIT_Y = ''                      # <--- NAME OF Y UNIT IN THE CREATED REP
 # Cursors on graph
 CURSOR_TYPE = 'Crosshair'               # <--- USE CURSORS: 'None', 'Continuous read XY', 'Selection of points with labels'
                                         #       'Selection of points', 'Numbered selections', 'Free select', 'Crosshair', 'Range select'
-
+CURSOR_LIMIT = 2                        # <--- SET THE MAXIMUM NUMBER OF CURSORS THAT CAN BE SELECTED. FOR NO LIMIT SET 0
 # ----------------------------------------------------------------------------------------------------
 #   -- Here starts obligatory part of the application                                               #|
 #   -- In general it should not be modified                                                         #|
@@ -67,7 +67,7 @@ class DistanceRead(SubMethods, WindowGUI):                                      
         if CURSOR_TYPE == 'None':
             cursor_mode = None
         else:
-            cursor_mode = {'type':CURSOR_TYPE, 'x':[], 'y':[], 'z':[]}
+            cursor_mode = {'type':CURSOR_TYPE, 'x':[], 'y':[], 'z':[], 'limit':CURSOR_LIMIT}
         SubMethods.__init__(self, app=app,                                                          #|
                             which=which,                                                            #|
                             use_second=self.use_second,                                             #|

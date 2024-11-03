@@ -43,6 +43,7 @@ class GraphPreferences:
         # Set cursor modes
         self.set_cursor_modes()
         self.current_cursor_mode = self.cursor_modes[0]
+        self.cursor_limit = 0
 
         # Load preferences from the settings file
         try:
@@ -524,11 +525,17 @@ class Grapher(GraphPreferences):
     def on_click_in_plot(self, event):
         """ Get coordinates from graph when Free Select is set in the combobox """
         # Check if Zoom is activated or not
+        #if self.cursor_limit !=0:
+        #    if len(self.cursor_annotations) >= self.cursor_limit:
+        #        return
         state = self.toolbar.mode
         if state == 'zoom rect' or state == 'pan/zoom':
             return
         if (event.inaxes is not None and (self.app.sel_cursor_mode.get() == 'Free select' or self.app.sel_cursor_mode.get() == 'Crosshair') and event.button == 1):
             # Create annotation when left mouse button is clicked
+            if self.cursor_limit !=0:
+               if len(self.cursor_annotations) >= self.cursor_limit:
+                   return
             x, y = event.xdata, event.ydata
             point_selected = (x,y)
             current_nr = 0
@@ -549,16 +556,34 @@ class Grapher(GraphPreferences):
             x, y = event.xdata, event.ydata
             xlim = self.ax.get_xlim()
             ylim = self.ax.get_ylim()
-            x_span = abs(xlim[1]-xlim[0])
-            y_span = abs(ylim[1]-ylim[0])
+            x_span = abs(xlim[1] - xlim[0])
+            y_span = abs(ylim[1] - ylim[0])
             tolerance = 0.05  # Tolerance for coordinates clicked
-            for annotation in self.ax.texts:
-                x_diff = abs(annotation.xy[0] - x)
-                y_diff = abs(annotation.xy[1] - y)
-                if x_diff < tolerance*x_span and y_diff < tolerance*y_span:
-                    annotation.remove()
-                    self.eleana.set_selections(variable='grapher_action', value='point_removed')
+            closest_point = None
+            closest_distance = float('inf')
+            for cursor_annotation in self.cursor_annotations:
+                point = cursor_annotation['point']
+                x_diff = abs(point[0] - x)
+                y_diff = abs(point[1] - y)
+                # Check if the point is within toleracne for clicking
+                if x_diff < tolerance * x_span and y_diff < tolerance * y_span:
+                    distance = (x_diff ** 2 + y_diff ** 2) ** 0.5
+                    if distance < closest_distance:
+                        closest_distance = distance
+                        closest_point = point
+            # If closest point where found remove annotation
+            if closest_point is not None:
+                # Find index to remove
+                index_to_remove = next(
+                    i for i, annotation in enumerate(self.cursor_annotations) if annotation['point'] == closest_point)
+                self.cursor_annotations.pop(index_to_remove)  # Delete from list
+                annotation_to_remove = next(
+                    annotation for annotation in self.ax.texts if list(annotation.xy) == list(closest_point))
+                annotation_to_remove.remove()  # Remove from the graph
+                self.eleana.set_selections(variable='grapher_action', value='point_removed')
+            self.clearAnnotationList()
             self.canvas.draw()
+            self.updateAnnotationList()
         else:
             return
 
@@ -566,27 +591,6 @@ class Grapher(GraphPreferences):
         ''' Create range entry in self.eleana.color_span to generate
             area between clicked positions.
         '''
-
-        # def exclude_range(excluded_range):
-        #     tab = self.eleana.color_span['ranges']
-        #     zkr = excluded_range
-        #     result = []
-        #     zkr_start, zkr_end = zkr
-        #     for start, end in tab:
-        #         if end < zkr_start or start > zkr_end:
-        #             result.append([start, end])
-        #         elif start >= zkr_start and end <= zkr_end:
-        #             continue
-        #         elif start < zkr_start and end > zkr_start and end <= zkr_end:
-        #             result.append([start, zkr_start])
-        #         elif start >= zkr_start and start < zkr_end and end > zkr_end:
-        #             result.append([zkr_end, end])
-        #         elif start < zkr_start and end > zkr_end:
-        #             result.append([start, zkr_start])
-        #             result.append([zkr_end, end])
-        #     return result
-
-
         if self.app.sel_cursor_mode.get() != 'Range select':
             return
         x = float(sel.xdata)
@@ -639,6 +643,9 @@ class Grapher(GraphPreferences):
     def annotation_create(self, sel):
         ''' This creates annotations on the graph and add selected
             to the list in self.cursor_annotations '''
+        if self.cursor_limit !=0:
+            if len(self.cursor_annotations) > self.cursor_limit:
+                return
         curve = sel.artist.get_label()
         x = sel.target[0]
         y = sel.target[1]
@@ -663,14 +670,17 @@ class Grapher(GraphPreferences):
         if self.current_cursor_mode['label'] != 'Continuous read XY':
             self.eleana.set_selections(variable='grapher_action', value='annotation_create')
 
-    def annotation_removed(self, event):
+    def annotation_removed(self, event=None, xy=None):
         ''' This deletes selected annotation from the graph
             and removes the respective point from the list in
             self.cursor_annotations. '''
-        annotation = event.annotation
-        x = annotation.xy[0]
-        y = annotation.xy[1]
-        point = [x,y]
+        if xy is not None:
+            point = xy
+        if event is not None:
+            annotation = event.annotation
+            x = annotation.xy[0]
+            y = annotation.xy[1]
+            point = [x,y]
         points = [d['point'] for d in self.cursor_annotations if 'point' in d]
         if point in points:
             index = points.index(point)
