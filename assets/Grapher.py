@@ -43,7 +43,7 @@ class GraphPreferences:
         # Set cursor modes
         self.set_cursor_modes()
         self.current_cursor_mode = self.cursor_modes[0]
-        self.cursor_limit = 0
+        self.cursor_limit = 2
 
         # Load preferences from the settings file
         try:
@@ -188,7 +188,6 @@ class Grapher(GraphPreferences):
             data = self.eleana.dataset[index]
         except IndexError:
             return {'x_title': "Abscissa [a.u.]", 'y_title': "Ordinate [a.u.]"}
-
         name_x = data.parameters.get('name_x', 'Abscissa')
         unit_x = data.parameters.get('unit_x', 'a.u.')
         name_y = data.parameters.get('name_y', 'Ordinate')
@@ -483,6 +482,7 @@ class Grapher(GraphPreferences):
             self.cursor = self.mplcursors.cursor(self.ax,
                                                  multiple=self.current_cursor_mode['multip'],
                                                  hover=self.current_cursor_mode['hov'])
+            #self.cursor.connect("add", self.annotation_create)
             self.cursor.connect("add", self.annotation_create)
             self.cursor.connect("remove", self.annotation_removed)
             self.app.info.configure(text='LEFT CLICK - select point\nRIGHT CLICK - delete selected point')
@@ -504,8 +504,6 @@ class Grapher(GraphPreferences):
             # Range select
             self.app.btn_clear_cursors.grid_remove()
             _show_annotation_list(self)
-            #self.cursor = self.mplcursors.cursor(self.ax, multiple=False, hover=True)
-            #self.cursor.connect("add", self.mplcursor_crosshair)
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.range_clicked)
             self.app.info.configure(text='  LEFT CLICK - select the beginning \n  of the range\n  SECOND LEFT CLICK - select the end of the range\n  RIGHT CLICK INSIDE THE RANGE - delete \n  the range under the cursor')
             self.eleana.color_span['ranges'] = []
@@ -524,10 +522,6 @@ class Grapher(GraphPreferences):
 
     def on_click_in_plot(self, event):
         """ Get coordinates from graph when Free Select is set in the combobox """
-        # Check if Zoom is activated or not
-        #if self.cursor_limit !=0:
-        #    if len(self.cursor_annotations) >= self.cursor_limit:
-        #        return
         state = self.toolbar.mode
         if state == 'zoom rect' or state == 'pan/zoom':
             return
@@ -643,9 +637,10 @@ class Grapher(GraphPreferences):
     def annotation_create(self, sel):
         ''' This creates annotations on the graph and add selected
             to the list in self.cursor_annotations '''
-        if self.cursor_limit !=0:
-            if len(self.cursor_annotations) > self.cursor_limit:
-                return
+        if len(self.cursor_annotations) >= self.cursor_limit:
+            sel = self.cursor.selections[-1]
+            self.cursor.remove_selection(sel)
+            return
         curve = sel.artist.get_label()
         x = sel.target[0]
         y = sel.target[1]
@@ -669,6 +664,7 @@ class Grapher(GraphPreferences):
         self.updateAnnotationList(action ='add')
         if self.current_cursor_mode['label'] != 'Continuous read XY':
             self.eleana.set_selections(variable='grapher_action', value='annotation_create')
+
 
     def annotation_removed(self, event=None, xy=None):
         ''' This deletes selected annotation from the graph
