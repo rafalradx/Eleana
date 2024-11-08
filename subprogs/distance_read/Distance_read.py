@@ -117,12 +117,15 @@ class DistanceRead(SubMethods, WindowGUI):                                      
         self.dy_entry = self.builder.get_object('dy_entry', self.mainwindow)
         self.check_keep_track = self.builder.get_object('check_track_minmax', self.mainwindow)
         self.keep_track = False
-        # Create validate methods for CTkEntries. Use this to enter only numbers in the entries
-        self.validate_command = (self.mainwindow.register(self.validate_number), '%P')
-        self.x1_entry.configure(validate="key", validatecommand=self.validate_command)
-        self.x2_entry.configure(validate="key", validatecommand=self.validate_command)
-        self.y1_entry.configure(validate="key", validatecommand=self.validate_command)
-        self.y2_entry.configure(validate="key", validatecommand=self.validate_command)
+
+        # Define list of CTkEntries that should be validated for floats
+        self.set_validation_for_ctkentries([
+                self.x1_entry,
+                self.x2_entry,
+                self.y1_entry,
+                self.y2_entry
+                ])
+
 
         # Set disabled field
         self.dx_entry.configure(state='disabled')

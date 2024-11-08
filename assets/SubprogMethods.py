@@ -6,7 +6,7 @@ from subprogs.table.table import CreateFromTable
 import pandas
 
 class SubMethods():
-    def __init__(self, app=None, which='first', use_second = False, stack_sep = True, data_label = None, work_on_start = False, window_title='', on_top = True, cursor_mode = None):
+    def __init__(self, app=None, which='first', use_second = False, stack_sep = True, data_label = None, work_on_start = False, window_title='', on_top = True, cursor_mode=None):
         # Set get_from_region to use selected range for data
         #self.collected_reports = None
         self.original_data = None
@@ -16,7 +16,6 @@ class SubMethods():
         self.data_name_widget = None
         self.show_stk_report = True
         self.work_on_start = work_on_start
-        self.subprog_cursor_mode = cursor_mode
         if app:
             self.batch = False
             self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
@@ -27,16 +26,15 @@ class SubMethods():
             self.update = self.app.update
             self.mainwindow.title(window_title)
             self.mainwindow.attributes('-topmost', on_top)
-            if self.subprog_cursor_mode is not None:
-                self.app.sel_graph_cursor(self.subprog_cursor_mode['type'])
-                self.app.sel_cursor_mode.set(self.subprog_cursor_mode['type'])
-                self.grapher.cursor_limit = self.subprog_cursor_mode['limit']
-
             if data_label is not None:
                 data_label_text = "self._data_label__ = self.builder.get_object(" + data_label + ", self.mainwindow)"
                 exec(data_label_text)
             else:
                 self._data_label__ = None
+            if cursor_mode is not None:
+                self.grapher.cursor_limit = cursor_mode['limit']
+                self.app.sel_graph_cursor(cursor_mode['type'])
+                self.app.sel_cursor_mode.set(cursor_mode['type'])
         else:
             self.app = None
             self.master = None
@@ -49,7 +47,7 @@ class SubMethods():
         self.stack_sep = stack_sep
         # Do not build window if app is not defined
         if self.app:
-            # Configure Window
+            # Create window
             self.configure_window()
             # Create observer
             self.observer = Observer(self.eleana, self)
@@ -70,7 +68,6 @@ class SubMethods():
         self.response = None
         # Unregister observer
         self.eleana.detach(self.observer)
-        self.grapher.cursor_limit = 0
         self.mainwindow.destroy()
 
     def get_data(self, start=False):
@@ -113,31 +110,16 @@ class SubMethods():
         # Create reference to data in results
         self.result_index = self.eleana.selections['result']
         self.result_data = self.eleana.results_dataset[self.result_index]
+        if self.get_from_region:
+            self.extract_region()
         if self.work_on_start:
             self.perform_single_calculations()
 
-    def data_changed(self, variable=None, value=None):
+    def data_changed(self):
         ''' Activate get_data when selection changed.
             This is triggered by the Observer.   '''
-        # If f_stk or s_stk variable is changed ignore Observer call
-        if variable == 'f_stk' or variable == 's_stk':
-            return
-        elif variable == 'grapher_action':
-            limit = self.subprog_cursor_mode['limit']
-            annotations = self.grapher.cursor_annotations
-            if limit != 0:
-                if len(annotations) > limit:
-                    xy_ = self.grapher.cursor_annotations[0]['point']
-                    self.grapher.annotation_removed(xy = xy_)
-                    self.grapher.plot_graph()
-                    self.grapher.cursor_on_off()
-                    #first_annotation = self.grapher.cursor.annotations[0]
-                    #first_annotation.remove()  # Usuń z wykresu
-                    #self.grapher.cursor.annotations.pop(0)
-            self.graph_action(variable, value)
-        else:
-            self.get_data()
-            self.perform_single_calculations()
+        self.get_data()
+        self.perform_single_calculations()
 
     def update_result_data(self, y=None, x=None, z=None):
         ''' Move calculated data in y and x to self.eleana.result_dataset. '''
@@ -166,8 +148,9 @@ class SubMethods():
                 print(z)
         if self.app:
             self.grapher.plot_graph()
-
     def prep_calc_data(self, dataset, x_data, y_data, z_data, name):
+        if self.get_from_region:
+            self.extract_region()
         if dataset and self.app is None:
             x_data = self.original_data.x
             y_data = self.original_data.y
@@ -175,14 +158,11 @@ class SubMethods():
             name = self.original_data.name_nr
             if self.get_from_region:
                 self.extract_region()
-        if self.get_from_region:
-            x_data, y_data = self.extract_region(x = x_data, y = y_data)
         x_cal = x_data
         y_cal = y_data
         z_cal = z_data
         name_cal = name
         return x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal
-
     def perform_single_calculations(self, value=None):
         if self.original_data is None:
             if self._data_label__ is not None:
@@ -312,7 +292,7 @@ class SubMethods():
         self.collected_reports['rows'] = []
         self.consecutive_number = 1
 
-    def extract_region_in_dataset(self):
+    def extract_region(self, x=None, y=None):
         ''' Extract data on the basis of selected ranges in self.eleana.color_span['ranges'] '''
         ranges = self.eleana.color_span['ranges']
         if not ranges:
@@ -350,31 +330,28 @@ class SubMethods():
                 self.original_data2.x = extracted_x
                 self.original_data2.y = extracted_y
 
-    def extract_region(self, x=None, y=None):
-        ''' Extract data for pair (x,y) on the basis of selected ranges in self.eleana.color_span['ranges'] '''
-        ranges = self.eleana.color_span['ranges']
-        if not ranges:
-            return x,y
-        indexes = []
-        for range_ in ranges:
-            idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
-            indexes.extend(idx.tolist())
-        extracted_x = x[indexes]
-        extracted_y = y[indexes]
-        return extracted_x, extracted_y
+    def set_validation_for_ctkentries(self, list_of_entries):
+        self.validate_command = (self.mainwindow.register(self.validate_number), '%P')
+        for entry in list_of_entries:
+            entry.configure(validate="key", validatecommand=self.validate_command)
 
-    def validate_number(self, text):
-        ''' Validate the number in CtkEntry box'''
-        if text == "":  # Allow for empty field
+    def validate_number(self, new_value):
+        """
+        Validates that the input is a number or empty.
+        Called on each keystroke in CTkEntry fields with `validate="key"`.
+
+        Args:
+        - new_value (str): The current content of the entry field.
+
+        Returns:
+        - bool: True if `new_value` is a valid number or empty, False otherwise.
+        """
+        # Handle empty field
+        if new_value == '':
             return True
+        # Check if entry can be converted to float
         try:
-            float(text)  # Check to float conversion
-            return True  # If ok accept
+            float(new_value)  # OK
+            return True
         except ValueError:
-            return False  # If conversion not possible decline
-
-    def set_cursor(self):
-        ''' Switch appropriate cursor on graph '''
-        if self.subprog_cursor_mode is not None:
-            self.app.sel_graph_cursor(cursor_mode)
-            self.app.sel_cursor_mode.set(cursor_mode)
+            return False

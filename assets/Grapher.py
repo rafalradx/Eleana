@@ -43,7 +43,7 @@ class GraphPreferences:
         # Set cursor modes
         self.set_cursor_modes()
         self.current_cursor_mode = self.cursor_modes[0]
-        self.cursor_limit = 2
+        self.cursor_limit = 0
 
         # Load preferences from the settings file
         try:
