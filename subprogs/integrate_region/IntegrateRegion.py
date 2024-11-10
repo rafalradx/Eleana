@@ -45,8 +45,8 @@ else:
     cmd_to_import = 'from ' + SUBPROG_FOLDER + '.' + cmd_to_import
 exec(cmd_to_import)
 from assets.Error import Error
-from assets.SubprogMethods import SubMethods
-class IntegrateRegion(SubMethods, WindowGUI):
+from assets.SubprogMethods import SubMethods_01
+class IntegrateRegion(SubMethods_01, WindowGUI):
     ''' THIS IS STANDARD CONSTRUCTOR THAT SHOULD NOT BE MODIFIED '''
     def __init__(self, app=None, which='first', batch_mode=False):
         if app and not batch_mode:
@@ -57,7 +57,7 @@ class IntegrateRegion(SubMethods, WindowGUI):
         self.collected_reports = {'headers':REPORT_HEADERS, 'rows':[], 'x_name':REPORT_NAME_X, 'y_name':REPORT_NAME_Y,'default_x':REPORT_HEADERS[REPORT_DEFAULT_X], 'default_y':REPORT_HEADERS[REPORT_DEFAULT_Y], 'x_unit':REPORT_UNIT_X, 'y_unit':REPORT_UNIT_Y}
         # Use second data
         self.use_second = TWO_SETS
-        SubMethods.__init__(self, app=app, which=which, use_second=self.use_second, stack_sep = STACK_SEP, data_label = DATA_LABEL_WIDGET, work_on_start = WORK_ON_START, window_title = TITLE, on_top=ON_TOP)
+        SubMethods_01.__init__(self, app=app, which=which, use_second=self.use_second, stack_sep = STACK_SEP, data_label = DATA_LABEL_WIDGET, work_on_start = WORK_ON_START, window_title = TITLE, on_top=ON_TOP)
 
     # STANDARD METHODS FOR BUTTON EVENTS ON CLICK
     def ok_clicked(self):
@@ -94,6 +94,7 @@ class IntegrateRegion(SubMethods, WindowGUI):
 
 
     def set_double_integration(self):
+        self.get_data()
         self.perform_single_calculations()       # <-- This is custom button
 
     def calculate_stack(self, x, y, name, z = None, stk_index = None):
@@ -106,11 +107,11 @@ class IntegrateRegion(SubMethods, WindowGUI):
         else:
             print(info__)
 
-    def calculate(self, dataset = None, name = None, stk_index = None, y = None, x = None, z = None,
+    def calculate(self, name = None, stk_index = None, y = None, x = None, z = None,
                   double=None
                   ):
         ''' Your algorithm to perform calculations on single x,y,z data. Do not modify line below '''
-        x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_calc_data(dataset, x, y, z, name)
+        x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_calc_data(x, y, z, name)
         print('Extract regions:' + str(self.get_from_region))
         ''' HERE STARTS YOUR CODE 
         --------------------------

@@ -875,14 +875,14 @@ class Grapher(GraphPreferences):
         second_shown = True if len(data['x']) > 0 else False
         if second_shown:
             axis_title = self.axis_title('second')
-            plot_data['x_title'] = copy.copy(axis_title['x_title'])
-            plot_data['y_title'] = copy.copy(axis_title['y_title'])
-            curve['legend'] = copy.copy(self.create_legend('second'))
-            curve['style'] = copy.copy(self.style_second)
+            plot_data['x_title'] = copy.deepcopy(axis_title['x_title'])
+            plot_data['y_title'] = copy.deepcopy(axis_title['y_title'])
+            curve['legend'] = copy.deepcopy(self.create_legend('second'))
+            curve['style'] = copy.deepcopy(self.style_second)
             curve['x'] = copy.copy(data['x'])
-            curve['re_y'] = copy.copy(data['re_y'])
-            curve['im_y'] = copy.copy(data['im_y'])
-            curve['disp'] = copy.copy(self.eleana.selections['s_cpl'])
+            curve['re_y'] = copy.deepcopy(data['re_y'])
+            curve['im_y'] = copy.deppcopycopy(data['im_y'])
+            curve['disp'] = copy.deepcopycopy(self.eleana.selections['s_cpl'])
             if data['complex'] and self.eleana.selections['s_cpl'] == 'im':
                 curve['re_y'] = None
             elif data['complex'] and self.eleana.selections['s_cpl'] == 're':

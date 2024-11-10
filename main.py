@@ -1441,6 +1441,7 @@ class MainApp:
         static_plot['name'] = name
         self.eleana.static_plots.append(static_plot)
         main_menu.create_showplots_menu()
+        self.grapher.show_static_graph_window(len(self.eleana.static_plots)-1)
 
     def delete_simple_static_plot(self):
         '''

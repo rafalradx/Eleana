@@ -1,3 +1,5 @@
+
+
 from assets.Observer import Observer
 import copy
 import numpy as np
@@ -5,17 +7,32 @@ from assets.Error import Error
 from subprogs.table.table import CreateFromTable
 import pandas
 
-class SubMethods():
-    def __init__(self, app=None, which='first', use_second = False, stack_sep = True, data_label = None, work_on_start = False, window_title='', on_top = True, cursor_mode=None):
+class SubMethods_01():
+    def __init__(self, app=None,
+                 which='first',
+                 use_second = False,
+                 stack_sep = True,
+                 data_label = None,
+                 work_on_start = False,
+                 window_title='',
+                 on_top = True,
+                 cursor_mode=None,
+                 region_from_scale=False,
+                 auto_result=True,
+                 report_to_group = '<ANALYSIS>',
+                 ):
         # Set get_from_region to use selected range for data
         #self.collected_reports = None
-        self.original_data = None
-        self.original_data2 = None
-        self.get_from_region = True
-        self.consecutive_number = 1
-        self.data_name_widget = None
-        self.show_stk_report = True
-        self.work_on_start = work_on_start
+        self.original_data = None           # Data to manipulate
+        self.original_data2 = None          # Second data for additional use
+        self.get_from_region = True         # If true the calculations will be done os selected regions
+        self.region_from_scale = region_from_scale    # If True the regions are taken from x min and x max. If False then from selection
+        self.consecutive_number = 1         # Current number for report creation
+        self.data_name_widget = None        # Reference to GUI widget to display current data name to process
+        self.show_stk_report = True         # If true then Report from 2D stac will be displayed
+        self.work_on_start = work_on_start  #
+        self.auto_result = auto_result
+        self.report_to_group = report_to_group
         if app:
             self.batch = False
             self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
@@ -53,9 +70,10 @@ class SubMethods():
             self.observer = Observer(self.eleana, self)
             self.eleana.notify_on = True
             # Initialize data to modify
-            self.get_data(start=True)
+            self.get_data(variable=None, value=None, start=True)
             # Set current position in Results Dataset
-            self.result_index = len(self.eleana.results_dataset)
+            if self.auto_result:
+                self.result_index = len(self.eleana.results_dataset)
 
     def get(self):
         ''' Returns self.response to the main application after close '''
@@ -70,10 +88,12 @@ class SubMethods():
         self.eleana.detach(self.observer)
         self.mainwindow.destroy()
 
-    def get_data(self, start=False):
+    def get_data(self, variable=None, value=None, start=False):
         ''' Makes a copy of the selected data and stores it in self.original_data.
             You may perform calculations on self.original_data. '''
         # Get data from selections First or Second
+        if variable == 'f_stk' or variable == 's_stk':
+            return
         if self.eleana.selections[self.which] >= 0:
             index = self.eleana.selections[self.which]
             if not start:
@@ -81,7 +101,8 @@ class SubMethods():
             if self.which == 'second':
                 self.app.second_to_result()
             else:
-                self.app.first_to_result()
+                if self.auto_result:
+                    self.app.first_to_result()
         else:
             self.original_data = None
             self.result_data = None
@@ -108,17 +129,22 @@ class SubMethods():
             self.original_data = copy.deepcopy(self.eleana.dataset[index])
             self.original_data2 = None
         # Create reference to data in results
-        self.result_index = self.eleana.selections['result']
-        self.result_data = self.eleana.results_dataset[self.result_index]
+        if self.auto_result:
+            self.result_index = self.eleana.selections['result']
+            self.result_data = self.eleana.results_dataset[self.result_index]
+        else:
+            self.result_data = None
         if self.get_from_region:
             self.extract_region()
         if self.work_on_start:
             self.perform_single_calculations()
 
-    def data_changed(self):
+    def data_changed(self, variable, value):
         ''' Activate get_data when selection changed.
             This is triggered by the Observer.   '''
-        self.get_data()
+        if variable == 'f_stk' or variable == 's_stk':
+            return
+        self.get_data(variable, value)
         self.perform_single_calculations()
 
     def update_result_data(self, y=None, x=None, z=None):
@@ -128,41 +154,84 @@ class SubMethods():
         if y is not None:
             if self.app:
                 if self.original_data.type.lower() == "stack 2d":
-                    self.result_data.y[self.i_stk]  = y
+                    if self.auto_result:
+                        self.result_data.y[self.i_stk]  = y
                 else:
-                    self.result_data.y = y
+                    if self.auto_result:
+                        self.result_data.y = y
             else:
                 print('Result Y:')
                 print(y)
         if x is not None:
             if self.app:
-                self.result_data.x = x
+                if self.auto_result:
+                    self.result_data.x = x
             else:
                 print('Result X:')
                 print(x)
         if z is not None:
             if self.app:
-                self.result_data.z = z
+                if self.auto_result:
+                    self.result_data.z = z
             else:
                 print('Result Z:')
                 print(z)
         if self.app:
             self.grapher.plot_graph()
-    def prep_calc_data(self, dataset, x_data, y_data, z_data, name):
+
+    def prep_calc_data(self, x=None, y=None, z=None, name=None):
+        # Prepare data for calculation depending x,y,z
+        if x is None:
+            # Prepare data directly from self.original_data
+            x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_from_original_data()
+        else:
+            x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_from_xyz(x = x, y = y, z = z, name=name)
+        return x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal
+
+    def prep_from_xyz(self, x, y, z=None, name=None):
+        if self.get_from_region:
+            extracted_x, extracted_y = self.extract_region_xy(x,y)
+        else:
+            extracted_x = x
+            extracted_y = y
+        x_data = extracted_x
+        y_data = extracted_y
+        z_data = z
+        x_cal = copy.deepcopy(x_data)
+        y_cal = copy.deepcopy(y_data)
+        z_cal = copy.deepcopy(z_data)
+        name_cal = copy.deepcopy(name)
+        return x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal
+
+
+
+    def prep_from_original_data(self):
         if self.get_from_region:
             self.extract_region()
-        if dataset and self.app is None:
+        x_data = self.original_data.x
+        y_data = self.original_data.y
+        z_data = self.original_data.z
+        name = self.original_data.name_nr
+        x_cal = copy.deepcopy(x_data)
+        y_cal = copy.deepcopy(y_data)
+        z_cal = copy.deepcopy(z_data)
+        name_cal = copy(name)
+        if len(x_data) == 0:
+            self.get_data(None, None)
+            if self.get_from_region:
+                self.extract_region()
             x_data = self.original_data.x
             y_data = self.original_data.y
             z_data = self.original_data.z
             name = self.original_data.name_nr
             if self.get_from_region:
                 self.extract_region()
-        x_cal = x_data
-        y_cal = y_data
-        z_cal = z_data
-        name_cal = name
+            x_cal = x_data
+            y_cal = y_data
+            z_cal = z_data
+            name_cal = name
         return x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal
+
     def perform_single_calculations(self, value=None):
         if self.original_data is None:
             if self._data_label__ is not None:
@@ -189,7 +258,7 @@ class SubMethods():
                         break
                     self.i_stk+=1
                     self.consecutive_number += 1
-                # Restore create_report_setings
+                # Restore create_report_settings
                 self.create_report = create_report
             else:
                 name_ = self.original_data.name_nr
@@ -225,7 +294,8 @@ class SubMethods():
             index = self.eleana.get_index_by_name(spectrum)
             self.eleana.selections['first'] = index
             self.original_data = copy.deepcopy(self.eleana.dataset[index])
-            self.result_data = self.eleana.results_dataset[i]
+            if self.auto_result:
+                self.result_data = self.eleana.results_dataset[i]
             self.perform_single_calculations()
             i += 1
             self.consecutive_number+=1
@@ -282,7 +352,7 @@ class SubMethods():
                                 x_name = x_name,
                                 y_unit = y_unit,
                                 y_name = y_name,
-                                group=group)
+                                group=self.report_to_group)
         response = table.get()
         self.update.dataset_list()
         self.update.group_list()
@@ -292,10 +362,33 @@ class SubMethods():
         self.collected_reports['rows'] = []
         self.consecutive_number = 1
 
+    def extract_region_xy(self, x, y):
+        if self.region_from_scale:
+            ranges = [self.grapher.ax.get_xlim()]
+        else:
+            ranges = self.eleana.color_span['ranges']
+        if ranges == []:
+            return x, y
+        is_2D = len(y.shape) == 2
+        indexes = []
+        for range_ in ranges:
+            idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
+            indexes.extend(idx.tolist())
+        extracted_x = x[indexes]
+        if is_2D:
+            extracted_y = y[:, indexes]
+        else:
+            extracted_y = y[indexes]
+        return extracted_x, extracted_y
+
+
     def extract_region(self, x=None, y=None):
         ''' Extract data on the basis of selected ranges in self.eleana.color_span['ranges'] '''
-        ranges = self.eleana.color_span['ranges']
-        if not ranges:
+        if self.region_from_scale:
+            ranges = [self.grapher.ax.get_xlim()]
+        else:
+            ranges = self.eleana.color_span['ranges']
+        if ranges == []:
             return
         if self.original_data:
             x = self.original_data.x
@@ -330,21 +423,15 @@ class SubMethods():
                 self.original_data2.x = extracted_x
                 self.original_data2.y = extracted_y
 
+    # Section handling CTkEntries
     def set_validation_for_ctkentries(self, list_of_entries):
         self.validate_command = (self.mainwindow.register(self.validate_number), '%P')
         for entry in list_of_entries:
             entry.configure(validate="key", validatecommand=self.validate_command)
 
     def validate_number(self, new_value):
-        """
-        Validates that the input is a number or empty.
-        Called on each keystroke in CTkEntry fields with `validate="key"`.
-
-        Args:
-        - new_value (str): The current content of the entry field.
-
-        Returns:
-        - bool: True if `new_value` is a valid number or empty, False otherwise.
+        """ Validates that the input is a number or empty.
+         Called on each keystroke in CTkEntry fields with `validate="key"`.
         """
         # Handle empty field
         if new_value == '':
@@ -355,3 +442,9 @@ class SubMethods():
             return True
         except ValueError:
             return False
+
+    def set_entry_value(self, entry=None, value=None):
+        if entry is None:
+            return
+        entry.delete(0, 'end')
+        entry.insert(0, str(value))  # <--- Put 'result' to the widget
