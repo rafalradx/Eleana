@@ -112,7 +112,7 @@ class IntegrateRegion(SubMethods_01, WindowGUI):
                   ):
         ''' Your algorithm to perform calculations on single x,y,z data. Do not modify line below '''
         x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_calc_data(x, y, z, name)
-        print('Extract regions:' + str(self.get_from_region))
+
         ''' HERE STARTS YOUR CODE 
         --------------------------
         Use:
@@ -134,7 +134,6 @@ class IntegrateRegion(SubMethods_01, WindowGUI):
             y_cal2 = cumulative_trapezoid(y_cal, x_data, initial=0)
             integral = trapezoid(y_cal, x_data)
             y_cal = y_cal2
-
         result = integral # <--- Put the result value to 'result' variable
 
         # ------- AFTER CALCULATIONS ---------

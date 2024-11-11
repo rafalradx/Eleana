@@ -19,7 +19,8 @@ class SubMethods_01():
                  cursor_mode=None,
                  region_from_scale=False,
                  auto_result=True,
-                 report_to_group = '<ANALYSIS>',
+                 report_to_group = '__ANALYSIS__',
+                 trigger_when_range_complete=False,
                  ):
         # Set get_from_region to use selected range for data
         #self.collected_reports = None
@@ -30,9 +31,10 @@ class SubMethods_01():
         self.consecutive_number = 1         # Current number for report creation
         self.data_name_widget = None        # Reference to GUI widget to display current data name to process
         self.show_stk_report = True         # If true then Report from 2D stac will be displayed
-        self.work_on_start = work_on_start  #
-        self.auto_result = auto_result
-        self.report_to_group = report_to_group
+        self.work_on_start = work_on_start  # Perform calculations upon opening the window
+        self.auto_result = auto_result      # Sets if result data should be created automatically.
+        self.report_to_group = report_to_group # Defines the group the results from report should be assigned to
+        self.trigger_when_range_complete = trigger_when_range_complete # Defines if
         if app:
             self.batch = False
             self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
@@ -94,6 +96,8 @@ class SubMethods_01():
         # Get data from selections First or Second
         if variable == 'f_stk' or variable == 's_stk':
             return
+        if variable == 'range_start' and self.trigger_when_range_complete:
+            return
         if self.eleana.selections[self.which] >= 0:
             index = self.eleana.selections[self.which]
             if not start:
@@ -144,12 +148,16 @@ class SubMethods_01():
             This is triggered by the Observer.   '''
         if variable == 'f_stk' or variable == 's_stk':
             return
+        if variable == 'grapher_action' and value == 'range_start':
+            return
         self.get_data(variable, value)
+        if variable == 'grapher_action' and value == 'range_end':
+            if self.trigger_when_range_complete is False:
+                return
         self.perform_single_calculations()
 
     def update_result_data(self, y=None, x=None, z=None):
         ''' Move calculated data in y and x to self.eleana.result_dataset. '''
-
         # Update results if there was a single data
         if y is not None:
             if self.app:
@@ -180,15 +188,20 @@ class SubMethods_01():
             self.grapher.plot_graph()
 
     def prep_calc_data(self, x=None, y=None, z=None, name=None):
+        ''' Master methods which takes data either from self.original of from given x, y, x args'''
         # Prepare data for calculation depending x,y,z
         if x is None:
             # Prepare data directly from self.original_data
             x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_from_original_data()
+            if len(x_data) == 0:
+                Error.show(info = f'There is no data between selected range for {name}')
+                return None
         else:
             x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_from_xyz(x = x, y = y, z = z, name=name)
         return x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal
 
     def prep_from_xyz(self, x, y, z=None, name=None):
+        ''' Prepare x_data, y_data, z_data to use for calculations from given x,y,z'''
         if self.get_from_region:
             extracted_x, extracted_y = self.extract_region_xy(x,y)
         else:
@@ -203,9 +216,8 @@ class SubMethods_01():
         name_cal = copy.deepcopy(name)
         return x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal
 
-
-
     def prep_from_original_data(self):
+        ''' Prepare x_data, y_data, z_data to use for calculations from self.original_data '''
         if self.get_from_region:
             self.extract_region()
         x_data = self.original_data.x
@@ -233,6 +245,7 @@ class SubMethods_01():
         return x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal
 
     def perform_single_calculations(self, value=None):
+        ''' Master method triggered by clicking "OK" or "calculate" button  '''
         if self.original_data is None:
             if self._data_label__ is not None:
                 self._data_label__.configure(text = '')
@@ -296,6 +309,8 @@ class SubMethods_01():
             self.original_data = copy.deepcopy(self.eleana.dataset[index])
             if self.auto_result:
                 self.result_data = self.eleana.results_dataset[i]
+            if self.
+            self.extract_region()
             self.perform_single_calculations()
             i += 1
             self.consecutive_number+=1
@@ -359,10 +374,12 @@ class SubMethods_01():
         self.update.all_lists()
 
     def clear_report(self):
+        ''' Clear the created report '''
         self.collected_reports['rows'] = []
         self.consecutive_number = 1
 
     def extract_region_xy(self, x, y):
+        ''' Extract data using selected range (self.grapher.color_span) or scale (x_min, x_max) from array in x,y '''
         if self.region_from_scale:
             ranges = [self.grapher.ax.get_xlim()]
         else:
@@ -381,9 +398,8 @@ class SubMethods_01():
             extracted_y = y[indexes]
         return extracted_x, extracted_y
 
-
     def extract_region(self, x=None, y=None):
-        ''' Extract data on the basis of selected ranges in self.eleana.color_span['ranges'] '''
+        ''' Same as extract_region_xy but from self.original_data '''
         if self.region_from_scale:
             ranges = [self.grapher.ax.get_xlim()]
         else:
@@ -422,9 +438,28 @@ class SubMethods_01():
                     extracted_y = y[indexes]
                 self.original_data2.x = extracted_x
                 self.original_data2.y = extracted_y
+        if self.auto_result:
+            x = self.result_data.x
+            y = self.result_data.y
+            is_2D = len(y.shape) == 2
+            indexes = []
+            for range_ in ranges:
+                idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
+                indexes.extend(idx.tolist())
+            extracted_x = x[indexes]
+            if is_2D:
+                extracted_y = y[:, indexes]
+            else:
+                extracted_y = y[indexes]
+            self.result_data.x = extracted_x
+            self.result_data.y = extracted_y
+
+    ''' Several general methods to handle GUI elements like Validation 
+        method for CTkEntry or putting the value to the disabled CTkEntry '''
 
     # Section handling CTkEntries
     def set_validation_for_ctkentries(self, list_of_entries):
+        ''' Sets the validation methods for the CTkEntries listed in "list_of_entries"  '''
         self.validate_command = (self.mainwindow.register(self.validate_number), '%P')
         for entry in list_of_entries:
             entry.configure(validate="key", validatecommand=self.validate_command)
@@ -444,7 +479,14 @@ class SubMethods_01():
             return False
 
     def set_entry_value(self, entry=None, value=None):
+        ''' Puts the "value" int the field of CTkEntry defined by "entry" '''
         if entry is None:
             return
-        entry.delete(0, 'end')
-        entry.insert(0, str(value))  # <--- Put 'result' to the widget
+        if entry.cget("state") == "disabled":
+            entry.configure(state = 'normal')
+            entry.delete(0, 'end')
+            entry.insert(0, str(value))
+            entry.configure(state = 'disabled')
+        else:
+            entry.delete(0, 'end')
+            entry.insert(0, str(value))

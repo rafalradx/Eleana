@@ -19,6 +19,7 @@ DATA_LABEL_WIDGET = 'data_label'        # <--- ID OF THE LABEL WIDGET WHERE NAME
 AUTO_RESULT = True                      # <--- IF TRUE THEN RESULT DATA WILL BE AUTOMATICALLY CREATED
 REGIONS = True                          # <--- IF TRUE THE DATA WILL BE EXTRACTED FROM REGIONS IN SELF.ELEANA.COLOR_SPAN
 REGION_FROM_SCALE = True                # <--- IF TRUE THEN EXTRACTED REGION IS TAKEN FROM X MIN TO X MAX (can be changed by self.region_from_scale)
+RANGE_SEL_COMPLETE = True               # <--- IF TRUE THEN CALCULATIONS WILL BE TRIGGERED WHEN RANGE SELECTION IS DONE. IF FALSE THEN EVERY CLICK WHILE RANGE SELECTION WILL TRIGGER CALCULATION
 TWO_SETS = False                        # <--- IF TRUE THEN FIRST AND SECOND DATA WILL BE AVAILABLE FOR CALCULATIONS
 STACK_SEP = True                        # <--- IF TRUE THEN EACH DATA IN A STACK WILL BE CALCULATED SEPARATELY
                                         #      WHEN FALSE THEN YOU MUST CREATE A METHOD THAT CALCS OF THE WHOLE STACK
@@ -80,7 +81,8 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
                             on_top=ON_TOP,                                                          #|
                             cursor_mode = cursor_mode,                                              #|
                             region_from_scale=REGION_FROM_SCALE,
-                            auto_result = AUTO_RESULT
+                            auto_result = AUTO_RESULT,
+                            range_start_ignore = RANGE_SEL_COMPLETE
                             )                                                                       #|
                                                                                                     #|
     # STANDARD METHODS FOR BUTTON EVENTS ON CLICK                                                   #|
