@@ -150,6 +150,8 @@ class MainApp:
         self.info = builder.get_object('info', self.mainwindow)
         self.infoframe = builder.get_object('infoframe', self.mainwindow)
         self.infoframe.grid_remove()
+        self.btn_clear_cursors.grid_remove()
+        self.annotationsFrame.grid_remove()
 
         # Command line
         self.command_line = builder.get_object('command_line', self.mainwindow)

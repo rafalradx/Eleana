@@ -187,22 +187,32 @@ class SubMethods_01():
         if self.app:
             self.grapher.plot_graph()
 
-    def prep_calc_data(self, x=None, y=None, z=None, name=None):
+    def prep_calc_data(self, x=None, y=None, z=None, name=None, region = None):
         ''' Master methods which takes data either from self.original of from given x, y, x args'''
         # Prepare data for calculation depending x,y,z
+        if region is not None:
+            if not isinstance(region, list):
+                raise TypeError('Region argument must be a list with exactly 2 elements')
+            elif isinstance(region, list) and len(region) != 2:
+                raise ValueError('Region argument must be a list with exactly 2 elements')
+            elif isinstance(region, list) and any(isinstance(sublist, list) and len(sublist) != 2 for sublist in region):
+                raise ValueError('Region argument must be a list of lists, each containing exactly 2 elements')
+
         if x is None:
             # Prepare data directly from self.original_data
-            x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_from_original_data()
+            x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_from_original_data(region=region)
             if len(x_data) == 0:
                 Error.show(info = f'There is no data between selected range for {name}')
                 return None
         else:
-            x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_from_xyz(x = x, y = y, z = z, name=name)
+            x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_from_xyz(x = x, y = y, z = z, name=name, region=region)
         return x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal
 
-    def prep_from_xyz(self, x, y, z=None, name=None):
+    def prep_from_xyz(self, x, y, z=None, name=None, region=None):
         ''' Prepare x_data, y_data, z_data to use for calculations from given x,y,z'''
-        if self.get_from_region:
+        if region is not None:
+            extracted_x, extracted_y = self.extract_region_xy_cmd(x,y, region)
+        elif self.get_from_region:
             extracted_x, extracted_y = self.extract_region_xy(x,y)
         else:
             extracted_x = x
@@ -218,6 +228,8 @@ class SubMethods_01():
 
     def prep_from_original_data(self):
         ''' Prepare x_data, y_data, z_data to use for calculations from self.original_data '''
+        if region is not None:
+            print('Region is defined for prep_from_original_data')
         if self.get_from_region:
             self.extract_region()
         x_data = self.original_data.x
@@ -402,12 +414,81 @@ class SubMethods_01():
             extracted_y = y[indexes]
         return extracted_x, extracted_y
 
+    def extract_region_xy_cmd(self, x, y, region):
+        ''' Extract data using range passed from command line '''
+        ranges = region
+        if ranges == []:
+            return x, y
+        is_2D = len(y.shape) == 2
+        indexes = []
+        for range_ in ranges:
+            idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
+            indexes.extend(idx.tolist())
+        extracted_x = x[indexes]
+        if is_2D:
+            extracted_y = y[:, indexes]
+        else:
+            extracted_y = y[indexes]
+        return extracted_x, extracted_y
+
     def extract_region(self, x=None, y=None):
         ''' Same as extract_region_xy but from self.original_data '''
         if self.region_from_scale:
             ranges = [self.grapher.ax.get_xlim()]
         else:
             ranges = self.eleana.color_span['ranges']
+        if ranges == []:
+            return
+        if self.original_data:
+            x = self.original_data.x
+            y = self.original_data.y
+            is_2D = len(y.shape) == 2
+            indexes = []
+            for range_ in ranges:
+                idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
+                indexes.extend(idx.tolist())
+            extracted_x = x[indexes]
+            if is_2D:
+                extracted_y = y[:, indexes]
+            else:
+                extracted_y = y[indexes]
+            self.original_data.x = extracted_x
+            self.original_data.y = extracted_y
+        if self.original_data2:
+            # Extract for second
+            if self.use_second:
+                x = self.original_data2.x
+                y = self.original_data2.y
+                is_2D = len(y.shape) == 2
+                indexes = []
+                for range_ in ranges:
+                    idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
+                    indexes.extend(idx.tolist())
+                extracted_x = x[indexes]
+                if is_2D:
+                    extracted_y = y[:, indexes]
+                else:
+                    extracted_y = y[indexes]
+                self.original_data2.x = extracted_x
+                self.original_data2.y = extracted_y
+        if self.auto_result:
+            x = self.result_data.x
+            y = self.result_data.y
+            is_2D = len(y.shape) == 2
+            indexes = []
+            for range_ in ranges:
+                idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
+                indexes.extend(idx.tolist())
+            extracted_x = x[indexes]
+            if is_2D:
+                extracted_y = y[:, indexes]
+            else:
+                extracted_y = y[indexes]
+            self.result_data.x = extracted_x
+            self.result_data.y = extracted_y
+
+    def extract_region_cmd(self, range):
+        ranges = range
         if ranges == []:
             return
         if self.original_data:

@@ -82,7 +82,7 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
                             cursor_mode = cursor_mode,                                              #|
                             region_from_scale=REGION_FROM_SCALE,
                             auto_result = AUTO_RESULT,
-                            range_start_ignore = RANGE_SEL_COMPLETE
+                            trigger_when_range_complete = RANGE_SEL_COMPLETE
                             )                                                                       #|
                                                                                                     #|
     # STANDARD METHODS FOR BUTTON EVENTS ON CLICK                                                   #|
@@ -163,15 +163,13 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
 
     # Here starts your main algorithm that performs a calculations
     # On a single data
-    def calculate(self, dataset = None, name = None, stk_index = None, y = None, x = None, z = None,
-                  double=None # <--- Add your additional variables
+    def calculate(self, name=None, stk_index=None, y=None, x=None, z=None, region=None,
+                  # DEFINE YOUR OWN ARGUMENTS HERE
+                  double=True
                   ):
-        # Do not remove the line below
-        self.extract_from_scales = True
-        x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_calc_data(dataset)
 
-        print('Min:', x_data[0])
-        print('Max:', x_data[-1])
+        self.extract_from_scales = True
+        x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_calc_data(x, y, z, name, region)
 
         ''' 
         Your code starts here 
@@ -186,6 +184,15 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
             z_cal:  the result of calculations on z_data
             result: the value of resulted calculations 
         '''
+
+        print(x_data)
+        exit()
+        if self.app:
+            # If not called from command line put instructions below
+            if double is None:
+                double = self.check_double_integration.get()
+
+
 
 
         # Send calculated values to result (if needed)

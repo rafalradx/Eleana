@@ -107,11 +107,11 @@ class IntegrateRegion(SubMethods_01, WindowGUI):
         else:
             print(info__)
 
-    def calculate(self, name = None, stk_index = None, y = None, x = None, z = None, between = None,
-                  double=None
+    def calculate(self, name = None, stk_index = None, y = None, x = None, z = None, region = None,
+                  double = True
                   ):
         ''' Your algorithm to perform calculations on single x,y,z data. Do not modify line below '''
-        x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_calc_data(x, y, z, name)
+        x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_calc_data(x, y, z, name, region)
 
         ''' HERE STARTS YOUR CODE 
         --------------------------
@@ -125,9 +125,15 @@ class IntegrateRegion(SubMethods_01, WindowGUI):
             z_cal:  the result of calculations on z_data
             result: the value of resulted calculations 
         '''
+        if self.app:
+            # Application is running and parameters are taken from GUI
+            if double is None:
+                double = self.check_double_integration.get()
 
-        if double is None:
-            double = self.check_double_integration.get()
+
+
+
+
         y_cal = cumulative_trapezoid(y_data, x_data, initial=0)
         integral = trapezoid(y_data,x_data)
         if double:
@@ -156,6 +162,6 @@ if __name__ == "__main__":
     x_data = np.array([1,2,3,4,5,6])
     y_data = np.array([4,3,5,3,5,6])
     double = False
-    integral = ir.calculate(x=x_data, y=y_data, double = double, range = [1,5])
+    integral = ir.calculate(x=x_data, y=y_data, region = [[1,2],[1,3]])
     print(integral)
 

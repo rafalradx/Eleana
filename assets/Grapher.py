@@ -478,9 +478,12 @@ class Grapher(GraphPreferences):
                 self.cursor_binding_id = None
             self.app.annotationsFrame.grid_remove()
             self.app.infoframe.grid_remove()
+            self.app.btn_clear_cursors.grid_remove()
+
         elif index > 0 and index < 5:
             # Switch on the mplcursors
             self.app.btn_clear_cursors.grid()
+            self.app.btn_clear_cursors.configure(text='Clear cursors')
             _show_annotation_list()
             self.cursor = self.mplcursors.cursor(self.ax,
                                                  multiple=self.current_cursor_mode['multip'],
@@ -490,22 +493,26 @@ class Grapher(GraphPreferences):
             self.cursor.connect("remove", self.annotation_removed)
             self.app.info.configure(text='LEFT CLICK - select point\nRIGHT CLICK - delete selected point')
 
+
         elif index == 5:
             # Free select
             self.app.btn_clear_cursors.grid()
+            self.app.btn_clear_cursors.configure(text='Clear cursors')
             _show_annotation_list()
             # Switch on Free point selections
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
         elif index == 6:
             # Crosshair
             self.app.btn_clear_cursors.grid()
+            self.app.btn_clear_cursors.configure(text='Clear cursors')
             _show_annotation_list()
             self.cursor = self.mplcursors.cursor(self.ax, multiple=False, hover=True)
             self.cursor.connect("add", self.mplcursor_crosshair)
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
         elif index == 7:
             # Range select
-            self.app.btn_clear_cursors.grid_remove()
+            self.app.btn_clear_cursors.grid()
+            self.app.btn_clear_cursors.configure(text='Clear ranges')
             _show_annotation_list()
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.range_clicked)
             self.app.info.configure(text='  LEFT CLICK - select the beginning \n  of the range\n  SECOND LEFT CLICK - select the end of the range\n  RIGHT CLICK INSIDE THE RANGE - delete \n  the range under the cursor')
