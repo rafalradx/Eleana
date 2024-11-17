@@ -68,9 +68,23 @@ class CTkListbox(customtkinter.CTkScrollableFrame):
 
         super().bind("<Destroy>", lambda e: self.unbind_all("<Configure>"))
 
+        # Mouse over widget bind
         self.mouse_over_widget = False
-        self.bind("<Button-4>", self.wheel_up)
-        self.bind('<Button-5>', self.wheel_down)
+        self.bind("<Enter>", lambda e: self.set_mouse_over_widget(True))
+        self.bind("<Leave>", lambda e: self.set_mouse_over_widget(False))
+        # Scroll mouse bind
+        self.bind("<MouseWheel>", self.on_mouse_wheel)  # Windows i macOS
+        self.bind("<Button-4>", self.wheel_up)  # Linux
+        self.bind("<Button-5>", self.wheel_down)  # Linux
+
+    def set_mouse_over_widget(self, value):
+        self.mouse_over_widget = value
+
+    def on_mouse_wheel(self, event):
+        if event.delta > 0:
+            self.wheel_up(event)
+        else:
+            self.wheel_down(event)
 
     def wheel_down(self, event):
         if not self.mouse_over_widget:

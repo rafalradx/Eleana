@@ -433,26 +433,30 @@ class Grapher(GraphPreferences):
             for extra in sel.extras:
                 extra.remove()
             sel.extras.clear()
+
             # Create new crosshairs
             hline = self.ax.axhline(y, color='k', ls=':')
             vline = self.ax.axvline(x, color='k', ls=':')
             sel.extras.append(hline)
             sel.extras.append(vline)
+
             # Update position of both lines of crosshair
             sel.extras[0].set_ydata([y, y])
             sel.extras[1].set_xdata([x, x])
 
     def cursor_on_off(self):
-        def _show_annotation_list(self):
+        def _show_annotation_list():
+            self.annotationlist = CTkListbox(self.app.annotationsFrame, command=self.annotationlist_clicked,
+                                             multiple_selection=True, height=300)
             self.app.annotationsFrame.grid()
-            self.app.annotationsFrame.grid_columnconfigure(0, weight=1)  # Kolumna 0
-            self.app.annotationsFrame.grid_rowconfigure(0, weight=1)  # Wiersz 0
-            self.annotationlist = CTkListbox(self.app.annotationsFrame, command=self.updateAnnotationList, multiple_selection=True, height=300)
-
+            self.app.annotationsFrame.grid_columnconfigure(0, weight=1)
+            self.app.annotationsFrame.grid_rowconfigure(0, weight=1)
             self.annotationlist.grid(column=0, row=0, sticky="nsew")
             self.app.infoframe.grid()
             self.app.infoframe.grid_columnconfigure(0, weight=1)
             self.app.infoframe.grid_rowconfigure(0, weight=1)
+            self.app.info.grid()
+            self.app.annotationsFrame.grid()
             self.app.info.grid()
 
         self.free_move_binding_id = None
@@ -477,31 +481,32 @@ class Grapher(GraphPreferences):
         elif index > 0 and index < 5:
             # Switch on the mplcursors
             self.app.btn_clear_cursors.grid()
-            _show_annotation_list(self)
+            _show_annotation_list()
             self.cursor = self.mplcursors.cursor(self.ax,
                                                  multiple=self.current_cursor_mode['multip'],
                                                  hover=self.current_cursor_mode['hov'])
-            self.cursor.connect("add", lambda x="cursor_add": self.annotation_create(sel=x))
+            #self.cursor.connect("add", self.annotation_create)
+            self.cursor.connect("add", self.annotation_create)
             self.cursor.connect("remove", self.annotation_removed)
             self.app.info.configure(text='LEFT CLICK - select point\nRIGHT CLICK - delete selected point')
 
         elif index == 5:
             # Free select
             self.app.btn_clear_cursors.grid()
-            _show_annotation_list(self)
+            _show_annotation_list()
             # Switch on Free point selections
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
         elif index == 6:
             # Crosshair
             self.app.btn_clear_cursors.grid()
-            _show_annotation_list(self)
+            _show_annotation_list()
             self.cursor = self.mplcursors.cursor(self.ax, multiple=False, hover=True)
             self.cursor.connect("add", self.mplcursor_crosshair)
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
         elif index == 7:
             # Range select
             self.app.btn_clear_cursors.grid_remove()
-            _show_annotation_list(self)
+            _show_annotation_list()
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.range_clicked)
             self.app.info.configure(text='  LEFT CLICK - select the beginning \n  of the range\n  SECOND LEFT CLICK - select the end of the range\n  RIGHT CLICK INSIDE THE RANGE - delete \n  the range under the cursor')
             self.eleana.color_span['ranges'] = []
@@ -517,6 +522,9 @@ class Grapher(GraphPreferences):
                 self.plt.disconnect(self.free_move_binding_id)
             if self.click_binding_id is not None:
                 self.canvas.mpl_disconnect(self.click_binding_id)
+
+    def annotationlist_clicked(self, sel):
+        pass
 
     def on_click_in_plot(self, event):
         """ Get coordinates from graph when Free Select is set in the combobox """
@@ -539,7 +547,7 @@ class Grapher(GraphPreferences):
             self.cursor_annotations.append(my_annotation)
             self.updateAnnotationList(action='add')
             text = ' '
-            self.ax.annotate(text, xy=point_selected, arrowprops={})
+            self.ax.annotate(text, xy=point_selected, arrowprops={'facecolor':'yellow', 'edgecolor':'blue'})
             self.canvas.draw()
             self.eleana.set_selections(variable='grapher_action', value='point_selected')
 

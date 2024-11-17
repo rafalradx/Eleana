@@ -246,6 +246,8 @@ class SubMethods_01():
 
     def perform_single_calculations(self, value=None):
         ''' Master method triggered by clicking "OK" or "calculate" button  '''
+        self.app.mainwindow.configure(cursor="watch")
+        self.grapher.canvas.get_tk_widget().config(cursor="watch")
         if self.original_data is None:
             if self._data_label__ is not None:
                 self._data_label__.configure(text = '')
@@ -291,6 +293,8 @@ class SubMethods_01():
                 self._data_label__.configure(text=name_)
             calc_result_row = self.calculate(name = self.original_data.name_nr, y = self.original_data.y, x = self.original_data.x)
             self.add_to_report(row=calc_result_row)
+        self.app.mainwindow.configure(cursor="")
+        self.grapher.canvas.get_tk_widget().config(cursor="")
 
     def perform_group_calculations(self, headers = None):
         ''' Triggers 'perform_calculation' for all data in the current group. '''

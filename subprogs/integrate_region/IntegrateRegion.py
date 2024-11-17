@@ -107,7 +107,7 @@ class IntegrateRegion(SubMethods_01, WindowGUI):
         else:
             print(info__)
 
-    def calculate(self, name = None, stk_index = None, y = None, x = None, z = None,
+    def calculate(self, name = None, stk_index = None, y = None, x = None, z = None, between = None,
                   double=None
                   ):
         ''' Your algorithm to perform calculations on single x,y,z data. Do not modify line below '''
@@ -156,6 +156,6 @@ if __name__ == "__main__":
     x_data = np.array([1,2,3,4,5,6])
     y_data = np.array([4,3,5,3,5,6])
     double = False
-    integral = ir.calculate(x=x_data, y=y_data, double = double)
+    integral = ir.calculate(x=x_data, y=y_data, double = double, range = [1,5])
     print(integral)
 
