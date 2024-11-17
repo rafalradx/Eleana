@@ -433,13 +433,11 @@ class Grapher(GraphPreferences):
             for extra in sel.extras:
                 extra.remove()
             sel.extras.clear()
-
             # Create new crosshairs
             hline = self.ax.axhline(y, color='k', ls=':')
             vline = self.ax.axvline(x, color='k', ls=':')
             sel.extras.append(hline)
             sel.extras.append(vline)
-
             # Update position of both lines of crosshair
             sel.extras[0].set_ydata([y, y])
             sel.extras[1].set_xdata([x, x])
@@ -450,6 +448,7 @@ class Grapher(GraphPreferences):
             self.app.annotationsFrame.grid_columnconfigure(0, weight=1)  # Kolumna 0
             self.app.annotationsFrame.grid_rowconfigure(0, weight=1)  # Wiersz 0
             self.annotationlist = CTkListbox(self.app.annotationsFrame, command=self.updateAnnotationList, multiple_selection=True, height=300)
+
             self.annotationlist.grid(column=0, row=0, sticky="nsew")
             self.app.infoframe.grid()
             self.app.infoframe.grid_columnconfigure(0, weight=1)
@@ -482,8 +481,7 @@ class Grapher(GraphPreferences):
             self.cursor = self.mplcursors.cursor(self.ax,
                                                  multiple=self.current_cursor_mode['multip'],
                                                  hover=self.current_cursor_mode['hov'])
-            #self.cursor.connect("add", self.annotation_create)
-            self.cursor.connect("add", self.annotation_create)
+            self.cursor.connect("add", lambda x="cursor_add": self.annotation_create(sel=x))
             self.cursor.connect("remove", self.annotation_removed)
             self.app.info.configure(text='LEFT CLICK - select point\nRIGHT CLICK - delete selected point')
 
@@ -637,10 +635,11 @@ class Grapher(GraphPreferences):
     def annotation_create(self, sel):
         ''' This creates annotations on the graph and add selected
             to the list in self.cursor_annotations '''
-        if len(self.cursor_annotations) >= self.cursor_limit:
-            sel = self.cursor.selections[-1]
-            self.cursor.remove_selection(sel)
-            return
+        if self.cursor_limit != 0:
+            if len(self.cursor_annotations) >= self.cursor_limit:
+                sel = self.cursor.selections[-1]
+                self.cursor.remove_selection(sel)
+                return
         curve = sel.artist.get_label()
         x = sel.target[0]
         y = sel.target[1]

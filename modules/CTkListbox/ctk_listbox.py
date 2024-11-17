@@ -105,7 +105,6 @@ class CTkListbox(customtkinter.CTkScrollableFrame):
         for options in self.buttons.values():
             if options.winfo_exists():
                 options.configure(fg_color="transparent")
-
         if self.multiple:
             if self.buttons[index] in self.selections:
                 self.selections.remove(self.buttons[index])

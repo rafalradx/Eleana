@@ -309,7 +309,7 @@ class SubMethods_01():
             self.original_data = copy.deepcopy(self.eleana.dataset[index])
             if self.auto_result:
                 self.result_data = self.eleana.results_dataset[i]
-            if self.
+
             self.extract_region()
             self.perform_single_calculations()
             i += 1
