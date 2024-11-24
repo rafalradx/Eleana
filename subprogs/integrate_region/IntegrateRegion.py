@@ -108,10 +108,14 @@ class IntegrateRegion(SubMethods_01, WindowGUI):
             print(info__)
 
     def calculate(self, name = None, stk_index = None, y = None, x = None, z = None, region = None,
-                  double = True
+                  double = None
                   ):
         ''' Your algorithm to perform calculations on single x,y,z data. Do not modify line below '''
-        x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_calc_data(x, y, z, name, region)
+        try:
+            x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_calc_data(x, y, z, name, region)
+        except:
+            return
+
 
         ''' HERE STARTS YOUR CODE 
         --------------------------
@@ -130,10 +134,6 @@ class IntegrateRegion(SubMethods_01, WindowGUI):
             if double is None:
                 double = self.check_double_integration.get()
 
-
-
-
-
         y_cal = cumulative_trapezoid(y_data, x_data, initial=0)
         integral = trapezoid(y_data,x_data)
         if double:
@@ -141,6 +141,7 @@ class IntegrateRegion(SubMethods_01, WindowGUI):
             integral = trapezoid(y_cal, x_data)
             y_cal = y_cal2
         result = integral # <--- Put the result value to 'result' variable
+        self.place_annotation(x = 2000)
 
         # ------- AFTER CALCULATIONS ---------
         # Update Window Widgets

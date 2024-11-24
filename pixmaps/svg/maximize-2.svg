@@ -1,1 +1,116 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#aaaaaa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather feather-maximize-2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="20"
+   height="20"
+   viewBox="0 0 24 24"
+   fill="none"
+   stroke="#aaaaaa"
+   stroke-width="1.5"
+   stroke-linecap="round"
+   stroke-linejoin="round"
+   class="feather feather-maximize-2"
+   version="1.1"
+   id="svg2505"
+   sodipodi:docname="maximize-2.svg"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
+   inkscape:export-filename="/home/marcin/PycharmProjects/Eleana/pixmaps/clearrange.png"
+   inkscape:export-xdpi="124"
+   inkscape:export-ydpi="124">
+  <metadata
+     id="metadata2511">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs2509" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1128"
+     id="namedview2507"
+     showgrid="false"
+     inkscape:zoom="15.750804"
+     inkscape:cx="13.928587"
+     inkscape:cy="22.259347"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2505" />
+  <g
+     id="g2646"
+     transform="translate(0.45711953)">
+    <g
+       id="g2545"
+       transform="matrix(1.199461,0,0,1.2521191,3.1158125,4.979896)"
+       style="stroke-width:2.05917">
+      <line
+         x1="10.611112"
+         y1="2.0218856"
+         x2="3.6111107"
+         y2="9.0218859"
+         id="line2501-3"
+         style="stroke-width:1.37278" />
+      <line
+         x1="10.624578"
+         y1="9.0084171"
+         x2="3.6245792"
+         y2="2.0084167"
+         id="line2501-3-6"
+         style="stroke-width:1.37278" />
+    </g>
+    <line
+       x1="3.8326876"
+       y1="2.1586628"
+       x2="3.8710158"
+       y2="21.620375"
+       id="line2503-2"
+       style="stroke-width:1.49999" />
+    <line
+       x1="19.267031"
+       y1="2.1748688"
+       x2="19.305359"
+       y2="21.63658"
+       id="line2503-2-9"
+       style="stroke-width:1.49999"
+       inkscape:transform-center-x="19.609428"
+       inkscape:transform-center-y="3.2861953" />
+    <line
+       x1="5.6278715"
+       y1="19.373505"
+       x2="17.775667"
+       y2="19.335176"
+       id="line2503-2-9-1"
+       style="stroke-width:1.49999"
+       inkscape:transform-center-x="-2.0512091"
+       inkscape:transform-center-y="19.609428" />
+  </g>
+  <line
+     x1="37.421089"
+     y1="-16.719501"
+     x2="17.959381"
+     y2="-16.681173"
+     id="line2503-2-9-2"
+     style="stroke-width:1.49999"
+     inkscape:transform-center-x="3.2861963"
+     inkscape:transform-center-y="-19.609428" />
+</svg>

@@ -1,3 +1,5 @@
+from distutils.sysconfig import customize_compiler
+
 from LoadSave import Load
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
@@ -8,8 +10,7 @@ import mplcursors
 import customtkinter as ctk
 import copy
 from CTkListbox import CTkListbox
-from Observer import Observer
-from Plots import Staticplotwindow
+import numpy as np
 
 # Make matplotlib to use tkinter
 matplotlib.use('TkAgg')
@@ -398,6 +399,24 @@ class Grapher(GraphPreferences):
 
         # Draw color span
         self.show_color_span()
+        # Create annotations
+        if self.eleana.custom_annotations:
+            self.app.btn_clear_cursors.grid()
+            self.app.btn_clear_cursors.configure(text='Clear cursors')
+            self.annotationlist = CTkListbox(self.app.annotationsFrame, command=self.annotationlist_clicked,
+                                             multiple_selection=True, height=300)
+            self.app.annotationsFrame.grid()
+            self.app.annotationsFrame.grid_columnconfigure(0, weight=1)
+            self.app.annotationsFrame.grid_rowconfigure(0, weight=1)
+            self.annotationlist.grid(column=0, row=0, sticky="nsew")
+            annots = self.eleana.custom_annotations
+            elements = len(annots)
+            i = 0
+            for annot in annots:
+                xy = annot['point']
+                number_ = str(i)
+                self.ax.annotate(text=number_, xy=xy, arrowprops = dict(facecolor = 'green', shrink = 2))
+                i+=1
         # Draw canvas
         self.canvas.draw()
 
@@ -479,6 +498,7 @@ class Grapher(GraphPreferences):
             self.app.annotationsFrame.grid_remove()
             self.app.infoframe.grid_remove()
             self.app.btn_clear_cursors.grid_remove()
+            self.app.btn_clear_cursors.configure(text='Clear cursors', command=self.clear_all_annotations)
 
         elif index > 0 and index < 5:
             # Switch on the mplcursors
@@ -488,7 +508,7 @@ class Grapher(GraphPreferences):
             self.cursor = self.mplcursors.cursor(self.ax,
                                                  multiple=self.current_cursor_mode['multip'],
                                                  hover=self.current_cursor_mode['hov'])
-            #self.cursor.connect("add", self.annotation_create)
+
             self.cursor.connect("add", self.annotation_create)
             self.cursor.connect("remove", self.annotation_removed)
             self.app.info.configure(text='LEFT CLICK - select point\nRIGHT CLICK - delete selected point')
@@ -512,7 +532,7 @@ class Grapher(GraphPreferences):
         elif index == 7:
             # Range select
             self.app.btn_clear_cursors.grid()
-            self.app.btn_clear_cursors.configure(text='Clear ranges')
+            self.app.btn_clear_cursors.configure(text='Clear ranges', command = self.clear_selected_ranges)
             _show_annotation_list()
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.range_clicked)
             self.app.info.configure(text='  LEFT CLICK - select the beginning \n  of the range\n  SECOND LEFT CLICK - select the end of the range\n  RIGHT CLICK INSIDE THE RANGE - delete \n  the range under the cursor')
@@ -647,7 +667,52 @@ class Grapher(GraphPreferences):
                 self.eleana.set_selections(variable='grapher_action', value='range_removed')
         self.plot_graph()
 
-    def annotation_create(self, sel):
+    def clear_selected_ranges(self):
+        ''' Remove all selected ranges from the graph and clear variable that stores the ranges '''
+        self.eleana.color_span['ranges'] = []
+        self.eleana.color_span['status'] = 0
+        self.plot_graph()
+
+    def set_custom_annotation(self, point, snap = True, which='first'):
+        ''' Create annotation programmatically at the specified (x, y) point. '''
+        def _find_nearest_index(x_data, x_coord):
+            x_data = np.array(x_data)
+            index = np.abs(x_data - x_coord).argmin()
+            return index
+        x_coord, y_coord = point  # Unpack the point coordinates
+        if which == 'first':
+            nr = 0
+            stk_index = self.eleana.selections['f_stk']
+        elif which == 'second':
+            nr = 1
+            stk_index = self.eleana.selections['s_stk']
+        else:
+            nr = 2
+            stk_index = self.eleana.selections['r_stk']
+        lines = self.ax.get_lines()
+        line = lines[nr]
+        curve_name = line.get_label()
+        index = self.eleana.get_index_by_name(selected_value_text=curve_name)
+        x_data, y_data = line.get_data()
+        if snap:
+            index_of_x = _find_nearest_index(x_data, x_coord)
+            y_coord = y_data[index_of_x]
+            x_coord = x_data[index_of_x]
+        else:
+            y_coord = point[1]
+            x_coord = point[0]
+        number_ = len(self.cursor_annotations)
+        custom_annot = {'type': None,
+                        'curve':curve_name,
+                        'index':index,
+                        'stk_index':stk_index,
+                        'point': (x_coord, y_coord),
+                        'nr':number_}
+        self.eleana.custom_annotations.append(custom_annot)
+        self.cursor_annotations.append(custom_annot)
+        self.updateAnnotationList(action='add')
+
+    def annotation_create(self, sel, curve = None):
         ''' This creates annotations on the graph and add selected
             to the list in self.cursor_annotations '''
         if self.cursor_limit != 0:
@@ -655,7 +720,13 @@ class Grapher(GraphPreferences):
                 sel = self.cursor.selections[-1]
                 self.cursor.remove_selection(sel)
                 return
-        curve = sel.artist.get_label()
+        if curve is None:
+            curve = sel.artist.get_label()
+            variable = 'grapher_action'
+            value = 'annotation_create'
+        else:
+            variable = None
+            value = None
         x = sel.target[0]
         y = sel.target[1]
         # Get curve index
@@ -677,8 +748,7 @@ class Grapher(GraphPreferences):
         sel.annotation.set_visible(self.current_cursor_mode['annot'])
         self.updateAnnotationList(action ='add')
         if self.current_cursor_mode['label'] != 'Continuous read XY':
-            self.eleana.set_selections(variable='grapher_action', value='annotation_create')
-
+            self.eleana.set_selections(variable=variable, value=variable)
 
     def annotation_removed(self, event=None, xy=None):
         ''' This deletes selected annotation from the graph
@@ -700,7 +770,7 @@ class Grapher(GraphPreferences):
 
     def clear_all_annotations(self, skip=None):
         self.cursor_annotations = []
-        self.eleana.color_span['ranges'] = []
+        self.eleana.custom_annotations = []
         self.eleana.set_selections(variable='grapher_action', value='annotations_cleared')
         try:
             self.clearAnnotationList()
@@ -797,7 +867,7 @@ class Grapher(GraphPreferences):
             curve_type = 'none'
         return curve_type, index, stk_index
 
-    '''******************************************l.ann
+    '''******************************************
     *                                           *
     *              EVENTS ON GRAPH              *
     *   (key press or navigation toolbar use)   *

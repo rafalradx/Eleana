@@ -184,6 +184,7 @@ class CreateFromTable:
 
     def edit_parameters(self):
         info = CTkMessagebox(title = "Edit parameters", message="This option is not implemented yet. Please edit parameters after addition of the data.")
+
     def generate_table(self, df=None, list2D=None):
         if df is not None:
             self.table = Sheet(self.tableFrame)

@@ -20,8 +20,10 @@ class EditParameters:
         self.mainwindow = builder.get_object("toplevel1", master)
         builder.connect_callbacks(self)
 
-        screen_width = self.mainwindow.winfo_screenwidth()
-        screen_height = self.mainwindow.winfo_screenheight()
+        #screen_width = self.mainwindow.winfo_screenwidth()
+        #screen_height = self.mainwindow.winfo_screenheight()
+        screen_width = 1100
+        screen_height = 600
         self.mainwindow.geometry(f"{screen_width}x{screen_height}")
 
         # References
@@ -89,7 +91,8 @@ class EditParameters:
         self.table.enable_bindings( "ctrl_select", "all", "right_click_popup_menu")
         self.table.set_options(50)
         self.table.highlight_columns(columns = [0], bg = '#2A578F', fg = None, highlight_header = True, redraw = True, overwrite = True)
-        self.table.column_width(column = 0, width = 800, only_set_if_too_small = True, redraw = True)
+        self.table.column_width(column = 0, width = 600, only_set_if_too_small = True, redraw = True)
+
     def get_data_from_column(self, column_name):
         index = self.sel_x_axis._values.index(column_name)
         if index < 0:

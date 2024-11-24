@@ -80,6 +80,8 @@ class Eleana:
                            'start':0,
                            'end':0}
 
+        self.custom_annotations = []
+
     ''' ***************************** 
      *         OBSERVER METHODS      *
      ******************************'''

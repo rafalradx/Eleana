@@ -49,6 +49,8 @@ class MainMenu:
         self.icon_normalize = self.prepare_icon("normalize.png")
         self.icon_distance = self.prepare_icon("distance.png")
         self.icon_static_plot = self.prepare_icon("static_plot.png")
+        self.icon_graphtools = self.prepare_icon("graphtools.png")
+        self.icon_clearrange = self.prepare_icon("clearrange.png")
 
         ''' BUILD MENU '''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth_bar, activeborderwidth=self.borderwidth)
@@ -222,8 +224,20 @@ class MainMenu:
         self.menu_plots = tk.Menu(self.main_menu, tearoff=1, bg=self.bg, fg=self.fg, font=self.font,
                                  activebackground=self.activebg, activeforeground=self.activefg,
                                  borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        #self.main_menu.add_cascade(label="Plots", menu=self.menu_plots, image=self.icon_dropdown, compound="left")
+
+
         self.main_menu.add_cascade(label="Plots", menu=self.menu_plots)
+        self.menu_graphtools = tk.Menu(self.main_menu, tearoff=1, bg=self.bg, fg=self.fg, font=self.font,
+                                  activebackground=self.activebg, activeforeground=self.activefg,
+                                  borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+
+        # - Graph tools
+        self.menu_plots.add_cascade(label="Graph tools", menu=self.menu_graphtools, image=self.icon_graphtools, compound="left")
+
+        # ---- Clear selected range
+        self.menu_graphtools.add_command(label="Clear selected range", command=self.app.clear_selected_ranges,
+                                    image=self.icon_clearrange, compound="left")
+
 
 
         # - Create plot

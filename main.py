@@ -1445,6 +1445,10 @@ class MainApp:
         main_menu.create_showplots_menu()
         self.grapher.show_static_graph_window(len(self.eleana.static_plots)-1)
 
+    def clear_selected_ranges(self):
+        self.grapher.clear_selected_ranges()
+        self.grapher.clear_all_annotations()
+
     def delete_simple_static_plot(self):
         '''
         Opens window to ask which plots

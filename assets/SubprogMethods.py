@@ -33,7 +33,6 @@ class SubMethods_01():
         self.show_stk_report = True         # If true then Report from 2D stac will be displayed
         self.work_on_start = work_on_start  # Perform calculations upon opening the window
         self.auto_result = auto_result      # Sets if result data should be created automatically.
-        self.report_to_group = report_to_group # Defines the group the results from report should be assigned to
         self.trigger_when_range_complete = trigger_when_range_complete # Defines if
         if app:
             self.batch = False
@@ -41,6 +40,7 @@ class SubMethods_01():
             self.app = app
             self.master = self.app.mainwindow
             self.eleana = self.app.eleana
+            self.report_to_group = report_to_group + self.eleana.selections['group']
             self.grapher = self.app.grapher
             self.update = self.app.update
             self.mainwindow.title(window_title)
@@ -146,13 +146,23 @@ class SubMethods_01():
     def data_changed(self, variable, value):
         ''' Activate get_data when selection changed.
             This is triggered by the Observer.   '''
+        if variable == "first" and value is None:
+            self.app.mainwindow.configure(cursor="")
+            self.grapher.canvas.get_tk_widget().config(cursor="")
+            return
         if variable == 'f_stk' or variable == 's_stk':
+            self.app.mainwindow.configure(cursor="")
+            self.grapher.canvas.get_tk_widget().config(cursor="")
             return
         if variable == 'grapher_action' and value == 'range_start':
+            self.app.mainwindow.configure(cursor="")
+            self.grapher.canvas.get_tk_widget().config(cursor="")
             return
         self.get_data(variable, value)
         if variable == 'grapher_action' and value == 'range_end':
             if self.trigger_when_range_complete is False:
+                self.app.mainwindow.configure(cursor="")
+                self.grapher.canvas.get_tk_widget().config(cursor="")
                 return
         self.perform_single_calculations()
 
@@ -258,12 +268,12 @@ class SubMethods_01():
 
     def perform_single_calculations(self, value=None):
         ''' Master method triggered by clicking "OK" or "calculate" button  '''
-        self.app.mainwindow.configure(cursor="watch")
-        self.grapher.canvas.get_tk_widget().config(cursor="watch")
         if self.original_data is None:
             if self._data_label__ is not None:
                 self._data_label__.configure(text = '')
             return
+        self.app.mainwindow.configure(cursor="watch")
+        self.grapher.canvas.get_tk_widget().config(cursor="watch")
         if self.original_data.type.lower() == "stack 2d":
             if self.stack_sep:
                 # Store current create_report status
@@ -325,7 +335,6 @@ class SubMethods_01():
             self.original_data = copy.deepcopy(self.eleana.dataset[index])
             if self.auto_result:
                 self.result_data = self.eleana.results_dataset[i]
-
             self.extract_region()
             self.perform_single_calculations()
             i += 1
@@ -334,6 +343,19 @@ class SubMethods_01():
         if self.create_report:
             self.show_report()
         self.eleana.selections = keep_selections
+
+    def place_annotation(self, x, y = None, which = 'first', style = None):
+        ''' Sets the annotation at given point.
+            If only x is set the y coordinate will snap to the curve indicated in "which" variable.
+            If x and y are set then the annotation will appear at given (x,y) coordinates
+            '''
+        if x is None:
+            return
+        if y:
+            snap = False
+        else:
+            snap = True
+        self.grapher.set_custom_annotation(point = (x,y), snap=snap, which = which)
 
     def add_to_report(self, headers = None, row = None):
         ''' Add headers for columns and or additional row to the report'''

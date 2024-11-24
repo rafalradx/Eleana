@@ -185,6 +185,8 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
             result: the value of resulted calculations 
         '''
 
+
+
         print(x_data)
         exit()
         if self.app:
