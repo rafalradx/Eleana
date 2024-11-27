@@ -114,6 +114,7 @@ class IntegrateRegion(SubMethods_01, WindowGUI):
         try:
             x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_calc_data(x, y, z, name, region)
         except:
+            print('Return from "calculate" function without doing anything')
             return
 
 
@@ -141,7 +142,7 @@ class IntegrateRegion(SubMethods_01, WindowGUI):
             integral = trapezoid(y_cal, x_data)
             y_cal = y_cal2
         result = integral # <--- Put the result value to 'result' variable
-        self.place_annotation(x = 2000)
+        #self.place_annotation(x = 2000)
 
         # ------- AFTER CALCULATIONS ---------
         # Update Window Widgets
@@ -162,7 +163,7 @@ if __name__ == "__main__":
     ir = IntegrateRegion()
     x_data = np.array([1,2,3,4,5,6])
     y_data = np.array([4,3,5,3,5,6])
-    double = False
-    integral = ir.calculate(x=x_data, y=y_data, region = [[1,2],[1,3]])
+    double = True
+    integral = ir.calculate(x=x_data, y=y_data)
     print(integral)
 

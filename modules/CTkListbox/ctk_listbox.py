@@ -92,7 +92,7 @@ class CTkListbox(customtkinter.CTkScrollableFrame):
         if self._scrollbar:
             current_position = self._scrollbar.get()[1]
             if current_position < 1.0:
-                new_position = min(current_position + 0.01, 1.0)  # Zmniejszenie wartości zmiany
+                new_position = min(current_position + 0.01, 1.0)
                 self._scrollbar.set(new_position - 0.01, new_position)
         self._parent_canvas.yview("scroll", int(100 / 20), "units")
 
@@ -102,7 +102,7 @@ class CTkListbox(customtkinter.CTkScrollableFrame):
         if self._scrollbar:
             current_position = self._scrollbar.get()[0]
             if current_position > 0.0:
-                new_position = max(current_position - 0.01, 0.0)  # Zmniejszenie wartości zmiany
+                new_position = max(current_position - 0.01, 0.0)
                 self._scrollbar.set(new_position, new_position + 0.01)
         self._parent_canvas.yview("scroll", -int(100 / 20), "units")
 

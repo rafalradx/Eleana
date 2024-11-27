@@ -149,21 +149,20 @@ class SubMethods_01():
         if variable == "first" and value is None:
             self.app.mainwindow.configure(cursor="")
             self.grapher.canvas.get_tk_widget().config(cursor="")
-            return
-        if variable == 'f_stk' or variable == 's_stk':
+        elif variable == 'f_stk' or variable == 's_stk':
             self.app.mainwindow.configure(cursor="")
             self.grapher.canvas.get_tk_widget().config(cursor="")
             return
-        if variable == 'grapher_action' and value == 'range_start':
+        elif variable == 'grapher_action' and value == 'range_start':
             self.app.mainwindow.configure(cursor="")
             self.grapher.canvas.get_tk_widget().config(cursor="")
             return
-        self.get_data(variable, value)
-        if variable == 'grapher_action' and value == 'range_end':
+        elif variable == 'grapher_action' and value == 'range_end':
             if self.trigger_when_range_complete is False:
                 self.app.mainwindow.configure(cursor="")
                 self.grapher.canvas.get_tk_widget().config(cursor="")
                 return
+        self.get_data(variable, value)
         self.perform_single_calculations()
 
     def update_result_data(self, y=None, x=None, z=None):
@@ -222,7 +221,7 @@ class SubMethods_01():
         ''' Prepare x_data, y_data, z_data to use for calculations from given x,y,z'''
         if region is not None:
             extracted_x, extracted_y = self.extract_region_xy_cmd(x,y, region)
-        elif self.get_from_region:
+        elif self.get_from_region and self.eleana is not None:
             extracted_x, extracted_y = self.extract_region_xy(x,y)
         else:
             extracted_x = x

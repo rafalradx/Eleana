@@ -111,6 +111,7 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
     # Your code starts from here                                                                    #|
     #-------------------------------------------------------------------------------------------------
 
+
     def configure_window(self):
         # Define additional window configuration if needed
         #self.mainwindow =
@@ -133,14 +134,13 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
                 self.y2_entry
                 ])
 
-
         # Set disabled field
         self.dx_entry.configure(state='disabled')
         self.dy_entry.configure(state='disabled')
 
     def graph_action(self, variable=None, value=None):
         ''' Do something when cursor action on graph was done '''
-        print('uhfu weuhfuhw fuhewfu qhuif')
+
 
     def find_minmax_clicked(self):
         print('Find min/max')
@@ -167,9 +167,17 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
                   # DEFINE YOUR OWN ARGUMENTS HERE
                   double=True
                   ):
+        #----------------------------------------------------------------------------------------------------------|
+        # Leave the lines below unchanged                                                                        # |                              # |
+        try:                                                                                                     # |
+            x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_calc_data(x,y,z,name,region) # |
+        except:                                                                                                  # |
+            if self.eleana.devel_mode:                                                                           # |
+                print('Return from "calculate" function without doing anything')                                 # |
+            return                                                                                               # |
+                                                                                                                 # |
+        #-----------------------------------------------------------------------------------------------------------
 
-        self.extract_from_scales = True
-        x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_calc_data(x, y, z, name, region)
 
         ''' 
         Your code starts here 
@@ -186,7 +194,6 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
         '''
 
 
-
         print(x_data)
         exit()
         if self.app:
@@ -194,14 +201,11 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
             if double is None:
                 double = self.check_double_integration.get()
 
-
-
-
-        # Send calculated values to result (if needed)
+        # Send calculated values to result (if needed). This will be sent to command line
         result = None # <--- HERE
         # Create summary row to add to the report
+        # The values must match the colum names in REPORT_HEADERS
         to_result_row = [1,2,3,4,5,6,7,8]
-        # self.consecutive_number, name_cal, z_cal, result]  # Here
 
         # ------- AFTER CALCULATIONS ---------
         # You must adjust this according to your needs. Below are examples
