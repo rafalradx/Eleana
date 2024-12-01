@@ -4,7 +4,7 @@ import customtkinter as ctk
 import numpy as np
 import pygubu
 import pandas
-from pandastable import Table, MultipleValDialog
+from pandastable import MultipleValDialog
 from pathlib import Path
 from modules.CTkMessagebox import CTkMessagebox
 from assets.DataClasses import Single2D

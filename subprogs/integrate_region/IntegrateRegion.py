@@ -41,17 +41,22 @@ REPORT_UNIT_Y = ''                      # <--- NAME OF Y UNIT IN THE CREATED REP
 cmd_to_import = GUI_FILE[:-3] + ' import ' + GUI_CLASS + ' as WindowGUI'
 if __name__ == "__main__":
     cmd_to_import = 'from ' + cmd_to_import
+    cmd_to_import = cmd_to_import + '\nfrom assets.Eleana import Eleana'
 else:
     cmd_to_import = 'from ' + SUBPROG_FOLDER + '.' + cmd_to_import
+
 exec(cmd_to_import)
 from assets.Error import Error
 from assets.SubprogMethods import SubMethods_01
+
 class IntegrateRegion(SubMethods_01, WindowGUI):
     ''' THIS IS STANDARD CONSTRUCTOR THAT SHOULD NOT BE MODIFIED '''
     def __init__(self, app=None, which='first', batch_mode=False):
         if app and not batch_mode:
             # Initialize window if app is defined and not batch mode is set
             WindowGUI.__init__(self, app.mainwindow)
+        else:
+            self.eleana = Eleana(version = 1, devel = True)
         self.get_from_region = REGIONS
         self.create_report = REPORT
         self.collected_reports = {'headers':REPORT_HEADERS, 'rows':[], 'x_name':REPORT_NAME_X, 'y_name':REPORT_NAME_Y,'default_x':REPORT_HEADERS[REPORT_DEFAULT_X], 'default_y':REPORT_HEADERS[REPORT_DEFAULT_Y], 'x_unit':REPORT_UNIT_X, 'y_unit':REPORT_UNIT_Y}
@@ -111,10 +116,9 @@ class IntegrateRegion(SubMethods_01, WindowGUI):
                   double = None
                   ):
         ''' Your algorithm to perform calculations on single x,y,z data. Do not modify line below '''
-        try:
-            x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_calc_data(x, y, z, name, region)
-        except:
-            print('Return from "calculate" function without doing anything')
+        self.eleana.cmd_error = ''
+        x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_calc_data(x, y, z, name, region)
+        if self.eleana.cmd_error:
             return
 
 
@@ -163,7 +167,6 @@ if __name__ == "__main__":
     ir = IntegrateRegion()
     x_data = np.array([1,2,3,4,5,6])
     y_data = np.array([4,3,5,3,5,6])
-    double = True
-    integral = ir.calculate(x=x_data, y=y_data)
+    integral = ir.calculate(x=x_data, y=y_data, double=0, region = [3,7])
     print(integral)
 

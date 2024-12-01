@@ -34,6 +34,7 @@ class SubMethods_01():
         self.work_on_start = work_on_start  # Perform calculations upon opening the window
         self.auto_result = auto_result      # Sets if result data should be created automatically.
         self.trigger_when_range_complete = trigger_when_range_complete # Defines if
+        self.process_group_show_error = True
         if app:
             self.batch = False
             self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
@@ -57,7 +58,6 @@ class SubMethods_01():
         else:
             self.app = None
             self.master = None
-            self.eleana = None
             self.grapher = None
             self.batch = True
         # Set to which selection 'First' or 'Second'
@@ -198,23 +198,34 @@ class SubMethods_01():
 
     def prep_calc_data(self, x=None, y=None, z=None, name=None, region = None):
         ''' Master methods which takes data either from self.original of from given x, y, x args'''
+        if isinstance(y, np.ndarray) and y.ndim != 1:
+            self.eleana.cmd_error = 'Y must be one-dimensional.'
+            return None, None, None, None, None, None, None, None
+        elif isinstance(y, list) and all(not isinstance(i, list) for i in y):
+            self.eleana.cmd_error = 'Y must be one-dimensional.'
+            return None, None, None, None, None, None, None, None
         # Prepare data for calculation depending x,y,z
         if region is not None:
             if not isinstance(region, list):
-                raise TypeError('Region argument must be a list with exactly 2 elements')
+                self.eleana.cmd_error = 'Region argument must be a list with exactly 2 elements'
+                return None,None,None,None,None,None,None,None
             elif isinstance(region, list) and len(region) != 2:
-                raise ValueError('Region argument must be a list with exactly 2 elements')
+                self.eleana.cmd_error = 'Region argument must be a list with exactly 2 elements'
+                return None,None,None,None,None,None,None,None
             elif isinstance(region, list) and any(isinstance(sublist, list) and len(sublist) != 2 for sublist in region):
-                raise ValueError('Region argument must be a list of lists, each containing exactly 2 elements')
+                self.eleana.cmd_error = 'Region argument must be a list of lists, each containing exactly 2 elements'
+                return None,None,None,None,None,None,None,None
 
         if x is None:
             # Prepare data directly from self.original_data
             x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_from_original_data(region=region)
             if len(x_data) == 0:
                 Error.show(info = f'There is no data between selected range for {name}')
-                return None
+                return None,None,None,None,None,None,None
         else:
             x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_from_xyz(x = x, y = y, z = z, name=name, region=region)
+        if not x_data.all() and self.batch:
+            self.eleana.cmd_error = 'There is no data within the region.'
         return x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal
 
     def prep_from_xyz(self, x, y, z=None, name=None, region=None):
@@ -312,13 +323,28 @@ class SubMethods_01():
             name_ = self.original_data.name_nr
             if self._data_label__ is not None:
                 self._data_label__.configure(text=name_)
-            calc_result_row = self.calculate(name = self.original_data.name_nr, y = self.original_data.y, x = self.original_data.x)
-            self.add_to_report(row=calc_result_row)
+            x_ = self.original_data.x
+            y_ = self.original_data.y
+            z_ = self.original_data.z
+            name_ = self.original_data.name_nr
+            try:
+                calc_result_row = self.calculate(name = name_, y = y_, x = x_, z = z_)
+                self.add_to_report(row=calc_result_row)
+            except ValueError:
+                if self.process_group_show_error:
+                    answer = Error.ask_for_option(title = 'Empty range',
+                                                  info = f"There is no data in: \n\n {name_}\n\n within the selected range. \n\nIf you don’t want this error to appear for other data in the group, click the SKIP button.",
+                                                  option = "Skip")
+                    if answer == 'Skip':
+                        self.process_group_show_error = False
+                    else:
+                        self.process_group_show_error = True
         self.app.mainwindow.configure(cursor="")
         self.grapher.canvas.get_tk_widget().config(cursor="")
 
     def perform_group_calculations(self, headers = None):
         ''' Triggers 'perform_calculation' for all data in the current group. '''
+        self.process_group_show_error = True
         self.show_stk_report = False
         self.collected_reports['rows'] = []
         self.app.clear_results(skip_question=True)
@@ -342,6 +368,7 @@ class SubMethods_01():
         if self.create_report:
             self.show_report()
         self.eleana.selections = keep_selections
+        self.process_group_show_error = True
 
     def place_annotation(self, x, y = None, which = 'first', style = None):
         ''' Sets the annotation at given point.
@@ -440,17 +467,26 @@ class SubMethods_01():
         ranges = region
         if ranges == []:
             return x, y
-        is_2D = len(y.shape) == 2
+        #is_2D = len(y.shape) == 2
+        is_2D = isinstance(ranges, list) and all(isinstance(r, (list, np.ndarray)) for r in ranges)
+        if not is_2D:
+            ranges = [region]
         indexes = []
         for range_ in ranges:
+            range_ = sorted(range_)
             idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
             indexes.extend(idx.tolist())
         extracted_x = x[indexes]
-        if is_2D:
-            extracted_y = y[:, indexes]
-        else:
+        #if is_2D:
+        #    extracted_y = y[:, indexes]
+        #else:
+        #    extracted_y = y[indexes]
+        try:
             extracted_y = y[indexes]
-        return extracted_x, extracted_y
+            return extracted_x, extracted_y
+        except IndexError:
+            self.eleana.cmd_error = 'Y array must be a one-dimensional'
+            return [],[]
 
     def extract_region(self, x=None, y=None):
         ''' Same as extract_region_xy but from self.original_data '''

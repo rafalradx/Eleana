@@ -793,7 +793,9 @@ class MainApp:
                 list_of_results.append(each.name)
         except:
             pass
-        spectrum.name = self.generate_name_suffix(spectrum.name, list_of_results)
+        name__ = self.generate_name_suffix(spectrum.name, list_of_results)
+        spectrum.name = name__
+        spectrum.name_nr = name__
 
         # Send to result and update lists
         self.eleana.results_dataset.append(spectrum)
@@ -1004,7 +1006,9 @@ class MainApp:
         except:
             pass
         # Create numbered name if similar exists in the Result Dataset
-        spectrum.name = self.generate_name_suffix(spectrum.name, list_of_results)
+        name__ = self.generate_name_suffix(spectrum.name, list_of_results)
+        spectrum.name = name__
+        spectrum.name_nr = name__
 
         # Send to result and update lists
         self.eleana.results_dataset.append(spectrum)

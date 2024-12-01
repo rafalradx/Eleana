@@ -17,6 +17,7 @@ class Eleana:
         self.static_plots = []                          # This contains a list of created simple static plots
         self.active_static_plot_windows = []
         self.devel_mode = devel
+        self.cmd_error = ''                             # This contains the current error for command line
 
         # Attribute "notes" contains general notes edited by Edit --> Notes in RTF
         self.notes = ""
@@ -232,33 +233,6 @@ class Eleana:
         y = data.y
         type = data.type
         
-
-
-    #
-    # # Write "content" to text file "filename" in temporary directory (/tmp)
-    # def create_tmp_file(self, filename: str, content=""):
-    #     path_to_file = Path(eleana.paths['tmp_dir'], filename)
-    #     try:
-    #         with open(path_to_file, "w") as file:
-    #             file.write(content)
-    #         return {"Error": False, 'desc': "" }
-    #     except:self.spinboxFrame = self.builder.get_object('spinboxFrame', self.mainwindow)
-    #     self.spinbox = self.builder.get_object('spinbox', self.mainwindow)
-    #     self.spinbox.grid_remove()
-    #     self.spinbox = CTkSpinbox(master=self.spinboxFrame, wait_for=0.05, command=self.ok_clicked, min_value=0,
-    #                               step_value=0.02, scroll_value=0.01, start_value=1)
-    #     self.spinbox.grid(column=0, row=0, sticky='ew')
-    #
-    #         return {"Error": True, 'desc': f"Cannot create {path_to_file}"}
-    #
-    # # Reading temporary "filename" text file from /tmp
-    # def read_tmp_file(self, filename):
-    #     path_to_file = Path(Eleana.paths['tmp_dir'], filename)
-    #     with open(path_to_file) as file:
-    #         file_content = file.read()
-    #     return file_content
-    #
-
 
 if __name__ == "__main__":
     eleana = Eleana()
