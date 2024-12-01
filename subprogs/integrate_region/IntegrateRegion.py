@@ -121,7 +121,6 @@ class IntegrateRegion(SubMethods_01, WindowGUI):
         if self.eleana.cmd_error:
             return
 
-
         ''' HERE STARTS YOUR CODE 
         --------------------------
         Use:
@@ -167,6 +166,6 @@ if __name__ == "__main__":
     ir = IntegrateRegion()
     x_data = np.array([1,2,3,4,5,6])
     y_data = np.array([4,3,5,3,5,6])
-    integral = ir.calculate(x=x_data, y=y_data, double=0, region = [3,7])
+    integral = ir.calculate(x=x_data, y=y_data, double=0, region = [1,7])
     print(integral)
 

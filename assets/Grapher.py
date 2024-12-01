@@ -751,13 +751,6 @@ class Grapher(GraphPreferences):
         if self.current_cursor_mode['label'] != 'Continuous read XY':
             self.eleana.set_selections(variable=variable, value=variable)
 
-
-
-        # TUTATJ JEST JAKIŚ PROBLEM Z KURSORAMI W 2 LINIACH POWYŻEJ
-
-
-
-
     def annotation_removed(self, event=None, xy=None):
         ''' This deletes selected annotation from the graph
             and removes the respective point from the list in

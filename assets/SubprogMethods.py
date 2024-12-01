@@ -229,6 +229,9 @@ class SubMethods_01():
             x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_from_xyz(x = x, y = y, z = z, name=name, region=region)
         if not x_data.all() and self.batch:
             self.eleana.cmd_error = 'There is no data within the region.'
+        x_data = np.asarray(x_data)
+        y_data = np.asarray(y_data)
+        z_data = np.asarray(z_data)
         return x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal
 
     def prep_from_xyz(self, x, y, z=None, name=None, region=None):

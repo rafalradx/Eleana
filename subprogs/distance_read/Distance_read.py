@@ -50,7 +50,7 @@ else:                                                                           
 exec(cmd_to_import)                                                                                 #|
 from assets.Error import Error                                                                      #|
 from assets.SubprogMethods import SubMethods_01                                                     #|
-class DistanceRead(SubMethods_01, WindowGUI):                                                          #|
+class DistanceRead(SubMethods_01, WindowGUI):                                                       #|
     ''' THIS IS STANDARD CONSTRUCTOR THAT SHOULD NOT BE MODIFIED '''                                #|
     def __init__(self, app=None, which='first', batch_mode=False):                                  #|
         if app and not batch_mode:                                                                  #|
@@ -168,14 +168,11 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
                   double=True
                   ):
         #----------------------------------------------------------------------------------------------------------|
-        # Leave the lines below unchanged                                                                        # |                              # |
-        try:                                                                                                     # |
-            x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_calc_data(x,y,z,name,region) # |
-        except:                                                                                                  # |
-            if self.eleana.devel_mode:                                                                           # |
-                print('Return from "calculate" function without doing anything')                                 # |
+        # Leave the lines below unchanged                                                                        # |
+        self.eleana.cmd_error = ''                                                                               # |
+        x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_calc_data(x, y, z, name, region) # |
+        if self.eleana.cmd_error:                                                                                # |
             return                                                                                               # |
-                                                                                                                 # |
         #-----------------------------------------------------------------------------------------------------------
 
 
@@ -183,23 +180,36 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
         Your code starts here 
         ---------------------
         Use:
-            x_data:  contains original data for x axis
-            y_data:  contains original data for y axis (can be complex)
-            z_data:  contains original data for z axis if there is a stack
+            x_data:  contains original data for x axis as np.array
+            y_data:  contains original data for y axis (can be complex) as np.array
+            z_data:  contains original data for z axis if there is a stack as np.array
         After calculation put calculated data to:
-            y_cal:  the results of calculations on y_data
-            x_cal:  the result of calculations on x_data
-            z_cal:  the result of calculations on z_data
+            y_cal:  the results of calculations on y_data as np.array
+            x_cal:  the result of calculations on x_data as np.array
+            z_cal:  the result of calculations on z_data as np.array
             result: the value of resulted calculations 
         '''
 
+        if self.keep_track:
+            # Auto detect maximum and minimum using numpy
+            min_y = np.min(y_data)
+            index_min_y = np.argmin(y_data)
+            min_x = x_data[index_min_y]
+            max_y = np.max(y_data)
+            index_max_y = np.argmax(y_data)
+            max_x = x_data[index_max_y]
+            minimum = [min_x, min_y]
+            maximum = [max_x, max_y]
+        else:
+            try:
+                p1 = self.grapher.cursor_annotations[0]
+                p2 = self.grapher.cursor_annotations[1]
+            except:
+                print("Select more than one point")
+                return
+            minimum = ([p1['point'][0], p1['point'][1]])
+            maximum = ([p2['point'][0], p2['point'][1]])
 
-        print(x_data)
-        exit()
-        if self.app:
-            # If not called from command line put instructions below
-            if double is None:
-                double = self.check_double_integration.get()
 
         # Send calculated values to result (if needed). This will be sent to command line
         result = None # <--- HERE
