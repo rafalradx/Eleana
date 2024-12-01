@@ -55,6 +55,7 @@ class SubMethods_01():
                 self.grapher.cursor_limit = cursor_mode['limit']
                 self.app.sel_graph_cursor(cursor_mode['type'])
                 self.app.sel_cursor_mode.set(cursor_mode['type'])
+                self.grapher.cursor_on_off()
         else:
             self.app = None
             self.master = None
@@ -162,6 +163,8 @@ class SubMethods_01():
                 self.app.mainwindow.configure(cursor="")
                 self.grapher.canvas.get_tk_widget().config(cursor="")
                 return
+        elif variable == "grapher_action":
+            return
         self.get_data(variable, value)
         self.perform_single_calculations()
 

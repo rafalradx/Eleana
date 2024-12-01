@@ -402,7 +402,7 @@ class Grapher(GraphPreferences):
         # Create annotations
         if self.eleana.custom_annotations:
             self.app.btn_clear_cursors.grid()
-            self.app.btn_clear_cursors.configure(text='Clear cursors')
+            self.app.btn_clear_cursors.configure(text='Clear cursors', command=self.clear_all_annotations)
             self.annotationlist = CTkListbox(self.app.annotationsFrame, command=self.annotationlist_clicked,
                                              multiple_selection=True, height=300)
             self.app.annotationsFrame.grid()
@@ -503,7 +503,7 @@ class Grapher(GraphPreferences):
         elif index > 0 and index < 5:
             # Switch on the mplcursors
             self.app.btn_clear_cursors.grid()
-            self.app.btn_clear_cursors.configure(text='Clear cursors')
+            self.app.btn_clear_cursors.configure(text='Clear cursors', command=self.clear_all_annotations)
             _show_annotation_list()
             self.cursor = self.mplcursors.cursor(self.ax,
                                                  multiple=self.current_cursor_mode['multip'],
@@ -517,14 +517,14 @@ class Grapher(GraphPreferences):
         elif index == 5:
             # Free select
             self.app.btn_clear_cursors.grid()
-            self.app.btn_clear_cursors.configure(text='Clear cursors')
+            self.app.btn_clear_cursors.configure(text='Clear cursors', command=self.clear_all_annotations)
             _show_annotation_list()
             # Switch on Free point selections
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
         elif index == 6:
             # Crosshair
             self.app.btn_clear_cursors.grid()
-            self.app.btn_clear_cursors.configure(text='Clear cursors')
+            self.app.btn_clear_cursors.configure(text='Clear cursors', command=self.clear_all_annotations)
             _show_annotation_list()
             self.cursor = self.mplcursors.cursor(self.ax, multiple=False, hover=True)
             self.cursor.connect("add", self.mplcursor_crosshair)
@@ -671,6 +671,7 @@ class Grapher(GraphPreferences):
         ''' Remove all selected ranges from the graph and clear variable that stores the ranges '''
         self.eleana.color_span['ranges'] = []
         self.eleana.color_span['status'] = 0
+        self.clearAnnotationList()
         self.plot_graph()
 
     def set_custom_annotation(self, point, snap = True, which='first'):
@@ -749,6 +750,13 @@ class Grapher(GraphPreferences):
         self.updateAnnotationList(action ='add')
         if self.current_cursor_mode['label'] != 'Continuous read XY':
             self.eleana.set_selections(variable=variable, value=variable)
+
+
+
+        # TUTATJ JEST JAKIŚ PROBLEM Z KURSORAMI W 2 LINIACH POWYŻEJ
+
+
+
 
     def annotation_removed(self, event=None, xy=None):
         ''' This deletes selected annotation from the graph
