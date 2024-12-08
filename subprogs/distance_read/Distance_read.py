@@ -3,6 +3,8 @@
 # -- Here is an example --
 import numpy as np
 
+from subprogs.integrate_region.IntegrateRegion import CURSOR_DISABLED
+
 # General setting of the application. Here is an example
 # File/Path/Class settings
 SUBPROG_FOLDER = 'distance_read'        # <--- SUBFOLDER IN SUBPROGS CONTAINING THIS FILE
@@ -35,6 +37,7 @@ REPORT_UNIT_X = ''                      # <--- NAME OF X UNIT IN THE CREATED REP
 REPORT_UNIT_Y = ''                      # <--- NAME OF Y UNIT IN THE CREATED REPORT
 
 # Cursors on graph
+CURSOR_DISABLED = True                  # <--- IF TRUE THEN CURSOR SELECTION IN MAIN GUI WILL BE DISABLED
 CURSOR_TYPE = 'Crosshair'               # <--- USE CURSORS: 'None', 'Continuous read XY', 'Selection of points with labels'
                                         #       'Selection of points', 'Numbered selections', 'Free select', 'Crosshair', 'Range select'
 CURSOR_LIMIT = 2                        # <--- SET THE MAXIMUM NUMBER OF CURSORS THAT CAN BE SELECTED. FOR NO LIMIT SET 0
@@ -80,9 +83,10 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
                             window_title = TITLE,                                                   #|
                             on_top=ON_TOP,                                                          #|
                             cursor_mode = cursor_mode,                                              #|
-                            region_from_scale=REGION_FROM_SCALE,
-                            auto_result = AUTO_RESULT,
-                            trigger_when_range_complete = RANGE_SEL_COMPLETE
+                            region_from_scale=REGION_FROM_SCALE,                                    #|
+                            auto_result = AUTO_RESULT,                                              #|
+                            trigger_when_range_complete = RANGE_SEL_COMPLETE,                       #|
+                            disable_cursor_sel = CURSOR_DISABLED                                    #|
                             )                                                                       #|
                                                                                                     #|
     # STANDARD METHODS FOR BUTTON EVENTS ON CLICK                                                   #|

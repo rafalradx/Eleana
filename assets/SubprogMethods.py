@@ -21,6 +21,7 @@ class SubMethods_01():
                  auto_result=True,
                  report_to_group = '__ANALYSIS__',
                  trigger_when_range_complete=False,
+                 disable_cursor_sel = True
                  ):
         # Set get_from_region to use selected range for data
         #self.collected_reports = None
@@ -35,6 +36,7 @@ class SubMethods_01():
         self.auto_result = auto_result      # Sets if result data should be created automatically.
         self.trigger_when_range_complete = trigger_when_range_complete # Defines if
         self.process_group_show_error = True
+        self.disable_cursor_select = disable_cursor_sel # If true then selection of cursors will be disabled
         if app:
             self.batch = False
             self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
@@ -46,6 +48,7 @@ class SubMethods_01():
             self.update = self.app.update
             self.mainwindow.title(window_title)
             self.mainwindow.attributes('-topmost', on_top)
+            self.current_cursor_selected = self.app.sel_cursor_mode.get()
             if data_label is not None:
                 data_label_text = "self._data_label__ = self.builder.get_object(" + data_label + ", self.mainwindow)"
                 exec(data_label_text)
@@ -53,9 +56,10 @@ class SubMethods_01():
                 self._data_label__ = None
             if cursor_mode is not None:
                 self.grapher.cursor_limit = cursor_mode['limit']
-                self.app.sel_graph_cursor(cursor_mode['type'])
                 self.app.sel_cursor_mode.set(cursor_mode['type'])
-                self.grapher.cursor_on_off()
+                self.app.sel_graph_cursor(cursor_mode['type'])
+            if self.disable_cursor_select:
+                self.app.sel_cursor_mode.configure(state="disabled")
         else:
             self.app = None
             self.master = None
@@ -87,6 +91,10 @@ class SubMethods_01():
     def cancel(self, event=None):
         ''' Close the window without changes '''
         self.response = None
+        # Return cursor selection to enabled
+        self.app.sel_cursor_mode.configure(state="normal")
+        self.app.sel_cursor_mode.set(self.current_cursor_selected)
+        self.app.sel_graph_cursor(self.current_cursor_selected)
         # Unregister observer
         self.eleana.detach(self.observer)
         self.mainwindow.destroy()
@@ -175,6 +183,9 @@ class SubMethods_01():
             if self.app:
                 if self.original_data.type.lower() == "stack 2d":
                     if self.auto_result:
+                        print(self.result_data.y)
+                        print(self.result_data.y)
+                        print(y)
                         self.result_data.y[self.i_stk]  = y
                 else:
                     if self.auto_result:
@@ -291,6 +302,7 @@ class SubMethods_01():
         self.app.mainwindow.configure(cursor="watch")
         self.grapher.canvas.get_tk_widget().config(cursor="watch")
         if self.original_data.type.lower() == "stack 2d":
+            self.extract_from_result()
             if self.stack_sep:
                 # Store current create_report status
                 self.mainwindow.config(cursor='watch')
@@ -462,11 +474,25 @@ class SubMethods_01():
             idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
             indexes.extend(idx.tolist())
         extracted_x = x[indexes]
+        self.result_data.x = x[indexes]
         if is_2D:
             extracted_y = y[:, indexes]
         else:
             extracted_y = y[indexes]
         return extracted_x, extracted_y
+
+    def extract_from_result(self):
+        ''' Extract data in results according to ranges in self.eleana.color_span
+            when result_data.y is a stack
+        '''
+        x_ = self.result_data.x
+        extracted_y = []
+        for each_y in self.result_data.y:
+            x_, y_ = self.extract_region_xy(x = x_, y=each_y)
+            extracted_y.append(y_)
+        y_ = np.asarray(extracted_y)
+        self.result_data.y = y_
+        self.result_data.x = x_
 
     def extract_region_xy_cmd(self, x, y, region):
         ''' Extract data using range passed from command line '''

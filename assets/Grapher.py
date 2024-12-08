@@ -377,10 +377,10 @@ class Grapher(GraphPreferences):
             self.ax.set_yscale('linear')
 
         # Draw Graph
-        self.draw()
+        self.draw_plot()
         self.eleana.notify_on = True
 
-    def draw(self):
+    def draw_plot(self):
         ''' Put the selected curves on the graph'''
         self.ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1),
                        fancybox=False, shadow=False, ncol=5)

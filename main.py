@@ -1071,8 +1071,6 @@ class MainApp:
     # --------------------------------------------
     def integrate_region(self):
         ''' Integration of the selected range '''
-        self.sel_graph_cursor('Range select')
-        self.sel_cursor_mode.set('Range select')
         self.integrate_region = IntegrateRegion(self, which = 'first')
 
     def normalize(self):
@@ -1160,10 +1158,11 @@ class MainApp:
         if skip_question:
             response = "Yes"
         else:
-            quit_dialog = CTkMessagebox(title="Clear results",
-                                    message="Are you sure you want to clear the entire dataset in the results?",
-                                    icon="warning", option_1="No", option_2="Yes")
-            response = quit_dialog.get()
+            # quit_dialog = CTkMessagebox(title="Clear results",
+            #                         message="Are you sure you want to clear the entire dataset in the results?",
+            #                         icon="warning", option_1="No", option_2="Yes")
+            # response = quit_dialog.get()
+            pass
 
         if response == "Yes":
             self.eleana.results_dataset = []
