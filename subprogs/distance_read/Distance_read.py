@@ -3,6 +3,7 @@
 # -- Here is an example --
 import numpy as np
 
+#from assets.drag_and_drop import entry
 from subprogs.integrate_region.IntegrateRegion import CURSOR_DISABLED
 
 # General setting of the application. Here is an example
@@ -38,7 +39,7 @@ REPORT_UNIT_Y = ''                      # <--- NAME OF Y UNIT IN THE CREATED REP
 
 # Cursors on graph
 CURSOR_DISABLED = True                  # <--- IF TRUE THEN CURSOR SELECTION IN MAIN GUI WILL BE DISABLED
-CURSOR_TYPE = 'Crosshair'               # <--- USE CURSORS: 'None', 'Continuous read XY', 'Selection of points with labels'
+CURSOR_TYPE = 'Crosshair'     # <--- USE CURSORS: 'None', 'Continuous read XY', 'Selection of points with labels'
                                         #       'Selection of points', 'Numbered selections', 'Free select', 'Crosshair', 'Range select'
 CURSOR_LIMIT = 2                        # <--- SET THE MAXIMUM NUMBER OF CURSORS THAT CAN BE SELECTED. FOR NO LIMIT SET 0
 # ----------------------------------------------------------------------------------------------------
@@ -147,7 +148,14 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
 
 
     def find_minmax_clicked(self):
-        print('Find min/max')
+        x_data, y_data = self.grapher.get_graph_line(index = 0)
+        index_min_y = np.argmin(y_data)
+        min_x = x_data[index_min_y]
+        index_max_y = np.argmax(y_data)
+        max_x = x_data[index_max_y]
+        self.grapher.clear_all_annotations()
+        self.place_annotation(x = min_x)
+        self.place_annotation(x = max_x)
 
     def track_minmax_clicked(self):
         self.keep_track = self.check_keep_track.get()
@@ -169,7 +177,7 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
     # On a single data
     def calculate(self, name=None, stk_index=None, y=None, x=None, z=None, region=None,
                   # DEFINE YOUR OWN ARGUMENTS HERE
-                  double=True
+                  track=None
                   ):
         #----------------------------------------------------------------------------------------------------------|
         # Leave the lines below unchanged                                                                        # |
@@ -194,7 +202,7 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
             result: the value of resulted calculations 
         '''
 
-        if self.keep_track:
+        if track or self.keep_track:
             # Auto detect maximum and minimum using numpy
             min_y = np.min(y_data)
             index_min_y = np.argmin(y_data)
@@ -205,28 +213,51 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
             minimum = [min_x, min_y]
             maximum = [max_x, max_y]
         else:
+            # Do not detect where maximum and minimum are
             try:
                 p1 = self.grapher.cursor_annotations[0]
                 p2 = self.grapher.cursor_annotations[1]
             except:
-                print("Select more than one point")
                 return
             minimum = ([p1['point'][0], p1['point'][1]])
             maximum = ([p2['point'][0], p2['point'][1]])
 
+        # Get x1 and x2
+        x1 = minimum[0]
+        x2 = maximum[0]
+
+        # Find index in x_data which is closest to x1 or x2
+        index_x1 = np.abs(x_data - x1).argmin()
+        index_x2 = np.abs(x_data - x2).argmin()
+
+        # Get data from x_data and y_data using the indexes for x1 and x2, respectively
+        x1 = x_data[index_x1]
+        x2 = x_data[index_x2]
+        y1 = y_data[index_x1]
+        y2 = y_data[index_x2]
+
+        # Calculate differences
+        dx = x2 - x1
+        dy = y2 - y1
 
         # Send calculated values to result (if needed). This will be sent to command line
-        result = None # <--- HERE
-        # Create summary row to add to the report
-        # The values must match the colum names in REPORT_HEADERS
-        to_result_row = [1,2,3,4,5,6,7,8]
+        result = [dx, dy] # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
 
-        # ------- AFTER CALCULATIONS ---------
-        # You must adjust this according to your needs. Below are examples
+        # Create summary row to add to the report. The values must match the column names in REPORT_HEADERS
+        to_result_row = [self.consecutive_number, name, x1, x2, dx, y1, y2, dy]
+
         # Update Window Widgets
-        if not self.batch:
-            self.set_entry_value(entry = self.dy_entry, value=result)
-
+        #----------------------------------------------------------------------------------------------
+        if not self.batch:                                                                           #|
+        # ---------------------------------------------------------------------------------------------
+            # Put values to the entries
+            self.set_entry_value(self.x1_entry, x1)
+            self.set_entry_value(self.x2_entry, x2)
+            self.set_entry_value(self.y1_entry, y1)
+            self.set_entry_value(self.y2_entry, y2)
+            self.set_entry_value(self.dx_entry, dx)
+            self.set_entry_value(self.dy_entry, dy)
+            pass
         #---------------------------------------------------------------------------------------------
         # Construct line for the report if needed                                                   #|
         # This is obligatory part of the function                                                   #|
@@ -235,7 +266,7 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
             self.update_result_data(y=y_cal, x=x_cal, z=z_cal)                                      #|
             return to_result_row # <--- Return this if report is going to be                        #|
         else:                                                                                       #|
-            return result # <-- Return this to commmand line                                        #|
+            return result # <-- Return this to command line                                         #|
         #---------------------------------------------------------------------------------------------
 
 # THIS IS FOR TESTING COMMAND LINE

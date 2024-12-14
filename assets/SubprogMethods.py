@@ -37,6 +37,7 @@ class SubMethods_01():
         self.trigger_when_range_complete = trigger_when_range_complete # Defines if
         self.process_group_show_error = True
         self.disable_cursor_select = disable_cursor_sel # If true then selection of cursors will be disabled
+        self.update_gui = True
         if app:
             self.batch = False
             self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
@@ -54,12 +55,7 @@ class SubMethods_01():
                 exec(data_label_text)
             else:
                 self._data_label__ = None
-            if cursor_mode is not None:
-                self.grapher.cursor_limit = cursor_mode['limit']
-                self.app.sel_cursor_mode.set(cursor_mode['type'])
-                self.app.sel_graph_cursor(cursor_mode['type'])
-            if self.disable_cursor_select:
-                self.app.sel_cursor_mode.configure(state="disabled")
+
         else:
             self.app = None
             self.master = None
@@ -81,6 +77,12 @@ class SubMethods_01():
             # Set current position in Results Dataset
             if self.auto_result:
                 self.result_index = len(self.eleana.results_dataset)
+            if cursor_mode is not None:
+                self.grapher.cursor_limit = cursor_mode['limit']
+                self.app.sel_cursor_mode.set(cursor_mode['type'])
+                self.app.sel_graph_cursor(cursor_mode['type'])
+            if self.disable_cursor_select:
+                self.app.sel_cursor_mode.configure(state="disabled")
 
     def get(self):
         ''' Returns self.response to the main application after close '''
@@ -183,9 +185,6 @@ class SubMethods_01():
             if self.app:
                 if self.original_data.type.lower() == "stack 2d":
                     if self.auto_result:
-                        print(self.result_data.y)
-                        print(self.result_data.y)
-                        print(y)
                         self.result_data.y[self.i_stk]  = y
                 else:
                     if self.auto_result:
@@ -316,6 +315,9 @@ class SubMethods_01():
                     z_ = self.original_data.z[self.i_stk]
                     if self._data_label__ is not None:
                         self._data_label__.configure(text = name_)
+                        # Update tkinter widget
+                        if self.update_gui:
+                            self.app.mainwindow.update()
                     calc_result_row = self.calculate(x = x_, y = y_, z = z_, name = name_, stk_index = self.i_stk)
                     try:
                         self.add_to_report(row = calc_result_row)
@@ -362,6 +364,7 @@ class SubMethods_01():
 
     def perform_group_calculations(self, headers = None):
         ''' Triggers 'perform_calculation' for all data in the current group. '''
+        self.update_gui = False
         self.process_group_show_error = True
         self.show_stk_report = False
         self.collected_reports['rows'] = []
@@ -387,6 +390,7 @@ class SubMethods_01():
             self.show_report()
         self.eleana.selections = keep_selections
         self.process_group_show_error = True
+        self.update_gui = True
 
     def place_annotation(self, x, y = None, which = 'first', style = None):
         ''' Sets the annotation at given point.
@@ -400,6 +404,8 @@ class SubMethods_01():
         else:
             snap = True
         self.grapher.set_custom_annotation(point = (x,y), snap=snap, which = which)
+        self.grapher.updateAnnotationList()
+        self.grapher.refresh()
 
     def add_to_report(self, headers = None, row = None):
         ''' Add headers for columns and or additional row to the report'''
@@ -409,9 +415,6 @@ class SubMethods_01():
             if len(row) != len(self.collected_reports['headers']):
                 if self.eleana.devel_mode:
                     Error.show(title="Error in report creating.", info="The number of column headers is different than provided columns in row. See console for details")
-                    print('The number of columns does not equal the column headers:')
-                    print('headers = ', self.collected_reports['headers'])
-                    print('row = ', row)
                     raise ValueError
             else:
                 processed_row = []
@@ -432,7 +435,6 @@ class SubMethods_01():
         df = pandas.DataFrame(rows, columns=headers)
         default_x = self.collected_reports['default_x']
         default_y = self.collected_reports['default_y']
-        group = self.eleana.selections['group']
         x_unit = self.collected_reports['x_unit']
         x_name = self.collected_reports['x_name']
         y_name = self.collected_reports['y_name']
@@ -499,7 +501,6 @@ class SubMethods_01():
         ranges = region
         if ranges == []:
             return x, y
-        #is_2D = len(y.shape) == 2
         is_2D = isinstance(ranges, list) and all(isinstance(r, (list, np.ndarray)) for r in ranges)
         if not is_2D:
             ranges = [region]
@@ -509,10 +510,6 @@ class SubMethods_01():
             idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
             indexes.extend(idx.tolist())
         extracted_x = x[indexes]
-        #if is_2D:
-        #    extracted_y = y[:, indexes]
-        #else:
-        #    extracted_y = y[indexes]
         try:
             extracted_y = y[indexes]
             return extracted_x, extracted_y
@@ -664,3 +661,4 @@ class SubMethods_01():
         else:
             entry.delete(0, 'end')
             entry.insert(0, str(value))
+        self.app.mainwindow.update()

@@ -1,4 +1,5 @@
 import sys
+
 # BASIC CONFIGURATION
 ELEANA_VERSION = 1              # Set the Eleana version. This will be stored in self.eleana.version
 INTERPRETER = sys.executable    # Defines python version
@@ -11,6 +12,7 @@ import copy
 import io
 import re
 import os
+
 # Set paths for assets, modules, subprogs and widgets
 PROJECT_PATH = Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "Eleana_interface.ui"
@@ -813,8 +815,9 @@ class MainApp:
     ****************************************'''
 
     def result_show(self):
-        self.eleana.set_selections('r_dsp', bool(self.check_result_show.get()))
+        #self.eleana.set_selections(variable = 'result', value = bool(self.check_result_show.get()))
         selection = self.sel_result.get()
+        self.eleana.selections['r_dsp'] = bool(self.check_result_show.get())
         if selection == 'None':
             return
         self.result_selected(selection)
@@ -1154,7 +1157,7 @@ class MainApp:
         update.dataset_list()
         update.all_lists()
 
-    def clear_results(self, skip_question = False):
+    def clear_results(self, skip_question = True):
         if skip_question:
             response = "Yes"
         else:
@@ -1178,7 +1181,7 @@ class MainApp:
                                     icon="warning", option_1="No", option_2="Yes")
         response = quit_dialog.get()
         if response == "Yes":
-            init.main_window()
+            #init.main_window()
             self.resultFrame.grid_remove()
             self.firstComplex.grid_remove()
             self.firstStkFrame.grid_remove()
@@ -1186,6 +1189,14 @@ class MainApp:
             self.secondStkFrame.grid_remove()
             init.eleana_variables()
             self.grapher.plot_graph()
+            self.sel_first.configure(values=['None'])
+            self.sel_second.configure(values=['None'])
+            self.clear_results()
+            self.sel_first.set('None')
+            self.sel_second.set('None')
+
+
+
 
     def preferences(self):
         ''' Open window for editing preferences '''

@@ -380,6 +380,9 @@ class Grapher(GraphPreferences):
         self.draw_plot()
         self.eleana.notify_on = True
 
+    def refresh(self):
+        self.draw_plot()
+
     def draw_plot(self):
         ''' Put the selected curves on the graph'''
         self.ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1),
@@ -415,7 +418,7 @@ class Grapher(GraphPreferences):
             for annot in annots:
                 xy = annot['point']
                 number_ = str(i)
-                self.ax.annotate(text=number_, xy=xy, arrowprops = dict(facecolor = 'green', shrink = 2))
+                self.ax.annotate(text=number_, xy=xy, arrowprops = dict(facecolor = 'orange', shrink = 2))
                 i+=1
         # Draw canvas
         self.canvas.draw()
@@ -436,7 +439,6 @@ class Grapher(GraphPreferences):
                 min = range[0]
                 max = range[1]
                 self.ax.axvspan(min, max, alpha=alpha, color=color)
-
 
     '''**********************************
     *                                   *
@@ -508,11 +510,9 @@ class Grapher(GraphPreferences):
             self.cursor = self.mplcursors.cursor(self.ax,
                                                  multiple=self.current_cursor_mode['multip'],
                                                  hover=self.current_cursor_mode['hov'])
-
             self.cursor.connect("add", self.annotation_create)
             self.cursor.connect("remove", self.annotation_removed)
             self.app.info.configure(text='LEFT CLICK - select point\nRIGHT CLICK - delete selected point')
-
 
         elif index == 5:
             # Free select
@@ -529,6 +529,7 @@ class Grapher(GraphPreferences):
             self.cursor = self.mplcursors.cursor(self.ax, multiple=False, hover=True)
             self.cursor.connect("add", self.mplcursor_crosshair)
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
+
         elif index == 7:
             # Range select
             self.app.btn_clear_cursors.grid()
@@ -573,12 +574,12 @@ class Grapher(GraphPreferences):
                              'nr': current_nr}
             self.cursor_annotations.append(my_annotation)
             self.updateAnnotationList(action='add')
-            text = ' '
+            text = f'Point: {len(self.cursor_annotations)}'
             self.ax.annotate(text, xy=point_selected, arrowprops={'facecolor':'yellow', 'edgecolor':'blue'})
             self.canvas.draw()
             self.eleana.set_selections(variable='grapher_action', value='point_selected')
 
-        elif (event.inaxes is not None and self.app.sel_cursor_mode.get() == 'Free select' and event.button == 3):
+        elif (event.inaxes is not None and (self.app.sel_cursor_mode.get() == 'Free select' or self.app.sel_cursor_mode.get() == 'Crosshair')  and event.button == 3):
             # Remove annotation when right mouse button is clicked
             x, y = event.xdata, event.ydata
             xlim = self.ax.get_xlim()
@@ -899,6 +900,41 @@ class Grapher(GraphPreferences):
             self.ax.plot(x, y)
             i +=1
         self.canvas.draw()
+
+    def get_graph_line(self, index=None, region_from_scale = True, region = False):
+        ''' Get x,y data directly from the plot '''
+        if index:
+            # Get the data for the plot with given index
+            line = self.ax.lines[index]
+        else:
+            # Index not provided, get according to GUI selection
+            if self.eleana.selections['first'] != -1 and self.eleana.selections['f_dsp'] == True:
+                line = self.ax.lines[0]
+            elif self.eleana.selections['second'] != -1 and self.eleana.selections['s_dsp'] == True:
+                line = self.ax.lines[1]
+            else:
+                return None, None
+
+        x = line.get_xdata()
+        y = line.get_ydata()
+
+        if region_from_scale:
+            ranges = [self.ax.get_xlim()]
+        if region:
+            ranges = self.eleana.color_span['ranges']
+        if region_from_scale or region:
+            # If region_from_scale or region is True then extract
+            # data between x_min and x_max or from selected range, respectively
+            indexes = []
+            for range_ in ranges:
+                range_ = sorted(range_)
+                idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
+                indexes.extend(idx.tolist())
+            extracted_x = x[indexes]
+            extracted_y = y[indexes]
+            return extracted_x, extracted_y
+        else:
+            return x, y
 
     ''' 
     Methods to handle Static Plots that are created as snaphots of

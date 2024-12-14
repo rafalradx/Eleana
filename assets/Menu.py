@@ -51,6 +51,9 @@ class MainMenu:
         self.icon_static_plot = self.prepare_icon("static_plot.png")
         self.icon_graphtools = self.prepare_icon("graphtools.png")
         self.icon_clearrange = self.prepare_icon("clearrange.png")
+        self.icon_trash = self.prepare_icon("trash.png")
+        self.icon_trashres = self.prepare_icon("trash_res.png")
+        self.icon_fromclipboard =self.prepare_icon("fromclipboard.png")
 
         ''' BUILD MENU '''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth_bar, activeborderwidth=self.borderwidth)
@@ -148,8 +151,16 @@ class MainMenu:
         # - Edit parameters
         self.menu_edit.add_command(label="Edit parameters", command = self.app.edit_parameters, image=self.icon_edit_par, compound="left")
 
+        # - SEPARATOR -
+        self.menu_edit.add_separator()
+
+        # - Copy to clipboard
+        self.menu_edit.add_command(label="Copy", command=self.app.quick_paste, image=self.icon_clipboard, compound="left", accelerator='Ctrl+C')
         # - Create from clipboard
-        self.menu_edit.add_command(label="Paste from clipboard", command=self.app.quick_paste,  image=self.icon_clipboard, compound="left")
+        self.menu_edit.add_command(label="Paste", command=self.app.quick_paste,  image=self.icon_fromclipboard, compound="left", accelerator='Ctrl+V')
+
+        # - SEPARATOR -
+        self.menu_edit.add_separator()
 
         # - Delete selected data
         self.menu_edit.add_command(label="Delete selected data", command=self.app.delete_selected_data, image = self.icon_trash, compound="left")
@@ -164,10 +175,10 @@ class MainMenu:
         self.menu_edit.add_cascade(label="Clear", menu=self.menu_clear, image = self.icon_clear, compound="left")
 
         # -------- Clear dataset
-        self.menu_clear.add_command(label="Dataset", command=self.app.clear_dataset)
+        self.menu_clear.add_command(label="Dataset", image = self.icon_trash, command=self.app.clear_dataset, compound="left")
 
         # -------- Clear result
-        self.menu_clear.add_command(label="Result", command=self.app.clear_results)
+        self.menu_clear.add_command(label="Result", image = self.icon_trashres, command=self.app.clear_results, compound="left")
 
         # - First
         self.menu_groups = tk.Menu(self.menu_edit, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
