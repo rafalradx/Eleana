@@ -99,6 +99,7 @@ class SubMethods_01():
         self.app.sel_graph_cursor(self.current_cursor_selected)
         # Unregister observer
         self.eleana.detach(self.observer)
+        self.grapher.clear_selected_ranges()
         self.mainwindow.destroy()
 
     def get_data(self, variable=None, value=None, start=False):
@@ -175,6 +176,8 @@ class SubMethods_01():
                 return
         elif variable == "grapher_action":
             return
+        elif variable == 'result':
+            return
         self.get_data(variable, value)
         self.perform_single_calculations()
 
@@ -206,8 +209,6 @@ class SubMethods_01():
             else:
                 print('Result Z:')
                 print(z)
-        if self.app:
-            self.grapher.plot_graph()
 
     def prep_calc_data(self, x=None, y=None, z=None, name=None, region = None):
         ''' Master methods which takes data either from self.original of from given x, y, x args'''
@@ -292,19 +293,33 @@ class SubMethods_01():
             name_cal = name
         return x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal
 
-    def perform_single_calculations(self, value=None):
+    def perform_single_calculations(self, value = None):
+        selections_copy = copy.deepcopy(self.eleana.selections)
+        self.get_data()
+        self.grapher.canvas.get_tk_widget().config(cursor="watch")
+        self.app.mainwindow.configure(cursor="watch")
+        try:
+            self.single_calc_workflow()
+            self.app.result_show()
+        except Exception as e:
+            print(e)
+        self.grapher.canvas.get_tk_widget().config(cursor="")
+        self.app.mainwindow.configure(cursor="")
+        self.eleana.selections = selections_copy
+        self.app.gui_set_from_eleana()
+        if self.create_report:
+            self.show_report()
+
+    def single_calc_workflow(self, value=None):
         ''' Master method triggered by clicking "OK" or "calculate" button  '''
         if self.original_data is None:
             if self._data_label__ is not None:
                 self._data_label__.configure(text = '')
             return
-        self.app.mainwindow.configure(cursor="watch")
-        self.grapher.canvas.get_tk_widget().config(cursor="watch")
         if self.original_data.type.lower() == "stack 2d":
             self.extract_from_result()
             if self.stack_sep:
                 # Store current create_report status
-                self.mainwindow.config(cursor='watch')
                 create_report = copy.copy(self.create_report)
                 self.i_stk = 0
                 self.create_report = True
@@ -317,7 +332,8 @@ class SubMethods_01():
                         self._data_label__.configure(text = name_)
                         # Update tkinter widget
                         if self.update_gui:
-                            self.app.mainwindow.update()
+                            #self.app.mainwindow.update()
+                            pass
                     calc_result_row = self.calculate(x = x_, y = y_, z = z_, name = name_, stk_index = self.i_stk)
                     try:
                         self.add_to_report(row = calc_result_row)
@@ -336,13 +352,13 @@ class SubMethods_01():
                 calc_result_row = self.calculate_stack(x = x_, y = y_, z = None, name = name_, stk_index = None)
                 if self.create_report:
                     self.add_to_report(row = calc_result_row)
-            self.mainwindow.config(cursor='')
             if self.show_stk_report:
                 self.show_report()
         elif self.original_data.type.lower() == 'single 2d':
             name_ = self.original_data.name_nr
             if self._data_label__ is not None:
-                self._data_label__.configure(text=name_)
+                #self._data_label__.configure(text=name_)
+                pass
             x_ = self.original_data.x
             y_ = self.original_data.y
             z_ = self.original_data.z
@@ -359,38 +375,54 @@ class SubMethods_01():
                         self.process_group_show_error = False
                     else:
                         self.process_group_show_error = True
-        self.app.mainwindow.configure(cursor="")
-        self.grapher.canvas.get_tk_widget().config(cursor="")
 
     def perform_group_calculations(self, headers = None):
+        selections_copy = copy.deepcopy(self.eleana.selections)
+        self.get_data()
+        self.grapher.canvas.get_tk_widget().config(cursor="watch")
+        self.app.mainwindow.configure(cursor="watch")
+        try:
+            self.group_calc_workflow()
+            self.app.result_show()
+        except Exception as e:
+            print(e)
+        self.grapher.canvas.get_tk_widget().config(cursor="")
+        self.app.mainwindow.configure(cursor="")
+        self.eleana.selections = selections_copy
+        self.app.gui_set_from_eleana()
+        if self.create_report:
+            self.show_report()
+
+    def group_calc_workflow(self, headers = None):
         ''' Triggers 'perform_calculation' for all data in the current group. '''
         self.update_gui = False
         self.process_group_show_error = True
         self.show_stk_report = False
         self.collected_reports['rows'] = []
-        self.app.clear_results(skip_question=True)
-        self.mainwindow.config(cursor='watch')
+        self.app.clear_results(skip_question=True, refresh_graph = False)
         spectra = copy.copy(self.app.sel_first._values)
         del spectra[0]
         i = 0
         keep_selections = copy.deepcopy(self.eleana.selections)
         for spectrum in spectra:
-            self.app.first_to_result(name=spectrum)
+            self.app.first_to_result(name=spectrum, refresh_graph=False)
             index = self.eleana.get_index_by_name(spectrum)
             self.eleana.selections['first'] = index
             self.original_data = copy.deepcopy(self.eleana.dataset[index])
             if self.auto_result:
                 self.result_data = self.eleana.results_dataset[i]
             self.extract_region()
-            self.perform_single_calculations()
+            self.single_calc_workflow()
             i += 1
             self.consecutive_number+=1
         self.mainwindow.config(cursor='')
-        if self.create_report:
-            self.show_report()
+        #if self.create_report:
+        #    self.show_report()
         self.eleana.selections = keep_selections
         self.process_group_show_error = True
         self.update_gui = True
+        self.grapher.canvas.get_tk_widget().config(cursor="")
+        self.app.mainwindow.configure(cursor="")
 
     def place_annotation(self, x, y = None, which = 'first', style = None):
         ''' Sets the annotation at given point.
@@ -405,7 +437,7 @@ class SubMethods_01():
             snap = True
         self.grapher.set_custom_annotation(point = (x,y), snap=snap, which = which)
         self.grapher.updateAnnotationList()
-        self.grapher.refresh()
+        self.grapher.draw_plot()
 
     def add_to_report(self, headers = None, row = None):
         ''' Add headers for columns and or additional row to the report'''
@@ -661,4 +693,3 @@ class SubMethods_01():
         else:
             entry.delete(0, 'end')
             entry.insert(0, str(value))
-        self.app.mainwindow.update()

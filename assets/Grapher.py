@@ -380,9 +380,6 @@ class Grapher(GraphPreferences):
         self.draw_plot()
         self.eleana.notify_on = True
 
-    def refresh(self):
-        self.draw_plot()
-
     def draw_plot(self):
         ''' Put the selected curves on the graph'''
         self.ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1),
@@ -413,7 +410,6 @@ class Grapher(GraphPreferences):
             self.app.annotationsFrame.grid_rowconfigure(0, weight=1)
             self.annotationlist.grid(column=0, row=0, sticky="nsew")
             annots = self.eleana.custom_annotations
-            elements = len(annots)
             i = 0
             for annot in annots:
                 xy = annot['point']

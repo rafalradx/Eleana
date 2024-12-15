@@ -108,8 +108,9 @@ class IntegrateRegion(SubMethods_01, WindowGUI):
 
 
     def set_double_integration(self):
-        self.get_data()
-        self.perform_single_calculations()       # <-- This is custom button
+        # self.get_data()
+        # self.perform_single_calculations()       # <-- This is custom button
+        pass
 
     def calculate_stack(self, x, y, name, z = None, stk_index = None):
         ''' If STAC_SEP is False it means that data in stack should

@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import pathlib
+import copy
 import pygubu
 from tkinter import Event
 from modules.CTkMessagebox import CTkMessagebox
@@ -47,7 +48,6 @@ class Groupassign:
         groups = list(asToGr.keys())
         self.sel_group.configure(values = groups)
         self.sel_group.set('All')
-
         self.mainwindow.bind("<Escape>", self.cancel)
         self.display_data_groups()
 
@@ -67,9 +67,13 @@ class Groupassign:
         self.write_assignment_to_data(new_group)
 
     def assign_to_new(self):
+        self.mainwindow.grab_release()
+        self.mainwindow.attributes('-topmost', False)
         group_create = Groupcreate(self.mainwindow, self.eleana)
         new_group = group_create.get()
         self.write_assignment_to_data(new_group)
+        self.mainwindow.grab_set()
+        self.mainwindow.attributes('-topmost', True)
 
 
     def cancel(self, event: Event = None):
@@ -77,13 +81,34 @@ class Groupassign:
 
     def write_assignment_to_data(self, new_group):
         index = self.eleana.selections[self.which]
-        groups = self.eleana.dataset[index].groups
+        if self.which == 'result':
+            groups = ['All']
+        else:
+            groups = self.eleana.dataset[index].groups
         if new_group in groups:
             info = "'" + str(self.eleana.dataset[index].name_nr) + "'" + ' already belongs to ' + new_group
             CTkMessagebox(title="", message=info)
             return
-        self.eleana.dataset[index].groups.append(new_group)
-        self.display_data_groups()
+        if self.which != 'result':
+            data = copy.deepcopy(self.eleana.dataset[index])
+            current_groups = data.groups
+            current_groups.append(new_group)
+            self.eleana.dataset[index].groups = current_groups
+            self.display_data_groups()
+        else:
+            field_content = self.group_field.get('0.0', 'end')
+            field_content = field_content.replace("\n", " ")
+            field_content = field_content.replace("\t", " ")
+            current_groups = field_content.split(',')
+            current_groups = [el.replace(" ", "").replace("\t", "").replace("\n", "") for el in current_groups]
+            current_groups.append(new_group)
+            text = ", ".join(current_groups)
+            self.group_field.configure(state="normal")
+            self.group_field.delete("0.0", "end")
+            self.group_field.insert("0.0", text)
+            self.group_field.configure(state="disabled")
+        self.response = current_groups
+
     def display_data_groups(self):
         data_name = self.eleana.dataset[self.index].name_nr
         groups = self.eleana.dataset[self.index].groups

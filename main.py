@@ -342,7 +342,6 @@ class MainApp:
         self.sel_group.set(new_group)
         self.group_selected(new_group)
 
-
     def group_up_clicked(self):
         current_group = self.sel_group.get()
         group_list = self.sel_group._values
@@ -526,6 +525,10 @@ class MainApp:
                 }
         created_stack = Stack(new_stack)
         self.add_to_results(created_stack)
+
+    def gui_set_from_eleana(self, which = 'first'):
+        ''' Takes values from self.eleana.selections and sets GUI'''
+        update.gui_widgets()
 
     def first_show(self):
         self.eleana.set_selections('f_dsp', bool(self.check_first_show.get()))
@@ -768,7 +771,6 @@ class MainApp:
             self.firstComplex.grid_remove()
         if first_pos == 'None':
             self.secondComplex.grid_remove()
-
         self.sel_first.set(second_pos)
         self.sel_second.set(first_pos)
         self.first_selected(second_pos)
@@ -822,12 +824,13 @@ class MainApp:
             return
         self.result_selected(selection)
 
-    def result_selected(self, selected_value_text):
+    def result_selected(self, selected_value_text, refresh_graph = True):
         if selected_value_text == 'None':
             self.eleana.set_selections('result', -1)
             self.resultComplex.grid_remove()
             self.resultStkFrame.grid_remove()
-            self.grapher.plot_graph()
+            if refresh_graph:
+                self.grapher.plot_graph()
             return
         i = 0
         while i < len(self.eleana.results_dataset):
@@ -842,7 +845,8 @@ class MainApp:
             self.resultComplex.grid()
         else:
             self.resultComplex.grid_remove()
-        self.grapher.plot_graph()
+        if refresh_graph:
+            self.grapher.plot_graph()
 
     def result_up_clicked(self):
         current_position = self.sel_result.get()
@@ -925,26 +929,19 @@ class MainApp:
             self.eleana.dataset.append(result)
         update.dataset_list()
         update.all_lists()
-        added_item = self.eleana.dataset[-1].name_nr
-        group = self.sel_group.get()
-        self.group_selected(group)
-        self.sel_first.set(added_item)
-        self.first_selected(added_item)
 
     def all_results_to_new_group(self):
+        self.group_assign = Groupassign(master=app, which='result')
+        response = self.group_assign.get()
         if len(self.eleana.results_dataset) == 0:
             return
         for each in self.eleana.results_dataset:
             result = copy.deepcopy(each)
-            result.groups = [self.sel_group.get()]
+            result.groups = response
             self.eleana.dataset.append(result)
+        update.group_list()
         update.dataset_list()
         update.all_lists()
-        added_item = self.eleana.dataset[-1].name_nr
-        group = self.sel_group.get()
-        self.group_selected(group)
-        self.sel_first.set(added_item)
-        self.first_selected(added_item)
 
     def replace_first(self):
         if self.eleana.selections['result'] < 0:
@@ -990,7 +987,7 @@ class MainApp:
         self.sel_result.set('None')
         self.grapher.plot_graph()
 
-    def first_to_result(self, name = None):
+    def first_to_result(self, name = None, refresh_graph = True):
         if name is not None:
             current = name
             skip_grapher = True
@@ -1021,10 +1018,11 @@ class MainApp:
         list_of_results = self.sel_result._values
         position = list_of_results[-1]
         self.sel_result.set(position)
-        self.result_selected(position)
+        self.result_selected(position, refresh_graph = False)
         if skip_grapher:
             return
-        self.grapher.plot_graph()
+        if refresh_graph:
+            self.grapher.plot_graph()
 
     def generate_name_suffix(self, name, list_of_results):
         name_lists = []
@@ -1157,7 +1155,7 @@ class MainApp:
         update.dataset_list()
         update.all_lists()
 
-    def clear_results(self, skip_question = True):
+    def clear_results(self, skip_question = True, refresh_graph=True):
         if skip_question:
             response = "Yes"
         else:
@@ -1173,7 +1171,8 @@ class MainApp:
             self.sel_result.configure(values=['None'])
             self.r_stk.configure(values=[])
             self.resultFrame.grid_remove()
-            self.grapher.plot_graph()
+            if refresh_graph:
+                self.grapher.plot_graph()
 
     def clear_dataset(self):
         quit_dialog = CTkMessagebox(title="Clear dataset",

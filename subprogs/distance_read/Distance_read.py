@@ -19,7 +19,7 @@ ON_TOP = True                           # <--- IF TRUE THE WINDOW WILL BE ALWAYS
 DATA_LABEL_WIDGET = 'data_label'        # <--- ID OF THE LABEL WIDGET WHERE NAME OF CURRENTLY SELECTED DATA WILL APPEAR.
                                         #      THE LABEL WIDGET OF THE SAME ID NAME MUST EXIST IN THE GUI. IF NOT USED SET THIS TO NONE
 # Data settings
-AUTO_RESULT = True                      # <--- IF TRUE THEN RESULT DATA WILL BE AUTOMATICALLY CREATED
+AUTO_RESULT = True                     # <--- IF TRUE THEN RESULT DATA WILL BE AUTOMATICALLY CREATED
 REGIONS = True                          # <--- IF TRUE THE DATA WILL BE EXTRACTED FROM REGIONS IN SELF.ELEANA.COLOR_SPAN
 REGION_FROM_SCALE = True                # <--- IF TRUE THEN EXTRACTED REGION IS TAKEN FROM X MIN TO X MAX (can be changed by self.region_from_scale)
 RANGE_SEL_COMPLETE = True               # <--- IF TRUE THEN CALCULATIONS WILL BE TRIGGERED WHEN RANGE SELECTION IS DONE. IF FALSE THEN EVERY CLICK WHILE RANGE SELECTION WILL TRIGGER CALCULATION
@@ -95,12 +95,13 @@ class DistanceRead(SubMethods_01, WindowGUI):                                   
         ''' [-OK-] button                                                                           #|
             This is standard function in SubprogMethods '''                                         #|
         self.perform_single_calculations()                                                          #|
+        self.update_after_calc()
                                                                                                     #|
     def process_group_clicked(self):                                                                #|
         ''' [-Process Group-] button                                                                #|
             This is standard function in SubprogMethods '''                                         #|
         self.perform_group_calculations()                                                           #|
-                                                                                                    #|
+                                                                                           #|
     def show_report_clicked(self):                                                                  #|
         ''' [-Show Report-] button                                                                  #|
             This is standard function in SubprogMethods '''                                         #|

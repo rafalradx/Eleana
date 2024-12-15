@@ -17,27 +17,23 @@ class Groupcreate:
         self.mainwindow = builder.get_object("toplevel1", master)
         builder.connect_callbacks(self)
         # Reference to master window and eleana instance and response variable
+        self.group_name_entry = builder.get_object("ctkentry2", self.mainwindow)
+        self.description = builder.get_object("ctkentry3", self.mainwindow)
+        self.btn_create = builder.get_object("btn_create", self.mainwindow)
         self.master = master
         self.eleana = eleana_instance
         self.response = None
         ''' Do not modify the code until this part'''
 
         # Set the window properties to modal mode
-        self.mainwindow.grab_set()  # Set as modal
+        self.master.update()
         self.mainwindow.attributes('-topmost', True)  # Always on top
         self.mainwindow.title('Create new group')
 
-        # Define references to objects in the window
-        # --- example: self.text_box contains textbox widget object
-        self.group_name = builder.get_object("ctkentry2", self.mainwindow)
-        self.description = builder.get_object("ctkentry3", self.mainwindow)
-        self.btn_create = builder.get_object("btn_create", self.mainwindow)
-
-        self.group_name.focus_set()
+        #self.group_name_entry.focus_set()
         # Define keyboard bindings
         self.mainwindow.bind('<Return>', lambda event: self.btn_create.invoke())
         self.mainwindow.bind("<Escape>", self.cancel)
-
 
     ''' DO NOT REMOVE GET AND RUN FUNCTIONS'''
     def get(self):
@@ -50,10 +46,10 @@ class Groupcreate:
 
     def create_group(self):
         groups = list(self.eleana.assignmentToGroups.keys())
-        new_group = self.group_name.get()
+        new_group = self.group_name_entry.get()
         if new_group not in groups:
             self.eleana.assignmentToGroups[new_group] = []
-            self.group_name.delete(0, "end")
+            self.group_name_entry.delete(0, "end")
             self.description.delete(0, "end")
             self.cancel(None)
         else:
@@ -62,6 +58,7 @@ class Groupcreate:
         self.response = new_group
 
     def cancel(self, event: Event = None):
+        self.master.attributes('-topmost', True)
         self.mainwindow.destroy()
 
 if __name__ == "__main__":
