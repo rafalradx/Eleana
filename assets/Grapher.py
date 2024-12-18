@@ -617,6 +617,8 @@ class Grapher(GraphPreferences):
         '''
         if self.app.sel_cursor_mode.get() != 'Range select':
             return
+        if sel.xdata is None or sel.ydata is None:
+            return
         x = float(sel.xdata)
         y = float(sel.ydata)
         if sel.button == 1: # Left button

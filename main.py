@@ -531,11 +531,11 @@ class MainApp:
         update.gui_widgets()
 
     def first_show(self):
-        self.eleana.set_selections('f_dsp', bool(self.check_first_show.get()))
+        self.eleana.selections['f_dsp'] = bool(self.check_first_show.get())
         selection = self.sel_first.get()
         if selection == 'None':
             return
-        self.first_selected(selection)
+        self.grapher.plot_graph()
 
     def first_down_clicked(self):
         current_position = self.sel_first.get()
@@ -656,11 +656,11 @@ class MainApp:
         response = self.modify_data.get()
 
     def second_show(self):
-        self.eleana.set_selections('s_dsp', bool(self.check_second_show.get()))
+        self.eleana.selections['s_dsp'] = bool(self.check_second_show.get())
         selection = self.sel_second.get()
         if selection == 'None':
             return
-        self.second_selected(selection)
+        self.grapher.plot_graph()
 
     def second_selected(self, selected_value_text):
         if selected_value_text == 'None':
@@ -817,12 +817,11 @@ class MainApp:
     ****************************************'''
 
     def result_show(self):
-        #self.eleana.set_selections(variable = 'result', value = bool(self.check_result_show.get()))
         selection = self.sel_result.get()
         self.eleana.selections['r_dsp'] = bool(self.check_result_show.get())
         if selection == 'None':
             return
-        self.result_selected(selection)
+        self.grapher.plot_graph()
 
     def result_selected(self, selected_value_text, refresh_graph = True):
         if selected_value_text == 'None':

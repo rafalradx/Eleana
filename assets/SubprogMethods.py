@@ -108,6 +108,8 @@ class SubMethods_01():
         # Get data from selections First or Second
         if variable == 'f_stk' or variable == 's_stk':
             return
+        elif variable == 'first' and variable == 'show':
+            return
         if variable == 'range_start' and self.trigger_when_range_complete:
             return
         if self.eleana.selections[self.which] >= 0:
@@ -152,8 +154,6 @@ class SubMethods_01():
             self.result_data = None
         if self.get_from_region:
             self.extract_region()
-        if self.work_on_start:
-            self.perform_single_calculations()
 
     def data_changed(self, variable, value):
         ''' Activate get_data when selection changed.
@@ -178,7 +178,6 @@ class SubMethods_01():
             return
         elif variable == 'result':
             return
-        self.get_data(variable, value)
         self.perform_single_calculations()
 
     def update_result_data(self, y=None, x=None, z=None):
@@ -294,13 +293,22 @@ class SubMethods_01():
         return x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal
 
     def perform_single_calculations(self, value = None):
+        if self.eleana.selections[self.which] < 0:
+            return
+        self.clear_report()
         selections_copy = copy.deepcopy(self.eleana.selections)
         self.get_data()
+        # del self.eleana.results_dataset[0]
         self.grapher.canvas.get_tk_widget().config(cursor="watch")
         self.app.mainwindow.configure(cursor="watch")
         try:
             self.single_calc_workflow()
-            self.app.result_show()
+            del self.eleana.results_dataset[0]
+            res_names = []
+            for each in self.eleana.results_dataset:
+                res_names.append(each.name_nr)
+            self.app.sel_result.configure(values = res_names)
+            self.app.mainwindow.update()
         except Exception as e:
             print(e)
         self.grapher.canvas.get_tk_widget().config(cursor="")
@@ -308,7 +316,10 @@ class SubMethods_01():
         self.eleana.selections = selections_copy
         self.app.gui_set_from_eleana()
         if self.create_report:
-            self.show_report()
+            result_  = self.eleana.results_dataset[-1]
+            if result_.type == "stack 2D":
+                self.show_report()
+        self.app.result_show()
 
     def single_calc_workflow(self, value=None):
         ''' Master method triggered by clicking "OK" or "calculate" button  '''
@@ -332,7 +343,7 @@ class SubMethods_01():
                         self._data_label__.configure(text = name_)
                         # Update tkinter widget
                         if self.update_gui:
-                            #self.app.mainwindow.update()
+                            self.app.mainwindow.update()
                             pass
                     calc_result_row = self.calculate(x = x_, y = y_, z = z_, name = name_, stk_index = self.i_stk)
                     try:
@@ -349,15 +360,20 @@ class SubMethods_01():
                 y_ = self.original_data.y
                 if self._data_label__ is not None:
                     self._data_label__.configure(text=name_)
+                    # Update tkinter widget
+                    if self.update_gui:
+                        self.app.mainwindow.update()
                 calc_result_row = self.calculate_stack(x = x_, y = y_, z = None, name = name_, stk_index = None)
                 if self.create_report:
                     self.add_to_report(row = calc_result_row)
-            if self.show_stk_report:
-                self.show_report()
+            #if self.show_stk_report:
+            #    self.show_report()
         elif self.original_data.type.lower() == 'single 2d':
             name_ = self.original_data.name_nr
             if self._data_label__ is not None:
-                #self._data_label__.configure(text=name_)
+                self._data_label__.configure(text=name_)
+                if self.update_gui:
+                    self.app.mainwindow.update()
                 pass
             x_ = self.original_data.x
             y_ = self.original_data.y
