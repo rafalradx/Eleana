@@ -1,5 +1,4 @@
 import sys
-
 # BASIC CONFIGURATION
 ELEANA_VERSION = 1              # Set the Eleana version. This will be stored in self.eleana.version
 INTERPRETER = sys.executable    # Defines python version
@@ -12,7 +11,6 @@ import copy
 import io
 import re
 import os
-
 # Set paths for assets, modules, subprogs and widgets
 PROJECT_PATH = Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "Eleana_interface.ui"
@@ -342,6 +340,7 @@ class MainApp:
         self.sel_group.set(new_group)
         self.group_selected(new_group)
 
+
     def group_up_clicked(self):
         current_group = self.sel_group.get()
         group_list = self.sel_group._values
@@ -526,16 +525,12 @@ class MainApp:
         created_stack = Stack(new_stack)
         self.add_to_results(created_stack)
 
-    def gui_set_from_eleana(self, which = 'first'):
-        ''' Takes values from self.eleana.selections and sets GUI'''
-        update.gui_widgets()
-
     def first_show(self):
-        self.eleana.selections['f_dsp'] = bool(self.check_first_show.get())
+        self.eleana.set_selections('f_dsp', bool(self.check_first_show.get()))
         selection = self.sel_first.get()
         if selection == 'None':
             return
-        self.grapher.plot_graph()
+        self.first_selected(selection)
 
     def first_down_clicked(self):
         current_position = self.sel_first.get()
@@ -656,11 +651,11 @@ class MainApp:
         response = self.modify_data.get()
 
     def second_show(self):
-        self.eleana.selections['s_dsp'] = bool(self.check_second_show.get())
+        self.eleana.set_selections('s_dsp', bool(self.check_second_show.get()))
         selection = self.sel_second.get()
         if selection == 'None':
             return
-        self.grapher.plot_graph()
+        self.second_selected(selection)
 
     def second_selected(self, selected_value_text):
         if selected_value_text == 'None':
@@ -771,6 +766,7 @@ class MainApp:
             self.firstComplex.grid_remove()
         if first_pos == 'None':
             self.secondComplex.grid_remove()
+
         self.sel_first.set(second_pos)
         self.sel_second.set(first_pos)
         self.first_selected(second_pos)
@@ -817,19 +813,18 @@ class MainApp:
     ****************************************'''
 
     def result_show(self):
+        self.eleana.set_selections('r_dsp', bool(self.check_result_show.get()))
         selection = self.sel_result.get()
-        self.eleana.selections['r_dsp'] = bool(self.check_result_show.get())
         if selection == 'None':
             return
-        self.grapher.plot_graph()
+        self.result_selected(selection)
 
-    def result_selected(self, selected_value_text, refresh_graph = True):
+    def result_selected(self, selected_value_text):
         if selected_value_text == 'None':
             self.eleana.set_selections('result', -1)
             self.resultComplex.grid_remove()
             self.resultStkFrame.grid_remove()
-            if refresh_graph:
-                self.grapher.plot_graph()
+            self.grapher.plot_graph()
             return
         i = 0
         while i < len(self.eleana.results_dataset):
@@ -844,8 +839,7 @@ class MainApp:
             self.resultComplex.grid()
         else:
             self.resultComplex.grid_remove()
-        if refresh_graph:
-            self.grapher.plot_graph()
+        self.grapher.plot_graph()
 
     def result_up_clicked(self):
         current_position = self.sel_result.get()
@@ -928,19 +922,26 @@ class MainApp:
             self.eleana.dataset.append(result)
         update.dataset_list()
         update.all_lists()
+        added_item = self.eleana.dataset[-1].name_nr
+        group = self.sel_group.get()
+        self.group_selected(group)
+        self.sel_first.set(added_item)
+        self.first_selected(added_item)
 
     def all_results_to_new_group(self):
-        self.group_assign = Groupassign(master=app, which='result')
-        response = self.group_assign.get()
         if len(self.eleana.results_dataset) == 0:
             return
         for each in self.eleana.results_dataset:
             result = copy.deepcopy(each)
-            result.groups = response
+            result.groups = [self.sel_group.get()]
             self.eleana.dataset.append(result)
-        update.group_list()
         update.dataset_list()
         update.all_lists()
+        added_item = self.eleana.dataset[-1].name_nr
+        group = self.sel_group.get()
+        self.group_selected(group)
+        self.sel_first.set(added_item)
+        self.first_selected(added_item)
 
     def replace_first(self):
         if self.eleana.selections['result'] < 0:
@@ -986,7 +987,7 @@ class MainApp:
         self.sel_result.set('None')
         self.grapher.plot_graph()
 
-    def first_to_result(self, name = None, refresh_graph = True):
+    def first_to_result(self, name = None):
         if name is not None:
             current = name
             skip_grapher = True
@@ -1017,11 +1018,10 @@ class MainApp:
         list_of_results = self.sel_result._values
         position = list_of_results[-1]
         self.sel_result.set(position)
-        self.result_selected(position, refresh_graph = False)
+        self.result_selected(position)
         if skip_grapher:
             return
-        if refresh_graph:
-            self.grapher.plot_graph()
+        self.grapher.plot_graph()
 
     def generate_name_suffix(self, name, list_of_results):
         name_lists = []
@@ -1154,7 +1154,7 @@ class MainApp:
         update.dataset_list()
         update.all_lists()
 
-    def clear_results(self, skip_question = True, refresh_graph=True):
+    def clear_results(self, skip_question = False):
         if skip_question:
             response = "Yes"
         else:
@@ -1170,8 +1170,7 @@ class MainApp:
             self.sel_result.configure(values=['None'])
             self.r_stk.configure(values=[])
             self.resultFrame.grid_remove()
-            if refresh_graph:
-                self.grapher.plot_graph()
+            self.grapher.plot_graph()
 
     def clear_dataset(self):
         quit_dialog = CTkMessagebox(title="Clear dataset",
@@ -1179,7 +1178,7 @@ class MainApp:
                                     icon="warning", option_1="No", option_2="Yes")
         response = quit_dialog.get()
         if response == "Yes":
-            #init.main_window()
+            init.main_window()
             self.resultFrame.grid_remove()
             self.firstComplex.grid_remove()
             self.firstStkFrame.grid_remove()
@@ -1187,14 +1186,6 @@ class MainApp:
             self.secondStkFrame.grid_remove()
             init.eleana_variables()
             self.grapher.plot_graph()
-            self.sel_first.configure(values=['None'])
-            self.sel_second.configure(values=['None'])
-            self.clear_results()
-            self.sel_first.set('None')
-            self.sel_second.set('None')
-
-
-
 
     def preferences(self):
         ''' Open window for editing preferences '''
