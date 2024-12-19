@@ -316,7 +316,10 @@ class SubMethods_01():
         self.eleana.selections = selections_copy
         self.app.gui_set_from_eleana()
         if self.create_report:
-            result_  = self.eleana.results_dataset[-1]
+            try:
+                result_  = self.eleana.results_dataset[-1]
+            except:
+                pass
             if result_.type == "stack 2D":
                 self.show_report()
         self.app.result_show()

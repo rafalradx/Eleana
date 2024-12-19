@@ -8,12 +8,12 @@ from subprogs.table.table import CreateFromTable
 import pandas
 
 class SubMethods_02:
-    def __init__(self, app=None, which='first'):
-        # Set get_from_region to use selected range for data
-        self.report['nrr':1]
+    def __init__(self, app=None, which='first', commandline=False):
+        self.commandline = commandline
         self.process_group_show_error = True
         self.update_gui = True
-        if app:
+        self.stk_index = 0
+        if app and not self.commandline:
             # Window start from Menu in GUI
             self.app = app
             self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
@@ -28,15 +28,12 @@ class SubMethods_02:
             else:
                 self.data_label = None
         else:
-            # Instance created from command line.
+            # Instance created directly from subprog.
             self.app = None
             self.master = None
             self.grapher = None
-            self.batch = True
-
         # Set to which selection 'First' or 'Second'
         self.which = which
-
         # If self.app is defined, configure window, observer and grapher
         if self.app:
             # Custom window configuration in parrent
@@ -44,15 +41,17 @@ class SubMethods_02:
             # Create observer
             self.observer = Observer(self.eleana, self)
             self.eleana.notify_on = True
-            # Initialize data to modify
-            self.get_data(variable=None, value=None, start=True)
             # Set current position in Results Dataset
-            if cursor_mode is not None:
-                self.grapher.cursor_limit = cursor_mode['limit']
-                self.app.sel_cursor_mode.set(cursor_mode['type'])
-                self.app.sel_graph_cursor(cursor_mode['type'])
-            if self.disable_cursor_select:
-                self.app.sel_cursor_mode.configure(state="disabled")
+            cursor_type = self.subprog_cursor['type'].lower()
+            if  cursor_type != 'none' or cursor_type != '':
+                # Configure cursor
+                self.subprog_cursor['previous'] = copy.copy(self.grapher.current_cursor_mode['label'])
+                self.grapher.cursor_limit = self.subprog_cursor['limit']
+                self.app.sel_cursor_mode.set(self.subprog_cursor['type'])
+                self.app.sel_graph_cursor(self.subprog_cursor['type'])
+                if not self.subprog_cursor['changing']:
+                    # Disable cursor changing
+                    self.app.sel_cursor_mode.configure(state="disabled")
 
     def get(self):
         ''' Returns self.response to the main application after close '''
@@ -65,69 +64,40 @@ class SubMethods_02:
         self.response = None
         # Return cursor selection to enabled
         self.app.sel_cursor_mode.configure(state="normal")
-        self.app.sel_cursor_mode.set(self.current_cursor_selected)
-        self.app.sel_graph_cursor(self.current_cursor_selected)
+        self.app.sel_cursor_mode.set(self.subprog_cursor['previous'])
+        self.app.sel_graph_cursor(self.subprog_cursor['previous'])
         # Unregister observer
         self.eleana.detach(self.observer)
         self.grapher.clear_selected_ranges()
         self.mainwindow.destroy()
 
-    def get_data(self, variable=None, value=None, start=False):
+    def get_data(self, variable=None, value=None):
         ''' Makes a copy of the selected data and stores it in self.original_data.
             You may perform calculations on self.original_data. '''
-        # Get data from selections First or Second
-        if variable == 'f_stk' or variable == 's_stk':
-            return
-        elif variable == 'first' and variable == 'show':
-            return
-        if variable == 'range_start' and self.trigger_when_range_complete:
-            return
-        if self.eleana.selections[self.which] >= 0:
+        if self.eleana.selections[self.which] >= 0: # If selection is not None
             index = self.eleana.selections[self.which]
-            if not start:
-                self.eleana.notify_on = False
-            if self.which == 'second':
-                self.app.second_to_result()
-            else:
-                if self.auto_result:
-                    self.app.first_to_result()
+            self.eleana.notify_on = False
+            self.original_data1 = copy.deepcopy(self.eleana.dataset[index])
+            self.original_data2 = None
         else:
-            self.original_data = None
-            self.result_data = None
+            if self.app:
+                Error.show(info='No first data selected', details='')
             return False
         if self.use_second:
             # --- TWO DATA ARE NEEDED ---
-            index = self.eleana.selections['first']
             index2 = self.eleana.selections['second']
-            if index == -1:
-                if self.app:
-                    Error.show(info='No first data selected', details='')
-                self.original_data = None
-                return False
-            elif self.eleana.selections['second'] == -1:
+            if self.eleana.selections['second'] == -1:
                 if self.app:
                     Error.show(info='No second data selected', details='')
                 self.original_data2 = None
                 return False
             self.original_data2 = copy.deepcopy(self.eleana.dataset[index2])
-            self.original_data = copy.deepcopy(self.eleana.dataset[index])
-        else:
-            # --- ONLY ONE DATA IS NEEDED ---
-            # Create reference to original data
-            self.original_data = copy.deepcopy(self.eleana.dataset[index])
-            self.original_data2 = None
-        # Create reference to data in results
-        if self.auto_result:
-            self.result_index = self.eleana.selections['result']
-            self.result_data = self.eleana.results_dataset[self.result_index]
-        else:
-            self.result_data = None
-        if self.get_from_region:
-            self.extract_region()
+        return True
 
     def data_changed(self, variable, value):
         ''' Activate get_data when selection changed.
             This is triggered by the Observer.   '''
+        print(f'variable = {variable} value = {value}')
         if variable == "first" and value is None:
             self.app.mainwindow.configure(cursor="")
             self.grapher.canvas.get_tk_widget().config(cursor="")
