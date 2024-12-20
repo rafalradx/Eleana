@@ -7,12 +7,14 @@ from assets.Error import Error
 from subprogs.table.table import CreateFromTable
 import pandas
 
+
 class SubMethods_02:
     def __init__(self, app=None, which='first', commandline=False):
         self.commandline = commandline
         self.process_group_show_error = True
         self.update_gui = True
         self.stk_index = 0
+        self.data_for_calculations = []
         if app and not self.commandline:
             # Window start from Menu in GUI
             self.app = app
@@ -71,6 +73,9 @@ class SubMethods_02:
         self.grapher.clear_selected_ranges()
         self.mainwindow.destroy()
 
+    #
+    #   GETTING THE DATA ACCORDING TO THE SELECTION
+    #
     def get_data(self, variable=None, value=None):
         ''' Makes a copy of the selected data and stores it in self.original_data.
             You may perform calculations on self.original_data. '''
@@ -104,21 +109,100 @@ class SubMethods_02:
         elif variable == 'f_stk' or variable == 's_stk':
             self.app.mainwindow.configure(cursor="")
             self.grapher.canvas.get_tk_widget().config(cursor="")
-            return
+            return False
         elif variable == 'grapher_action' and value == 'range_start':
             self.app.mainwindow.configure(cursor="")
             self.grapher.canvas.get_tk_widget().config(cursor="")
-            return
+            return False
         elif variable == 'grapher_action' and value == 'range_end':
             if self.trigger_when_range_complete is False:
                 self.app.mainwindow.configure(cursor="")
                 self.grapher.canvas.get_tk_widget().config(cursor="")
-                return
+                return False
         elif variable == "grapher_action":
-            return
+            return False
         elif variable == 'result':
-            return
-        self.perform_single_calculations()
+            return False
+        if self.subwindow_settings['auto_calculate']:
+            self.ok_clicked()
+        return True
+
+    #
+    # TRIGGERING CALCULATIONS
+    #
+    def perform_single_calculations(self):
+        ''' Performs calculations for single data selected in First or Second
+            This function checks if this is a single data of stack and if stack
+            can be calculated as separate data or must be taken as whole.
+            This function is triggered by Clicking "Calculate" or data change in GUI
+        '''
+        self.set_mouse_state("watch")
+        is_2D = self.original_data1.y.ndim == 2
+        # Check if data is stack 2D
+        if self.original_data1.type.lower() == 'stack 2D' or is_2D:
+            # This is stack 2D then check if stack is calculated as separate data
+            if not self.stack_sep:
+                status = self.prepare_stack_for_calc() # Prepare the whole stack for calculations
+                return status
+            else:
+                status = self.prepare_for_stack_separate()
+                return status
+        elif self.original_data1.type.lower() == 'single 2D' or not is_2D:
+                status = self.prepare_single_data()
+
+                # W tym miejscu skończyłem
+
+
+
+                return status
+        else:
+            Error.show(info='The type of the selected data cannot be determined. Please define the "type" parameter.',
+                       details='')
+        return True
+
+    def prepare_single_data(self):
+        ''' Gets data from original_data1 and original_data2 and send
+            to calculate
+        '''
+        # Clear current data:
+        self.data_for_calculations = []
+        # Get data from self.original_data1
+        x_data1 = copy.deepcopy(self.original_data1.x)
+        y_data1 = copy.deepcopy(self.original_data1.y)
+        z_data1 = copy.deepcopy(self.original_data1.z)
+        name1 = copy.deepcopy(self.original_data1.name)
+        # Extract the data in x and y
+        x_data1, y_data1 = self.extract_region_xy(x = x_data1, y = y_data1)
+        data_1 = {'x':x_data1, 'y':y_data1, 'name':name1}
+        self.data_for_calculations.append(data_1)
+        if self.use_second:
+            # Check if the second selected data is single 2D
+            is_2D = self.original_data2.y.ndim == 2
+            if self.original_data2.type.lower() != 'single 2D' or is_2D != 2:
+                # First is single 2D and second is single 2D
+                x_data2 = copy.deepcopy(self.original_data2)
+                y_data2 = copy.deepcopy(self.original_data2)
+                z_data2 = copy.deepcopy(self.original_data2)
+                name2 = copy.deepcopy(self.original_data2.name)
+                # Extract the data in x and y
+                x_data2, y_data2 = self.extract_region_xy(x=x_data2, y=y_data2)
+                data_2 = {'x': x_data2, 'y': y_data2, 'name': name2}
+                self.data_for_calculations.append(data_2)
+            else:
+                Error.show(info='If the first data is 2D, the second must also be 2D, not a stack.', details='')
+                return False
+        return True
+
+    def prepare_stack_for_calc(self):
+        print("to be done stack as whole")
+        return False
+
+    def prepare_for_stack_separate(self):
+        print("to be done stack_separate")
+
+    #
+    #   UPDATING RESULTS
+    #
 
     def update_result_data(self, y=None, x=None, z=None):
         ''' Move calculated data in y and x to self.eleana.result_dataset. '''
@@ -232,34 +316,6 @@ class SubMethods_02:
             name_cal = name
         return x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal
 
-    def perform_single_calculations(self, value = None):
-        if self.eleana.selections[self.which] < 0:
-            return
-        self.clear_report()
-        selections_copy = copy.deepcopy(self.eleana.selections)
-        self.get_data()
-        # del self.eleana.results_dataset[0]
-        self.grapher.canvas.get_tk_widget().config(cursor="watch")
-        self.app.mainwindow.configure(cursor="watch")
-        try:
-            self.single_calc_workflow()
-            del self.eleana.results_dataset[0]
-            res_names = []
-            for each in self.eleana.results_dataset:
-                res_names.append(each.name_nr)
-            self.app.sel_result.configure(values = res_names)
-            self.app.mainwindow.update()
-        except Exception as e:
-            print(e)
-        self.grapher.canvas.get_tk_widget().config(cursor="")
-        self.app.mainwindow.configure(cursor="")
-        self.eleana.selections = selections_copy
-        self.app.gui_set_from_eleana()
-        if self.create_report:
-            result_  = self.eleana.results_dataset[-1]
-            if result_.type == "stack 2D":
-                self.show_report()
-        self.app.result_show()
 
     def single_calc_workflow(self, value=None):
         ''' Master method triggered by clicking "OK" or "calculate" button  '''
@@ -452,23 +508,21 @@ class SubMethods_02:
 
     def extract_region_xy(self, x, y):
         ''' Extract data using selected range (self.grapher.color_span) or scale (x_min, x_max) from array in x,y '''
-        if self.region_from_scale:
+        if self.regions['from'] == 'scale':
             ranges = [self.grapher.ax.get_xlim()]
-        else:
+        elif self.regions['from'] == 'selection':
             ranges = self.eleana.color_span['ranges']
+        else:
+            print('REGIONS_FROM must be "scale", "selection" or "none"')
+            return x, y
         if ranges == []:
             return x, y
-        is_2D = len(y.shape) == 2
         indexes = []
         for range_ in ranges:
             idx = np.where((x >= range_[0]) & (x <= range_[1]))[0]
             indexes.extend(idx.tolist())
         extracted_x = x[indexes]
-        self.result_data.x = x[indexes]
-        if is_2D:
-            extracted_y = y[:, indexes]
-        else:
-            extracted_y = y[indexes]
+        extracted_y = y[indexes]
         return extracted_x, extracted_y
 
     def extract_from_result(self):
@@ -649,3 +703,7 @@ class SubMethods_02:
         else:
             entry.delete(0, 'end')
             entry.insert(0, str(value))
+
+    def set_mouse_state(self, state = ""):
+        self.grapher.canvas.get_tk_widget().config(cursor=state)
+        self.app.mainwindow.configure(cursor=state)

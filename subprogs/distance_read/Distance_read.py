@@ -15,14 +15,14 @@ ON_TOP = True                           # <--- IF TRUE THE WINDOW WILL BE ALWAYS
 DATA_LABEL = 'data_label'               # <--- ID OF THE LABEL WIDGET WHERE NAME OF CURRENTLY SELECTED DATA WILL APPEAR.
                                         #      THE LABEL WIDGET OF THE SAME ID NAME MUST EXIST IN THE GUI. IF NOT USED SET THIS TO NONE
 NAME_SUFFIX = ''                        # <--- DEFINES THE SUFFIX THAT WILL BE ADDED TO NAME OF PROCESSED DATA
-
+AUTO_CALCULATE = True                   # <--- DEFINES IF CALCULATION IS AUTOMATICALLY PERFORMED UPON DATA CHANGE IN GUI
 # Data settings
-REGIONS_FROM = 'scale'                  # <--- DEFINES IF DATA WILL BE EXTRACTED:
-#REGIONS_FROM = 'selection'             # 'none' - DO NOT EXTRACT
+#REGIONS_FROM = 'scale'                  # <--- DEFINES IF DATA WILL BE EXTRACTED:
+REGIONS_FROM = 'selection'             # 'none' - DO NOT EXTRACT
                                         # 'scale' - EXTRACT DATA BETWEEN X MIN X MAX
                                         # 'sel' - EXTRACT DATA FROM SELECTED RANGE
 
-USE_SECOND = True                       # <--- IF TRUE THEN FIRST AND SECOND DATA WILL BE AVAILABLE FOR CALCULATIONS
+USE_SECOND = False                      # <--- IF TRUE THEN FIRST AND SECOND DATA WILL BE AVAILABLE FOR CALCULATIONS
 STACK_SEP = True                        # <--- IF TRUE THEN EACH DATA IN A STACK WILL BE CALCULATED SEPARATELY
                                         #      WHEN FALSE THEN YOU MUST CREATE A METHOD THAT CALCS OF THE WHOLE STACK
 
@@ -35,7 +35,7 @@ REPORT_NAME_X =  'Data Number'          # <--- NAME OF X AXIS IN THE REPORT
 REPORT_NAME_Y =  'dY Value'             # <--- NAME OF Y AXIS IN THE REPORT
 REPORT_UNIT_X = ''                      # <--- NAME OF X UNIT IN THE CREATED REPORT
 REPORT_UNIT_Y = ''                      # <--- NAME OF Y UNIT IN THE CREATED REPORT
-REPORT_TO_GROUP = 'RESULT:distance'     # <--- DEFULT GROUP NAME TO WHICH REPORT WILL BE ADDED
+REPORT_TO_GROUP = 'RESULT:distance'     # <--- DEFAULT GROUP NAME TO WHICH REPORT WILL BE ADDED
 
 # Cursors on graph
 CURSOR_CHANGING = True                  # <--- IF TRUE THEN CURSOR SELECTION IN MAIN GUI WILL BE DISABLED
@@ -61,10 +61,8 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
             # Initialize window if app is defined and not commandline                               #|
             WindowGUI.__init__(self, app.mainwindow)                                                #|
         # Create settings for the subprog                                                           #|
-        self.subwindow_settings = {'title':TITLE,                                                   #|
-                                   'on_top':ON_TOP,                                                 #|
-                                   'data_label':DATA_LABEL,
-                                   'name_suffix':NAME_SUFFIX
+        self.subwindow_settings = {'title':TITLE, 'on_top':ON_TOP,'data_label':DATA_LABEL,
+                                   'name_suffix':NAME_SUFFIX, 'auto_calculate':AUTO_CALCULATE
                                    }                                                                #|
         self.regions = {'from':REGIONS_FROM}                                                        #|
         self.report = {'nr':1,                                                                      #|
@@ -93,8 +91,8 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
             This is standard function in SubprogMethods '''                                         #|
         status = self.get_data()
         if status:
-            self.perform_single_calculations()                                                          #|
-            self.update_after_calc()
+            self.perform_single_calculations()                                                      #|
+            #self.update_after_calc()
                                                                                                     #|
     def process_group_clicked(self):                                                                #|
         ''' [-Process Group-] button                                                                #|
