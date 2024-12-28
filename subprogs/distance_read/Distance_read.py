@@ -25,6 +25,9 @@ REGIONS_FROM = 'selection'             # 'none' - DO NOT EXTRACT
 USE_SECOND = False                      # <--- IF TRUE THEN FIRST AND SECOND DATA WILL BE AVAILABLE FOR CALCULATIONS
 STACK_SEP = True                        # <--- IF TRUE THEN EACH DATA IN A STACK WILL BE CALCULATED SEPARATELY
                                         #      WHEN FALSE THEN YOU MUST CREATE A METHOD THAT CALCS OF THE WHOLE STACK
+RESULT_CREATE = ''                      # <--- DETEMINES IF PROCESSED DATA SHOULD BE ADDED TO RESULT_DATASET
+#RESULT_CREATE = 'replace'              #      'ADD' OR 'REPLACE' IS SELF EXPLANATORY
+                                        #      ANY OTHER VALUES MEANS NOT RESULT CREATION
 
 # Report settings
 REPORT_CREATE = True                    # <--- IF TRUE THEN REPORT WILL BE CREATED AFTER CALCULATIONS
@@ -61,9 +64,10 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
             # Initialize window if app is defined and not commandline                               #|
             WindowGUI.__init__(self, app.mainwindow)                                                #|
         # Create settings for the subprog                                                           #|
-        self.subwindow_settings = {'title':TITLE, 'on_top':ON_TOP,'data_label':DATA_LABEL,
-                                   'name_suffix':NAME_SUFFIX, 'auto_calculate':AUTO_CALCULATE
-                                   }                                                                #|
+        self.subprog_settings = {'title':TITLE, 'on_top':ON_TOP, 'data_label':DATA_LABEL,
+                                   'name_suffix':NAME_SUFFIX, 'auto_calculate':AUTO_CALCULATE,
+                                   'result':RESULT_CREATE
+                                 }                                                                #|
         self.regions = {'from':REGIONS_FROM}                                                        #|
         self.report = {'nr':1,                                                                      #|
                        'create': REPORT_CREATE,                                                     #|
@@ -92,7 +96,6 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
         status = self.get_data()
         if status:
             self.perform_single_calculations()                                                      #|
-            #self.update_after_calc()
                                                                                                     #|
     def process_group_clicked(self):                                                                #|
         ''' [-Process Group-] button                                                                #|
@@ -173,50 +176,48 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
 
     # Here starts your main algorithm that performs a calculations
     # On a single data
-    def calculate(self, name=None, stk_index=None, y=None, x=None, z=None, region=None,
-                  # DEFINE YOUR OWN ARGUMENTS HERE
-                  track=None
-                  ):
-        #----------------------------------------------------------------------------------------------------------|
-        # Leave the lines below unchanged                                                                        # |
-        self.eleana.cmd_error = ''                                                                               # |
-        x_data, y_data, z_data, name, x_cal, y_cal, z_cal, name_cal = self.prep_calc_data(x, y, z, name, region) # |
-        if self.eleana.cmd_error:                                                                                # |
-            return                                                                                               # |
-        #-----------------------------------------------------------------------------------------------------------
-
-
-        ''' 
+    def calculate(self):
+        '''
         Your code starts here 
         ---------------------
         Use:
-            x_data:  contains original data for x axis as np.array
-            y_data:  contains original data for y axis (can be complex) as np.array
-            z_data:  contains original data for z axis if there is a stack as np.array
+            x_data1, y_data1, z_data1:  contain the prepared x, y, z data
+                for calculations
+            x_data2, y_data2, z_data2: contain the reference data to use
+                for example to subtract from data1
         After calculation put calculated data to:
-            y_cal:  the results of calculations on y_data as np.array
-            x_cal:  the result of calculations on x_data as np.array
-            z_cal:  the result of calculations on z_data as np.array
+            x_data1, y_data1 and z_data1
             result: the value of resulted calculations 
         '''
 
-        if track or self.keep_track:
+        x_data1 = self.data_for_calculations[0]['x']
+        y_data1 = self.data_for_calculations[0]['y']
+        z_data1 = self.data_for_calculations[0]['z']
+        name1 =   self.data_for_calculations[0]['name']
+        if self.use_second:
+            x_data2 = self.data_for_calculations[1]['x']
+            y_data2 = self.data_for_calculations[1]['y']
+            z_data2 = self.data_for_calculations[1]['z']
+            name2 = self.data_for_calculations[1]['name']
+        # --------------------------------------------- #
+        #                  CODE BELOW                   #
+        # ----------------------------------------------#
+
+        if self.keep_track:
             # Auto detect maximum and minimum using numpy
-            min_y = np.min(y_data)
-            index_min_y = np.argmin(y_data)
+            index_min_y = np.argmin(y_data1)
             min_x = x_data[index_min_y]
-            max_y = np.max(y_data)
-            index_max_y = np.argmax(y_data)
+            index_max_y = np.argmax(y_data1)
             max_x = x_data[index_max_y]
-            minimum = [min_x, min_y]
-            maximum = [max_x, max_y]
+            minimum = [min_x, min_y1]
+            maximum = [max_x, max_y1]
         else:
             # Do not detect where maximum and minimum are
             try:
                 p1 = self.grapher.cursor_annotations[0]
                 p2 = self.grapher.cursor_annotations[1]
             except:
-                return
+                return False
             minimum = ([p1['point'][0], p1['point'][1]])
             maximum = ([p2['point'][0], p2['point'][1]])
 
@@ -225,14 +226,14 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
         x2 = maximum[0]
 
         # Find index in x_data which is closest to x1 or x2
-        index_x1 = np.abs(x_data - x1).argmin()
-        index_x2 = np.abs(x_data - x2).argmin()
+        index_x1 = np.abs(x_data1 - x1).argmin()
+        index_x2 = np.abs(x_data1 - x2).argmin()
 
         # Get data from x_data and y_data using the indexes for x1 and x2, respectively
-        x1 = x_data[index_x1]
-        x2 = x_data[index_x2]
-        y1 = y_data[index_x1]
-        y2 = y_data[index_x2]
+        x1 = x_data1[index_x1]
+        x2 = x_data1[index_x2]
+        y1 = y_data1[index_x1]
+        y2 = y_data1[index_x2]
 
         # Calculate differences
         dx = x2 - x1
@@ -242,11 +243,11 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
         result = [dx, dy] # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
 
         # Create summary row to add to the report. The values must match the column names in REPORT_HEADERS
-        to_result_row = [self.consecutive_number, name, x1, x2, dx, y1, y2, dy]
+        row_to_report = [self.consecutive_number, name1, x1, x2, dx, y1, y2, dy]
 
         # Update Window Widgets
         #----------------------------------------------------------------------------------------------
-        if not self.batch:                                                                           #|
+        if self.app and not self.commandline:                                                                           #|
         # ---------------------------------------------------------------------------------------------
             # Put values to the entries
             self.set_entry_value(self.x1_entry, x1)
@@ -255,17 +256,18 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
             self.set_entry_value(self.y2_entry, y2)
             self.set_entry_value(self.dx_entry, dx)
             self.set_entry_value(self.dy_entry, dy)
-            pass
+
         #---------------------------------------------------------------------------------------------
         # Construct line for the report if needed                                                   #|
         # This is obligatory part of the function                                                   #|
-        if not self.batch:                                                                          #|
-            # Update results of the calculations                                                    #|
-            self.update_result_data(y=y_cal, x=x_cal, z=z_cal)                                      #|
-            return to_result_row # <--- Return this if report is going to be                        #|
-        else:                                                                                       #|
-            return result # <-- Return this to command line                                         #|
+        # if not self.commandline:                                                                          #|
+        #     # Update results of the calculations                                                    #|
+        #     self.update_result_data(y=y_cal, x=x_cal, z=z_cal)                                      #|
+        #     return to_result_row # <--- Return this if report is going to be                        #|
+        # else:                                                                                       #|
+        #     return result # <-- Return this to command line                                         #|
         #---------------------------------------------------------------------------------------------
+        return row_to_report
 
 # THIS IS FOR TESTING COMMAND LINE
 if __name__ == "__main__":

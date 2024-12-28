@@ -1162,6 +1162,7 @@ class MainApp:
             #                         message="Are you sure you want to clear the entire dataset in the results?",
             #                         icon="warning", option_1="No", option_2="Yes")
             # response = quit_dialog.get()
+            response = "Yes"
             pass
 
         if response == "Yes":
