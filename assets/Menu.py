@@ -52,10 +52,8 @@ class MainMenu:
         self.icon_graphtools = self.prepare_icon("graphtools.png")
         self.icon_clearrange = self.prepare_icon("clearrange.png")
         self.icon_trash = self.prepare_icon("trash.png")
-        #self.icon_trashres = self.prepare_icon("trash_res.png")
-        #self.icon_fromclipboard =self.prepare_icon("fromclipboard.png")
-        self.icon_trashres = self.icon_none
-        self.icon_fromclipboard = self.icon_none
+        self.icon_trashres = self.prepare_icon("trash_res.png")
+        self.icon_fromclipboard =self.prepare_icon("fromclipboard.png")
 
         ''' BUILD MENU '''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth_bar, activeborderwidth=self.borderwidth)

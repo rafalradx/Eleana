@@ -1,9 +1,12 @@
+
+
 from assets.Observer import Observer
 import copy
 import numpy as np
 from assets.Error import Error
 from subprogs.table.table import CreateFromTable
 import pandas
+
 
 class SubMethods_02:
     def __init__(self, app=None, which='first', commandline=False):
@@ -43,22 +46,16 @@ class SubMethods_02:
             self.eleana.notify_on = True
             # Set current position in Results Dataset
             cursor_type = self.subprog_cursor['type'].lower()
-            if cursor_type != 'none' or cursor_type != '':
+            if  cursor_type != 'none' or cursor_type != '':
                 # Configure cursor
                 self.subprog_cursor['previous'] = copy.copy(self.grapher.current_cursor_mode['label'])
                 self.grapher.cursor_limit = self.subprog_cursor['limit']
                 self.app.sel_cursor_mode.set(self.subprog_cursor['type'])
                 self.app.sel_graph_cursor(self.subprog_cursor['type'])
-                self.app.mainwindow.update()
                 if not self.subprog_cursor['changing']:
                     # Disable cursor changing
                     self.app.sel_cursor_mode.configure(state="disabled")
-                if self.subprog_cursor['clear_on_start']:
-                    # Clear current cursors
-                    if self.subprog_cursor['type'].lower() == 'range select':
-                        self.grapher.clear_selected_ranges()
-                    else:
-                        self.grapher.clear_all_annotations()
+
 
     # STANDARD METHODS FOR MAIN APPLICATION
     # ----------------------------------------------
@@ -725,11 +722,7 @@ class SubMethods_02:
         new_result.y = copy.deepcopy(self.data_for_calculations[0]['y'])
         new_result.z = copy.deepcopy(self.data_for_calculations[0]['z'])
         new_result.name = copy.deepcopy(self.data_for_calculations[0]['name'])
-        new_result.complex = copy.deepcopy(self.data_for_calculations[0]['complex'])
-        new_result.type = copy.deepcopy(self.data_for_calculations[0]['type'])
-        new_result.origin = copy.deepcopy(self.data_for_calculations[0]['origin'])
-        new_result.comment = copy.deepcopy(self.data_for_calculations[0]['comment'])
-        new_result.parameters = copy.deepcopy(self.data_for_calculations[0]['parameters'])
+
 
         if self.stk_index == -1 and results_dataset:
             results_dataset[-1].x = new_result.x
@@ -737,11 +730,6 @@ class SubMethods_02:
             results_dataset[-1].z = new_result.z
             name__ = self.app.generate_name_suffix(new_result.name, list_of_results)
             results_dataset[-1].name = name__ + self.subprog_settings['name_suffix']
-            results_dataset[-1].complex = new_result.complex
-            results_dataset[-1].type = new_result.type
-            results_dataset[-1].origin = new_result.origin
-            results_dataset[-1].parameters = new_result.parameters
-            results_dataset[-1].comment = new_result.comment
         elif self.stk_index == -1 and not results_dataset:
             results_dataset.append(new_result)
         self.app.update.list_in_combobox(comboboxID='sel_result')
@@ -760,11 +748,6 @@ class SubMethods_02:
         new_result.y = copy.deepcopy(self.data_for_calculations[0]['y'])
         new_result.z = copy.deepcopy(self.data_for_calculations[0]['z'])
         new_result.name = copy.deepcopy(self.data_for_calculations[0]['name'])
-        new_result.complex = copy.deepcopy(self.data_for_calculations[0]['complex'])
-        new_result.type = copy.deepcopy(self.data_for_calculations[0]['type'])
-        new_result.origin = copy.deepcopy(self.data_for_calculations[0]['origin'])
-        new_result.comment = copy.deepcopy(self.data_for_calculations[0]['comment'])
-        new_result.parameters = copy.deepcopy(self.data_for_calculations[0]['parameters'])
 
         if self.stk_index == -1 and results_dataset:
             results_dataset[-1].x = new_result.x
@@ -772,27 +755,16 @@ class SubMethods_02:
             results_dataset[-1].z = new_result.z
             name__ = self.app.generate_name_suffix(new_result.name, list_of_results)
             results_dataset[-1].name = name__ + self.subprog_settings['name_suffix']
-            results_dataset[-1].complex = new_result.complex
-            results_dataset[-1].type = new_result.type
-            results_dataset[-1].origin = new_result.origin
-            results_dataset[-1].parameters = new_result.parameters
-            results_dataset[-1].comment = new_result.comment
 
         elif self.stk_index == -1 and not results_dataset:
             results_dataset.append(new_result)
 
         elif self.stk_index >= 0:
             index_in_result = len(results_dataset) - 1
-            if self.stk_index < len(results_dataset[index_in_result].y)-1:
-                results_dataset[index_in_result].y[self.stk_index] = copy.deepcopy(new_result.y)
-            else:
-                results_dataset[index_in_result].x = copy.deepcopy(new_result.x)
-                results_dataset[index_in_result].z = copy.deepcopy(new_result.x)
-                results_dataset[index_in_result].complex = copy.deepcopy(new_result.complex)
-                results_dataset[index_in_result].type = copy.deepcopy(new_result.type)
-                results_dataset[index_in_result].origin = copy.deepcopy(new_result.origin)
-                results_dataset[index_in_result].comment = copy.deepcopy(new_result.comment)
-                results_dataset[index_in_result].parameters = copy.deepcopy(new_result.parameters)
+
+            results_dataset[index_in_result].y[self.stk_index] = copy.deepcopy(new_result.y)
+        else:
+            index_in_result = len(results_dataset) if result_create == 'replace' else max(len(results_dataset) - 1, 0)
         self.app.update.list_in_combobox(comboboxID='sel_result')
 
     def update_results_list(self, results):

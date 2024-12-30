@@ -20,20 +20,20 @@ GUI_CLASS = 'IntegrateRegionUI'         # <--- CLASS NAME IN GUI_FILE THAT BUILD
 # ---
 TITLE = 'Integrate region'              # <--- TITLE OF THE WINDOW
 ON_TOP = True                           # <--- IF TRUE THE WINDOW WILL BE ALWAYS ON TOP
-DATA_LABEL = 'data_label'        # <--- ID OF THE LABEL WIDGET WHERE NAME OF CURRENTLY SELECTED DATA WILL APPEAR.
+DATA_LABEL = 'data_label'               # <--- ID OF THE LABEL WIDGET WHERE NAME OF CURRENTLY SELECTED DATA WILL APPEAR.
                                         #      THE LABEL WIDGET OF THE SAME ID NAME MUST EXIST IN THE GUI. IF NOT USED SET THIS TO NONE
 
-NAME_SUFFIX = ':INT'                        # <--- DEFINES THE SUFFIX THAT WILL BE ADDED TO NAME OF PROCESSED DATA
-AUTO_CALCULATE = True                   # <--- DEFINES IF CALCULATION IS AUTOMATICALLY PERFORMED UPON DATA CHANGE IN GUI
+NAME_SUFFIX = '_INTEGRAL'                    # <--- DEFINES THE SUFFIX THAT WILL BE ADDED TO NAME OF PROCESSED DATA
+AUTO_CALCULATE = False                   # <--- DEFINES IF CALCULATION IS AUTOMATICALLY PERFORMED UPON DATA CHANGE IN GUI
 # Data settings
 #REGIONS_FROM = 'scale'                  # <--- DEFINES IF DATA WILL BE EXTRACTED:
-REGIONS_FROM = 'selection'             # 'none' - DO NOT EXTRACT
+REGIONS_FROM = 'selection'              #       'none' - DO NOT EXTRACT
 
 USE_SECOND = False                      # <--- IF TRUE THEN FIRST AND SECOND DATA WILL BE AVAILABLE FOR CALCULATIONS
 STACK_SEP = True                        # <--- IF TRUE THEN EACH DATA IN A STACK WILL BE CALCULATED SEPARATELY
                                         #      WHEN FALSE THEN YOU MUST CREATE A METHOD THAT CALCS OF THE WHOLE STACK
-#RESULT_CREATE = 'add'                   # <--- DETEMINES IF PROCESSED DATA SHOULD BE ADDED TO RESULT_DATASET
-RESULT_CREATE = 'replace'              #      'ADD' OR 'REPLACE' IS SELF EXPLANATORY
+#RESULT_CREATE = 'add'                  # <--- DETEMINES IF PROCESSED DATA SHOULD BE ADDED TO RESULT_DATASET
+RESULT_CREATE = 'replace'               #     'ADD' OR 'REPLACE' IS SELF EXPLANATORY
                                         #      ANY OTHER VALUES MEANS NOT RESULT CREATION
 
 # Report settings
@@ -44,21 +44,21 @@ REPORT_HEADERS = ['Nr',
                   'Double integration',
                   'Integral Value',
                   'Points No.'] # <--- Define names of columns in the Report
+
 REPORT_DEFAULT_X = 0                    # <--- INDEX IN REPORT_HEADERS USED TO SET NAME OF COLUMN THAT IS USED AS DEFAULT X IN THE REPORT
 REPORT_DEFAULT_Y = 4                    # <--- INDEX IN REPORT_HEADERS USED TO SET NAME OF COLUMN THAT IS USED AS DEFAULT Y IN THE REPORT
 REPORT_NAME_X =  'Data Number'          # <--- NAME OF X AXIS IN THE REPORT
 REPORT_NAME_Y =  'Integral Value'       # <--- NAME OF Y AXIS IN THE REPORT
 REPORT_UNIT_X = ''                      # <--- NAME OF X UNIT IN THE CREATED REPORT
 REPORT_UNIT_Y = ''                      # <--- NAME OF Y UNIT IN THE CREATED REPORT
-REPORT_TO_GROUP = 'Integrate'           # <--- DEFAULT GROUP NAME TO WHICH REPORT WILL BE ADDED
-
+REPORT_TO_GROUP = 'RESULT Integrate'              # <--- DEFAULT GROUP NAME TO WHICH REPORT WILL BE ADDED
 
 # Cursors on graph
-CURSOR_CHANGING = True                   # <--- IF TRUE THEN SELECTION OF CURSOR MODE IN MAN GUI IS DISABLED
-CURSOR_TYPE = 'Range select'               # <--- USE CURSORS: 'None', 'Continuous read XY', 'Selection of points with labels'
+CURSOR_CHANGING = False                 # <--- IF TRUE THEN SELECTION OF CURSOR MODE IN MAN GUI IS DISABLED
+CURSOR_TYPE = 'Range select'            # <--- USE CURSORS: 'None', 'Continuous read XY', 'Selection of points with labels'
                                         #       'Selection of points', 'Numbered selections', 'Free select', 'Crosshair', 'Range select'
 CURSOR_LIMIT = 0                        # <--- SET THE MAXIMUM NUMBER OF CURSORS THAT CAN BE SELECTED. FOR NO LIMIT SET 0
-
+CURSOR_CLEAR_ON_START =  False           # <--- CLEAR CURSOR ON START THE WINDOW
 '''
 ##################################
 #    END OF SUBPROG SETTINGS     #
@@ -71,7 +71,6 @@ if __name__ == "__main__":
     cmd_to_import = cmd_to_import + '\nfrom assets.Eleana import Eleana'
 else:
     cmd_to_import = 'from ' + SUBPROG_FOLDER + '.' + cmd_to_import
-
 exec(cmd_to_import)
 from assets.Error import Error
 from assets.SubprogMethods2 import SubMethods_02
@@ -80,7 +79,7 @@ class IntegrateRegion(SubMethods_02, WindowGUI):
     ''' THIS IS STANDARD CONSTRUCTOR THAT SHOULD NOT BE MODIFIED '''
 
     def __init__(self, app=None, which='first', commandline=False):  # |
-        if app and not commandline:  # |
+        if app and not commandline:                                                                 #|
             # Initialize window if app is defined and not commandline                               #|
             WindowGUI.__init__(self, app.mainwindow)  # |
         # Create settings for the subprog                                                           #|
@@ -101,38 +100,14 @@ class IntegrateRegion(SubMethods_02, WindowGUI):
                        'y_unit': REPORT_UNIT_Y,  # |
                        'to_group': REPORT_TO_GROUP  # |
                        }  # |
-        self.subprog_cursor = {'type': CURSOR_TYPE, 'changing': CURSOR_CHANGING, 'limit': CURSOR_LIMIT,  # |
-                               'x': [], 'y': [], 'z': []}  # |
+        self.subprog_cursor = {'type': CURSOR_TYPE, 'changing': CURSOR_CHANGING, 'limit': CURSOR_LIMIT,
+                               'clear_on_start':CURSOR_CLEAR_ON_START, 'x': [], 'y': [], 'z': []}  # |
         # Use second data                                                                           #|
         self.use_second = USE_SECOND
         # Treat each data in stack separately
         self.stack_sep = STACK_SEP  # |
         SubMethods_02.__init__(self, app=app, which=which, commandline=commandline)  # |
 
-    # STANDARD METHODS FOR BUTTON EVENTS ON CLICK
-    def ok_clicked(self):
-        ''' [-OK-] button
-            This is standard function in SubprogMethods '''
-        # Display errors while processig data
-        self.skip_next_error = False
-        status = self.get_data()
-        if status:
-            self.perform_single_calculations(group_processing=False)
-
-    def process_group_clicked(self):
-        ''' [-Process Group-] button
-            This is standard function in SubprogMethods '''
-        self.perform_group_calculations()
-
-    def show_report_clicked(self):
-        ''' [-Show Report-] button
-            This is standard function in SubprogMethods '''
-        self.show_report()
-
-    def clear_report_clicked(self):
-        ''' [-Show Report-] button
-            This is standard function in SubprogMethods '''
-        self.clear_report()
 
     # DEFINE YOUR CUSTOM METHODS FOR THIS ROUTINE
     # ----------------------------------------------
@@ -148,73 +123,100 @@ class IntegrateRegion(SubMethods_02, WindowGUI):
 
 
     def set_double_integration(self):
-        # self.get_data()
-        # self.perform_single_calculations()       # <-- This is custom button
         pass
 
-    def calculate_stack(self, x, y, name, z = None, stk_index = None):
-        ''' If STAC_SEP is False it means that data in stack should
+    def calculate_stack(self, commandline = False):
+        ''' If STACK_SEP is False it means that data in stack should
             not be treated as separate data but are calculated as whole
             '''
-        info__ = 'There is no method defined for Stack calculations'
-        if self.app is not None:
-            Error.show(info=info__)
-        else:
-            print(info__)
-
-    def calculate(self):
-        ''' Your algorithm to perform calculations on single x,y,z data. Do not modify line below '''
-        '''
-                Your code starts here 
-                ---------------------
-                Use:
-                    x_data1, y_data1, z_data1:  contain the prepared x, y, z data
-                        for calculations
-                    x_data2, y_data2, z_data2: contain the reference data to use
-                        for example to subtract from data1
-                After calculation put calculated data to:
-                    x_data1, y_data1 and z_data1
-                    result: the value of resulted calculations 
-        '''
-
-        x_data1 = self.data_for_calculations[0]['x']
-        y_data1 = self.data_for_calculations[0]['y']
-        z_data1 = self.data_for_calculations[0]['z']
+        # AVAILABLE DATA. REMOVE UNNECESSARY
+        # EACH X,Y,Z IS NP.ARRAY
+        # X, Z is 1D, Y is 2D
+        # -----------------------------------------
+        x1 = self.data_for_calculations[0]['x']
+        y1 = self.data_for_calculations[0]['y']
+        z1 = self.data_for_calculations[0]['z']
         name1 = self.data_for_calculations[0]['name']
-        stk_value = self.data_for_calculations[0]['stk_value']
+        stk_value1 = self.data_for_calculations[0]['stk_value']
+        complex1 = self.data_for_calculations[0]['complex']
+        type1 = self.data_for_calculations[0]['type']
+        origin1 = self.data_for_calculations[0]['origin']
+        comment1 = self.data_for_calculations[0]['comment']
+        parameters1 = self.data_for_calculations[0]['parameters']
         if self.use_second:
-            x_data2 = self.data_for_calculations[1]['x']
-            y_data2 = self.data_for_calculations[1]['y']
-            z_data2 = self.data_for_calculations[1]['z']
+            x2 = self.data_for_calculations[1]['x']
+            y2 = self.data_for_calculations[1]['y']
+            z2 = self.data_for_calculations[1]['z']
             name2 = self.data_for_calculations[1]['name']
+            stk_value2 = self.data_for_calculations[1]['stk_value']
+            complex2 = self.data_for_calculations[1]['complex']
+            type2 = self.data_for_calculations[1]['type']
+            origin2 = self.data_for_calculations[1]['origin']
+            comment2 = self.data_for_calculations[1]['comment']
+            parameters2 = self.data_for_calculations[1]['parameters']
+        # ------------------------------------------
+
+
+        row_to_report = [self.consecutive_number, name1, '', '', '', '']
+        return row_to_report
+
+    def calculate(self, commandline = False):
+        ''' The algorithm for calculations on single x,y,z data.
+
+        Usage:
+            x1, y1, z1: contain the prepared x, y, z data for calculations
+            x2, y2, z2: contain the reference data to use for example to subtract from data1
+        After calculation put calculated data to:
+            x1, y1 and z1 etc.
+            result: the value of resulted calculations
+        '''
+
+        # AVAILABLE DATA. REMOVE UNNECESSARY
+        # EACH X,Y,Z IS NP.ARRAY OF ONE DIMENSION
+        # -----------------------------------------
+        x1 = self.data_for_calculations[0]['x']
+        y1 = self.data_for_calculations[0]['y']
+        z1 = self.data_for_calculations[0]['z']
+        name1 = self.data_for_calculations[0]['name']
+        stk_value1 = self.data_for_calculations[0]['stk_value']
+        complex1 = self.data_for_calculations[0]['complex']
+        type1 = self.data_for_calculations[0]['type']
+        origin1 = self.data_for_calculations[0]['origin']
+        comment1 = self.data_for_calculations[0]['comment']
+        parameters1 = self.data_for_calculations[0]['parameters']
+        if self.use_second:
+            x2 = self.data_for_calculations[1]['x']
+            y2 = self.data_for_calculations[1]['y']
+            z2 = self.data_for_calculations[1]['z']
+            name2 = self.data_for_calculations[1]['name']
+            stk_value2 = self.data_for_calculations[1]['stk_value']
+            complex2 = self.data_for_calculations[1]['complex']
+            type2 = self.data_for_calculations[1]['type']
+            origin2 = self.data_for_calculations[1]['origin']
+            comment2 = self.data_for_calculations[1]['comment']
+            parameters2 = self.data_for_calculations[1]['parameters']
+        # ------------------------------------------
+
         if self.app:
             # Application is running and parameters are taken from GUI
             double = self.check_double_integration.get()
-
-        y_cal = cumulative_trapezoid(y_data1, x_data1, initial=0)
-        integral = trapezoid(y_data1,x_data1)
+        y_cal = cumulative_trapezoid(y1, x1, initial=0)
+        integral = trapezoid(y1,x1)
         if double:
-            y_cal2 = cumulative_trapezoid(y_cal, x_data1, initial=0)
-            integral = trapezoid(y_cal, x_data1)
+            y_cal2 = cumulative_trapezoid(y_cal, x1, initial=0)
+            integral = trapezoid(y_cal, x1)
             y_cal = y_cal2
         result = integral # <--- Put the result value to 'result' variable
         self.data_for_calculations[0]['y'] = y_cal
 
         double = self.check_double_integration.get()
-
-        row_to_report = [self.consecutive_number, name1, stk_value, double, result, str(len(y_data1))]
+        row_to_report = [self.consecutive_number, name1, stk_value1, double, result, str(len(y1))]
 
         # Update Window Widgets
         if self.app and not self.commandline:
             self.field_value.delete(0, 'end')
             self.field_value.insert(0, str(result)) # <--- Put 'result' to the widget
-
         return row_to_report
-# THIS IS FOR TESTING COMMAND LINE
-if __name__ == "__main__":
-    ir = IntegrateRegion()
-    x_data = np.array([1,2,3,4,5,6])
-    y_data = np.array([4,3,5,3,5,6])
-    integral = ir.calculate(x=x_data, y=y_data, double=0, region = [1,7])
-    print(integral)
 
+if __name__ == "__main__":
+    pass

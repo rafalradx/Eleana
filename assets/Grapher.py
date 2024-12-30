@@ -813,8 +813,8 @@ class Grapher(GraphPreferences):
                 else:
                     nr = '#' + str(i)
                 min = str(each[0])
-                max = str(each[0])
-                entry = f"{nr}:  [{min} <---> {max}]"
+                max = str(each[1])
+                entry = f"{nr}: [{min};  {max}]"
                 list_of_annotations.append(entry)
                 i+=1
         i = 0

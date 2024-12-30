@@ -3,6 +3,8 @@
 # -- Here is an example --
 import numpy as np
 
+from subprogs.integrate_region.IntegrateRegion import RESULT_CREATE
+
 # General setting of the application. Here is an example
 # File/Path/Class settings
 SUBPROG_FOLDER = 'distance_read'        # <--- SUBFOLDER IN SUBPROGS CONTAINING THIS FILE
@@ -15,40 +17,51 @@ ON_TOP = True                           # <--- IF TRUE THE WINDOW WILL BE ALWAYS
 DATA_LABEL = 'data_label'               # <--- ID OF THE LABEL WIDGET WHERE NAME OF CURRENTLY SELECTED DATA WILL APPEAR.
                                         #      THE LABEL WIDGET OF THE SAME ID NAME MUST EXIST IN THE GUI. IF NOT USED SET THIS TO NONE
 NAME_SUFFIX = ''                        # <--- DEFINES THE SUFFIX THAT WILL BE ADDED TO NAME OF PROCESSED DATA
-AUTO_CALCULATE = True                   # <--- DEFINES IF CALCULATION IS AUTOMATICALLY PERFORMED UPON DATA CHANGE IN GUI
+AUTO_CALCULATE = False                  # <--- DEFINES IF CALCULATION IS AUTOMATICALLY PERFORMED UPON DATA CHANGE IN GUI
 # Data settings
-#REGIONS_FROM = 'scale'                  # <--- DEFINES IF DATA WILL BE EXTRACTED:
-REGIONS_FROM = 'selection'             # 'none' - DO NOT EXTRACT
+REGIONS_FROM = 'scale'                  # <--- DEFINES IF DATA WILL BE EXTRACTED:
+#REGIONS_FROM = 'selection'              # 'none' - DO NOT EXTRACT
                                         # 'scale' - EXTRACT DATA BETWEEN X MIN X MAX
                                         # 'sel' - EXTRACT DATA FROM SELECTED RANGE
 
 USE_SECOND = False                      # <--- IF TRUE THEN FIRST AND SECOND DATA WILL BE AVAILABLE FOR CALCULATIONS
 STACK_SEP = True                        # <--- IF TRUE THEN EACH DATA IN A STACK WILL BE CALCULATED SEPARATELY
                                         #      WHEN FALSE THEN YOU MUST CREATE A METHOD THAT CALCS OF THE WHOLE STACK
-RESULT_CREATE = ''                      # <--- DETEMINES IF PROCESSED DATA SHOULD BE ADDED TO RESULT_DATASET
+RESULT_CREATE = ''
+#RESULT_CREATE = 'add'                      # <--- DETEMINES IF PROCESSED DATA SHOULD BE ADDED TO RESULT_DATASET
 #RESULT_CREATE = 'replace'              #      'ADD' OR 'REPLACE' IS SELF EXPLANATORY
                                         #      ANY OTHER VALUES MEANS NOT RESULT CREATION
 
 # Report settings
 REPORT_CREATE = True                    # <--- IF TRUE THEN REPORT WILL BE CREATED AFTER CALCULATIONS
-REPORT_HEADERS = ['Nr', 'Name', 'X1', 'X2', 'dX', 'Y1', 'Y2', 'dY'] # <--- Define names of columns in the Report
+REPORT_HEADERS = ['Nr',
+                  'Name',
+                  'X1',
+                  'X2',
+                  'dX',
+                  'Y1',
+                  'Y2',
+                  'dY']                  # <--- Define names of columns in the Report
 REPORT_DEFAULT_X = 0                    # <--- INDEX IN REPORT_HEADERS USED TO SET NAME OF COLUMN THAT IS USED AS DEFAULT X IN THE REPORT
 REPORT_DEFAULT_Y = 7                    # <--- INDEX IN REPORT_HEADERS USED TO SET NAME OF COLUMN THAT IS USED AS DEFAULT Y IN THE REPORT
 REPORT_NAME_X =  'Data Number'          # <--- NAME OF X AXIS IN THE REPORT
 REPORT_NAME_Y =  'dY Value'             # <--- NAME OF Y AXIS IN THE REPORT
 REPORT_UNIT_X = ''                      # <--- NAME OF X UNIT IN THE CREATED REPORT
 REPORT_UNIT_Y = ''                      # <--- NAME OF Y UNIT IN THE CREATED REPORT
-REPORT_TO_GROUP = 'RESULT:distance'     # <--- DEFAULT GROUP NAME TO WHICH REPORT WILL BE ADDED
+REPORT_TO_GROUP = 'RESULT Distance'     # <--- DEFAULT GROUP NAME TO WHICH REPORT WILL BE ADDED
 
 # Cursors on graph
-CURSOR_CHANGING = True                  # <--- IF TRUE THEN CURSOR SELECTION IN MAIN GUI WILL BE DISABLED
+CURSOR_CHANGING = False                  # <--- IF TRUE THEN CURSOR SELECTION IN MAIN GUI WILL BE DISABLED
 CURSOR_TYPE = 'Crosshair'               # <--- USE CURSORS: 'None', 'Continuous read XY', 'Selection of points with labels'
                                         #       'Selection of points', 'Numbered selections', 'Free select', 'Crosshair', 'Range select'
 CURSOR_LIMIT = 2                        # <--- SET THE MAXIMUM NUMBER OF CURSORS THAT CAN BE SELECTED. FOR NO LIMIT SET 0
-# ----------------------------------------------------------------------------------------------------
-#   -- Here starts obligatory part of the application                                               #|
-#   -- In general it should not be modified                                                         #|
-#                                                                                                   #|
+CURSOR_CLEAR_ON_START = True
+'''
+##################################
+#    END OF SUBPROG SETTINGS     #
+#  DO NOT MODIFY LINES BELOW     #
+##################################'''
+
 cmd_to_import = GUI_FILE[:-3] + ' import ' + GUI_CLASS + ' as WindowGUI'                            #|
 if __name__ == "__main__":                                                                          #|
     cmd_to_import = 'from ' + cmd_to_import                                                         #|
@@ -58,71 +71,44 @@ exec(cmd_to_import)                                                             
 from assets.Error import Error                                                                      #|
 from assets.SubprogMethods2 import SubMethods_02                                                    #|
 class DistanceRead(SubMethods_02, WindowGUI):                                                       #|
-    ''' THIS IS STANDARD CONSTRUCTOR THAT SHOULD NOT BE MODIFIED '''                                #|
-    def __init__(self, app=None, which='first', commandline=False):                                 #|
-        if app and not commandline:                                                                  #|
+    def __init__(self, app=None, which='first', commandline=False):  # |
+        if app and not commandline:  # |
             # Initialize window if app is defined and not commandline                               #|
-            WindowGUI.__init__(self, app.mainwindow)                                                #|
+            WindowGUI.__init__(self, app.mainwindow)  # |
         # Create settings for the subprog                                                           #|
-        self.subprog_settings = {'title':TITLE, 'on_top':ON_TOP, 'data_label':DATA_LABEL,
-                                   'name_suffix':NAME_SUFFIX, 'auto_calculate':AUTO_CALCULATE,
-                                   'result':RESULT_CREATE
-                                 }                                                                #|
-        self.regions = {'from':REGIONS_FROM}                                                        #|
-        self.report = {'nr':1,                                                                      #|
-                       'create': REPORT_CREATE,                                                     #|
-                       'headers':REPORT_HEADERS,                                                    #|
-                       'rows':[],                                                                   #|
-                       'x_name':REPORT_NAME_X,                                                      #|
-                       'y_name':REPORT_NAME_Y,                                                      #|
-                       'default_x':REPORT_HEADERS[REPORT_DEFAULT_X],                                #|
-                       'default_y':REPORT_HEADERS[REPORT_DEFAULT_Y],                                #|
-                       'x_unit':REPORT_UNIT_X,                                                      #|
-                       'y_unit':REPORT_UNIT_Y,                                                      #|
-                       'to_group':REPORT_TO_GROUP                                                   #|
-                       }                                                                            #|
-        self.subprog_cursor = {'type':CURSOR_TYPE, 'changing':CURSOR_CHANGING, 'limit':CURSOR_LIMIT,#|
-                           'x':[], 'y':[], 'z':[] }                                                 #|
+        self.subprog_settings = {'title': TITLE, 'on_top': ON_TOP, 'data_label': DATA_LABEL,
+                                 'name_suffix': NAME_SUFFIX, 'auto_calculate': AUTO_CALCULATE,
+                                 'result': RESULT_CREATE
+                                 }  # |
+        self.regions = {'from': REGIONS_FROM}  # |
+        self.report = {'nr': 1,  # |
+                       'create': REPORT_CREATE,  # |
+                       'headers': REPORT_HEADERS,  # |
+                       'rows': [],  # |
+                       'x_name': REPORT_NAME_X,  # |
+                       'y_name': REPORT_NAME_Y,  # |
+                       'default_x': REPORT_HEADERS[REPORT_DEFAULT_X],  # |
+                       'default_y': REPORT_HEADERS[REPORT_DEFAULT_Y],  # |
+                       'x_unit': REPORT_UNIT_X,  # |
+                       'y_unit': REPORT_UNIT_Y,  # |
+                       'to_group': REPORT_TO_GROUP  # |
+                       }  # |
+        self.subprog_cursor = {'type': CURSOR_TYPE, 'changing': CURSOR_CHANGING, 'limit': CURSOR_LIMIT,
+                               'clear_on_start': CURSOR_CLEAR_ON_START, 'x': [], 'y': [], 'z': []}  # |
         # Use second data                                                                           #|
         self.use_second = USE_SECOND
         # Treat each data in stack separately
-        self.stack_sep = STACK_SEP                                                                  #|
-        SubMethods_02.__init__(self, app=app, which=which, commandline=commandline)                                                                       #|
-                                                                                                    #|
-    # STANDARD METHODS FOR BUTTON EVENTS ON CLICK                                                   #|
-    def ok_clicked(self):                                                                           #|
-        ''' [-OK-] button                                                                           #|
-            This is standard function in SubprogMethods '''                                         #|
-        status = self.get_data()
-        if status:
-            self.perform_single_calculations()                                                      #|
-                                                                                                    #|
-    def process_group_clicked(self):                                                                #|
-        ''' [-Process Group-] button                                                                #|
-            This is standard function in SubprogMethods '''                                         #|
-        self.perform_group_calculations()                                                           #|
-                                                                                           #|
-    def show_report_clicked(self):                                                                  #|
-        ''' [-Show Report-] button                                                                  #|
-            This is standard function in SubprogMethods '''                                         #|
-        self.show_report()                                                                          #|
-                                                                                                    #|
-    def clear_report_clicked(self):                                                                 #|
-        ''' [-Clear Report-] button                                                                 #|
-            This is standard function in SubprogMethods '''                                         #|
-        self.clear_report()                                                                         #|
-                                                                                                    #|
-    #                                                                                               #|
-    # Here ends the obligatory part of the application                                              #|
-    # Your code starts from here                                                                    #|
-    #-------------------------------------------------------------------------------------------------
+        self.stack_sep = STACK_SEP  # |
+        SubMethods_02.__init__(self, app=app, which=which, commandline=commandline)  # |
 
 
+    # DEFINE YOUR CUSTOM METHODS FOR THIS ROUTINE
+    # ----------------------------------------------
     def configure_window(self):
-        # Define additional window configuration if needed
+        # HERE DEFINE ADDITIONAL MAIN WINDOW CONFIGURATION
         #self.mainwindow =
 
-        # Define references to your additional widgets and configuration
+        # HERE DEFINE YOUR REFERENCES TO WIDGETS
         self.x1_entry = self.builder.get_object('x1_entry', self.mainwindow)
         self.x2_entry = self.builder.get_object('x2_entry', self.mainwindow)
         self.dx_entry = self.builder.get_object('dx_entry', self.mainwindow)
@@ -147,7 +133,6 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
     def graph_action(self, variable=None, value=None):
         ''' Do something when cursor action on graph was done '''
 
-
     def find_minmax_clicked(self):
         x_data, y_data = self.grapher.get_graph_line(index = 0)
         index_min_y = np.argmin(y_data)
@@ -163,51 +148,79 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
         if self.keep_track:
             self.find_minmax_clicked()
 
-    def calculate_stack(self, x, y, name, z = None, stk_index = None):
+    def calculate_stack(self, commandline = False):
         ''' If STACK_SEP is False it means that data in stack should
             not be treated as separate data but are calculated as whole
-            If not used, leave it as it is
-        '''
-        info__ = 'There is no method defined for Stack calculations'
-        if self.app is not None:
-            Error.show(info=info__)
-        else:
-            print(info__)
-
-    # Here starts your main algorithm that performs a calculations
-    # On a single data
-    def calculate(self):
-        '''
-        Your code starts here 
-        ---------------------
-        Use:
-            x_data1, y_data1, z_data1:  contain the prepared x, y, z data
-                for calculations
-            x_data2, y_data2, z_data2: contain the reference data to use
-                for example to subtract from data1
-        After calculation put calculated data to:
-            x_data1, y_data1 and z_data1
-            result: the value of resulted calculations 
-        '''
-
-        x_data1 = self.data_for_calculations[0]['x']
-        y_data1 = self.data_for_calculations[0]['y']
-        z_data1 = self.data_for_calculations[0]['z']
-        name1 =   self.data_for_calculations[0]['name']
+            '''
+        # AVAILABLE DATA. REMOVE UNNECESSARY
+        # EACH X,Y,Z IS NP.ARRAY
+        # X, Z is 1D, Y is 2D
+        # -----------------------------------------
+        x1 = self.data_for_calculations[0]['x']
+        y1 = self.data_for_calculations[0]['y']
+        z1 = self.data_for_calculations[0]['z']
+        name1 = self.data_for_calculations[0]['name']
+        stk_value1 = self.data_for_calculations[0]['stk_value']
+        complex1 = self.data_for_calculations[0]['complex']
+        type1 = self.data_for_calculations[0]['type']
+        origin1 = self.data_for_calculations[0]['origin']
+        comment1 = self.data_for_calculations[0]['comment']
+        parameters1 = self.data_for_calculations[0]['parameters']
         if self.use_second:
-            x_data2 = self.data_for_calculations[1]['x']
-            y_data2 = self.data_for_calculations[1]['y']
-            z_data2 = self.data_for_calculations[1]['z']
+            x2 = self.data_for_calculations[1]['x']
+            y2 = self.data_for_calculations[1]['y']
+            z2 = self.data_for_calculations[1]['z']
             name2 = self.data_for_calculations[1]['name']
-        # --------------------------------------------- #
-        #                  CODE BELOW                   #
-        # ----------------------------------------------#
+            stk_value2 = self.data_for_calculations[1]['stk_value']
+            complex2 = self.data_for_calculations[1]['complex']
+            type2 = self.data_for_calculations[1]['type']
+            origin2 = self.data_for_calculations[1]['origin']
+            comment2 = self.data_for_calculations[1]['comment']
+            parameters2 = self.data_for_calculations[1]['parameters']
+        # ------------------------------------------
+
+    def calculate(self, commandline = False):
+        ''' The algorithm for calculations on single x,y,z data.
+
+        Usage:
+            x1, y1, z1: contain the prepared x, y, z data for calculations
+            x2, y2, z2: contain the reference data to use for example to subtract from data1
+        After calculation put calculated data to:
+            x1, y1 and z1 etc.
+            result: the value of resulted calculations
+        '''
+
+        # AVAILABLE DATA. REMOVE UNNECESSARY
+        # EACH X,Y,Z IS NP.ARRAY OF ONE DIMENSION
+        # -----------------------------------------
+        x1 = self.data_for_calculations[0]['x']
+        y1 = self.data_for_calculations[0]['y']
+        z1 = self.data_for_calculations[0]['z']
+        name1 = self.data_for_calculations[0]['name']
+        stk_value1 = self.data_for_calculations[0]['stk_value']
+        complex1 = self.data_for_calculations[0]['complex']
+        type1 = self.data_for_calculations[0]['type']
+        origin1 = self.data_for_calculations[0]['origin']
+        comment1 = self.data_for_calculations[0]['comment']
+        parameters1 = self.data_for_calculations[0]['parameters']
+        if self.use_second:
+            x2 = self.data_for_calculations[1]['x']
+            y2 = self.data_for_calculations[1]['y']
+            z2 = self.data_for_calculations[1]['z']
+            name2 = self.data_for_calculations[1]['name']
+            stk_value2 = self.data_for_calculations[1]['stk_value']
+            complex2 = self.data_for_calculations[1]['complex']
+            type2 = self.data_for_calculations[1]['type']
+            origin2 = self.data_for_calculations[1]['origin']
+            comment2 = self.data_for_calculations[1]['comment']
+            parameters2 = self.data_for_calculations[1]['parameters']
+        # ------------------------------------------
 
         if self.keep_track:
             # Auto detect maximum and minimum using numpy
-            index_min_y = np.argmin(y_data1)
+            index_min_y = np.argmin(y1)
             min_x = x_data[index_min_y]
-            index_max_y = np.argmax(y_data1)
+            index_max_y = np.argmax(y1)
             max_x = x_data[index_max_y]
             minimum = [min_x, min_y1]
             maximum = [max_x, max_y1]
@@ -222,59 +235,40 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
             maximum = ([p2['point'][0], p2['point'][1]])
 
         # Get x1 and x2
-        x1 = minimum[0]
-        x2 = maximum[0]
+        x1val = minimum[0]
+        x2val = maximum[0]
 
         # Find index in x_data which is closest to x1 or x2
-        index_x1 = np.abs(x_data1 - x1).argmin()
-        index_x2 = np.abs(x_data1 - x2).argmin()
+        index_x1 = np.abs(x1 - x1val).argmin()
+        index_x2 = np.abs(x1 - x2val).argmin()
 
         # Get data from x_data and y_data using the indexes for x1 and x2, respectively
-        x1 = x_data1[index_x1]
-        x2 = x_data1[index_x2]
-        y1 = y_data1[index_x1]
-        y2 = y_data1[index_x2]
+        x1val = x1[index_x1]
+        x2val = x1[index_x2]
+        y1val = y1[index_x1]
+        y2val = y1[index_x2]
 
         # Calculate differences
-        dx = x2 - x1
-        dy = y2 - y1
+        dx = x2val - x1val
+        dy = y2val - y1val
 
         # Send calculated values to result (if needed). This will be sent to command line
         result = [dx, dy] # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
 
         # Create summary row to add to the report. The values must match the column names in REPORT_HEADERS
-        row_to_report = [self.consecutive_number, name1, x1, x2, dx, y1, y2, dy]
+        row_to_report = [self.consecutive_number, name1, x1val, x2val, dx, y1val, y2val, dy]
 
         # Update Window Widgets
-        #----------------------------------------------------------------------------------------------
         if self.app and not self.commandline:                                                                           #|
-        # ---------------------------------------------------------------------------------------------
             # Put values to the entries
-            self.set_entry_value(self.x1_entry, x1)
-            self.set_entry_value(self.x2_entry, x2)
-            self.set_entry_value(self.y1_entry, y1)
-            self.set_entry_value(self.y2_entry, y2)
+            self.set_entry_value(self.x1_entry, x1val)
+            self.set_entry_value(self.x2_entry, x2val)
+            self.set_entry_value(self.y1_entry, y1val)
+            self.set_entry_value(self.y2_entry, y2val)
             self.set_entry_value(self.dx_entry, dx)
             self.set_entry_value(self.dy_entry, dy)
-
-        #---------------------------------------------------------------------------------------------
-        # Construct line for the report if needed                                                   #|
-        # This is obligatory part of the function                                                   #|
-        # if not self.commandline:                                                                          #|
-        #     # Update results of the calculations                                                    #|
-        #     self.update_result_data(y=y_cal, x=x_cal, z=z_cal)                                      #|
-        #     return to_result_row # <--- Return this if report is going to be                        #|
-        # else:                                                                                       #|
-        #     return result # <-- Return this to command line                                         #|
-        #---------------------------------------------------------------------------------------------
         return row_to_report
 
-# THIS IS FOR TESTING COMMAND LINE
 if __name__ == "__main__":
-    ir = IntegrateRegion()
-    x_data = np.array([1,2,3,4,5,6])
-    y_data = np.array([4,3,5,3,5,6])
-    double = False
-    integral = ir.calculate(x=x_data, y=y_data, double = double)
-    print(integral)
+    pass
 
