@@ -416,6 +416,7 @@ class Grapher(GraphPreferences):
                 number_ = str(i)
                 self.ax.annotate(text=number_, xy=xy, arrowprops = dict(facecolor = 'orange', shrink = 2))
                 i+=1
+
         # Draw canvas
         self.canvas.draw()
 

@@ -1,12 +1,9 @@
-
-
 from assets.Observer import Observer
 import copy
 import numpy as np
 from assets.Error import Error
 from subprogs.table.table import CreateFromTable
 import pandas
-
 
 class SubMethods_02:
     def __init__(self, app=None, which='first', commandline=False):
@@ -46,16 +43,22 @@ class SubMethods_02:
             self.eleana.notify_on = True
             # Set current position in Results Dataset
             cursor_type = self.subprog_cursor['type'].lower()
-            if  cursor_type != 'none' or cursor_type != '':
+            if cursor_type != 'none' or cursor_type != '':
                 # Configure cursor
                 self.subprog_cursor['previous'] = copy.copy(self.grapher.current_cursor_mode['label'])
                 self.grapher.cursor_limit = self.subprog_cursor['limit']
                 self.app.sel_cursor_mode.set(self.subprog_cursor['type'])
                 self.app.sel_graph_cursor(self.subprog_cursor['type'])
+                self.app.mainwindow.update()
                 if not self.subprog_cursor['changing']:
                     # Disable cursor changing
                     self.app.sel_cursor_mode.configure(state="disabled")
-
+                if self.subprog_cursor['clear_on_start']:
+                    # Clear current cursors
+                    if self.subprog_cursor['type'].lower() == 'range select':
+                        self.grapher.clear_selected_ranges()
+                    else:
+                        self.grapher.clear_all_annotations()
 
     # STANDARD METHODS FOR MAIN APPLICATION
     # ----------------------------------------------
@@ -164,6 +167,13 @@ class SubMethods_02:
 
     def start_single_calculations(self):
         ''' This function is triggered by clicking "Calculate" button'''
+        required_cursors = self.subprog_cursor['cursor_required']
+        nr_of_annotations = len(self.grapher.cursor_annotations)
+        if required_cursors > nr_of_annotations:
+            if self.subprog_cursor['cursor_req_text']:
+                Error.show(title='', info=self.subprog_cursor['cursor_req_text'])
+            return False
+
         self.skip_next_error = False
         status = self.get_data()
         if status:
@@ -283,6 +293,13 @@ class SubMethods_02:
         return True
 
     def perform_group_calculations(self):
+        required_cursors = self.subprog_cursor['cursor_required']
+        nr_of_annotations = len(self.grapher.cursor_annotations)
+        if required_cursors > nr_of_annotations:
+            if self.subprog_cursor['cursor_req_text']:
+                Error.show(title='', info=self.subprog_cursor['cursor_req_text'])
+            return False
+
         # Make copy of the settings and eleana.selections
         copy_selections = copy.deepcopy(self.eleana.selections)
         copy_of_subprog_settings = copy.deepcopy(self.subprog_settings)
@@ -297,7 +314,8 @@ class SubMethods_02:
             group_list = tuple(range(len(self.eleana.dataset)))
         else:
             group_list = self.eleana.assignmentToGroups[current_group]
-        self.subprog_settings['result'] = 'add'
+        if self.subprog_settings['result'] == 'replace':
+            self.subprog_settings['result'] = 'add'
 
         # Do the single calculation for the each of the data in the
         for each in group_list:
@@ -338,9 +356,9 @@ class SubMethods_02:
         comment1 = copy.deepcopy(self.original_data1.comment)
         parameters1 = copy.deepcopy(self.original_data1.parameters)
 
-
         # Extract the data in x and y if needed
         x_data1, y_data1 = self.extract_region_xy(x=x_data1, y=y_data1)
+
         if y_data1.size == 0:
             Error.show(info=f'For the selected range, the {name1} contains no values')
             self.set_mouse_state(state='')
@@ -440,6 +458,12 @@ class SubMethods_02:
 
         # Extract the data in x and y if needed
         x_data1, y_data1 = self.extract_region_xy(x = x_data1, y = y_data1)
+
+        # Check if cursors are within (x,y) of x_data1 and y_data1
+        status = self.check_cursor_bounds(x=x_data1, y=y_data1, name=name1)
+        if not status:
+            return False
+
         # Show error if extracted data contains no data
         if y_data1.size == 0:
             Error.show(info = f'For the selected range, the {name1} contains no values')
@@ -492,6 +516,10 @@ class SubMethods_02:
                 return False
         else:
             self.data_for_calculations.append(None)
+
+        # Check if cursors are within function
+
+
         # Go to calculate function
         row_to_report = self.calculate()
         # Update data and report
@@ -722,7 +750,11 @@ class SubMethods_02:
         new_result.y = copy.deepcopy(self.data_for_calculations[0]['y'])
         new_result.z = copy.deepcopy(self.data_for_calculations[0]['z'])
         new_result.name = copy.deepcopy(self.data_for_calculations[0]['name'])
-
+        new_result.complex = copy.deepcopy(self.data_for_calculations[0]['complex'])
+        new_result.type = copy.deepcopy(self.data_for_calculations[0]['type'])
+        new_result.origin = copy.deepcopy(self.data_for_calculations[0]['origin'])
+        new_result.comment = copy.deepcopy(self.data_for_calculations[0]['comment'])
+        new_result.parameters = copy.deepcopy(self.data_for_calculations[0]['parameters'])
 
         if self.stk_index == -1 and results_dataset:
             results_dataset[-1].x = new_result.x
@@ -730,6 +762,11 @@ class SubMethods_02:
             results_dataset[-1].z = new_result.z
             name__ = self.app.generate_name_suffix(new_result.name, list_of_results)
             results_dataset[-1].name = name__ + self.subprog_settings['name_suffix']
+            results_dataset[-1].complex = new_result.complex
+            results_dataset[-1].type = new_result.type
+            results_dataset[-1].origin = new_result.origin
+            results_dataset[-1].parameters = new_result.parameters
+            results_dataset[-1].comment = new_result.comment
         elif self.stk_index == -1 and not results_dataset:
             results_dataset.append(new_result)
         self.app.update.list_in_combobox(comboboxID='sel_result')
@@ -748,6 +785,11 @@ class SubMethods_02:
         new_result.y = copy.deepcopy(self.data_for_calculations[0]['y'])
         new_result.z = copy.deepcopy(self.data_for_calculations[0]['z'])
         new_result.name = copy.deepcopy(self.data_for_calculations[0]['name'])
+        new_result.complex = copy.deepcopy(self.data_for_calculations[0]['complex'])
+        new_result.type = copy.deepcopy(self.data_for_calculations[0]['type'])
+        new_result.origin = copy.deepcopy(self.data_for_calculations[0]['origin'])
+        new_result.comment = copy.deepcopy(self.data_for_calculations[0]['comment'])
+        new_result.parameters = copy.deepcopy(self.data_for_calculations[0]['parameters'])
 
         if self.stk_index == -1 and results_dataset:
             results_dataset[-1].x = new_result.x
@@ -755,16 +797,27 @@ class SubMethods_02:
             results_dataset[-1].z = new_result.z
             name__ = self.app.generate_name_suffix(new_result.name, list_of_results)
             results_dataset[-1].name = name__ + self.subprog_settings['name_suffix']
+            results_dataset[-1].complex = new_result.complex
+            results_dataset[-1].type = new_result.type
+            results_dataset[-1].origin = new_result.origin
+            results_dataset[-1].parameters = new_result.parameters
+            results_dataset[-1].comment = new_result.comment
 
         elif self.stk_index == -1 and not results_dataset:
             results_dataset.append(new_result)
 
         elif self.stk_index >= 0:
             index_in_result = len(results_dataset) - 1
-
-            results_dataset[index_in_result].y[self.stk_index] = copy.deepcopy(new_result.y)
-        else:
-            index_in_result = len(results_dataset) if result_create == 'replace' else max(len(results_dataset) - 1, 0)
+            if self.stk_index < len(results_dataset[index_in_result].y)-1:
+                results_dataset[index_in_result].y[self.stk_index] = copy.deepcopy(new_result.y)
+            else:
+                results_dataset[index_in_result].x = copy.deepcopy(new_result.x)
+                results_dataset[index_in_result].z = copy.deepcopy(new_result.x)
+                results_dataset[index_in_result].complex = copy.deepcopy(new_result.complex)
+                results_dataset[index_in_result].type = copy.deepcopy(new_result.type)
+                results_dataset[index_in_result].origin = copy.deepcopy(new_result.origin)
+                results_dataset[index_in_result].comment = copy.deepcopy(new_result.comment)
+                results_dataset[index_in_result].parameters = copy.deepcopy(new_result.parameters)
         self.app.update.list_in_combobox(comboboxID='sel_result')
 
     def update_results_list(self, results):
@@ -779,6 +832,40 @@ class SubMethods_02:
     #
     # ADDITIONAL METHODS SUCH AS PLACING ANNOTATION IN GRAPH
     # ------------------------------------------------
+
+    def check_cursor_bounds(self, x, y):
+        outside_x = self.subprog_cursor['cursor_outside_x']
+        outside_y = self.subprog_cursor['cursor_outside_y']
+        if outside_x and outside_y:
+           in_bounds = self.all_cursors_within_bounds(x=x, y=y)
+        elif outside_x and not outside_y:
+            in_bounds = self.all_cursors_within_bounds(x=x, y=None)
+        elif outside_y and not outside_x:
+            in_bounds = self.all_cursors_within_bounds(x=None, y=y)
+        else:
+            return True
+        answer = all(in_bounds)
+        return answer
+
+    def all_cursors_within_bounds(self, x = None, y = None):
+        answers = []
+        for cursor in self.grapher.cursor_annotations:
+            answer = self.is_cursors_within_bounds(cursor=cursor, x=x,y=y)
+            answers.append(answer)
+        return answers
+
+    def is_cursors_within_bounds(self, cursor, x=None, y=None):
+        cursor_x = cursor['point'][0]
+        cursor_y = cursor['point'][1]
+        if x is not None:
+            x_in_range = (cursor_x >= x.min()) & (cursor_x <= x.max())
+        else:
+            x_in_range = True
+        if y is not None:
+            y_in_range = (cursor_y >= y.min()) & (cursor_y <= y.max())
+        else:
+            y_in_range = True
+        return x_in_range and y_in_range
 
     def place_annotation(self, x, y = None, which = 'first', style = None):
         ''' Put the annotation at given (x,y) point.

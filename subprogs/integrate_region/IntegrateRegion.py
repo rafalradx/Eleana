@@ -59,6 +59,13 @@ CURSOR_TYPE = 'Range select'            # <--- USE CURSORS: 'None', 'Continuous 
                                         #       'Selection of points', 'Numbered selections', 'Free select', 'Crosshair', 'Range select'
 CURSOR_LIMIT = 0                        # <--- SET THE MAXIMUM NUMBER OF CURSORS THAT CAN BE SELECTED. FOR NO LIMIT SET 0
 CURSOR_CLEAR_ON_START =  False           # <--- CLEAR CURSOR ON START THE WINDOW
+CURSOR_REQUIRED = 0                     # <--- MINIMUM NUMBER OF CURSORS TO PROCESS THE CALCULATIONS
+                                        #      SET TO 0 FOR NO CHECKING
+CURSOR_REQ_TEXT = \
+    ''                                  # <--- TEXT TO DISPLAY IF NR OF CURSORS IS LESS THAN REQUIRED
+                                        #    LEAVE EMPTY IF YOU DO NOT WANT TO SHOW THE ERROR
+
+
 '''
 ##################################
 #    END OF SUBPROG SETTINGS     #
@@ -79,7 +86,7 @@ class IntegrateRegion(SubMethods_02, WindowGUI):
     ''' THIS IS STANDARD CONSTRUCTOR THAT SHOULD NOT BE MODIFIED '''
 
     def __init__(self, app=None, which='first', commandline=False):  # |
-        if app and not commandline:                                                                 #|
+        if app and not commandline:  # |
             # Initialize window if app is defined and not commandline                               #|
             WindowGUI.__init__(self, app.mainwindow)  # |
         # Create settings for the subprog                                                           #|
@@ -101,13 +108,13 @@ class IntegrateRegion(SubMethods_02, WindowGUI):
                        'to_group': REPORT_TO_GROUP  # |
                        }  # |
         self.subprog_cursor = {'type': CURSOR_TYPE, 'changing': CURSOR_CHANGING, 'limit': CURSOR_LIMIT,
-                               'clear_on_start':CURSOR_CLEAR_ON_START, 'x': [], 'y': [], 'z': []}  # |
-        # Use second data                                                                           #|
+                               'clear_on_start': CURSOR_CLEAR_ON_START, 'x': [], 'y': [], 'z': [],
+                               'cursor_required': CURSOR_REQUIRED, 'cursor_req_text': CURSOR_REQ_TEXT}
+        # Use second data
         self.use_second = USE_SECOND
         # Treat each data in stack separately
         self.stack_sep = STACK_SEP  # |
         SubMethods_02.__init__(self, app=app, which=which, commandline=commandline)  # |
-
 
     # DEFINE YOUR CUSTOM METHODS FOR THIS ROUTINE
     # ----------------------------------------------

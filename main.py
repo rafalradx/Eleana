@@ -1155,15 +1155,13 @@ class MainApp:
         update.all_lists()
 
     def clear_results(self, skip_question = False):
-        if skip_question:
-            response = "Yes"
+        if not skip_question:
+            quit_dialog = CTkMessagebox(title="Clear results",
+                                        message="Are you sure you want to clear the entire dataset in the results?",
+                                        icon="warning", option_1="No", option_2="Yes")
+            response = quit_dialog.get()
         else:
-            # quit_dialog = CTkMessagebox(title="Clear results",
-            #                         message="Are you sure you want to clear the entire dataset in the results?",
-            #                         icon="warning", option_1="No", option_2="Yes")
-            # response = quit_dialog.get()
-            response = "Yes"
-            pass
+            response = 'Yes'
 
         if response == "Yes":
             self.eleana.results_dataset = []

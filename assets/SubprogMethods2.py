@@ -144,11 +144,13 @@ class SubMethods_02:
         ''' [-OK-] button
             This is standard function in SubprogMethods '''
         self.start_single_calculations()
+        self.set_mouse_state(state='')
 
     def process_group_clicked(self):
         ''' [-Process Group-] button
             This is standard function in SubprogMethods '''
         self.perform_group_calculations()
+        self.set_mouse_state(state='')
 
     def show_report_clicked(self):
         ''' [-Show Report-] button
@@ -167,6 +169,13 @@ class SubMethods_02:
 
     def start_single_calculations(self):
         ''' This function is triggered by clicking "Calculate" button'''
+        required_cursors = self.subprog_cursor['cursor_required']
+        nr_of_annotations = len(self.grapher.cursor_annotations)
+        if required_cursors > nr_of_annotations:
+            if self.subprog_cursor['cursor_req_text']:
+                Error.show(title='', info=self.subprog_cursor['cursor_req_text'])
+            return False
+
         self.skip_next_error = False
         status = self.get_data()
         if status:
@@ -263,7 +272,6 @@ class SubMethods_02:
                 else:
                     return status
             skip_report_show = True
-
         else:
             Error.show(info='The type of the selected data cannot be determined. Please define the "type" parameter.',
                        details='')
@@ -286,6 +294,13 @@ class SubMethods_02:
         return True
 
     def perform_group_calculations(self):
+        required_cursors = self.subprog_cursor['cursor_required']
+        nr_of_annotations = len(self.grapher.cursor_annotations)
+        if required_cursors > nr_of_annotations:
+            if self.subprog_cursor['cursor_req_text']:
+                Error.show(title='', info=self.subprog_cursor['cursor_req_text'])
+            return False
+
         # Make copy of the settings and eleana.selections
         copy_selections = copy.deepcopy(self.eleana.selections)
         copy_of_subprog_settings = copy.deepcopy(self.subprog_settings)
@@ -300,7 +315,8 @@ class SubMethods_02:
             group_list = tuple(range(len(self.eleana.dataset)))
         else:
             group_list = self.eleana.assignmentToGroups[current_group]
-        self.subprog_settings['result'] = 'add'
+        if self.subprog_settings['result'] == 'replace':
+            self.subprog_settings['result'] = 'add'
 
         # Do the single calculation for the each of the data in the
         for each in group_list:
@@ -344,6 +360,12 @@ class SubMethods_02:
 
         # Extract the data in x and y if needed
         x_data1, y_data1 = self.extract_region_xy(x=x_data1, y=y_data1)
+
+        # Check if cursors are within (x,y) of x_data1 and y_data1
+        status = self.check_cursor_bounds(x=x_data1, y=y_data1, name=name1)
+        if not status:
+            return False
+
         if y_data1.size == 0:
             Error.show(info=f'For the selected range, the {name1} contains no values')
             self.set_mouse_state(state='')
@@ -443,6 +465,12 @@ class SubMethods_02:
 
         # Extract the data in x and y if needed
         x_data1, y_data1 = self.extract_region_xy(x = x_data1, y = y_data1)
+
+        # Check if cursors are within (x,y) of x_data1 and y_data1
+        status = self.check_cursor_bounds(x=x_data1, y=y_data1, name=name1)
+        if not status:
+            return False
+
         # Show error if extracted data contains no data
         if y_data1.size == 0:
             Error.show(info = f'For the selected range, the {name1} contains no values')
@@ -495,6 +523,7 @@ class SubMethods_02:
                 return False
         else:
             self.data_for_calculations.append(None)
+
         # Go to calculate function
         row_to_report = self.calculate()
         # Update data and report
@@ -527,6 +556,12 @@ class SubMethods_02:
 
         # Extract the data in x and y if needed
         x_data1, y_data1 = self.extract_region_xy(x=x_data1, y=y_data1)
+
+        # Check if cursors are within (x,y) of x_data1 and y_data1
+        status = self.check_cursor_bounds(x=x_data1, y=y_data1, name=name1)
+        if not status:
+            return False
+
         if y_data1.size == 0:
             Error.show(info=f'For the selected range, the {name1} contains no values')
             self.set_mouse_state(state='')
@@ -807,6 +842,43 @@ class SubMethods_02:
     #
     # ADDITIONAL METHODS SUCH AS PLACING ANNOTATION IN GRAPH
     # ------------------------------------------------
+
+    def check_cursor_bounds(self, x, y, name):
+        outside_x = self.subprog_cursor['cursor_outside_x']
+        outside_y = self.subprog_cursor['cursor_outside_y']
+        text = self.subprog_cursor['cursor_outside_text']
+        if outside_x and outside_y:
+           in_bounds = self.all_cursors_within_bounds(x=x, y=y)
+        elif outside_x and not outside_y:
+            in_bounds = self.all_cursors_within_bounds(x=x, y=None)
+        elif outside_y and not outside_x:
+            in_bounds = self.all_cursors_within_bounds(x=None, y=y)
+        else:
+            return True
+        answer = all(in_bounds)
+        if not answer and text:
+            Error.show(title=f'{name}', info=text)
+        return answer
+
+    def all_cursors_within_bounds(self, x = None, y = None):
+        answers = []
+        for cursor in self.grapher.cursor_annotations:
+            answer = self.is_cursors_within_bounds(cursor=cursor, x=x,y=y)
+            answers.append(answer)
+        return answers
+
+    def is_cursors_within_bounds(self, cursor, x=None, y=None):
+        cursor_x = cursor['point'][0]
+        cursor_y = cursor['point'][1]
+        if x is not None:
+            x_in_range = (cursor_x >= x.min()) & (cursor_x <= x.max())
+        else:
+            x_in_range = True
+        if y is not None:
+            y_in_range = (cursor_y >= y.min()) & (cursor_y <= y.max())
+        else:
+            y_in_range = True
+        return x_in_range and y_in_range
 
     def place_annotation(self, x, y = None, which = 'first', style = None):
         ''' Put the annotation at given (x,y) point.
