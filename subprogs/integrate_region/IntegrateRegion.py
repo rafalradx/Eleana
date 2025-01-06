@@ -64,6 +64,10 @@ CURSOR_REQUIRED = 0                     # <--- MINIMUM NUMBER OF CURSORS TO PROC
 CURSOR_REQ_TEXT = \
     ''                                  # <--- TEXT TO DISPLAY IF NR OF CURSORS IS LESS THAN REQUIRED
                                         #    LEAVE EMPTY IF YOU DO NOT WANT TO SHOW THE ERROR
+CURSOR_OUTSIDE_X = False                 # <--- CHECK IF ALL CURSORS ARE BETWEEN Xmin Xmax FOR SELF>DATA_FOR_CALCULATIONS
+CURSOR_OUTSIDE_Y = False
+CURSOR_OUTSIDE_TEXT = \
+                'One or more selected points are outside the (x, y) range of data.'
 
 
 '''
@@ -108,8 +112,9 @@ class IntegrateRegion(SubMethods_02, WindowGUI):
                        'to_group': REPORT_TO_GROUP  # |
                        }  # |
         self.subprog_cursor = {'type': CURSOR_TYPE, 'changing': CURSOR_CHANGING, 'limit': CURSOR_LIMIT,
-                               'clear_on_start': CURSOR_CLEAR_ON_START, 'x': [], 'y': [], 'z': [],
-                               'cursor_required': CURSOR_REQUIRED, 'cursor_req_text': CURSOR_REQ_TEXT}
+                               'clear_on_start': CURSOR_CLEAR_ON_START, 'cursor_required': CURSOR_REQUIRED,
+                               'cursor_req_text': CURSOR_REQ_TEXT, 'cursor_outside_x': CURSOR_OUTSIDE_X, 'cursor_outside_y': CURSOR_OUTSIDE_Y,
+                               'cursor_outside_text': CURSOR_OUTSIDE_TEXT}
         # Use second data
         self.use_second = USE_SECOND
         # Treat each data in stack separately

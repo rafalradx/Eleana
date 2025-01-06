@@ -1154,7 +1154,7 @@ class MainApp:
         update.dataset_list()
         update.all_lists()
 
-    def clear_results(self, skip_question = False):
+    def clear_results(self, skip_question = True):
         if not skip_question:
             quit_dialog = CTkMessagebox(title="Clear results",
                                         message="Are you sure you want to clear the entire dataset in the results?",
@@ -1511,8 +1511,9 @@ class MainApp:
     def clear_cursors(self):
         self.grapher.clear_all_annotations()
 
-    def sel_graph_cursor(self, value):
-        self.grapher.clear_all_annotations(True)
+    def sel_graph_cursor(self, value, clear_annotations=True):
+        if clear_annotations:
+            self.grapher.clear_all_annotations(True)
         self.grapher.current_cursor_mode['label'] = value
         self.grapher.plot_graph()
         self.grapher.cursor_on_off()

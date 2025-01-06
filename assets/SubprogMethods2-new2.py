@@ -460,7 +460,7 @@ class SubMethods_02:
         x_data1, y_data1 = self.extract_region_xy(x = x_data1, y = y_data1)
 
         # Check if cursors are within (x,y) of x_data1 and y_data1
-        status = self.check_cursor_bounds(x=x_data1, y=y_data1, name=name1)
+        status = self.check_cursor_bounds(x=x_data1, y=y_data1)
         if not status:
             return False
 
@@ -734,6 +734,7 @@ class SubMethods_02:
             result_selected = result_list[position_in_list]
             self.app.result_selected(result_selected)
             self.app.sel_result.set(result_selected)
+        self.after_result_show()
 
     def create_result_stack(self):
         ''' Create new result entry in result_dataset when stack is calculated as whole'''
@@ -921,4 +922,17 @@ class SubMethods_02:
         if self.app:
             self.grapher.canvas.get_tk_widget().config(cursor=state)
             self.app.mainwindow.configure(cursor=state)
+        return
+
+    #
+    # DUMMY FUNCTIONS TO OVERRIDE BY SUBPROG
+    # ------------------------------------------------
+
+    def after_data_changed(self, variable, value):
+        return
+
+    def after_calculations(self):
+        return
+
+    def after_result_show(self):
         return

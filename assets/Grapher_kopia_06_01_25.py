@@ -22,7 +22,6 @@ class GraphPreferences:
         self.app = main_menu.app
         self.eleana = self.app.eleana
 
-
         ''' CURSOR DEFINITIONS '''
         # Create avaliable cursor modes: hov - enable hover,
         #                                a_txt - display text label,
@@ -41,25 +40,9 @@ class GraphPreferences:
                             ]
 
        # Style of the custom annotation
-       #  self.style_of_annotation = {'text':"Point: ", 'number':True,
-       #                              'arrowprops' :{'facecolor':'yellow', 'edgecolor':'blue'}}
+        self.style_of_annotation = {'text':"Point: ", 'number':True,
+                                    'arrowprops' :{'facecolor':'yellow', 'edgecolor':'blue'}}
 
-        self.style_of_annotation = {'text': "", 'number': True,
-                                    'xytext':(0.03, 0.03),
-                                    'arrowprops':{
-                                            "arrowstyle": "->",  # Styl strzałki
-                                            "lw": 1.5,           # Grubość linii strzałki
-                                            "color": "black",    # Kolor strzałki
-                                                },
-                                    "bbox": {
-                                            "boxstyle": "round",  # Zaokrąglone pole tekstowe
-                                            "fc": "orange",       # Kolor wypełnienia pola tekstowego
-                                            "ec": "black",        # Kolor krawędzi pola tekstowego
-                                            "lw": 0.5            # Grubość krawędzi pola tekstowego
-                                            },
-                                    "fontsize": 10,          # Rozmiar czcionki
-                                    "color": "black"        # Kolor tekstu
-                                            }
         # Scale settings
         self.inverted_x_axis = False
 
@@ -438,18 +421,9 @@ class Grapher(GraphPreferences):
             for annot in annots:
                 xy = annot['point']
                 number_ = str(i+1) if self.style_of_annotation['number'] else ''
-                # self.ax.annotate(text=self.style_of_annotation['text'] + number_,
-                #                  xy=xy, arrowprops = self.style_of_annotation['arrowprops']
-                #                  )
                 self.ax.annotate(text=self.style_of_annotation['text'] + number_,
-                                 xy=xy,
-                                 xytext=self.xytext_position(xy),
-                                 arrowprops=self.style_of_annotation['arrowprops'],
-                                 bbox=self.style_of_annotation['bbox'],
-                                 fontsize=self.style_of_annotation['fontsize'],
-                                 color=self.style_of_annotation['color']
+                                 xy=xy, arrowprops = self.style_of_annotation['arrowprops']
                                  )
-
                 i+=1
 
         # Add annotations from Free Select
@@ -461,16 +435,12 @@ class Grapher(GraphPreferences):
                 number_ = str(i + 1) if self.style_of_annotation['number'] else ''
                 self.ax.annotate(text=self.style_of_annotation['text'] + number_,
                                  xy=xy,
-                                 xytext=self.xytext_position(xy),
-                                 arrowprops=self.style_of_annotation['arrowprops'],
-                                 bbox=self.style_of_annotation['bbox'],
-                                 fontsize=self.style_of_annotation['fontsize'],
-                                 color=self.style_of_annotation['color']
+                                 arrowprops=self.style_of_annotation['arrowprops']
                                  )
                 i += 1
 
         # Draw canvas
-        self.canvas.draw()
+        self.canvas.draw_idle()
 
         # Connect changes in scales due to ZOOM or MOVE
         self.ax.callbacks.connect('ylim_changed', self.on_ylim_changed)
@@ -575,6 +545,8 @@ class Grapher(GraphPreferences):
             # Podłączenie zdarzeń myszy
             self.motion_binding_id = self.canvas.mpl_connect('motion_notify_event', self.on_mouse_move_in_free_select)
             #self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
+
+
 
         elif index == 6:
             # Crosshair
@@ -719,14 +691,8 @@ class Grapher(GraphPreferences):
             i = len(self.cursor_annotations)
             number_ = str(i) if self.style_of_annotation['number'] else ''
             self.ax.annotate(text=self.style_of_annotation['text'] + number_,
-                             xy=point_selected,
-                             xytext=self.xytext_position(point_selected),
-                             arrowprops=self.style_of_annotation['arrowprops'],
-                             bbox=self.style_of_annotation['bbox'],
-                             fontsize=self.style_of_annotation['fontsize'],
-                             color=self.style_of_annotation['color']
+                             xy=point_selected, arrowprops=self.style_of_annotation['arrowprops']
                              )
-
 
             self.canvas.draw()
             self.eleana.set_selections(variable='grapher_action', value='point_selected')
@@ -829,6 +795,44 @@ class Grapher(GraphPreferences):
         self.clearAnnotationList()
         self.plot_graph()
 
+    def set_custom_annotation(self, point, snap = True, which='first'):
+        ''' Create annotation programmatically at the specified (x, y) point. '''
+        def _find_nearest_index(x_data, x_coord):
+            x_data = np.array(x_data)
+            index = np.abs(x_data - x_coord).argmin()
+            return index
+        x_coord, y_coord = point  # Unpack the point coordinates
+        if which == 'first':
+            nr = 0
+            stk_index = self.eleana.selections['f_stk']
+        elif which == 'second':
+            nr = 1
+            stk_index = self.eleana.selections['s_stk']
+        else:
+            nr = 2
+            stk_index = self.eleana.selections['r_stk']
+        lines = self.ax.get_lines()
+        line = lines[nr]
+        curve_name = line.get_label()
+        index = self.eleana.get_index_by_name(selected_value_text=curve_name)
+        x_data, y_data = line.get_data()
+        if snap:
+            index_of_x = _find_nearest_index(x_data, x_coord)
+            y_coord = y_data[index_of_x]
+            x_coord = x_data[index_of_x]
+        else:
+            y_coord = point[1]
+            x_coord = point[0]
+        number_ = len(self.cursor_annotations)
+        custom_annot = {'type': None,
+                        'curve':curve_name,
+                        'index':index,
+                        'stk_index':stk_index,
+                        'point': (x_coord, y_coord),
+                        'nr':number_}
+        self.eleana.custom_annotations.append(custom_annot)
+        self.cursor_annotations.append(custom_annot)
+        self.updateAnnotationList(action='add')
 
     def annotation_create(self, sel, curve = None):
         ''' This creates annotations on the graph and add selected
@@ -889,7 +893,7 @@ class Grapher(GraphPreferences):
     def clear_all_annotations(self, skip=None):
         self.cursor_annotations = []
         self.eleana.custom_annotations = []
-        #self.eleana.set_selections(variable='grapher_action', value='annotations_cleared')
+        self.eleana.set_selections(variable='grapher_action', value='annotations_cleared')
         try:
             self.clearAnnotationList()
         except:
@@ -898,17 +902,19 @@ class Grapher(GraphPreferences):
             return
         else:
             value = self.app.sel_cursor_mode.get()
-            self.current_cursor_mode['label'] = value
-            self.plot_graph()
-            self.cursor_on_off()
-
+            self.app.sel_graph_cursor(value)
         return
 
     def clearAnnotationList(self):
-        self.annotationlist.delete("all")
+        elements = self.annotationlist.size()
+        i = 0
+        while i < elements:
+            self.annotationlist.delete(0)
+            i += 1
 
     def updateAnnotationList(self, action=None):
-        self.annotationlist.delete("all")
+        self.clearAnnotationList()
+        list_of_annotations = []
         if self.app.sel_cursor_mode.get() != 'Range select':
             for each in self.cursor_annotations:
                 nr = each['nr']
@@ -920,7 +926,7 @@ class Grapher(GraphPreferences):
                 else:
                     nr = '#' + str(nr)
                 entry = nr + ' | ' + str(curve) + ' (' + str(round(point_x,2)) + ', ' + str(round(point_y, 2)) + ')'
-                self.annotationlist.insert("END", entry)
+                list_of_annotations.append(entry)
         else:
             i = 0
             for each in self.eleana.color_span['ranges']:
@@ -931,22 +937,12 @@ class Grapher(GraphPreferences):
                 min = str(each[0])
                 max = str(each[1])
                 entry = f"{nr}: [{min};  {max}]"
-                self.annotationlist.insert("END", entry)
+                list_of_annotations.append(entry)
                 i+=1
-
-
-    def xytext_position(self, point):
-        ''' Calculate position of xytext for annotation created by Free select
-            The position is calculated by percentage given in self.sty_of_annotation['xytext']
-            of x y scale and relative to the xy of the point
-        '''
-        len_perc = self.style_of_annotation['xytext']
-        x_min, x_max = self.ax.get_xlim()
-        y_min, y_max = self.ax.get_ylim()
-        dx = (x_max - x_min) * len_perc[0]
-        dy = (y_max - y_min) * len_perc[1]
-        xytext = (point[0] + dx, point[1] + dy)
-        return xytext
+        i = 0
+        while i < len(list_of_annotations):
+            self.annotationlist.insert(i, list_of_annotations[i])
+            i += 1
 
     def indexCurveForAnnot(self, curve):
         if self.app.sel_cursor_mode.get() == "Free select":

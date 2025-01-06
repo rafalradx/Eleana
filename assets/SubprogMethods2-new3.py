@@ -4,8 +4,7 @@ import numpy as np
 from assets.Error import Error
 from subprogs.table.table import CreateFromTable
 import pandas
-import matplotlib.pyplot as plt
-from tkinter import TclError
+
 class SubMethods_02:
     def __init__(self, app=None, which='first', commandline=False):
         self.commandline = commandline
@@ -13,6 +12,7 @@ class SubMethods_02:
         self.update_gui = True
         self.data_for_calculations = []
         self.consecutive_number = 1
+
         if app and not self.commandline:
             # Window start from Menu in GUI
             self.app = app
@@ -116,11 +116,9 @@ class SubMethods_02:
         if variable == "first" and value is None:
             self.app.mainwindow.configure(cursor="")
             self.grapher.canvas.get_tk_widget().config(cursor="")
-            self.after_data_changed(variable=variable, value=value)
         elif variable == 'f_stk' or variable == 's_stk':
             self.app.mainwindow.configure(cursor="")
             self.grapher.canvas.get_tk_widget().config(cursor="")
-            self.after_data_changed(variable=variable, value=value)
             return False
         elif variable == 'grapher_action' and value == 'range_start':
             self.app.mainwindow.configure(cursor="")
@@ -133,17 +131,14 @@ class SubMethods_02:
         elif variable == "grapher_action":
             return False
         elif variable == 'result':
-            self.after_data_changed(variable=variable, value=value)
             return False
         if self.subprog_settings['auto_calculate']:
             self.ok_clicked()
-
-
         return True
 
 
     # STANDARD METHODS FOR SUBPROG GUI BUTTONS
-    # -------------------------------------------------
+    #
 
     def ok_clicked(self):
         ''' [-OK-] button
@@ -151,6 +146,7 @@ class SubMethods_02:
         self.start_single_calculations()
         self.set_mouse_state(state='')
         self.after_ok_clicked()
+
 
     def process_group_clicked(self):
         ''' [-Process Group-] button
@@ -339,7 +335,6 @@ class SubMethods_02:
                     self.eleana.selections = copy_selections
                     self.subprog_settings = copy_of_subprog_settings
                     self.show_results_matching_first()
-                    self.after_result_show_on_graph()
                     return False
 
         # After processing
@@ -348,7 +343,6 @@ class SubMethods_02:
 
         # Display result settings that match selection in first
         self.show_results_matching_first()
-        self.after_result_show_on_graph()
 
         # Show Report
         self.after_calculations()
@@ -378,7 +372,6 @@ class SubMethods_02:
             Error.show(info=f'For the selected range, the {name1} contains no values')
             self.set_mouse_state(state='')
             self.show_results_matching_first()
-            self.after_result_show_on_graph()
             return False
         data_1 = {'x': x_data1,
                   'y': y_data1,
@@ -574,7 +567,6 @@ class SubMethods_02:
             Error.show(info=f'For the selected range, the {name1} contains no values')
             self.set_mouse_state(state='')
             self.show_results_matching_first()
-            self.after_result_show_on_graph()
             return False
         data_1 = {'x': x_data1,
                   'y': y_data1,
@@ -849,13 +841,11 @@ class SubMethods_02:
         self.app.sel_result.configure(values = results)
 
 
-
-    # ADDITIONAL METHODS FOR CHECKIN CURSOR POSITIONS ON GRAPH
+    #
+    # ADDITIONAL METHODS SUCH AS PLACING ANNOTATION IN GRAPH
     # ------------------------------------------------
 
     def check_cursor_bounds(self, x, y):
-        ''' If CURSOR_OUTSIDE_X or Y is set then check if cursor
-            at (x,y) is within the range of selected data'''
         outside_x = self.subprog_cursor['cursor_outside_x']
         outside_y = self.subprog_cursor['cursor_outside_y']
         if outside_x and outside_y:
@@ -895,111 +885,21 @@ class SubMethods_02:
             y_in_range = True
         return x_in_range and y_in_range
 
-
-
-    # METHODS FOR CUSTOM CURSOR HANDLING
-    # ------------------------------------------------
-
-    def clear_custom_annotations_list(self):
-        ''' Clear the list of added custom_annotations'''
-        self.eleana.custom_annotations = []
-        self.grapher.annotationlist.delete("all")
-
-    def place_custom_annotation(self, x, y = None, which = 'first', refresh_gui=True):
-        ''' Puts the annotation at given (x,y) point.
+    def place_annotation(self, x, y = None, which = 'first', style = None):
+        ''' Put the annotation at given (x,y) point.
             If only x is set the y coordinate will snap to the curve indicated in "which" variable.
             If x and y are set then the annotation will appear at given (x,y) coordinates
             '''
+
         if x is None:
             return
         if y:
             snap = False
         else:
             snap = True
-        self.set_custom_annotation(point = (x,y), snap=snap, which = which)
-        annots = self.eleana.custom_annotations
-        i = 0
-        for annot in annots:
-            xy = annot['point']
-            number_ = str(i + 1) if self.grapher.style_of_annotation['number'] else ''
-            # self.grapher.ax.annotate(text=self.grapher.style_of_annotation['text'] + number_,
-            #                  xy=xy, arrowprops=self.grapher.style_of_annotation['arrowprops']
-            #                  )
-            self.grapher.ax.annotate(text=self.grapher.style_of_annotation['text'] + number_,
-                             xy=xy,
-                             xytext=self.grapher.xytext_position(xy),
-                             arrowprops=self.grapher.style_of_annotation['arrowprops'],
-                             bbox=self.grapher.style_of_annotation['bbox'],
-                             fontsize=self.grapher.style_of_annotation['fontsize'],
-                             color=self.grapher.style_of_annotation['color']
-                             )
-
-            i += 1
-        self.grapher.canvas.draw()
-
-    def remove_custom_annotations_from_graph(self):
-        ''' Remove all annotations added to the graph '''
-        for child in self.grapher.ax.get_children():
-            if isinstance(child, plt.Annotation):
-                child.remove()
-        self.grapher.canvas.draw()
-
-    def set_custom_annotation(self, point, snap = True, which='first'):
-        ''' Create annotation programmatically at the specified (x, y) point. '''
-        def _find_nearest_index(x_data, x_coord):
-            x_data = np.array(x_data)
-            index = np.abs(x_data - x_coord).argmin()
-            return index
-        x_coord, y_coord = point  # Unpack the point coordinates
-        if which == 'first':
-            nr = 0
-            stk_index = self.eleana.selections['f_stk']
-        elif which == 'second':
-            nr = 1
-            stk_index = self.eleana.selections['s_stk']
-        else:
-            nr = 2
-            stk_index = self.eleana.selections['r_stk']
-        lines = self.grapher.ax.get_lines()
-        line = lines[nr]
-        curve_name = line.get_label()
-        index = self.eleana.get_index_by_name(selected_value_text=curve_name)
-        x_data, y_data = line.get_data()
-        if snap:
-            index_of_x = _find_nearest_index(x_data, x_coord)
-            y_coord = y_data[index_of_x]
-            x_coord = x_data[index_of_x]
-        else:
-            y_coord = point[1]
-            x_coord = point[0]
-        number_ = len(self.eleana.custom_annotations)
-        custom_annot = {'type': None,
-                        'curve': curve_name,
-                        'index': index,
-                        'stk_index': stk_index,
-                        'point': (x_coord, y_coord),
-                        'nr': number_}
-        self.eleana.custom_annotations.append(custom_annot)
-        self.grapher.cursor_annotations.append(custom_annot)
-        self.add_custom_annotation_entry(custom_annot)
-
-    def add_custom_annotation_entry(self, annotation):
-        ''' Creates the entry and adds it to the annotation list'''
-        nr = annotation['nr']
-        curve = annotation['curve']
-        point_x = annotation['point'][0]
-        point_y = annotation['point'][1]
-        if nr < 10:
-            nr = '#0' + str(nr)
-        else:
-            nr = '#' + str(nr)
-        entry = nr + ' | ' + str(curve) + ' (' + str(round(point_x, 2)) + ', ' + str(round(point_y, 2)) + ')'
-        self.grapher.annotationlist.insert("END", entry)
-
-
-
-    # METHODS FOR CTKENTRIES SUCH AS VALIDATION
-    # -------------------------------------------
+        self.grapher.set_custom_annotation(point = (x,y), snap=snap, which = which)
+        self.grapher.updateAnnotationList()
+        self.grapher.draw_plot()
 
     def set_validation_for_ctkentries(self, list_of_entries):
         ''' Sets the validation methods for the CTkEntries listed in "list_of_entries"  '''
@@ -1041,27 +941,7 @@ class SubMethods_02:
             self.app.mainwindow.configure(cursor=state)
         return
 
-
-    # DECORATORS FOR ERROR HANDLING
-    # -------------------------------------------------
-
-    @staticmethod
-    def skip_if_empty_graph(func):
-        ''' This method skips the decorated function if there is no data in the graph.'''
-        def wrapper(*args, **kwargs):
-            # Take class instance
-            instance = args[0]
-            # Take data from self.grapher
-            x_data, y_data = instance.grapher.get_graph_line(index=0)
-            if x_data is None or y_data is None:
-                return None
-            elif x_data.size == 0 or y_data.size == 0:
-                return None
-            # Go to original function
-            return func(*args, **kwargs)
-        return wrapper
-
-
+    #
     # DUMMY FUNCTIONS TO OVERRIDE BY SUBPROG
     # ------------------------------------------------
 

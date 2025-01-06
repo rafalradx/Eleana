@@ -20,6 +20,7 @@ DATA_LABEL = 'data_label'               # <--- ID OF THE LABEL WIDGET WHERE NAME
                                         #      THE LABEL WIDGET OF THE SAME ID NAME MUST EXIST IN THE GUI. IF NOT USED SET THIS TO NONE
 NAME_SUFFIX = ''                        # <--- DEFINES THE SUFFIX THAT WILL BE ADDED TO NAME OF PROCESSED DATA
 AUTO_CALCULATE = False                  # <--- DEFINES IF CALCULATION IS AUTOMATICALLY PERFORMED UPON DATA CHANGE IN GUI
+
 # Data settings
 REGIONS_FROM = 'scale'                  # <--- DEFINES IF DATA WILL BE EXTRACTED:
 #REGIONS_FROM = 'selection'             # 'none' - DO NOT EXTRACT
@@ -54,7 +55,7 @@ REPORT_TO_GROUP = 'RESULT Distance'     # <--- DEFAULT GROUP NAME TO WHICH REPOR
 
 # Cursors on graph
 CURSOR_CHANGING = False                  # <--- IF TRUE THEN CURSOR SELECTION IN MAIN GUI WILL BE DISABLED
-CURSOR_TYPE = 'Numbered selections'               # <--- USE CURSORS: 'None', 'Continuous read XY', 'Selection of points with labels'
+CURSOR_TYPE = 'Free select'               # <--- USE CURSORS: 'None', 'Continuous read XY', 'Selection of points with labels'
                                         #       'Selection of points', 'Numbered selections', 'Free select', 'Crosshair', 'Range select'
 CURSOR_LIMIT = 2                        # <--- SET THE MAXIMUM NUMBER OF CURSORS THAT CAN BE SELECTED. FOR NO LIMIT SET 0
 CURSOR_CLEAR_ON_START = True
@@ -63,7 +64,7 @@ CURSOR_REQUIRED = 2                     # <--- MINIMUM NUMBER OF CURSORS TO PROC
 CURSOR_REQ_TEXT = \
     'Please select two points.'         # <--- TEXT TO DISPLAY IF NR OF CURSORS IS LESS THAN REQUIRED
                                         #    LEAVE EMPTY IF YOU DO NOT WANT TO SHOW THE ERROR
-CURSOR_OUTSIDE_X = True                 # <--- CHECK IF ALL CURSORS ARE BETWEEN Xmin Xmax FOR SELF>DATA_FOR_CALCULATIONS
+CURSOR_OUTSIDE_X = False                # <--- CHECK IF ALL CURSORS ARE BETWEEN Xmin Xmax FOR SELF>DATA_FOR_CALCULATIONS
 CURSOR_OUTSIDE_Y = False
 CURSOR_OUTSIDE_TEXT = \
                 'One or more selected points are outside the (x, y) range of data.'
@@ -80,8 +81,8 @@ else:                                                                           
     cmd_to_import = 'from ' + SUBPROG_FOLDER + '.' + cmd_to_import                                  #|
 exec(cmd_to_import)                                                                                 #|
 from assets.Error import Error                                                                      #|
-from assets.SubprogMethods2 import SubMethods_02                                                    #|
-class DistanceRead(SubMethods_02, WindowGUI):                                                       #|
+from assets.SubprogMethods2 import SubMethods_02 as Methods                                                    #|
+class DistanceRead(Methods, WindowGUI):                                                       #|
     def __init__(self, app=None, which='first', commandline=False):  # |
         if app and not commandline:
             # Initialize window if app is defined and not commandline                               #|
@@ -89,8 +90,7 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
         # Create settings for the subprog                                                           #|
         self.subprog_settings = {'title': TITLE, 'on_top': ON_TOP, 'data_label': DATA_LABEL,
                                  'name_suffix': NAME_SUFFIX, 'auto_calculate': AUTO_CALCULATE,
-                                 'result': RESULT_CREATE
-                                 }
+                                 'result': RESULT_CREATE}
         self.regions = {'from': REGIONS_FROM}
         self.report = {'nr': 1,
                        'create': REPORT_CREATE,
@@ -112,7 +112,7 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
         self.use_second = USE_SECOND
         # Treat each data in stack separately
         self.stack_sep = STACK_SEP  # |
-        SubMethods_02.__init__(self, app=app, which=which, commandline=commandline)
+        Methods.__init__(self, app=app, which=which, commandline=commandline)
 
 
     # DEFINE YOUR CUSTOM METHODS FOR THIS ROUTINE
@@ -130,6 +130,7 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
         self.dy_entry = self.builder.get_object('dy_entry', self.mainwindow)
         self.check_keep_track = self.builder.get_object('check_track_minmax', self.mainwindow)
         self.keep_track = False
+        self.btn_findminmax = self.builder.get_object('btn_findminmax', self.mainwindow)
 
         # Define list of CTkEntries that should be validated for floats
         self.set_validation_for_ctkentries([
@@ -146,15 +147,57 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
     def graph_action(self, variable=None, value=None):
         ''' Do something when cursor action on graph was done '''
 
+    def after_data_changed(self, variable, value):
+        ''' This method is called after data changing
+            by clicking in the Main GUI '''
+        if self.keep_track:
+             self.find_minmax_clicked()
+        print('after_data_changed')
+        pass
+
+    def after_calculations(self):
+        ''' This method is called after single calculations
+            and just before showing the report
+            '''
+        print('after_caclulations')
+        pass
+
+    def after_result_show_on_graph(self):
+        ''' This method is called immediately when result
+            is shown on graph. This may be used for modifying something
+            in the graph when result is displayed after calculations.
+        '''
+        self.find_minmax_clicked()
+
+    def after_ok_clicked(self):
+        ''' This method is called when all functions are
+            finished after clicking 'Calculate'
+        '''
+        # if self.keep_track:
+        #     self.find_minmax_clicked()
+        print('after_ok_clicked')
+
+    def after_process_group_clicked(self):
+        print('after_process_group')
+        pass
+
+    @Methods.skip_if_empty_graph
     def find_minmax_clicked(self):
+        self.btn_findminmax.configure(state="disabled")
         x_data, y_data = self.grapher.get_graph_line(index = 0)
         index_min_y = np.argmin(y_data)
         min_x = x_data[index_min_y]
         index_max_y = np.argmax(y_data)
         max_x = x_data[index_max_y]
-        self.grapher.clear_all_annotations()
-        self.place_annotation(x = min_x)
-        self.place_annotation(x = max_x)
+
+        self.clear_custom_annotations_list()
+        self.remove_custom_annotations_from_graph()
+        self.place_custom_annotation(x = min_x)
+        self.place_custom_annotation(x = max_x)
+
+        self.btn_findminmax.configure(state="normal")
+        return True
+
 
     def track_minmax_clicked(self):
         self.keep_track = self.check_keep_track.get()
@@ -164,6 +207,8 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
     def calculate_stack(self, commandline = False):
         ''' If STACK_SEP is False it means that data in stack should
             not be treated as separate data but are calculated as whole
+
+            DO NOT USE FUNCTION REQUIRED GUI UPDATE HERE
             '''
         # AVAILABLE DATA. REMOVE UNNECESSARY
         # EACH X,Y,Z IS NP.ARRAY
@@ -201,6 +246,8 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
         After calculation put calculated data to:
             x1, y1 and z1 etc.
             result: the value of resulted calculations
+
+            DO NOT USE FUNCTION REQUIRED GUI UPDATE HERE
         '''
 
         # AVAILABLE DATA. REMOVE UNNECESSARY
@@ -240,6 +287,7 @@ class DistanceRead(SubMethods_02, WindowGUI):                                   
             max_y = y1[index_max_y]
             minimum = [min_x, min_y]
             maximum = [max_x, max_y]
+            self.find_minmax_clicked(skip_placing_annot=True)
         else:
             # Do not detect where maximum and minimum are
             p1 = cursor_positions[0]
