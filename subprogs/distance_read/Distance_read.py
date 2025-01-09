@@ -3,7 +3,6 @@
 # -- Here is an example --
 import numpy as np
 
-from modules.mplcursors import cursor
 from subprogs.integrate_region.IntegrateRegion import RESULT_CREATE
 
 # General setting of the application. Here is an example
@@ -150,8 +149,8 @@ class DistanceRead(Methods, WindowGUI):                                         
     def after_data_changed(self, variable, value):
         ''' This method is called after data changing
             by clicking in the Main GUI '''
-        if self.keep_track:
-             self.find_minmax_clicked()
+        #if self.keep_track:
+        #     self.find_minmax_clicked()
         print('after_data_changed')
         pass
 
@@ -167,19 +166,27 @@ class DistanceRead(Methods, WindowGUI):                                         
             is shown on graph. This may be used for modifying something
             in the graph when result is displayed after calculations.
         '''
-        self.find_minmax_clicked()
+        #self.find_minmax_clicked()
+        pass
 
     def after_ok_clicked(self):
         ''' This method is called when all functions are
             finished after clicking 'Calculate'
         '''
-        # if self.keep_track:
-        #     self.find_minmax_clicked()
         print('after_ok_clicked')
 
     def after_process_group_clicked(self):
         print('after_process_group')
         pass
+
+    def after_graph_plot(self):
+        ''' This method is called when main application refreshes Graph content.
+            For examplle '''
+        if self.keep_track:
+            self.find_minmax_clicked()
+        else:
+            self.clear_custom_annotations_list()
+            self.remove_custom_annotations_from_graph()
 
     @Methods.skip_if_empty_graph
     def find_minmax_clicked(self):

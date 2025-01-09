@@ -130,15 +130,18 @@ class SubMethods_02:
             self.app.mainwindow.configure(cursor="")
             self.grapher.canvas.get_tk_widget().config(cursor="")
             return False
+        elif variable == 'grapher_action' and value == 'plot':
+            self.after_graph_plot()
+            return False
         elif variable == "grapher_action":
             return False
         elif variable == 'result':
             self.after_data_changed(variable=variable, value=value)
             return False
+        else:
+            self.after_data_changed(variable=variable, value=value)
         if self.subprog_settings['auto_calculate']:
             self.ok_clicked()
-
-
         return True
 
 
@@ -903,7 +906,10 @@ class SubMethods_02:
     def clear_custom_annotations_list(self):
         ''' Clear the list of added custom_annotations'''
         self.eleana.custom_annotations = []
-        self.grapher.annotationlist.delete("all")
+        try:
+            self.grapher.annotationlist.delete("all")
+        except:
+            pass
 
     def place_custom_annotation(self, x, y = None, which = 'first', refresh_gui=True):
         ''' Puts the annotation at given (x,y) point.
@@ -1078,4 +1084,7 @@ class SubMethods_02:
         return
 
     def after_process_group_clicked(self):
+        return
+
+    def after_graph_plot(self):
         return

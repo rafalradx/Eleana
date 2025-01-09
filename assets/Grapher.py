@@ -472,6 +472,12 @@ class Grapher(GraphPreferences):
         # Draw canvas
         self.canvas.draw()
 
+        # Notify graph plot
+        self.notify_on_copy = copy.copy(self.eleana.notify_on)
+        self.eleana.notify_on = True
+        self.eleana.notify(variable='grapher_action', value="plot")
+        self.eleana.notify_on = self.notify_on_copy
+
         # Connect changes in scales due to ZOOM or MOVE
         self.ax.callbacks.connect('ylim_changed', self.on_ylim_changed)
         self.ax.callbacks.connect('xlim_changed', self.on_xlim_changed)
