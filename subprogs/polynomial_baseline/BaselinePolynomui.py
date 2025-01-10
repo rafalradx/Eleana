@@ -4,11 +4,11 @@ import tkinter as tk
 import pygubu
 
 PROJECT_PATH = pathlib.Path(__file__).parent
-PROJECT_UI = PROJECT_PATH / "distance_read.ui"
+PROJECT_UI = PROJECT_PATH / "polynomial_baseline.ui"
 RESOURCE_PATHS = [PROJECT_PATH]
 
 
-class DistanceReadUI:
+class BaselinePolynomUI:
     def __init__(self, master=None):
         self.builder = pygubu.Builder()
         self.builder.add_resource_paths(RESOURCE_PATHS)
@@ -46,10 +46,7 @@ class DistanceReadUI:
             self.center_map = self.mainwindow.bind("<Map>", self.center)
         self.mainwindow.mainloop()
 
-    def track_minmax_clicked(self):
-        pass
-
-    def find_minmax_clicked(self):
+    def keep_current_baseline(self):
         pass
 
     def ok_clicked(self):
@@ -69,5 +66,5 @@ class DistanceReadUI:
 
 
 if __name__ == "__main__":
-    app = DistanceReadUI()
+    app = BaselinePolynomUI()
     app.run()

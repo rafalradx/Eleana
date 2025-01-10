@@ -54,6 +54,7 @@ class MainMenu:
         self.icon_trash = self.prepare_icon("trash.png")
         self.icon_trashres = self.prepare_icon("trash_res.png")
         self.icon_fromclipboard =self.prepare_icon("fromclipboard.png")
+        self.icon_baselineplynom = self.prepare_icon("baseline.png")
 
         ''' BUILD MENU '''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth_bar, activeborderwidth=self.borderwidth)
@@ -223,6 +224,15 @@ class MainMenu:
         # - Normalize amplitude
         self.menu_modifications.add_command(label="Normalize amplitude", command=self.app.normalize,
                                        image=self.icon_normalize, compound="left")
+
+        self.menu_modifications.add_separator()
+
+        self.menu_modifications.add_command(label="Polynomial baseline", command=self.app.polynomial_baseline,
+                                            image=self.icon_baselineplynom, compound="left")
+
+
+
+
 
         ''' Menu EPR '''
         self.menu_EPR = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,

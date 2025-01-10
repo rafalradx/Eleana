@@ -531,8 +531,6 @@ class SubMethods_02:
         else:
             self.data_for_calculations.append(None)
 
-        # Check if cursors are within function
-
 
         # Go to calculate function
         row_to_report = self.calculate()
@@ -1087,4 +1085,7 @@ class SubMethods_02:
         return
 
     def after_graph_plot(self):
+        return
+
+    def graph_action(self, variable=None, value=None):
         return

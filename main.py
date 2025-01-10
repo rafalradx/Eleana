@@ -51,6 +51,8 @@ from DataClasses import Stack
 # append.(['name of instance without self., 'Command to close']
 
 list_of_subprogs = []
+from polynomial_baseline.Polynomial_baseline import PolynomialBaseline
+list_of_subprogs.append(['subprog_polynomial_baseline', 'cancel'])
 from distance_read.Distance_read import DistanceRead
 list_of_subprogs.append(['xy_distance', 'cancel'])
 from integrate_region.IntegrateRegion import IntegrateRegion
@@ -1476,10 +1478,10 @@ class MainApp:
         main_menu.create_showplots_menu()
 
     def xy_distance(self):
-        #self.sel_graph_cursor('Selection of points')
-        #self.sel_cursor_mode.set('Selection of points')
         self.xy_distance = DistanceRead(self, which = 'first')
 
+    def polynomial_baseline(self):
+        self.subprog_polynomial_baseline = PolynomialBaseline(self, which = 'first')
 
     '''***********************************************
     *           GRAPH SWITCHES AND BUTTONS           *
