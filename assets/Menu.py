@@ -239,21 +239,21 @@ class MainMenu:
                                           activebackground=self.activebg, activeforeground=self.activefg,
                                           borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
         #self.main_menu.add_cascade(label="EPR", menu=self.menu_EPR, image=self.icon_dropdown, compound="left")
-        self.main_menu.add_cascade(label=" EPR ", menu=self.menu_EPR)
+        self.main_menu.add_cascade(label="EPR ", menu=self.menu_EPR)
 
-        ''' Menu Plots '''
-        self.menu_plots = tk.Menu(self.main_menu, tearoff=1, bg=self.bg, fg=self.fg, font=self.font,
+        ''' Menu Tools '''
+        self.menu_tools = tk.Menu(self.main_menu, tearoff=1, bg=self.bg, fg=self.fg, font=self.font,
                                  activebackground=self.activebg, activeforeground=self.activefg,
                                  borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
 
 
-        self.main_menu.add_cascade(label="Plots", menu=self.menu_plots)
+        self.main_menu.add_cascade(label="Tools", menu=self.menu_tools)
         self.menu_graphtools = tk.Menu(self.main_menu, tearoff=1, bg=self.bg, fg=self.fg, font=self.font,
                                   activebackground=self.activebg, activeforeground=self.activefg,
                                   borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
 
         # - Graph tools
-        self.menu_plots.add_cascade(label="Graph tools", menu=self.menu_graphtools, image=self.icon_graphtools, compound="left")
+        self.menu_tools.add_cascade(label="Graph tools", menu=self.menu_graphtools, image=self.icon_graphtools, compound="left")
 
         # ---- Clear selected range
         self.menu_graphtools.add_command(label="Clear selected range", command=self.app.clear_selected_ranges,
@@ -262,15 +262,15 @@ class MainMenu:
 
 
         # - Create plot
-        self.menu_plots.add_command(label="Create plot", command=self.app.create_simple_static_plot,
+        self.menu_tools.add_command(label="Create plot", command=self.app.create_simple_static_plot,
                                     image=self.icon_create_static_plot, compound="left")
 
         # - Delete plot
-        self.menu_plots.add_command(label="Delete plot", command=self.app.delete_simple_static_plot,
+        self.menu_tools.add_command(label="Delete plot", command=self.app.delete_simple_static_plot,
                                     image=self.icon_delete_static_plot, compound="left")
 
         # -Separator
-        self.menu_plots.add_separator()
+        self.menu_tools.add_separator()
 
         # ---- ENTRIES IN menu_showPlots ARE GENERATED DYNAMICALLY
 

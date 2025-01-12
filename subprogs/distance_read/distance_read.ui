@@ -69,8 +69,8 @@
                     <property name="width">100</property>
                     <layout manager="grid">
                       <property name="column">0</property>
-                      <property name="padx">8</property>
-                      <property name="pady">8</property>
+                      <property name="padx">2</property>
+                      <property name="pady">2</property>
                       <property name="row">0</property>
                       <property name="sticky">new</property>
                     </layout>
@@ -83,6 +83,7 @@
                         <property name="text" translatable="yes">DATA:</property>
                         <layout manager="grid">
                           <property name="column">0</property>
+                          <property name="padx">2</property>
                           <property name="row">0</property>
                           <property name="sticky">w</property>
                         </layout>
@@ -94,7 +95,7 @@
                         <property name="text" translatable="yes"> </property>
                         <layout manager="grid">
                           <property name="column">1</property>
-                          <property name="padx">5</property>
+                          <property name="padx">2</property>
                           <property name="row">0</property>
                           <property name="sticky">ew</property>
                         </layout>
@@ -108,8 +109,8 @@
                     <layout manager="grid">
                       <property name="column">0</property>
                       <property name="columnspan">2</property>
-                      <property name="padx">8</property>
-                      <property name="pady">8</property>
+                      <property name="padx">2</property>
+                      <property name="pady">2</property>
                       <property name="row">1</property>
                       <property name="sticky">ew</property>
                     </layout>
@@ -146,7 +147,7 @@
                                 <property name="text" translatable="yes">X1</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
-                                  <property name="padx">4</property>
+                                  <property name="padx">2</property>
                                   <property name="row">0</property>
                                 </layout>
                               </object>
@@ -156,8 +157,7 @@
                                 <property name="exportselection">true</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
-                                  <property name="padx">4</property>
-                                  <property name="pady">4</property>
+                                  <property name="padx">2</property>
                                   <property name="row">1</property>
                                   <property name="sticky">ew</property>
                                 </layout>
@@ -181,7 +181,7 @@
                                 <property name="text" translatable="yes">X2</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
-                                  <property name="padx">4</property>
+                                  <property name="padx">2</property>
                                   <property name="row">0</property>
                                 </layout>
                               </object>
@@ -190,8 +190,7 @@
                               <object class="customtkinter.CTkEntry" id="x2_entry" named="True">
                                 <layout manager="grid">
                                   <property name="column">0</property>
-                                  <property name="padx">4</property>
-                                  <property name="pady">4</property>
+                                  <property name="padx">2</property>
                                   <property name="row">1</property>
                                   <property name="sticky">ew</property>
                                 </layout>
@@ -215,7 +214,7 @@
                                 <property name="text" translatable="yes">dX = X2-X1</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
-                                  <property name="padx">4</property>
+                                  <property name="padx">2</property>
                                   <property name="row">0</property>
                                 </layout>
                               </object>
@@ -226,8 +225,7 @@
                                 <property name="state">disabled</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
-                                  <property name="padx">4</property>
-                                  <property name="pady">4</property>
+                                  <property name="padx">2</property>
                                   <property name="row">1</property>
                                   <property name="sticky">ew</property>
                                 </layout>
@@ -267,7 +265,7 @@
                                 <property name="text" translatable="yes">Y1</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
-                                  <property name="padx">4</property>
+                                  <property name="padx">2</property>
                                   <property name="row">0</property>
                                 </layout>
                               </object>
@@ -278,8 +276,7 @@
                                 <property name="font">TkDefaultFont</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
-                                  <property name="padx">4</property>
-                                  <property name="pady">4</property>
+                                  <property name="padx">2</property>
                                   <property name="row">1</property>
                                   <property name="sticky">ew</property>
                                 </layout>
@@ -303,7 +300,7 @@
                                 <property name="text" translatable="yes">Y2</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
-                                  <property name="padx">4</property>
+                                  <property name="padx">2</property>
                                   <property name="row">0</property>
                                 </layout>
                               </object>
@@ -312,8 +309,7 @@
                               <object class="customtkinter.CTkEntry" id="y2_entry" named="True">
                                 <layout manager="grid">
                                   <property name="column">0</property>
-                                  <property name="padx">4</property>
-                                  <property name="pady">4</property>
+                                  <property name="padx">2</property>
                                   <property name="row">1</property>
                                   <property name="sticky">ew</property>
                                 </layout>
@@ -337,7 +333,7 @@
                                 <property name="text" translatable="yes">dY = Y2-Y1</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
-                                  <property name="padx">4</property>
+                                  <property name="padx">2</property>
                                   <property name="row">0</property>
                                 </layout>
                               </object>
@@ -347,8 +343,7 @@
                                 <property name="state">disabled</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
-                                  <property name="padx">4</property>
-                                  <property name="pady">4</property>
+                                  <property name="padx">2</property>
                                   <property name="row">1</property>
                                   <property name="sticky">ew</property>
                                 </layout>
@@ -365,6 +360,7 @@
                     <property name="corner_radius">0</property>
                     <layout manager="grid">
                       <property name="column">0</property>
+                      <property name="pady">2</property>
                       <property name="row">2</property>
                       <property name="sticky">sew</property>
                     </layout>
@@ -378,22 +374,27 @@
                         <property name="text" translatable="yes">Keep Min/Max Tracking</property>
                         <layout manager="grid">
                           <property name="column">0</property>
-                          <property name="padx">8</property>
-                          <property name="pady">8</property>
+                          <property name="padx">4</property>
+                          <property name="pady">2</property>
                           <property name="row">0</property>
+                          <property name="sticky">w</property>
                         </layout>
                       </object>
                     </child>
                     <child>
                       <object class="customtkinter.CTkButton" id="btn_findminmax" named="True">
+                        <property name="anchor">n</property>
                         <property name="command" type="command" cbtype="simple">find_minmax_clicked</property>
+                        <property name="fg_color">#607b36</property>
+                        <property name="hover_color">#285144</property>
                         <property name="round_height_to_even_numbers">True</property>
                         <property name="state">normal</property>
                         <property name="text" translatable="yes">Find Min/Max</property>
                         <layout manager="grid">
                           <property name="column">1</property>
+                          <property name="padx">4</property>
                           <property name="row">0</property>
-                          <property name="sticky">w</property>
+                          <property name="sticky">e</property>
                         </layout>
                       </object>
                     </child>
@@ -409,7 +410,7 @@
             <layout manager="grid">
               <property name="column">0</property>
               <property name="columnspan">2</property>
-              <property name="pady">10</property>
+              <property name="pady">2</property>
               <property name="row">1</property>
               <property name="sticky">n</property>
             </layout>
@@ -436,8 +437,8 @@
                     <property name="text" translatable="yes">Calculate</property>
                     <layout manager="grid">
                       <property name="column">0</property>
-                      <property name="padx">8</property>
-                      <property name="pady">5</property>
+                      <property name="padx">2</property>
+                      <property name="pady">2</property>
                       <property name="row">0</property>
                     </layout>
                   </object>
@@ -449,8 +450,8 @@
                     <property name="text" translatable="yes">Show report</property>
                     <layout manager="grid">
                       <property name="column">0</property>
-                      <property name="padx">8</property>
-                      <property name="pady">5</property>
+                      <property name="padx">2</property>
+                      <property name="pady">2</property>
                       <property name="row">1</property>
                     </layout>
                   </object>
@@ -474,8 +475,8 @@
                     <property name="text" translatable="yes">Process group</property>
                     <layout manager="grid">
                       <property name="column">0</property>
-                      <property name="padx">8</property>
-                      <property name="pady">5</property>
+                      <property name="padx">2</property>
+                      <property name="pady">2</property>
                       <property name="row">0</property>
                     </layout>
                   </object>
@@ -486,8 +487,8 @@
                     <property name="text" translatable="yes">Clear report</property>
                     <layout manager="grid">
                       <property name="column">0</property>
-                      <property name="padx">8</property>
-                      <property name="pady">5</property>
+                      <property name="padx">2</property>
+                      <property name="pady">2</property>
                       <property name="row">1</property>
                     </layout>
                   </object>
@@ -512,8 +513,8 @@
                     <property name="text" translatable="yes">Cancel</property>
                     <layout manager="grid">
                       <property name="column">0</property>
-                      <property name="padx">8</property>
-                      <property name="pady">5</property>
+                      <property name="padx">2</property>
+                      <property name="pady">2</property>
                       <property name="row">0</property>
                     </layout>
                   </object>

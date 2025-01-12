@@ -158,11 +158,11 @@
                     <child>
                       <object class="customtkinter.CTkCheckBox" id="keep_baseline" named="True">
                         <property name="command" type="command" cbtype="simple">keep_current_baseline</property>
-                        <property name="text" translatable="yes">Keep Min/Max Tracking</property>
+                        <property name="text" translatable="yes">Keep baseline for all curves</property>
                         <layout manager="grid">
                           <property name="column">0</property>
-                          <property name="padx">4</property>
-                          <property name="pady">4</property>
+                          <property name="padx">2</property>
+                          <property name="pady">2</property>
                           <property name="row">0</property>
                           <property name="sticky">w</property>
                         </layout>
