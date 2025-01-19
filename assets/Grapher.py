@@ -96,7 +96,7 @@ class GraphPreferences:
                             'linewidth': 2,
                             'linestyle':'solid',
                             'marker': '.',
-                            's': 30,
+                            's': 5,
                             'color_re': "#d53422",
                             'color_im': "#ef6f74"
                             }
@@ -620,16 +620,7 @@ class Grapher(GraphPreferences):
         ''' This is triggered while mouse is moving over the plot
             while Free select is set'''
         if not event.inaxes:  # If not inside the plot area
-            # self.horizontal_line.set_visible(False)
-            # self.vertical_line.set_visible(False)
-            # self.annotation.set_visible(False)
-            # self.canvas.draw_idle()
             return
-
-        # Take position of x,y
-        #x, y = event.xdata, event.ydata
-        # xy = (x,y)
-        #
 
 
     # def on_click_in_plot(self, event):

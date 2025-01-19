@@ -2,6 +2,7 @@
 # IMPORT MODULES NEEDED
 # -- Here is an example --
 import numpy as np
+from scipy.special import xlog1py
 
 from subprogs.integrate_region.IntegrateRegion import RESULT_CREATE
 
@@ -21,44 +22,37 @@ NAME_SUFFIX = ''                        # <--- DEFINES THE SUFFIX THAT WILL BE A
 AUTO_CALCULATE = False                  # <--- DEFINES IF CALCULATION IS AUTOMATICALLY PERFORMED UPON DATA CHANGE IN GUI
 
 # Data settings
-REGIONS_FROM = 'scale'                  # <--- DEFINES IF DATA WILL BE EXTRACTED:
-#REGIONS_FROM = 'selection'             # 'none' - DO NOT EXTRACT
+#REGIONS_FROM = 'scale'                  # <--- DEFINES IF DATA WILL BE EXTRACTED:
+REGIONS_FROM = 'selection'             # 'none' - DO NOT EXTRACT
                                         # 'scale' - EXTRACT DATA BETWEEN X MIN X MAX
                                         # 'sel' - EXTRACT DATA FROM SELECTED RANGE
 
 USE_SECOND = False                      # <--- IF TRUE THEN FIRST AND SECOND DATA WILL BE AVAILABLE FOR CALCULATIONS
 STACK_SEP = True                        # <--- IF TRUE THEN EACH DATA IN A STACK WILL BE CALCULATED SEPARATELY
                                         #      WHEN FALSE THEN YOU MUST CREATE A METHOD THAT CALCS OF THE WHOLE STACK
-RESULT_CREATE = ''
+RESULT_CREATE = 'add'
 #RESULT_CREATE = 'add'                  # <--- DETEMINES IF PROCESSED DATA SHOULD BE ADDED TO RESULT_DATASET
 #RESULT_CREATE = 'replace'              #      'ADD' OR 'REPLACE' IS SELF EXPLANATORY
                                         #      ANY OTHER VALUES MEANS NOT RESULT CREATION
 
 # Report settings
-REPORT_CREATE = True                    # <--- IF TRUE THEN REPORT WILL BE CREATED AFTER CALCULATIONS
-REPORT_HEADERS = ['Nr',
-                  'Name',
-                  'X1',
-                  'X2',
-                  'dX',
-                  'Y1',
-                  'Y2',
-                  'dY']                  # <--- Define names of columns in the Report
+REPORT_CREATE = False                    # <--- IF TRUE THEN REPORT WILL BE CREATED AFTER CALCULATIONS
+REPORT_HEADERS = []                     # <--- Define names of columns in the Report
 REPORT_DEFAULT_X = 0                    # <--- INDEX IN REPORT_HEADERS USED TO SET NAME OF COLUMN THAT IS USED AS DEFAULT X IN THE REPORT
-REPORT_DEFAULT_Y = 7                    # <--- INDEX IN REPORT_HEADERS USED TO SET NAME OF COLUMN THAT IS USED AS DEFAULT Y IN THE REPORT
-REPORT_NAME_X =  'Data Number'          # <--- NAME OF X AXIS IN THE REPORT
-REPORT_NAME_Y =  'dY Value'             # <--- NAME OF Y AXIS IN THE REPORT
+REPORT_DEFAULT_Y = 1                    # <--- INDEX IN REPORT_HEADERS USED TO SET NAME OF COLUMN THAT IS USED AS DEFAULT Y IN THE REPORT
+REPORT_NAME_X =  ''                     # <--- NAME OF X AXIS IN THE REPORT
+REPORT_NAME_Y =  ''                     # <--- NAME OF Y AXIS IN THE REPORT
 REPORT_UNIT_X = ''                      # <--- NAME OF X UNIT IN THE CREATED REPORT
 REPORT_UNIT_Y = ''                      # <--- NAME OF Y UNIT IN THE CREATED REPORT
-REPORT_TO_GROUP = 'RESULT Distance'     # <--- DEFAULT GROUP NAME TO WHICH REPORT WILL BE ADDED
+REPORT_TO_GROUP = ''                    # <--- DEFAULT GROUP NAME TO WHICH REPORT WILL BE ADDED
 
 # Cursors on graph
 CURSOR_CHANGING = False                  # <--- IF TRUE THEN CURSOR SELECTION IN MAIN GUI WILL BE DISABLED
-CURSOR_TYPE = 'Free select'               # <--- USE CURSORS: 'None', 'Continuous read XY', 'Selection of points with labels'
+CURSOR_TYPE = 'Range select'               # <--- USE CURSORS: 'None', 'Continuous read XY', 'Selection of points with labels'
                                         #       'Selection of points', 'Numbered selections', 'Free select', 'Crosshair', 'Range select'
-CURSOR_LIMIT = 2                        # <--- SET THE MAXIMUM NUMBER OF CURSORS THAT CAN BE SELECTED. FOR NO LIMIT SET 0
+CURSOR_LIMIT = 0                        # <--- SET THE MAXIMUM NUMBER OF CURSORS THAT CAN BE SELECTED. FOR NO LIMIT SET 0
 CURSOR_CLEAR_ON_START = True
-CURSOR_REQUIRED = 2                     # <--- MINIMUM NUMBER OF CURSORS TO PROCESS THE CALCULATIONS
+CURSOR_REQUIRED = 0                     # <--- MINIMUM NUMBER OF CURSORS TO PROCESS THE CALCULATIONS
                                         #      SET TO 0 FOR NO CHECKING
 CURSOR_REQ_TEXT = \
     'Please select two points.'         # <--- TEXT TO DISPLAY IF NR OF CURSORS IS LESS THAN REQUIRED
@@ -113,7 +107,6 @@ class PolynomialBaseline(Methods, WindowGUI):                                   
         self.stack_sep = STACK_SEP  # |
         Methods.__init__(self, app=app, which=which, commandline=commandline)
 
-
     # PRE-DEFINED FUNCTIONS TO EXECUTE AT DIFFERENT STAGES OF SUBPROG METHODS
     # Unused definitions can be deleted
 
@@ -143,11 +136,6 @@ class PolynomialBaseline(Methods, WindowGUI):                                   
         ''' This method is called when the main application refreshes Graph canva content.
             For example, after changing First data, the graph is reploted and then
             this function is run. '''
-        if self.keep_track:
-            self.find_minmax_clicked()
-        else:
-            self.clear_custom_annotations_list()
-            self.remove_custom_annotations_from_graph()
 
 
     # DEFINE YOUR CUSTOM METHODS FOR THIS ROUTINE
@@ -157,76 +145,18 @@ class PolynomialBaseline(Methods, WindowGUI):                                   
         #self.mainwindow =
 
         # HERE DEFINE YOUR REFERENCES TO WIDGETS
-        self.x1_entry = self.builder.get_object('x1_entry', self.mainwindow)
-        self.x2_entry = self.builder.get_object('x2_entry', self.mainwindow)
-        self.dx_entry = self.builder.get_object('dx_entry', self.mainwindow)
-        self.y1_entry = self.builder.get_object('y1_entry', self.mainwindow)
-        self.y2_entry = self.builder.get_object('y2_entry', self.mainwindow)
-        self.dy_entry = self.builder.get_object('dy_entry', self.mainwindow)
-        self.check_keep_track = self.builder.get_object('check_track_minmax', self.mainwindow)
-        self.keep_track = False
-        self.btn_findminmax = self.builder.get_object('btn_findminmax', self.mainwindow)
+        self.sel_polynomial = self.builder.get_object('sel_polynomial', self.mainwindow)
+        self.keep_baseline = self.builder.get_object('keep_baseline', self.mainwindow)
 
-        # Binding to Return/Enter after changing CTkEntries content
-        self.x1_entry.bind("<Return>",      lambda event: self.entry_value_changed(event, id="x1"))
-        self.x1_entry.bind("<KP_Enter>",    lambda event: self.entry_value_changed(event, id="x1"))
-        self.x2_entry.bind("<Return>",      lambda event: self.entry_value_changed(event, id="x2"))
-        self.x2_entry.bind("<KP_Enter>",    lambda event: self.entry_value_changed(event, id="x2"))
-
-        # Define list of CTkEntries that should be validated for floats
-        self.set_validation_for_ctkentries([
-                self.x1_entry,
-                self.x2_entry,
-                self.y1_entry,
-                self.y2_entry
-                ])
-
-        # Set disabled field
-        self.dx_entry.configure(state='disabled')
-        self.dy_entry.configure(state='disabled')
-
-    def entry_value_changed(self, event, id):
-        x1 = self.x1_entry.get()
-        x2 = self.x2_entry.get()
-        if x1 and x2:
-            x1 =float(x1)
-            x2 = float(x2)
-            self.clear_custom_annotations_list()
-            self.remove_custom_annotations_from_graph()
-            self.place_custom_annotation(x=x1)
-            self.place_custom_annotation(x=x2)
+        self.keep_baseline.deselect()
+        self.sel_polynomial.set(value="Linear")
 
     @Methods.skip_if_empty_graph
-    def find_minmax_clicked(self):
-        self.btn_findminmax.configure(state="disabled")
-        x_data, y_data = self.grapher.get_graph_line(index = 0)
-        index_min_y = np.argmin(y_data)
-        min_x = x_data[index_min_y]
-        min_y = y_data[index_min_y]
-        index_max_y = np.argmax(y_data)
-        max_x = x_data[index_max_y]
-        max_y = y_data[index_max_y]
-        dx = max_x - min_x
-        dy = max_y - min_y
+    def keep_current_baseline(self):
+        print("Keep current baseline")
 
-        self.set_entry_value(entry = self.x1_entry, value=min_x)
-        self.set_entry_value(entry = self.x2_entry, value=max_x)
-        self.set_entry_value(entry=self.y1_entry, value=min_y)
-        self.set_entry_value(entry=self.y2_entry, value=max_y)
-        self.set_entry_value(entry=self.dy_entry, value=dy)
-        self.set_entry_value(entry=self.dx_entry, value=dx)
-
-        self.clear_custom_annotations_list()
-        self.remove_custom_annotations_from_graph()
-        self.place_custom_annotation(x = min_x)
-        self.place_custom_annotation(x = max_x)
-        self.btn_findminmax.configure(state="normal")
-        return True
-
-    def track_minmax_clicked(self):
-        self.keep_track = self.check_keep_track.get()
-        if self.keep_track:
-            self.find_minmax_clicked()
+    def sel_polynomial_clicked(self, value):
+        print(value)
 
     def calculate_stack(self, commandline = False):
         ''' If STACK_SEP is False it means that data in stack should
@@ -301,50 +231,20 @@ class PolynomialBaseline(Methods, WindowGUI):                                   
         cursor_positions = self.grapher.cursor_annotations
         # ------------------------------------------
 
-        if self.keep_track:
-            # Auto detect maximum and minimum using numpy
-            index_min_y = np.argmin(y1)
-            min_x = x1[index_min_y]
-            min_y = y1[index_min_y]
-            index_max_y = np.argmax(y1)
-            max_x = x1[index_max_y]
-            max_y = y1[index_max_y]
-            minimum = [min_x, min_y]
-            maximum = [max_x, max_y]
-            self.find_minmax_clicked()
-        else:
-            # Do not detect where maximum and minimum are
-            p1 = cursor_positions[0]
-            p2 = cursor_positions[1]
-            minimum = ([p1['point'][0], p1['point'][1]])
-            maximum = ([p2['point'][0], p2['point'][1]])
+        self.temporary_plots = [{
+                                'x' : x1,
+                                'y' : y2,
+                                'legend': 'tekst',
+                                'color': 'gray',
+                                'linewidth': 2,
+                                'linestyle': 'dashed',
 
-        # Get x1 and x2
-        x1val = minimum[0]
-        x2val = maximum[0]
+                                }]
 
-        # Find index in x_data which is closest to x1 or x2
-        if x1val < x1.min() or x1val > x1.max():
-            return False
-        else:
-            index_x1 = np.abs(x1 - x1val).argmin()
-        if x2val < x1.min() or x2val > x1.max():
-            return False
-        else:
-            index_x2 = np.abs(x1 - x2val).argmin()
 
-        # Get data from x_data and y_data using the indexes for x1 and x2, respectively
-        x1val = x1[index_x1]
-        x2val = x1[index_x2]
-        y1val = y1[index_x1]
-        y2val = y1[index_x2]
-
-        # Calculate differences
-        dx = x2val - x1val
-        dy = y2val - y1val
 
         # Send calculated values to result (if needed). This will be sent to command line
-        result = [dx, dy] # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
+        result = [0, 0] # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
 
         # Create summary row to add to the report. The values must match the column names in REPORT_HEADERS
         row_to_report = [self.consecutive_number, name1, x1val, x2val, dx, y1val, y2val, dy]
@@ -361,5 +261,6 @@ class PolynomialBaseline(Methods, WindowGUI):                                   
         return row_to_report
 
 if __name__ == "__main__":
+
     pass
 

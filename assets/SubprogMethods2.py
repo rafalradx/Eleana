@@ -13,6 +13,12 @@ class SubMethods_02:
         self.update_gui = True
         self.data_for_calculations = []
         self.consecutive_number = 1
+        self.additional_plots_settings = {
+                                'color': 'gray',
+                                'linewidth': 2,
+                                'linestyle': 'dashed',
+                                }
+
         if app and not self.commandline:
             # Window start from Menu in GUI
             self.app = app
@@ -850,8 +856,23 @@ class SubMethods_02:
         self.app.sel_result.configure(values = results)
 
 
+    def show_additional_plots(self, data)
+        ''' This adds additional plots to the grapher
+            for example showing baseline or fits, etc.
+            The settings for the plot are taken from 
+            self.additional_plots_settings
+        '''
+        if not isinstance(data, list):
+            Error.show(title = 'Wrong type', info = 'Argument: data for self.show_additional_plots must be a list of dicts')
+            return
+        list_of_plots = []
+        for each in data:
+            joined = each |
 
-    # ADDITIONAL METHODS FOR CHECKIN CURSOR POSITIONS ON GRAPH
+
+
+
+    # ADDITIONAL METHODS FOR CHECKING CURSOR POSITIONS ON GRAPH
     # ------------------------------------------------
 
     def check_cursor_bounds(self, x, y):

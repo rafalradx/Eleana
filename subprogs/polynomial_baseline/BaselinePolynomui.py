@@ -46,6 +46,9 @@ class BaselinePolynomUI:
             self.center_map = self.mainwindow.bind("<Map>", self.center)
         self.mainwindow.mainloop()
 
+    def sel_polynomial_clicked(self, value):
+        pass
+
     def keep_current_baseline(self):
         pass
 
