@@ -4,11 +4,10 @@ import numpy as np
 from pathlib import Path
 import tempfile
 
-DEVEL = True
-
 class Eleana:
     # Main attributes associated with data gathered in the programe
     def __init__(self, version, devel):
+        self.busy = False                               # <-- This variable is set to True if something is triggered in application and other proces must wait until it is False
         self.version = version
         self.dataset = []                               # <-- This variable keeps all spectra available in Eleana. It is a list of objects
         self.results_dataset = []                       # <-- This keeps data containing results
@@ -18,6 +17,7 @@ class Eleana:
         self.active_static_plot_windows = []
         self.devel_mode = devel
         self.cmd_error = ''                             # This contains the current error for command line
+        #self.active_subprog = None                      # <-- This contains reference to the currently active subprog window
 
         # Attribute "notes" contains general notes edited by Edit --> Notes in RTF
         self.notes = ""

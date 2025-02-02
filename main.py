@@ -11,6 +11,8 @@ import copy
 import io
 import re
 import os
+from functools import wraps
+
 # Set paths for assets, modules, subprogs and widgets
 PROJECT_PATH = Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "Eleana_interface.ui"
@@ -57,7 +59,7 @@ from distance_read.Distance_read import DistanceRead
 list_of_subprogs.append(['xy_distance', 'cancel'])
 from integrate_region.IntegrateRegion import IntegrateRegion
 list_of_subprogs.append(['integrate_region', 'cancel'])
-from normalize.Normalize import Normalize
+from normalize.normalize_2 import Normalize
 list_of_subprogs.append(['normalize', 'cancel'])
 from group_edit.add_group import Groupcreate
 list_of_subprogs.append(['group_create', 'cancel'])
@@ -86,6 +88,17 @@ list_of_subprogs.append(['convert_stack_to_group', 'cancel'])
 
 # Widgets used by main application
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
+
+def check_busy(method):
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if self.eleana.busy:
+            if self.eleana.devel_mode:
+                print(f"{Path(__file__).name}, {method.__name__}: self.eleana.busy = True")  # Używamy method.__name__
+            return  # Breaks a method execution
+        return method(self, *args, **kwargs)  # Go to a method
+    return wrapper
+
 
 class MainApp:
     def __init__(self, eleana_instance, command_processor, master=None):
@@ -331,6 +344,7 @@ class MainApp:
     *              COMBOBOX SELECTIONS              *
     **********************************************'''
 
+    @check_busy
     def group_down_clicked(self):
         current_group = self.sel_group.get()
         group_list = self.sel_group._values
@@ -342,7 +356,7 @@ class MainApp:
         self.sel_group.set(new_group)
         self.group_selected(new_group)
 
-
+    @check_busy
     def group_up_clicked(self):
         current_group = self.sel_group.get()
         group_list = self.sel_group._values
@@ -354,6 +368,7 @@ class MainApp:
         self.sel_group.set(new_group)
         self.group_selected(new_group)
 
+    @check_busy
     def group_selected(self, value):
         self.eleana.set_selections('group', value)
         # self.eleana.selections['group'] = value
@@ -366,7 +381,12 @@ class MainApp:
         self.grapher.plot_graph()
         self.comparison_view()
 
+    @check_busy
     def delete_group(self):
+        if self.eleana.busy:
+            if self.eleana.devel_mode:
+                print('delete_group_clicked - blocked by self.eleana.busy')
+            return
         current_group = self.eleana.selections['group']
         if current_group == 'All':
             info = CTkMessagebox(title='',
@@ -395,6 +415,7 @@ class MainApp:
             self.sel_group.set('All')
             self.eleana.selections['group'] = 'All'
 
+    @check_busy
     def data_to_other_group(self, move = True):
         if self.eleana.selections['group'] == 'All' and move:
             info = CTkMessagebox(title='', message="Data from the 'All' group cannot be moved to another group. However, you can make an additional assignment.",
@@ -442,6 +463,7 @@ class MainApp:
         update.all_lists()
         self.sel_group.set('All')
 
+    @check_busy
     def delete_data_from_group(self):
         group = self.eleana.selections['group']
         data_indexes = self.eleana.assignmentToGroups.get(group, None)
@@ -467,6 +489,7 @@ class MainApp:
         self.sel_first.set('None')
         self.sel_second.set('None')
 
+    @check_busy
     def convert_group_to_stack(self, all = False):
         if all:
             # Convert whole data in the group to a stack
@@ -527,6 +550,7 @@ class MainApp:
         created_stack = Stack(new_stack)
         self.add_to_results(created_stack)
 
+    @check_busy
     def first_show(self):
         self.eleana.set_selections('f_dsp', bool(self.check_first_show.get()))
         selection = self.sel_first.get()
@@ -534,6 +558,7 @@ class MainApp:
             return
         self.first_selected(selection)
 
+    @check_busy
     def first_down_clicked(self):
         current_position = self.sel_first.get()
         list_of_items = self.sel_first._values
@@ -551,6 +576,7 @@ class MainApp:
         except IndexError:
             return
 
+    @check_busy
     def first_up_clicked(self):
         current_position = self.sel_first.get()
         list_of_items = self.sel_first._values
@@ -565,10 +591,12 @@ class MainApp:
         except IndexError:
             return
 
+    @check_busy
     def first_complex_clicked(self, value):
         self.eleana.set_selections('f_cpl', value)
         self.grapher.plot_graph()
 
+    @check_busy
     def first_selected(self, selected_value_text):
         if selected_value_text == 'None':
             self.eleana.set_selections('first', -1)
@@ -591,6 +619,7 @@ class MainApp:
             self.firstComplex.grid_remove()
         self.grapher.plot_graph()
 
+    @check_busy
     def f_stk_selected(self, selected_value_text):
         if selected_value_text in self.f_stk._values:
             index = self.f_stk._values.index(selected_value_text)
@@ -599,6 +628,7 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
+    @check_busy
     def f_stk_up_clicked(self):
         current_position = self.f_stk.get()
         list_of_items = self.f_stk._values
@@ -615,6 +645,7 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
+    @check_busy
     def f_stk_down_clicked(self):
         current_position = self.f_stk.get()
         list_of_items = self.f_stk._values
@@ -633,12 +664,15 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
+    @check_busy
     def modify_first(self):
         self.modify('first')
 
+    @check_busy
     def modify_second(self):
         self.modify('second')
 
+    @check_busy
     def modify(self, which=None):
         if len(self.eleana.dataset) == 0:
             info = CTkMessagebox(title='', message='Empty dataset')
@@ -652,6 +686,7 @@ class MainApp:
         self.modify_data = ModifyData(self, which)
         response = self.modify_data.get()
 
+    @check_busy
     def second_show(self):
         self.eleana.set_selections('s_dsp', bool(self.check_second_show.get()))
         selection = self.sel_second.get()
@@ -659,6 +694,7 @@ class MainApp:
             return
         self.second_selected(selection)
 
+    @check_busy
     def second_selected(self, selected_value_text):
         if selected_value_text == 'None':
             self.eleana.set_selections('second', -1)
@@ -681,6 +717,7 @@ class MainApp:
             self.secondComplex.grid_remove()
         self.grapher.plot_graph()
 
+    @check_busy
     def second_down_clicked(self):
         current_position = self.sel_second.get()
         list_of_items = self.sel_second._values
@@ -698,6 +735,7 @@ class MainApp:
         except IndexError:
             return
 
+    @check_busy
     def second_up_clicked(self):
         current_position = self.sel_second.get()
         list_of_items = self.sel_second._values
@@ -721,6 +759,7 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
+    @check_busy
     def s_stk_up_clicked(self):
         current_position = self.s_stk.get()
         list_of_items = self.s_stk._values
@@ -737,6 +776,7 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
+    @check_busy
     def s_stk_down_clicked(self):
         current_position = self.s_stk.get()
         list_of_items = self.s_stk._values
@@ -755,10 +795,12 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
+    @check_busy
     def second_complex_clicked(self, value):
         self.eleana.set_selections('s_cpl', value)
         self.grapher.plot_graph()
 
+    @check_busy
     def swap_first_second(self):
         first_pos = self.sel_first.get()
         second_pos = self.sel_second.get()
@@ -779,6 +821,7 @@ class MainApp:
         self.s_stk_selected(first_stk)
         self.grapher.plot_graph()
 
+    @check_busy
     def second_to_result(self):
         current = self.sel_second.get()
         if current == 'None':
@@ -787,6 +830,7 @@ class MainApp:
         spectrum = copy.deepcopy(self.eleana.dataset[index])
         self.add_to_results(spectrum)
 
+    @check_busy
     def add_to_results(self, spectrum):
         # Check the name if the same already exists in eleana.result_dataset
         list_of_results = []
@@ -814,6 +858,7 @@ class MainApp:
     *                RESULT                   *
     ****************************************'''
 
+    @check_busy
     def result_show(self):
         self.eleana.set_selections('r_dsp', bool(self.check_result_show.get()))
         selection = self.sel_result.get()
@@ -821,6 +866,7 @@ class MainApp:
             return
         self.result_selected(selection)
 
+    @check_busy
     def result_selected(self, selected_value_text):
         if selected_value_text == 'None':
             self.eleana.set_selections('result', -1)
@@ -843,6 +889,7 @@ class MainApp:
             self.resultComplex.grid_remove()
         self.grapher.plot_graph()
 
+    @check_busy
     def result_up_clicked(self):
         current_position = self.sel_result.get()
         list_of_items = self.sel_result._values
@@ -859,6 +906,7 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
+    @check_busy
     def result_down_clicked(self):
         current_position = self.sel_result.get()
         list_of_items = self.sel_result._values
@@ -877,6 +925,7 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
+    @check_busy
     def r_stk_up_clicked(self):
         current_position = self.r_stk.get()
         list_of_items = self.r_stk._values
@@ -893,6 +942,7 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
+    @check_busy
     def r_stk_down_clicked(self):
         current_position = self.r_stk.get()
         list_of_items = self.r_stk._values
@@ -911,10 +961,12 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
+    @check_busy
     def result_complex_clicked(self, value):
         self.eleana.set_selections('r_cpl', value)
         self.grapher.plot_graph()
 
+    @check_busy
     def all_results_to_current_group(self):
         if len(self.eleana.results_dataset) == 0:
             return
@@ -930,6 +982,7 @@ class MainApp:
         self.sel_first.set(added_item)
         self.first_selected(added_item)
 
+    @check_busy
     def all_results_to_new_group(self):
         if len(self.eleana.results_dataset) == 0:
             return
@@ -945,6 +998,7 @@ class MainApp:
         self.sel_first.set(added_item)
         self.first_selected(added_item)
 
+    @check_busy
     def replace_first(self):
         if self.eleana.selections['result'] < 0:
             return
@@ -963,6 +1017,7 @@ class MainApp:
         self.mainwindow.update_idletasks()
         self.sel_first.set(name)
 
+    @check_busy
     def result_to_main(self):
         if self.eleana.selections['result'] < 0:
             return
@@ -1377,12 +1432,7 @@ class MainApp:
             Save.save_preferences(self.eleana, self, self.grapher)
             self.mainwindow.iconify()
             # Close all subprograms from the list
-            for each in list_of_subprogs:
-                close_cmd = 'self.' + each[0] + '.' + each[1] + '()'
-                try:
-                    exec(close_cmd)
-                except:
-                    pass
+            self.close_all_subprogs()
             # Close all static_plot windows from self.eleana.active_static_windows
             if self.eleana.active_static_plot_windows:
                 for window_nr in self.eleana.active_static_plot_windows:
@@ -1392,6 +1442,14 @@ class MainApp:
                     except:
                         print("Error: " + close_cmd)
             self.mainwindow.destroy()
+
+    def close_all_subprogs(self):
+        for each in list_of_subprogs:
+            close_cmd = 'self.' + each[0] + '.' + each[1] + '()'
+            try:
+                exec(close_cmd)
+            except:
+                pass
 
     def notes(self):
         self.notepad = Notepad(master=self.mainwindow, title="Edit notes", text=self.eleana.notes)

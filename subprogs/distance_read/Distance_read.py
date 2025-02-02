@@ -36,6 +36,8 @@ RESULT_CREATE = ''
 
 # Report settings
 REPORT_CREATE = True                    # <--- IF TRUE THEN REPORT WILL BE CREATED AFTER CALCULATIONS
+REPORT_SKIP_FOR_STK = False
+REPORT_WINDOW_TITLE = 'Results of distance measurements'
 REPORT_HEADERS = ['Nr',
                   'Name',
                   'X1',
@@ -46,6 +48,7 @@ REPORT_HEADERS = ['Nr',
                   'dY']                  # <--- Define names of columns in the Report
 REPORT_DEFAULT_X = 0                    # <--- INDEX IN REPORT_HEADERS USED TO SET NAME OF COLUMN THAT IS USED AS DEFAULT X IN THE REPORT
 REPORT_DEFAULT_Y = 7                    # <--- INDEX IN REPORT_HEADERS USED TO SET NAME OF COLUMN THAT IS USED AS DEFAULT Y IN THE REPORT
+REPORT_NAME = "Distance measurements"
 REPORT_NAME_X =  'Data Number'          # <--- NAME OF X AXIS IN THE REPORT
 REPORT_NAME_Y =  'dY Value'             # <--- NAME OF Y AXIS IN THE REPORT
 REPORT_UNIT_X = ''                      # <--- NAME OF X UNIT IN THE CREATED REPORT
@@ -91,18 +94,21 @@ class DistanceRead(Methods, WindowGUI):                                         
                                  'name_suffix': NAME_SUFFIX, 'auto_calculate': AUTO_CALCULATE,
                                  'result': RESULT_CREATE}
         self.regions = {'from': REGIONS_FROM}
-        self.report = {'nr': 1,
-                       'create': REPORT_CREATE,
-                       'headers': REPORT_HEADERS,
-                       'rows': [],
-                       'x_name': REPORT_NAME_X,
-                       'y_name': REPORT_NAME_Y,
-                       'default_x': REPORT_HEADERS[REPORT_DEFAULT_X],
-                       'default_y': REPORT_HEADERS[REPORT_DEFAULT_Y],
-                       'x_unit': REPORT_UNIT_X,
-                       'y_unit': REPORT_UNIT_Y,
-                       'to_group': REPORT_TO_GROUP
-                       }
+        self.report = self.report = {'nr': 1,
+                                     'create': REPORT_CREATE,
+                                     'headers': REPORT_HEADERS,
+                                     'rows': [],
+                                     'x_name': REPORT_NAME_X,
+                                     'y_name': REPORT_NAME_Y,
+                                     'default_x': REPORT_HEADERS[REPORT_DEFAULT_X],
+                                     'default_y': REPORT_HEADERS[REPORT_DEFAULT_Y],
+                                     'x_unit': REPORT_UNIT_X,
+                                     'y_unit': REPORT_UNIT_Y,
+                                     'to_group': REPORT_TO_GROUP,
+                                     'report_skip_for_stk': REPORT_SKIP_FOR_STK,
+                                     'report_window_title': REPORT_WINDOW_TITLE,
+                                     'report_name': REPORT_NAME
+                                     }
         self.subprog_cursor = {'type': CURSOR_TYPE, 'changing': CURSOR_CHANGING, 'limit': CURSOR_LIMIT,
                                'clear_on_start': CURSOR_CLEAR_ON_START, 'cursor_required': CURSOR_REQUIRED, 'cursor_req_text':CURSOR_REQ_TEXT,
                                'cursor_outside_x':CURSOR_OUTSIDE_X, 'cursor_outside_y':CURSOR_OUTSIDE_Y,
@@ -145,6 +151,15 @@ class DistanceRead(Methods, WindowGUI):                                         
             this function is run. '''
         if self.keep_track:
             self.find_minmax_clicked()
+
+            '''Tutaj jest problem z nieskończoną rekurencją przy klikaniu zmiany widma przyciskami z GUI
+            '''
+
+
+
+
+
+
         else:
             self.clear_custom_annotations_list()
             self.remove_custom_annotations_from_graph()
@@ -311,7 +326,6 @@ class DistanceRead(Methods, WindowGUI):                                         
             max_y = y1[index_max_y]
             minimum = [min_x, min_y]
             maximum = [max_x, max_y]
-            self.find_minmax_clicked()
         else:
             # Do not detect where maximum and minimum are
             p1 = cursor_positions[0]

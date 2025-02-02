@@ -902,7 +902,11 @@ class Grapher(GraphPreferences):
         return
 
     def clearAnnotationList(self):
-        self.annotationlist.delete("all")
+        try:
+            self.annotationlist.delete("all")
+        except AttributeError as e:
+            if self.eleana.devel_mode:
+                print(e)
 
     def updateAnnotationList(self, action=None):
         self.annotationlist.delete("all")

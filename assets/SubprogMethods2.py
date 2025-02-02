@@ -5,7 +5,20 @@ from assets.Error import Error
 from subprogs.table.table import CreateFromTable
 import pandas
 import matplotlib.pyplot as plt
-from tkinter import TclError
+from pathlib import Path
+from functools import wraps
+
+def check_busy(method):
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if self.eleana.busy:
+            if self.eleana.devel_mode:
+                print(f"{Path(__file__).name}, {method.__name__}: self.eleana.busy = True")  # Używamy method.__name__
+            return  # Breaks a method execution
+        return method(self, *args, **kwargs)  # Go to a method
+    return wrapper
+
+
 class SubMethods_02:
     def __init__(self, app=None, which='first', commandline=False):
         self.commandline = commandline
@@ -29,6 +42,7 @@ class SubMethods_02:
             self.update = self.app.update
             self.mainwindow.title(self.subprog_settings['title'])
             self.mainwindow.attributes('-topmost', self.subprog_settings['on_top'])
+            self.app.close_all_subprogs()
             if self.subprog_settings['data_label']:
                 self.data_label = self.builder.get_object(self.subprog_settings['data_label'], self.mainwindow)
             else:
@@ -86,7 +100,7 @@ class SubMethods_02:
         self.eleana.detach(self.observer)
         self.grapher.clear_selected_ranges()
         self.mainwindow.destroy()
-
+        self.eleana.active_subprog = None
 
 
     # GETTING THE DATA ACCORDING TO ELEANA.SELECTION
@@ -157,13 +171,23 @@ class SubMethods_02:
     def ok_clicked(self):
         ''' [-OK-] button
             This is standard function in SubprogMethods '''
+        if self.eleana.busy:
+            if self.eleana.devel_mode:
+                print('ok_clicked - blocked by self.eleana.busy')
+            return
+        self.eleana.busy = True
         self.start_single_calculations()
         self.set_mouse_state(state='')
         self.after_ok_clicked()
 
+
     def process_group_clicked(self):
         ''' [-Process Group-] button
             This is standard function in SubprogMethods '''
+        if self.eleana.busy:
+            if self.eleana.devel_mode:
+                print('process_group_clicked - blocked by self.eleana.busy')
+            return
         self.perform_group_calculations()
         self.set_mouse_state(state='')
         self.after_process_group_clicked()
@@ -171,14 +195,21 @@ class SubMethods_02:
     def show_report_clicked(self):
         ''' [-Show Report-] button
             This is standard function in SubprogMethods '''
+        if self.eleana.busy:
+            if self.eleana.devel_mode:
+                print('show_report_clicked - blocked by self.eleana.busy')
+            return
         self.set_mouse_state(state='')
         self.show_report()
 
     def clear_report_clicked(self):
         ''' [-Show Report-] button
             This is standard function in SubprogMethods '''
+        if self.eleana.busy:
+            if self.eleana.devel_mode:
+                print('clear_report_clicked - blocked by self.eleana.busy')
+            return
         self.clear_report()
-
 
 
     # TRIGGERING CALCULATIONS
@@ -275,7 +306,8 @@ class SubMethods_02:
                 # After stk calculations
                 self.stk_index = -1
                 self.set_mouse_state("")
-                skip_report_show = False
+                skip_report_show = self.report.get('report_skip_for_stk', False)
+                #skip_report_show = False
 
         # Single data that is not a stack
         elif self.original_data1.type.lower() == 'single 2D' or not is_2D:
@@ -303,7 +335,7 @@ class SubMethods_02:
                 self.show_report()
                 return True
             else:
-                # Select result to the last enrty
+                # Select result to the last entry
                 list_of_results = self.app.sel_result._values
                 selected_value_text = list_of_results[-1]
                 self.app.result_selected(selected_value_text)
@@ -665,6 +697,8 @@ class SubMethods_02:
             ranges = [self.grapher.ax.get_xlim()]
         elif self.regions['from'] == 'selection':
             ranges = self.eleana.color_span['ranges']
+        elif self.regions['from'] == 'none':
+            return x,y
         else:
             print('REGIONS_FROM must be "scale", "selection" or "none"')
             return x, y
@@ -711,6 +745,7 @@ class SubMethods_02:
             if self.eleana.devel_mode:
                 print("There is no reports in self.report")
             return
+
         rows = self.report['rows']
         headers = self.report['headers']
         df = pandas.DataFrame(rows, columns=headers)
@@ -721,11 +756,13 @@ class SubMethods_02:
         y_name = self.report['y_name']
         y_unit = self.report['y_unit']
         to_group = self.report['to_group']
-        table = CreateFromTable(window_title="Results of integration",
+        window_title = self.report['report_window_title']
+        name = self.report['report_name']
+        table = CreateFromTable(window_title=window_title,
                                 eleana_app=self.eleana,
                                 master=self.mainwindow,
                                 df=df,
-                                name='Results of Integration',
+                                name=name,
                                 default_x_axis=default_x,
                                 default_y_axis=default_y,
                                 x_unit = x_unit,
@@ -738,11 +775,11 @@ class SubMethods_02:
         self.update.group_list()
         self.update.all_lists()
 
+
     def clear_report(self):
         ''' Clear the created report '''
         self.report['rows'] = []
         self.consecutive_number = 1
-
 
 
     #   UPDATING RESULTS AND GUI
@@ -856,7 +893,7 @@ class SubMethods_02:
         self.app.sel_result.configure(values = results)
 
 
-    def show_additional_plots(self, data)
+    def show_additional_plots(self, data):
         ''' This adds additional plots to the grapher
             for example showing baseline or fits, etc.
             The settings for the plot are taken from 
@@ -866,8 +903,7 @@ class SubMethods_02:
             Error.show(title = 'Wrong type', info = 'Argument: data for self.show_additional_plots must be a list of dicts')
             return
         list_of_plots = []
-        for each in data:
-            joined = each |
+
 
 
 
