@@ -38,6 +38,7 @@ class SubMethods_02:
             self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
             self.master = self.app.mainwindow
             self.eleana = self.app.eleana
+            self.eleana.active_subprog = self
             self.grapher = self.app.grapher
             self.update = self.app.update
             self.mainwindow.title(self.subprog_settings['title'])
@@ -136,10 +137,22 @@ class SubMethods_02:
         if variable == "first" and value is None:
             self.app.mainwindow.configure(cursor="")
             self.grapher.canvas.get_tk_widget().config(cursor="")
+            if value is None:
+                try:
+                    self.grapher.clear_all_annotations()
+                except:
+                    if self.eleana.devel_mode:
+                        print("Subprogmethods2.data_changed() - Clear all annotations failed")
             self.after_data_changed(variable=variable, value=value)
+            return False
         elif variable == 'f_stk' or variable == 's_stk':
             self.app.mainwindow.configure(cursor="")
             self.grapher.canvas.get_tk_widget().config(cursor="")
+            try:
+                self.grapher.clear_all_annotations()
+            except:
+                if self.eleana.devel_mode:
+                    print("Subprogmethods2.data_changed() - Clear all annotations failed")
             self.after_data_changed(variable=variable, value=value)
             return False
         elif variable == 'grapher_action' and value == 'range_start':
@@ -178,8 +191,8 @@ class SubMethods_02:
         self.eleana.busy = True
         self.start_single_calculations()
         self.set_mouse_state(state='')
+        self.eleana.busy = False
         self.after_ok_clicked()
-
 
     def process_group_clicked(self):
         ''' [-Process Group-] button
@@ -188,8 +201,10 @@ class SubMethods_02:
             if self.eleana.devel_mode:
                 print('process_group_clicked - blocked by self.eleana.busy')
             return
+        self.eleana.busy = True
         self.perform_group_calculations()
         self.set_mouse_state(state='')
+        self.eleana.busy = False
         self.after_process_group_clicked()
 
     def show_report_clicked(self):
@@ -199,8 +214,10 @@ class SubMethods_02:
             if self.eleana.devel_mode:
                 print('show_report_clicked - blocked by self.eleana.busy')
             return
+        self.eleana.busy = True
         self.set_mouse_state(state='')
         self.show_report()
+        self.eleana.busy = False
 
     def clear_report_clicked(self):
         ''' [-Show Report-] button
@@ -905,9 +922,6 @@ class SubMethods_02:
         list_of_plots = []
 
 
-
-
-
     # ADDITIONAL METHODS FOR CHECKING CURSOR POSITIONS ON GRAPH
     # ------------------------------------------------
 
@@ -1122,9 +1136,16 @@ class SubMethods_02:
             return func(*args, **kwargs)
         return wrapper
 
+    def after_gui_clicked(self, widget):
+        ''' This is called when all actions are finished after clicking GUI buttons
+            widget - contains the name of method that triggered this method
+            '''
+
+
 
     # DUMMY FUNCTIONS TO OVERRIDE BY SUBPROG
     # ------------------------------------------------
+
 
     def after_data_changed(self, variable, value):
         return
@@ -1146,3 +1167,7 @@ class SubMethods_02:
 
     def graph_action(self, variable=None, value=None):
         return
+
+    def finish_action(self, by_method):
+        return
+

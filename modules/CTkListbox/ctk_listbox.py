@@ -167,7 +167,8 @@ class CTkListbox(customtkinter.CTkScrollableFrame):
                     index += 1
 
     def bind(self, key, func):
-        super().bind_all(key, lambda e: func(self.get()), add="+")
+        #super().bind_all(key, lambda e: func(self.get()), add="+")
+        super().bind(key, lambda e: func(self.get()), add="+")
 
     def deselect(self, index):
         """Deselect the option."""

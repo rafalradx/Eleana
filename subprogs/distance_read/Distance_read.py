@@ -148,21 +148,19 @@ class DistanceRead(Methods, WindowGUI):                                         
     def after_graph_plot(self):
         ''' This method is called when the main application refreshes Graph canva content.
             For example, after changing First data, the graph is reploted and then
-            this function is run. '''
+            this function is run.
+            DO NOT USE FUNCTIONS USING GRAPHER METHODS HERE!'''
+
+    def finish_action(self, by_method):
+        ''' This method is called when all calculations are finished and main window
+            awaits for action. This is useful if you need to put annotations to the graph etc.
+            by_method - the name of a method that triggered the action.
+        '''
         if self.keep_track:
             self.find_minmax_clicked()
-
-            '''Tutaj jest problem z nieskończoną rekurencją przy klikaniu zmiany widma przyciskami z GUI
-            '''
-
-
-
-
-
-
         else:
-            self.clear_custom_annotations_list()
-            self.remove_custom_annotations_from_graph()
+           self.clear_custom_annotations_list()
+           self.remove_custom_annotations_from_graph()
 
 
     # DEFINE YOUR CUSTOM METHODS FOR THIS ROUTINE

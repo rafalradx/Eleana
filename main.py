@@ -12,6 +12,7 @@ import io
 import re
 import os
 from functools import wraps
+import inspect
 
 # Set paths for assets, modules, subprogs and widgets
 PROJECT_PATH = Path(__file__).parent
@@ -89,16 +90,31 @@ list_of_subprogs.append(['convert_stack_to_group', 'cancel'])
 # Widgets used by main application
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
 
+# def check_busy(method):
+#     @wraps(method)
+#     def wrapper(self, *args, **kwargs):
+#         self.mainwindow.configure(cursor="watch")
+#         if self.eleana.busy:
+#             if self.eleana.devel_mode:
+#                 print(f"{Path(__file__).name}, {method.__name__}: self.eleana.busy = True")
+#             return  # Breaks a method execution
+#         self.mainwindow.configure(cursor="watch")
+#         return method(self, *args, **kwargs)  # Go to a method
+#    return wrapper
+
 def check_busy(method):
     @wraps(method)
     def wrapper(self, *args, **kwargs):
+        self.mainwindow.configure(cursor="watch")
         if self.eleana.busy:
             if self.eleana.devel_mode:
-                print(f"{Path(__file__).name}, {method.__name__}: self.eleana.busy = True")  # Używamy method.__name__
-            return  # Breaks a method execution
-        return method(self, *args, **kwargs)  # Go to a method
+                print(f"{Path(__file__).name}, {method.__name__}: self.eleana.busy = True")
+            return
+        result = method(self, *args, **kwargs)
+        self.mainwindow.configure(cursor="")
+        self.after_gui_action(by_method = method.__name__)
+        return result
     return wrapper
-
 
 class MainApp:
     def __init__(self, eleana_instance, command_processor, master=None):
@@ -225,6 +241,14 @@ class MainApp:
         self.mainwindow.after(100, self.set_pane_height)
         self.mainwindow.deiconify()
         self.mainwindow.mainloop()
+
+    def after_gui_action(self, by_method = None):
+        if self.eleana.active_subprog is None:
+            if self.eleana.devel_mode:
+                print("Subprog Inactive")
+        else:
+            self.eleana.active_subprog.finish_action(by_method)
+
 
     ''' *********************************************
     *              COMPARISON VIEW                  *
@@ -371,7 +395,6 @@ class MainApp:
     @check_busy
     def group_selected(self, value):
         self.eleana.set_selections('group', value)
-        # self.eleana.selections['group'] = value
         update.all_lists()
         self.sel_first.set('None')
         self.sel_second.set('None')
@@ -810,7 +833,6 @@ class MainApp:
             self.firstComplex.grid_remove()
         if first_pos == 'None':
             self.secondComplex.grid_remove()
-
         self.sel_first.set(second_pos)
         self.sel_second.set(first_pos)
         self.first_selected(second_pos)
@@ -1715,13 +1737,6 @@ if not DEVEL:
         sys.stderr = open('nul', 'w')
 
 eleana = Eleana(version = ELEANA_VERSION, devel = DEVEL)
-if not DEVEL:
-    # Switch off the error display in final product
-    if os.name == 'posix':  # Unix/Linux/macOS
-        sys.stderr = open(os.devnull, 'w')
-    elif os.name == 'nt':  # Windows
-        sys.stderr = open('nul', 'w')
-
 sound = Sound()
 cmd = CommandProcessor()
 
