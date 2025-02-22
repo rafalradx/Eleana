@@ -13,14 +13,14 @@ def check_busy(method):
     def wrapper(self, *args, **kwargs):
         if self.eleana.busy:
             if self.eleana.devel_mode:
-                print(f"{Path(__file__).name}, {method.__name__}: self.eleana.busy = True")  # Używamy method.__name__
+                print(f"{Path(__file__).name}, {method.__name__}: self.eleana.busy = True")
             return  # Breaks a method execution
         return method(self, *args, **kwargs)  # Go to a method
     return wrapper
 
 
 class SubMethods_02:
-    def __init__(self, app=None, which='first', commandline=False):
+    def __init__(self, app=None, which='first', commandline=False, close_subprogs=False):
         self.commandline = commandline
         self.general_error_skip = False
         self.update_gui = True
@@ -43,7 +43,11 @@ class SubMethods_02:
             self.update = self.app.update
             self.mainwindow.title(self.subprog_settings['title'])
             self.mainwindow.attributes('-topmost', self.subprog_settings['on_top'])
-            self.app.close_all_subprogs()
+
+            # Close all previous subprogs
+            if close_subprogs:
+                self.app.close_all_subprogs()
+
             if self.subprog_settings['data_label']:
                 self.data_label = self.builder.get_object(self.subprog_settings['data_label'], self.mainwindow)
             else:
@@ -194,6 +198,8 @@ class SubMethods_02:
         self.eleana.busy = False
         self.after_ok_clicked()
 
+        self.show_results_matching_first()
+
     def process_group_clicked(self):
         ''' [-Process Group-] button
             This is standard function in SubprogMethods '''
@@ -206,6 +212,8 @@ class SubMethods_02:
         self.set_mouse_state(state='')
         self.eleana.busy = False
         self.after_process_group_clicked()
+
+        self.show_results_matching_first()
 
     def show_report_clicked(self):
         ''' [-Show Report-] button
@@ -786,8 +794,10 @@ class SubMethods_02:
                                 x_name = x_name,
                                 y_unit = y_unit,
                                 y_name = y_name,
-                                group=to_group)
+                                group=to_group,
+                                set_parameters = {'origin':'result'})
         response = table.get()
+
         self.update.dataset_list()
         self.update.group_list()
         self.update.all_lists()

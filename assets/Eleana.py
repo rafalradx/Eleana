@@ -113,8 +113,8 @@ class Eleana:
             return
         if self.notify_on:
             self.notify(variable=variable)
-            if self.devel_mode:
-                print('Eleana.py: Activate observer')
+            #if self.devel_mode:
+            #    print('Eleana.py: Activate observer')
 
     # End of methods for observers --------------------
 

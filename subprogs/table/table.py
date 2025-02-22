@@ -10,12 +10,27 @@ from modules.CTkMessagebox import CTkMessagebox
 from assets.DataClasses import Single2D
 from tkinter import filedialog
 from modules.tksheet import Sheet
+import copy
 
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "table.ui"
 
 class CreateFromTable:
-    def __init__(self, eleana_app, master=None, list2D = None, df = None, name = None, group = None, loadOnStart = None, window_title = None, default_x_axis = None, default_y_axis = None, x_unit=None, x_name=None, y_unit=None, y_name=None):
+    def __init__(self, eleana_app,
+                 master=None,
+                 list2D = None,
+                 df = None,
+                 name = None,
+                 group = None,
+                 loadOnStart = None,
+                 window_title = None,
+                 default_x_axis = None,
+                 default_y_axis = None,
+                 x_unit=None,
+                 x_name=None,
+                 y_unit=None,
+                 y_name=None,
+                 set_parameters=None):
         self.master = master
         self.eleana = eleana_app
         self.builder = builder = pygubu.Builder()
@@ -40,6 +55,9 @@ class CreateFromTable:
         self.sel_x_axis = builder.get_object('sel_x_axis', master)
         self.sel_rey_axis = builder.get_object('sel_rey_axis', master)
         self.sel_imy_axis = builder.get_object('sel_imy_axis', master)
+
+        # Take a list of parameters to add to the data.
+        self.set_parameters = set_parameters
 
         if name:
             self.entry_name.insert(0, name)
@@ -77,6 +95,7 @@ class CreateFromTable:
             if dialog == 'cancel':
                 self.cancel
         self.mainwindow.attributes('-topmost', True)
+
     def loadExcel(self):
         self.mainwindow.iconify()
         filename = filedialog.askopenfilename(parent=self.mainwindow,
@@ -126,10 +145,12 @@ class CreateFromTable:
             self.sel_rey_axis.set(self.headers[2])
         except:
             pass
+
     def get(self):
         if self.mainwindow.winfo_exists():
            self.master.wait_window(self.mainwindow)
         return self.response
+
     def cancel(self, event = None):
         self.response = None
         self.mainwindow.destroy()
@@ -150,7 +171,10 @@ class CreateFromTable:
             return
 
         data = {}
-        data['parameters'] = {}
+        if self.set_parameters is None:
+            data['parameters'] = {}
+        else:
+            data['parameters'] = copy.deepcopy(self.set_parameters)
         data['name'] = self.entry_name.get()
         if self.entry_group.get():
             data['groups'] = [self.entry_group.get()]
