@@ -32,6 +32,7 @@ class SubMethods_02:
                                 'linestyle': 'dashed',
                                 }
 
+
         if app and not self.commandline:
             # Window start from Menu in GUI
             self.app = app
@@ -114,9 +115,13 @@ class SubMethods_02:
     def get_data(self, variable=None, value=None):
         ''' Makes a copy of the selected data and stores it in self.original_data.
             You may perform calculations on self.original_data. '''
-
+        index = self.eleana.selections[self.which]
+        parameters = self.eleana.dataset[index].parameters
+        origin = parameters.get('origin', None)
         if self.eleana.selections[self.which] >= 0: # If selection is not None
-            index = self.eleana.selections[self.which]
+            ignore = self.subprog_settings.get('result_ignore', True)
+            if origin == "@result" and ignore:
+                return False
             self.eleana.notify_on = False
             self.original_data1 = copy.deepcopy(self.eleana.dataset[index])
             self.original_data2 = None
@@ -795,7 +800,7 @@ class SubMethods_02:
                                 y_unit = y_unit,
                                 y_name = y_name,
                                 group=to_group,
-                                set_parameters = {'origin':'result'})
+                                set_parameters = {'origin':'@result'})
         response = table.get()
 
         self.update.dataset_list()

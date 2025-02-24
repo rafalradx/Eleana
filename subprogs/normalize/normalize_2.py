@@ -84,8 +84,7 @@ if __name__ == "__main__":                                                      
 else:                                                                                               #|
     cmd_to_import = 'from ' + SUBPROG_FOLDER + '.' + cmd_to_import                                  #|
 exec(cmd_to_import)                                                                                 #|
-from assets.Error import Error                                                                      #|
-from assets.SubprogMethods2 import SubMethods_02 as Methods                                                    #|
+from subprogs.general_methods.SubprogMethods2 import SubMethods_02 as Methods                                                    #|
 class Normalize(Methods, WindowGUI):                                                       #|
     def __init__(self, app=None, which='first', commandline=False):  # |
         if app and not commandline:

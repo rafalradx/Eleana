@@ -233,7 +233,6 @@ class MainMenu:
 
 
 
-
         ''' Menu EPR '''
         self.menu_EPR = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                           activebackground=self.activebg, activeforeground=self.activefg,

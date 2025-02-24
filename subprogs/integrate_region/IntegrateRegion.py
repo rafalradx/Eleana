@@ -2,7 +2,6 @@
 
 # IMPORT MODULES NEEDED
 from scipy.integrate import cumulative_trapezoid, trapezoid
-import numpy as np
 
 # General setting of the application. Here is an example
 # File/Path/Class settings
@@ -87,8 +86,7 @@ if __name__ == "__main__":
 else:
     cmd_to_import = 'from ' + SUBPROG_FOLDER + '.' + cmd_to_import
 exec(cmd_to_import)
-from assets.Error import Error
-from assets.SubprogMethods2 import SubMethods_02
+from subprogs.general_methods.SubprogMethods2 import SubMethods_02
 
 class IntegrateRegion(SubMethods_02, WindowGUI):
     ''' THIS IS STANDARD CONSTRUCTOR THAT SHOULD NOT BE MODIFIED '''
@@ -238,4 +236,5 @@ class IntegrateRegion(SubMethods_02, WindowGUI):
         return row_to_report
 
 if __name__ == "__main__":
+
     pass

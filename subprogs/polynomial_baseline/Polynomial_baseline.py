@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 # IMPORT MODULES NEEDED
 # -- Here is an example --
-import numpy as np
-from scipy.special import xlog1py
 
 from subprogs.integrate_region.IntegrateRegion import RESULT_CREATE
 
@@ -73,8 +71,7 @@ if __name__ == "__main__":                                                      
 else:                                                                                               #|
     cmd_to_import = 'from ' + SUBPROG_FOLDER + '.' + cmd_to_import                                  #|
 exec(cmd_to_import)                                                                                 #|
-from assets.Error import Error                                                                      #|
-from assets.SubprogMethods2 import SubMethods_02 as Methods                                                    #|
+from subprogs.general_methods.SubprogMethods2 import SubMethods_02 as Methods                                                    #|
 class PolynomialBaseline(Methods, WindowGUI):                                                       #|
     def __init__(self, app=None, which='first', commandline=False):  # |
         if app and not commandline:
