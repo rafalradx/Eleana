@@ -63,8 +63,10 @@ REPORT_TO_GROUP = 'RESULT Distance'     # <--- DEFAULT GROUP NAME TO WHICH REPOR
 
 # Cursors on graph
 CURSOR_CHANGING = False                 # <--- IF TRUE THEN CURSOR SELECTION IN MAIN GUI IS DISABLED
-CURSOR_TYPE = 'Free select'              # <--- USE CURSORS: 'None', 'Continuous read XY', 'Selection of points with labels'
+#CURSOR_TYPE = 'Free select'              # <--- USE CURSORS: 'None', 'Continuous read XY', 'Selection of points with labels'
                                         #       'Selection of points', 'Numbered selections', 'Free select', 'Crosshair', 'Range select'
+CURSOR_TYPE = 'Crosshair'
+
 CURSOR_LIMIT = 2                        # <--- SET THE MAXIMUM NUMBER OF CURSORS THAT CAN BE SELECTED. FOR NO LIMIT SET 0
 CURSOR_CLEAR_ON_START = True
 CURSOR_REQUIRED = 2                     # <--- MINIMUM NUMBER OF CURSORS TO PROCESS THE CALCULATIONS
