@@ -169,7 +169,6 @@ class DistanceRead(Methods, WindowGUI):                                         
            self.clear_custom_annotations_list()
            self.remove_custom_annotations_from_graph()
 
-
     # DEFINE YOUR CUSTOM METHODS FOR THIS ROUTINE
     # ----------------------------------------------
     def configure_window(self):

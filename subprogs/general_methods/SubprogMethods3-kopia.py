@@ -8,6 +8,15 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from functools import wraps
 
+'''
+======================================================
+==                                                  ==
+==            SUBPROG METHODS VERSION               ==
+==                       3                          ==
+==                                                  ==
+====================================================== 
+'''
+
 def check_busy(method):
     @wraps(method)
     def wrapper(self, *args, **kwargs):
@@ -19,7 +28,7 @@ def check_busy(method):
     return wrapper
 
 
-class SubMethods_02:
+class SubMethods_03:
     def __init__(self, app=None, which='first', commandline=False, close_subprogs=False):
         self.commandline = commandline
         self.general_error_skip = False
@@ -27,11 +36,10 @@ class SubMethods_02:
         self.data_for_calculations = []
         self.consecutive_number = 1
         self.additional_plots_settings = {
-                                'color': 'gray',
-                                'linewidth': 2,
-                                'linestyle': 'dashed',
-                                }
-
+            'color': 'gray',
+            'linewidth': 2,
+            'linestyle': 'dashed',
+        }
 
         if app and not self.commandline:
             # Window start from Menu in GUI
@@ -108,7 +116,6 @@ class SubMethods_02:
         self.mainwindow.destroy()
         self.eleana.active_subprog = None
 
-
     # GETTING THE DATA ACCORDING TO ELEANA.SELECTION
     # ----------------------------------------------
 
@@ -118,7 +125,7 @@ class SubMethods_02:
         index = self.eleana.selections[self.which]
         parameters = self.eleana.dataset[index].parameters
         origin = parameters.get('origin', None)
-        if self.eleana.selections[self.which] >= 0: # If selection is not None
+        if self.eleana.selections[self.which] >= 0:  # If selection is not None
             ignore = self.subprog_settings.get('result_ignore', True)
             if origin == "@result" and ignore:
                 return False
@@ -186,17 +193,16 @@ class SubMethods_02:
             self.ok_clicked()
         return True
 
-
     # STANDARD METHODS FOR SUBPROG GUI BUTTONS
     # -------------------------------------------------
 
     def ok_clicked(self):
         ''' [-OK-] button
             This is standard function in SubprogMethods '''
-        # if self.eleana.busy:
-        #     if self.eleana.devel_mode:
-        #         print('ok_clicked - blocked by self.eleana.busy')
-        #     return
+        if self.eleana.busy:
+            if self.eleana.devel_mode:
+                print('ok_clicked - blocked by self.eleana.busy')
+            return
         self.eleana.busy = True
         self.start_single_calculations()
         self.set_mouse_state(state='')
@@ -239,7 +245,6 @@ class SubMethods_02:
                 print('clear_report_clicked - blocked by self.eleana.busy')
             return
         self.clear_report()
-
 
     # TRIGGERING CALCULATIONS
     # -----------------------------------------------
@@ -313,7 +318,7 @@ class SubMethods_02:
             # This is stack 2D then check if stack is calculated as separate data
             self.stk_index = 0
             if not self.stack_sep:
-                status = self.stack_calc() # Prepare the whole stack for calculations
+                status = self.stack_calc()  # Prepare the whole stack for calculations
                 if not status:
                     return status
             else:
@@ -453,14 +458,33 @@ class SubMethods_02:
                   'y': y_data1,
                   'z': z_data1,
                   'name': name1,
-                  'stk_value':z_data1[self.stk_index],
-                  'complex':complex1,
-                  'type':datatype1,
-                  'origin':origin1,
-                  'comment':comment1,
-                  'parameters':parameters1
+                  'stk_value': z_data1[self.stk_index],
+                  'complex': complex1,
+                  'type': datatype1,
+                  'origin': origin1,
+                  'comment': comment1,
+                  'parameters': parameters1
                   }
         self.data_for_calculations.append(data_1)
+
+        # Add non extracted data if ORIG_IN_ODD_IDX is True
+        if self.regions['orig_in_odd_idx']:
+            x_data1_orig = copy.deepcopy(self.original_data1.x)
+            y_data1_orig = copy.deepcopy(self.original_data1.y[self.stk_index])
+            z_data1_orig = copy.deepcopy(self.original_data1.z)
+            data_1_orig =   {'x': x_data1_orig,
+                              'y': y_data1_orig,
+                              'z': z_data1_orig,
+                              'name': name1,
+                              'stk_value': copy.deepcopy(z_data1[self.stk_index]),
+                              'complex': copy.deepcopy(complex1),
+                              'type': copy.deepcopy(datatype1),
+                              'origin': copy.deepcopy(origin1),
+                              'comment': copy.deepcopy(comment1),
+                              'parameters': copy.deepcopy(parameters1)
+                              }
+        self.data_for_calculations.append(data_1_orig)
+
         if self.use_second:
             # Check if the second selected data is single 2D
             is_2D = self.original_data2.y.ndim == 2
@@ -486,12 +510,12 @@ class SubMethods_02:
                               'y': y_data2,
                               'z': z_data2,
                               'name': name2,
-                              'stk_value':z_data2[self.stk_index],
-                              'complex': complex2,
-                              'type': datatype2,
-                              'origin': origin2,
-                              'comment': comment2,
-                              'parameters': parameters2
+                              'stk_value': copy.deepcopy(z_data2[self.stk_index]),
+                              'complex': copy.deepcopy(complex2),
+                              'type': copy.deepcopy(datatype2),
+                              'origin': copy.deepcopy(origin2),
+                              'comment': copy.deepcopy(comment2),
+                              'parameters': copy.deepcopy(parameters2)
                               }
                 except:
                     # Skip setting 'stk_value'
@@ -499,14 +523,32 @@ class SubMethods_02:
                               'y': y_data2,
                               'z': z_data2,
                               'name': name2,
-                              'stk_value':'',
-                              'complex':complex2,
+                              'stk_value': '',
+                              'complex': complex2,
                               'type': datatype2,
                               'origin': origin2,
                               'comment': comment2,
                               'parameters': parameters2
                               }
                 self.data_for_calculations.append(data_2)
+
+                # Add original data
+                if self.regions['orig_in_odd_idx']:
+                    x_data2_orig = copy.deepcopy(self.original_data2.x)
+                    y_data2_orig = copy.deepcopy(self.original_data2.y[self.stk_index])
+                    z_data2_orig = copy.deepcopy(self.original_data2.z)
+                    data_2_orig = {'x': x_data2_orig,
+                                   'y': y_data2_orig,
+                                   'z': z_data2_orig,
+                                   'name': name2,
+                                   'stk_value': z_data2[self.stk_index],
+                                   'complex': complex2,
+                                   'type': datatype2,
+                                   'origin': origin2,
+                                   'comment': comment2,
+                                   'parameters': parameters2
+                                   }
+                self.data_for_calculations.append(data_2_orig)
             else:
                 Error.show(info='If the first data is 2D, the second must also be 2D, not a stack.', details='')
                 return False
@@ -542,18 +584,18 @@ class SubMethods_02:
         parameters1 = copy.deepcopy(self.original_data1.parameters)
 
         # Extract the data in x and y if needed
-        x_data1, y_data1 = self.extract_region_xy(x = x_data1, y = y_data1)
+        x_data1, y_data1 = self.extract_region_xy(x=x_data1, y=y_data1)
 
         # Show error if extracted data contains no data
         if y_data1.size == 0:
             Error.show(info=f'The {name1} contains no values for the selected range or the current cursor position.')
             self.set_mouse_state(state='')
             return False
-        data_1 = {'x':x_data1,
-                  'y':y_data1,
-                  'z':z_data1,
-                  'name':name1,
-                  'stk_value':'None',
+        data_1 = {'x': x_data1,
+                  'y': y_data1,
+                  'z': z_data1,
+                  'name': name1,
+                  'stk_value': 'None',
                   'complex': complex1,
                   'type': datatype1,
                   'origin': origin1,
@@ -561,6 +603,24 @@ class SubMethods_02:
                   'parameters': parameters1
                   }
         self.data_for_calculations.append(data_1)
+
+        # Add non extracted data if ORIG_IN_ODD_IDX is True
+        if self.regions['orig_in_odd_idx']:
+            x_data1_orig = copy.deepcopy(self.original_data1.x)
+            y_data1_orig = copy.deepcopy(self.original_data1.y[self.stk_index])
+            z_data1_orig = copy.deepcopy(self.original_data1.z)
+            data_1_orig = {'x': x_data1_orig,
+                           'y': y_data1_orig,
+                           'z': z_data1_orig,
+                           'name': name1,
+                           'stk_value': 'None',
+                           'complex': complex1,
+                           'type': datatype1,
+                           'origin': origin1,
+                           'comment': comment1,
+                           'parameters': parameters1
+                           }
+        self.data_for_calculations.append(data_1_orig)
 
         if self.use_second:
             # Check if the second selected data is single 2D
@@ -581,9 +641,9 @@ class SubMethods_02:
                 x_data2, y_data2 = self.extract_region_xy(x=x_data2, y=y_data2)
                 data_2 = {'x': x_data2,
                           'y': y_data2,
-                          'z':z_data2,
+                          'z': z_data2,
                           'name': name2,
-                          'stk_value':'None',
+                          'stk_value': 'None',
                           'complex': complex2,
                           'type': datatype2,
                           'origin': origin2,
@@ -591,12 +651,29 @@ class SubMethods_02:
                           'parameters': parameters2
                           }
                 self.data_for_calculations.append(data_2)
+                # Add original data
+                if self.regions['orig_in_odd_idx']:
+                    x_data2_orig = copy.deepcopy(self.original_data2.x)
+                    y_data2_orig = copy.deepcopy(self.original_data2.y[self.stk_index])
+                    z_data2_orig = copy.deepcopy(self.original_data2.z)
+                    data_2_orig = {'x': x_data2_orig,
+                                   'y': y_data2_orig,
+                                   'z': z_data2_orig,
+                                   'name': name2,
+                                   'stk_value': z_data2[self.stk_index],
+                                   'complex': complex2,
+                                   'type': datatype2,
+                                   'origin': origin2,
+                                   'comment': comment2,
+                                   'parameters': parameters2
+                                   }
+                self.data_for_calculations.append(data_2_orig)
+
             else:
                 Error.show(info='If the first data is 2D, the second must also be 2D, not a stack.', details='')
                 return False
         else:
             self.data_for_calculations.append(None)
-
 
         # Go to calculate function
         row_to_report = self.calculate()
@@ -692,12 +769,12 @@ class SubMethods_02:
                               'z': z_data2,
                               'name': name2,
                               'stk_value': '',
-                              'complex':complex2,
+                              'complex': complex2,
                               'type': datatype2,
                               'origin': origin2,
                               'comment': comment2,
                               'parameters': parameters2
-                    }
+                              }
                 self.data_for_calculations.append(data_2)
             else:
                 Error.show(info='If the first data is 2D, the second must also be 2D, not a stack.', details='')
@@ -722,7 +799,7 @@ class SubMethods_02:
         elif self.regions['from'] == 'selection':
             ranges = self.eleana.color_span['ranges']
         elif self.regions['from'] == 'none':
-            return x,y
+            return x, y
         else:
             print('REGIONS_FROM must be "scale", "selection" or "none"')
             return x, y
@@ -741,18 +818,18 @@ class SubMethods_02:
             raise ValueError('Extracted_xy method requires y 1D or 2D np.array')
         return extracted_x, extracted_y
 
-
     # CREATE, SHOW AND CLEAR REPORTS
     # ------------------------------------------------
 
-    def add_to_report(self, headers = None, row = None):
+    def add_to_report(self, headers=None, row=None):
         ''' Add headers for columns and or additional row to the report'''
         if headers:
             self.report['headers'] = headers
         if row:
             if len(row) != len(self.report['headers']):
                 if self.eleana.devel_mode:
-                    Error.show(title="Error in report creating.", info="The number of column headers is different than provided columns in row. See console for details")
+                    Error.show(title="Error in report creating.",
+                               info="The number of column headers is different than provided columns in row. See console for details")
                     raise ValueError
             else:
                 processed_row = []
@@ -769,7 +846,6 @@ class SubMethods_02:
             if self.eleana.devel_mode:
                 print("There is no reports in self.report")
             return
-
 
         rows = self.report['rows']
         headers = self.report['headers']
@@ -790,24 +866,22 @@ class SubMethods_02:
                                 name=name,
                                 default_x_axis=default_x,
                                 default_y_axis=default_y,
-                                x_unit = x_unit,
-                                x_name = x_name,
-                                y_unit = y_unit,
-                                y_name = y_name,
+                                x_unit=x_unit,
+                                x_name=x_name,
+                                y_unit=y_unit,
+                                y_name=y_name,
                                 group=to_group,
-                                set_parameters = {'origin':'@result'})
+                                set_parameters={'origin': '@result'})
         response = table.get()
 
         self.update.dataset_list()
         self.update.group_list()
         self.update.all_lists()
 
-
     def clear_report(self):
         ''' Clear the created report '''
         self.report['rows'] = []
         self.consecutive_number = 1
-
 
     #   UPDATING RESULTS AND GUI
     # ------------------------------------------------
@@ -834,7 +908,7 @@ class SubMethods_02:
         self.stk_index = -1
         result_create = copy.deepcopy(self.subprog_settings['result'])
         if result_create not in ['add', 'replace']:
-            return      # Do nothing if result should not be created
+            return  # Do nothing if result should not be created
 
         # Calculate index where spectrum must be inserted:
         results_dataset = self.eleana.results_dataset
@@ -869,7 +943,7 @@ class SubMethods_02:
         ''' Create new result entry in result_dataset '''
         result_create = copy.deepcopy(self.subprog_settings['result'])
         if result_create not in ['add', 'replace']:
-            return      # Do nothing if result should not be created
+            return  # Do nothing if result should not be created
 
         # Calculate index where spectrum must be inserted:
         results_dataset = self.eleana.results_dataset
@@ -902,7 +976,7 @@ class SubMethods_02:
 
         elif self.stk_index >= 0:
             index_in_result = len(results_dataset) - 1
-            if self.stk_index < len(results_dataset[index_in_result].y)-1:
+            if self.stk_index < len(results_dataset[index_in_result].y) - 1:
                 results_dataset[index_in_result].y[self.stk_index] = copy.deepcopy(new_result.y)
             else:
                 results_dataset[index_in_result].x = copy.deepcopy(new_result.x)
@@ -921,20 +995,18 @@ class SubMethods_02:
             self.app.resultFrame.grid_remove()
             return
         self.app.resultFrame.grid()
-        self.app.sel_result.configure(values = results)
-
+        self.app.sel_result.configure(values=results)
 
     def show_additional_plots(self, data):
         ''' This adds additional plots to the grapher
             for example showing baseline or fits, etc.
-            The settings for the plot are taken from 
+            The settings for the plot are taken from
             self.additional_plots_settings
         '''
         if not isinstance(data, list):
-            Error.show(title = 'Wrong type', info = 'Argument: data for self.show_additional_plots must be a list of dicts')
+            Error.show(title='Wrong type', info='Argument: data for self.show_additional_plots must be a list of dicts')
             return
         list_of_plots = []
-
 
     # ADDITIONAL METHODS FOR CHECKING CURSOR POSITIONS ON GRAPH
     # ------------------------------------------------
@@ -945,7 +1017,7 @@ class SubMethods_02:
         outside_x = self.subprog_cursor['cursor_outside_x']
         outside_y = self.subprog_cursor['cursor_outside_y']
         if outside_x and outside_y:
-           in_bounds = self.all_cursors_within_bounds(x=x, y=y)
+            in_bounds = self.all_cursors_within_bounds(x=x, y=y)
         elif outside_x and not outside_y:
             in_bounds = self.all_cursors_within_bounds(x=x, y=None)
         elif outside_y and not outside_x:
@@ -955,10 +1027,10 @@ class SubMethods_02:
         answer = all(in_bounds)
         return answer
 
-    def all_cursors_within_bounds(self, x = None, y = None):
+    def all_cursors_within_bounds(self, x=None, y=None):
         answers = []
         for cursor in self.grapher.cursor_annotations:
-            answer = self.is_cursors_within_bounds(cursor=cursor, x=x,y=y)
+            answer = self.is_cursors_within_bounds(cursor=cursor, x=x, y=y)
             answers.append(answer)
         return answers
 
@@ -974,14 +1046,12 @@ class SubMethods_02:
             x_in_range = True
         if y is not None:
             if y.size == 0:
-               y_in_range = False
+                y_in_range = False
             else:
                 y_in_range = (cursor_y >= y.min()) & (cursor_y <= y.max())
         else:
             y_in_range = True
         return x_in_range and y_in_range
-
-
 
     # METHODS FOR CUSTOM CURSOR HANDLING
     # ------------------------------------------------
@@ -994,7 +1064,7 @@ class SubMethods_02:
         except:
             pass
 
-    def place_custom_annotation(self, x, y = None, which = 'first', refresh_gui=True):
+    def place_custom_annotation(self, x, y=None, which='first', refresh_gui=True):
         ''' Puts the annotation at given (x,y) point.
             If only x is set the y coordinate will snap to the curve indicated in "which" variable.
             If x and y are set then the annotation will appear at given (x,y) coordinates
@@ -1005,7 +1075,7 @@ class SubMethods_02:
             snap = False
         else:
             snap = True
-        self.set_custom_annotation(point = (x,y), snap=snap, which = which)
+        self.set_custom_annotation(point=(x, y), snap=snap, which=which)
         annots = self.eleana.custom_annotations
         i = 0
         for annot in annots:
@@ -1015,13 +1085,13 @@ class SubMethods_02:
             #                  xy=xy, arrowprops=self.grapher.style_of_annotation['arrowprops']
             #                  )
             self.grapher.ax.annotate(text=self.grapher.style_of_annotation['text'] + number_,
-                             xy=xy,
-                             xytext=self.grapher.xytext_position(xy),
-                             arrowprops=self.grapher.style_of_annotation['arrowprops'],
-                             bbox=self.grapher.style_of_annotation['bbox'],
-                             fontsize=self.grapher.style_of_annotation['fontsize'],
-                             color=self.grapher.style_of_annotation['color']
-                             )
+                                     xy=xy,
+                                     xytext=self.grapher.xytext_position(xy),
+                                     arrowprops=self.grapher.style_of_annotation['arrowprops'],
+                                     bbox=self.grapher.style_of_annotation['bbox'],
+                                     fontsize=self.grapher.style_of_annotation['fontsize'],
+                                     color=self.grapher.style_of_annotation['color']
+                                     )
 
             i += 1
         self.grapher.canvas.draw()
@@ -1033,12 +1103,14 @@ class SubMethods_02:
                 child.remove()
         self.grapher.canvas.draw()
 
-    def set_custom_annotation(self, point, snap = True, which='first'):
+    def set_custom_annotation(self, point, snap=True, which='first'):
         ''' Create annotation programmatically at the specified (x, y) point. '''
+
         def _find_nearest_index(x_data, x_coord):
             x_data = np.array(x_data)
             index = np.abs(x_data - x_coord).argmin()
             return index
+
         x_coord, y_coord = point  # Unpack the point coordinates
         if which == 'first':
             nr = 0
@@ -1085,8 +1157,6 @@ class SubMethods_02:
         entry = nr + ' | ' + str(curve) + ' (' + str(round(point_x, 2)) + ', ' + str(round(point_y, 2)) + ')'
         self.grapher.annotationlist.insert("END", entry)
 
-
-
     # METHODS FOR CTKENTRIES SUCH AS VALIDATION
     # -------------------------------------------
 
@@ -1115,21 +1185,20 @@ class SubMethods_02:
         if entry is None:
             return
         if entry.cget("state") == "disabled":
-            entry.configure(state = 'normal')
+            entry.configure(state='normal')
             entry.delete(0, 'end')
             entry.insert(0, str(value))
-            entry.configure(state = 'disabled')
+            entry.configure(state='disabled')
         else:
             entry.delete(0, 'end')
             entry.insert(0, str(value))
 
-    def set_mouse_state(self, state = ""):
+    def set_mouse_state(self, state=""):
         ''' Set cursor to watch or ready for Main GUI and Main Graph'''
         if self.app:
             self.grapher.canvas.get_tk_widget().config(cursor=state)
             self.app.mainwindow.configure(cursor=state)
         return
-
 
     # DECORATORS FOR ERROR HANDLING
     # -------------------------------------------------
@@ -1137,6 +1206,7 @@ class SubMethods_02:
     @staticmethod
     def skip_if_empty_graph(func):
         ''' This method skips the decorated function if there is no data in the graph.'''
+
         def wrapper(*args, **kwargs):
             # Take class instance
             instance = args[0]
@@ -1148,6 +1218,7 @@ class SubMethods_02:
                 return None
             # Go to original function
             return func(*args, **kwargs)
+
         return wrapper
 
     def after_gui_clicked(self, widget):
@@ -1155,11 +1226,8 @@ class SubMethods_02:
             widget - contains the name of method that triggered this method
             '''
 
-
-
     # DUMMY FUNCTIONS TO OVERRIDE BY SUBPROG
     # ------------------------------------------------
-
 
     def after_data_changed(self, variable, value):
         return

@@ -90,18 +90,6 @@ list_of_subprogs.append(['convert_stack_to_group', 'cancel'])
 # Widgets used by main application
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
 
-# def check_busy(method):
-#     @wraps(method)
-#     def wrapper(self, *args, **kwargs):
-#         self.mainwindow.configure(cursor="watch")
-#         if self.eleana.busy:
-#             if self.eleana.devel_mode:
-#                 print(f"{Path(__file__).name}, {method.__name__}: self.eleana.busy = True")
-#             return  # Breaks a method execution
-#         self.mainwindow.configure(cursor="watch")
-#         return method(self, *args, **kwargs)  # Go to a method
-#    return wrapper
-
 def check_busy(method):
     @wraps(method)
     def wrapper(self, *args, **kwargs):
@@ -1155,6 +1143,7 @@ class MainApp:
     def normalize(self):
         ''' Normalization of the amplitutes'''
         self.normalize = Normalize(self, which = 'first')
+
 
     def delete_selected_data(self, index_to_delete=None):
         av_data = self.sel_first._values

@@ -29,7 +29,7 @@ REGIONS_FROM = 'none'
                                         # 'sel' - EXTRACT DATA FROM SELECTED RANGE
 
 USE_SECOND = False                      # <--- IF TRUE THEN FIRST AND SECOND DATA WILL BE AVAILABLE FOR CALCULATIONS
-STACK_SEP = True                        # <--- IF TRUE THEN EACH DATA IN A STACK WILL BE CALCULATED SEPARATELY
+STACK_SEP = False                       # <--- IF TRUE THEN EACH DATA IN A STACK WILL BE CALCULATED SEPARATELY
                                         #      WHEN FALSE THEN YOU MUST CREATE A METHOD THAT CALCS OF THE WHOLE STACK
 #RESULT_CREATE = ''
 #RESULT_CREATE = 'add'                  # <--- DETEMINES IF PROCESSED DATA SHOULD BE ADDED TO RESULT_DATASET
@@ -40,16 +40,9 @@ RESULT_CREATE = 'replace'              #      'ADD' OR 'REPLACE' IS SELF EXPLANA
 REPORT_CREATE = False                   # <--- IF TRUE THEN REPORT WILL BE CREATED AFTER CALCULATIONS
 REPORT_SKIP_FOR_STK = True              # <--- IF TRUE THEN REPORT WILL NOT BE SHOWN EVEN AFTER PROCESSING OF 2D STACK
 REPORT_WINDOW_TITLE = 'Results of normalization'
-REPORT_HEADERS = ['Nr',
-                  'Name',
-                  'X1',
-                  'X2',
-                  'dX',
-                  'Y1',
-                  'Y2',
-                  'dY']                  # <--- Define names of columns in the Report
+REPORT_HEADERS = [None]                  # <--- Define names of columns in the Report
 REPORT_DEFAULT_X = 0                    # <--- INDEX IN REPORT_HEADERS USED TO SET NAME OF COLUMN THAT IS USED AS DEFAULT X IN THE REPORT
-REPORT_DEFAULT_Y = 7                    # <--- INDEX IN REPORT_HEADERS USED TO SET NAME OF COLUMN THAT IS USED AS DEFAULT Y IN THE REPORT
+REPORT_DEFAULT_Y = 0                    # <--- INDEX IN REPORT_HEADERS USED TO SET NAME OF COLUMN THAT IS USED AS DEFAULT Y IN THE REPORT
 REPORT_NAME = 'Results of normalization'
 REPORT_NAME_X =  'Data Number'          # <--- NAME OF X AXIS IN THE REPORT
 REPORT_NAME_Y =  'dY Value'             # <--- NAME OF Y AXIS IN THE REPORT
@@ -171,6 +164,9 @@ class Normalize(Methods, WindowGUI):                                            
         self.normalize_to = float(self.spinbox.get())
         self.ok_clicked()
 
+    def process_group(self):
+        self.process_group_clicked()
+
     def calculate_stack(self, commandline = False):
         ''' If STACK_SEP is False it means that data in stack should
             not be treated as separate data but are calculated as whole
@@ -203,6 +199,28 @@ class Normalize(Methods, WindowGUI):                                            
             comment2 = self.data_for_calculations[1]['comment']
             parameters2 = self.data_for_calculations[1]['parameters']
         # ------------------------------------------
+        amplitudes = []
+        for data in y1:
+            amplitude = self.calc_amplitude(data)
+            amplitudes.append(amplitude)
+        amplitude = sorted(amplitudes, reverse=True)[0]
+
+        list_of_processed_y = []
+        for data in y1:
+            single_y = data / amplitude * self.normalize_to
+            single_y = np.array(single_y)
+            list_of_processed_y.append(single_y)
+            processed_y = np.array(list_of_processed_y)
+        self.data_for_calculations[0]['y'] = processed_y
+
+        # Send calculated values to result (if needed). This will be sent to command line
+        result = None  # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
+
+        # Create summary row to add to the report. The values must match the column names in REPORT_HEADERS
+        row_to_report = None
+
+        # Update Window Widgets
+        return row_to_report
 
     def calculate(self, commandline = False):
         ''' The algorithm for calculations on single x,y,z data.
@@ -217,8 +235,7 @@ class Normalize(Methods, WindowGUI):                                            
             DO NOT USE FUNCTION REQUIRED GUI UPDATE HERE
         '''
 
-        print("Normalizacja")
-        # AVAILABLE DATA. REMOVE UNNECESSARY
+        # AVAILABLE DATA. REMOVE UNNECESSARYself.show_results_matching_first()
         # EACH X,Y,Z IS NP.ARRAY OF ONE DIMENSION
         # -----------------------------------------
         x1 = self.data_for_calculations[0]['x']
@@ -261,6 +278,18 @@ class Normalize(Methods, WindowGUI):                                            
 
         # Update Window Widgets
         return row_to_report
+
+    def calc_amplitude(self, y):
+        ''' This is function that performs calculation
+            on a single Y data (also for stack)
+            You must define your calculations here
+        '''
+        if np.iscomplexobj(y):
+            y = np.abs(y)
+        min_ = np.min(y)
+        max_ = np.max(y)
+        amplitude = float(max_ - min_)
+        return amplitude
 
 if __name__ == "__main__":
     pass
