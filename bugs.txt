@@ -1,16 +1,9 @@
 Problemy:
-    1. Integrate region:
-        a) Wczytujemy dane stack (CTPO)
-        b) Wyświetlanmy dane CTPO
-        c) Włączamy Integrate
-        d) Klikamy Calculate
-        e) Zaznaczamy jakiś obszar
-        f) Klikamy ponownie Calculate
 
-        Pojawai się błąd:File "/home/marcin/PycharmProjects/Eleana/subprogs/integrate_region/IntegrateRegion.py", line 159, in calculate
-        self.update_result_data(y=y_cal, x=x_cal)
-        File "/home/marcin/PycharmProjects/Eleana/assets/SubprogMethods.py", line 178, in update_result_data
-        self.result_data.y[self.i_stk]  = y
-         ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+Polynomial baseline: wydaje się, że ostatnie widmo w stack nie odejmuje się linia bazowa. Trzeba sprawdzić dlaczego
+obliczenia kończą się na przedostatnim widmem. Podobnie się dzieje w przypadku integrate region. Też ostatniego ni liczy.
 
+Błędu tego nie ma dla Distance Mesurements więc nie wiem czy to nie jest przypadkiem tak, że liczy się wszystko,
+a na końcu się jakoś dziwnie podmienia ostatnie widmo
 
+COś źle liczy odejowanie polynomial od danych zespolonych

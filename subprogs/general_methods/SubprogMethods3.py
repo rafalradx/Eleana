@@ -275,10 +275,14 @@ class SubMethods_03:
         if self.subprog_settings['result'] == 'add':
             # Simply add the result to the eleana.results_dataset
             self.result_data = copy.deepcopy(self.original_data1)
+
             # Extract data from selections:
-            extr_x, extr_y = self.extract_region_xy(self.result_data.x, self.result_data.y)
-            self.result_data.x = extr_x
-            self.result_data.y = extr_y
+            # Only if ORIG_IN_ODD_IDX is False.
+            if not self.regions['orig_in_odd_idx']:
+                extr_x, extr_y = self.extract_region_xy(self.result_data.x, self.result_data.y)
+                self.result_data.x = extr_x
+                self.result_data.y = extr_y
+
             self.result_data.name = self.result_data.name + self.subprog_settings['name_suffix']
             self.result_data.name_nr = self.result_data.name_nr + self.subprog_settings['name_suffix']
             self.eleana.results_dataset.append(self.result_data)
@@ -287,19 +291,17 @@ class SubMethods_03:
         elif self.subprog_settings['result'] == 'replace':
             # The replace mode was set
             self.result_data = copy.deepcopy(self.original_data1)
-            # Extract data from selections:
-            extr_x, extr_y = self.extract_region_xy(self.result_data.x, self.result_data.y)
-            self.result_data.x = extr_x
-            self.result_data.y = extr_y
-
             self.result_data.name = self.result_data.name + self.subprog_settings['name_suffix']
             if len(self.eleana.results_dataset) == 0:
                 # Results_dataset is empty so new_result must be added
                 self.result_data = copy.deepcopy(self.original_data1)
+
                 # Extract data from selections:
-                extr_x, extr_y = self.extract_region_xy(self.result_data.x, self.result_data.y)
-                self.result_data.x = extr_x
-                self.result_data.y = extr_y
+                if not self.regions['orig_in_odd_idx']:
+                    extr_x, extr_y = self.extract_region_xy(self.result_data.x, self.result_data.y)
+                    self.result_data.x = extr_x
+                    self.result_data.y = extr_y
+
                 self.result_data.name = self.result_data.name + self.subprog_settings['name_suffix']
                 self.eleana.results_dataset.append(self.result_data)
                 self.current_index_in_results = 0
@@ -976,6 +978,7 @@ class SubMethods_03:
             index_in_result = len(results_dataset) - 1
             if self.stk_index < len(results_dataset[index_in_result].y) - 1:
                 results_dataset[index_in_result].y[self.stk_index] = copy.deepcopy(new_result.y)
+
             else:
                 results_dataset[index_in_result].x = copy.deepcopy(new_result.x)
                 results_dataset[index_in_result].z = copy.deepcopy(new_result.x)

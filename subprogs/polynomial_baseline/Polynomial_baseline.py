@@ -188,7 +188,7 @@ CURSOR_OUTSIDE_TEXT: str = 'One or more selected points are outside the (x, y) r
 
 
 '''**************************************************************************************************
-*                      THE DEFAULT CONSTRUCTOR (LINES BETWEEEN **)                                  * 
+*                      THE DEFAULT CONSTRUCTOR (LINES BETWEEN **)                                   * 
 **************************************************************************************************'''
 if __name__ == "__main__":                                                                          #|
     cmd_to_import = 'from subprogs.general_methods.Testui import TestUI as WindowGUI'
@@ -196,7 +196,7 @@ else:                                                                           
     cmd_to_import = f'from {SUBPROG_FOLDER}.{GUI_FILE[:-3]} import {GUI_CLASS} as WindowGUI'        #|
 exec(cmd_to_import)                                                                                 #|
 from subprogs.general_methods.SubprogMethods3 import SubMethods_03 as Methods                       #|
-class PolynomialBaseline(Methods, WindowGUI):                                                            #|
+class PolynomialBaseline(Methods, WindowGUI):                                                       #|
     def __init__(self, app=None, which='first', commandline=False):                                 #|
         if app and not commandline:                                                                 #|
             # Initialize window if app is defined and not commandline                               #|
@@ -361,7 +361,7 @@ class PolynomialBaseline(Methods, WindowGUI):                                   
 
         # Get the x data that were not extracted
         x1_orig = self.data_for_calculations[1]['x']
-
+        y1_orig = self.data_for_calculations[1]['y']
 
         # (1) CALCULATE BASELINE AND SUBTRACT IT FROM ORIGINAL
         polynom_coeff = np.polyfit(x1, y1, self.degree)
@@ -369,7 +369,7 @@ class PolynomialBaseline(Methods, WindowGUI):                                   
 
         # Write original data to results
         self.data_for_calculations[0]['x'] = x1_orig
-        self.data_for_calculations[0]['y'] = polynomial_y
+        self.data_for_calculations[0]['y'] = y1_orig - polynomial_y
 
 
         # Send calculated values to result (if needed). This will be sent to command line
