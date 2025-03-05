@@ -90,6 +90,15 @@ class GraphPreferences:
             self.plt_style =  'Solarize_Light2'
             plt.style.use(self.plt_style)
 
+        self.additional_plots_style = {
+                                        'color': 'gray',
+                                        'linewidth': 2,
+                                        'linestyle': 'dashed',
+                                        }
+
+        self.additional_plots = {'show': True,
+                                 'data': []}
+
     def default_settings(self):
         self.plt_style = 'Solarize_Light2'
         self.style_first = {'plot_type': 'line',
@@ -116,6 +125,9 @@ class GraphPreferences:
                              'color_re': '#108d3d',
                              'color_im': '#32ab5d'
                              }
+
+
+
         ctk.set_appearance_mode('light')
 
     def set_cursor_modes(self):
@@ -180,6 +192,9 @@ class Grapher(GraphPreferences):
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.app.graphFrame, pack_toolbar=False)
         self.toolbar.update()
         self.toolbar.grid(row=1, column=0, sticky="ew")
+
+        # Create empty set for additional plots used for temporary creation
+        self.additional_plots = []
 
         # Plot graph
         self.plot_graph()
@@ -388,6 +403,9 @@ class Grapher(GraphPreferences):
         self.ax.set_xlabel(axis_title['x_title'])
         self.ax.set_ylabel(axis_title['y_title'])
 
+        # Add additional plot like baseline etc
+        self.plot_additional_curves()
+
         # Log or Linear scales
         if bool(self.app.check_log_x.get()):
             self.ax.set_xscale('log')
@@ -494,6 +512,25 @@ class Grapher(GraphPreferences):
                 min = range[0]
                 max = range[1]
                 self.ax.axvspan(min, max, alpha=alpha, color=color)
+
+    def plot_additional_curves(self):
+        if not self.additional_plots.get('show', False):
+            # Do not add any additional plots
+            return
+        for data in self.additional_plots['data']:
+            x = data['x']
+            y = data['y']
+            name = data.get('name', None)
+            style = data.settings.get('settings', None)
+            if settings in None:
+                style = self.additional_plots_style
+
+
+        x1 = np.array(  [150,200, 350, 400, 500])
+        y1= np.array(   [2,3,2,3,3])
+        self.ax.plot(x1, y1, label = "Plot")
+
+
 
     '''**********************************
     *                                   *

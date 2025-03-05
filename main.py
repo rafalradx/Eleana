@@ -568,6 +568,7 @@ class MainApp:
         if selection == 'None':
             return
         self.first_selected(selection)
+        self.grapher.plot_additional_curves()
 
     @check_busy
     def first_down_clicked(self):

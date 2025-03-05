@@ -328,6 +328,8 @@ class SubMethods_03:
                 # Iterate over stk
                 name_nr = self.original_data1.name_nr + self.subprog_settings['name_suffix']
                 for stk_name in self.original_data1.stk_names:
+                    if stk_name == 'Time 1645.315 s':
+                        print('Stop here')
                     name = name_nr + '/' + stk_name + self.subprog_settings['name_suffix']
                     if self.data_label is not None:
                         self.data_label.configure(text=name)
@@ -976,12 +978,12 @@ class SubMethods_03:
 
         elif self.stk_index >= 0:
             index_in_result = len(results_dataset) - 1
-            if self.stk_index < len(results_dataset[index_in_result].y) - 1:
+            if self.stk_index <= len(results_dataset[index_in_result].y) - 1:
                 results_dataset[index_in_result].y[self.stk_index] = copy.deepcopy(new_result.y)
 
             else:
                 results_dataset[index_in_result].x = copy.deepcopy(new_result.x)
-                results_dataset[index_in_result].z = copy.deepcopy(new_result.x)
+                results_dataset[index_in_result].z = copy.deepcopy(new_result.z)
                 results_dataset[index_in_result].complex = copy.deepcopy(new_result.complex)
                 results_dataset[index_in_result].type = copy.deepcopy(new_result.type)
                 results_dataset[index_in_result].origin = copy.deepcopy(new_result.origin)
