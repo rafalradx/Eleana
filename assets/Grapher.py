@@ -96,8 +96,7 @@ class GraphPreferences:
                                         'linestyle': 'dashed',
                                         }
 
-        self.additional_plots = {'show': True,
-                                 'data': []}
+        self.additional_plots = []
 
     def default_settings(self):
         self.plt_style = 'Solarize_Light2'
@@ -514,22 +513,23 @@ class Grapher(GraphPreferences):
                 self.ax.axvspan(min, max, alpha=alpha, color=color)
 
     def plot_additional_curves(self):
-        if not self.additional_plots.get('show', False):
-            # Do not add any additional plots
+        ''' This add additional plots that are stored in self.additional_plots
+            to the graph. The additional plots are simply helper curves like
+            baseline or initial fit guess etc.
+        '''
+        if not self.additional_plots:
             return
-        for data in self.additional_plots['data']:
+        for data in self.additional_plots:
+            label = data.get('label', None)
             x = data['x']
             y = data['y']
-            name = data.get('name', None)
-            style = data.settings.get('settings', None)
-            if settings in None:
-                style = self.additional_plots_style
-
-
-        x1 = np.array(  [150,200, 350, 400, 500])
-        y1= np.array(   [2,3,2,3,3])
-        self.ax.plot(x1, y1, label = "Plot")
-
+            color = data['style']['color']
+            linewidth = data['style']['linewidth']
+            linestyle = data['style']['linestyle']
+            if np.size(x) != np.size(y):
+                return
+            self.ax.plot(x, y, label = label, color = color,
+                         linewidth = linewidth, linestyle = linestyle)
 
 
     '''**********************************

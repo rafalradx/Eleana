@@ -113,8 +113,10 @@ class SubMethods_03:
         # Unregister observer
         self.eleana.detach(self.observer)
         self.grapher.clear_selected_ranges()
+        self.clear_additional_plots()
         self.mainwindow.destroy()
         self.eleana.active_subprog = None
+        self.grapher.plot_graph()
 
     # GETTING THE DATA ACCORDING TO ELEANA.SELECTION
     # ----------------------------------------------
@@ -1000,16 +1002,24 @@ class SubMethods_03:
         self.app.resultFrame.grid()
         self.app.sel_result.configure(values=results)
 
-    def show_additional_plots(self, data):
+    def add_to_additional_plots(self, x, y, label = None, style = None, clear = False):
         ''' This adds additional plots to the grapher
             for example showing baseline or fits, etc.
             The settings for the plot are taken from
             self.additional_plots_settings
         '''
-        if not isinstance(data, list):
-            Error.show(title='Wrong type', info='Argument: data for self.show_additional_plots must be a list of dicts')
+        if clear:
+            self.grapher.additional_plots = []
+        if style is None:
+            style = self.additional_plots_settings
+        if np.size(x) != np.size(y):
+            Error.show(info = f"X and Y have different dimensions.")
             return
-        list_of_plots = []
+        data = {'label':label, 'x':x, 'y':y, 'style': style}
+        self.grapher.additional_plots.append(data)
+
+    def clear_additional_plots(self):
+        self.grapher.additional_plots = []
 
     # ADDITIONAL METHODS FOR CHECKING CURSOR POSITIONS ON GRAPH
     # ------------------------------------------------

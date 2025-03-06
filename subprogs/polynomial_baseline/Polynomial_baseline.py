@@ -25,6 +25,11 @@ TITLE: str = 'Polynomial baseline subtraction'
 # self.subprog_settings['on_top']
 ON_TOP : bool = True
 
+# If True then values for selected elements will be stored after close
+# and restored automatically when subprog is started again.
+# This works only until Eleana is closed
+RESTORE_SETTINGS = True
+
 # ID name of a CTkLabel widget where the name of current data is displayed.
 # CTkLabel with the same ID name must exist in the GUI.
 # If not used set this to None
@@ -203,7 +208,7 @@ class PolynomialBaseline(Methods, WindowGUI):                                   
             WindowGUI.__init__(self, app.mainwindow)                                                #|
         # Create settings for the subprog                                                           #|
         self.subprog_settings = {'title': TITLE, 'on_top': ON_TOP, 'data_label': DATA_LABEL, 'name_suffix': NAME_SUFFIX, 'auto_calculate': AUTO_CALCULATE, 'result': RESULT_CREATE, 'result_ignore':RESULT_IGNORE}
-        self.regions = {'from': REGIONS_FROM, 'orig_in_odd_idx':int(ORIG_IN_ODD_IDX)}
+        self.regions = {'from': REGIONS_FROM, 'orig_in_odd_idx':int(ORIG_IN_ODD_IDX),'restore':RESTORE_SETTINGS}
         self.report = {'nr': 1, 'create': REPORT_CREATE, 'headers': REPORT_HEADERS, 'rows': [], 'x_name': REPORT_NAME_X, 'y_name': REPORT_NAME_Y, 'default_x': REPORT_HEADERS[REPORT_DEFAULT_X], 'default_y': REPORT_HEADERS[REPORT_DEFAULT_Y],
                        'x_unit': REPORT_UNIT_X, 'y_unit': REPORT_UNIT_Y, 'to_group': REPORT_TO_GROUP, 'report_skip_for_stk': REPORT_SKIP_FOR_STK, 'report_window_title': REPORT_WINDOW_TITLE, 'report_name': REPORT_NAME}
         self.subprog_cursor = {'type': CURSOR_TYPE, 'changing': CURSOR_CHANGING, 'limit': CURSOR_LIMIT, 'clear_on_start': CURSOR_CLEAR_ON_START, 'cursor_required': CURSOR_REQUIRED, 'cursor_req_text':CURSOR_REQ_TEXT,
@@ -366,11 +371,15 @@ class PolynomialBaseline(Methods, WindowGUI):                                   
         # (1) CALCULATE BASELINE AND SUBTRACT IT FROM ORIGINAL
         polynom_coeff = np.polyfit(x1, y1, self.degree)
         polynomial_y = np.polyval(polynom_coeff, x1_orig)
+        poly_curve = np.polyval(polynom_coeff, x1)
 
         # Write original data to results
         self.data_for_calculations[0]['x'] = x1_orig
         self.data_for_calculations[0]['y'] = y1_orig - polynomial_y
 
+        # Add to additional plots
+        #self.clear_additional_plots()
+        self.add_to_additional_plots(x = x1, y = poly_curve, clear=True)
 
         # Send calculated values to result (if needed). This will be sent to command line
         result = None # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
