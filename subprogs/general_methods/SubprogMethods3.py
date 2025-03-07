@@ -1213,6 +1213,16 @@ class SubMethods_03:
             self.app.mainwindow.configure(cursor=state)
         return
 
+
+    # STORE AND RESTORE SETTINGS
+    # -------------------------------------------------
+    def storage(self, data = None):
+        ''' Stores the data in self.eleana.subprog_storage.
+            If data is None then read from self.subprog_storage and send
+            back to the subprog
+        '''
+
+
     # DECORATORS FOR ERROR HANDLING
     # -------------------------------------------------
 

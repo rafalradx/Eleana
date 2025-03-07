@@ -371,7 +371,7 @@ class PolynomialBaseline(Methods, WindowGUI):                                   
         # (1) CALCULATE BASELINE AND SUBTRACT IT FROM ORIGINAL
         polynom_coeff = np.polyfit(x1, y1, self.degree)
         polynomial_y = np.polyval(polynom_coeff, x1_orig)
-        poly_curve = np.polyval(polynom_coeff, x1)
+        poly_curve = np.polyval(polynom_coeff, x1_orig)
 
         # Write original data to results
         self.data_for_calculations[0]['x'] = x1_orig
@@ -379,7 +379,7 @@ class PolynomialBaseline(Methods, WindowGUI):                                   
 
         # Add to additional plots
         #self.clear_additional_plots()
-        self.add_to_additional_plots(x = x1, y = poly_curve, clear=True)
+        self.add_to_additional_plots(x = x1_orig, y = poly_curve, clear=True)
 
         # Send calculated values to result (if needed). This will be sent to command line
         result = None # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE

@@ -83,6 +83,11 @@ class Eleana:
 
         self.custom_annotations = []
 
+        # Storage for settings for subprogs
+        # The structure is list of dicts. Dicts has structure:
+        # {'subprog':'SUBPROG_PYTHON_FILENAME', 'content':[LIST_OF_DICTS_CONTAINING_STORAGE]}
+
+        self.subprog_storage = []
     ''' ***************************** 
      *         OBSERVER METHODS      *
      ******************************'''

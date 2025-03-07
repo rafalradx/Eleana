@@ -1726,6 +1726,12 @@ if not DEVEL:
     elif os.name == 'nt':  # Windows
         sys.stderr = open('nul', 'w')
 
+    # Switch off nupy RankWarnings in Numpy
+    import warnings
+    warnings.simplefilter('ignore', np.exceptions.RankWarning)
+
+
+''' Create Main instances '''
 eleana = Eleana(version = ELEANA_VERSION, devel = DEVEL)
 sound = Sound()
 cmd = CommandProcessor()
