@@ -30,6 +30,7 @@ def check_busy(method):
 
 class SubMethods_03:
     def __init__(self, app=None, which='first', commandline=False, close_subprogs=False):
+        self.subprog_storage_data = []
         self.commandline = commandline
         self.general_error_skip = False
         self.update_gui = True
@@ -93,6 +94,10 @@ class SubMethods_03:
                         self.grapher.clear_selected_ranges()
                     else:
                         self.grapher.clear_all_annotations()
+            # Restore settings for the subporg
+            self.subprog_id = self.subprog_settings['folder'] + "|" + self.subprog_settings['title']
+            if self.subprog_settings['restore']:
+                self.restore_settings()
 
     # STANDARD METHODS FOR MAIN APPLICATION
     # ----------------------------------------------
@@ -105,6 +110,10 @@ class SubMethods_03:
 
     def cancel(self, event=None):
         ''' Close the window with self.response = None '''
+        # Store settings
+        if self.subprog_settings['restore']:
+             self.save_storage_on_close()
+
         self.response = None
         # Return cursor selection to enabled
         self.app.sel_cursor_mode.configure(state="normal")
@@ -887,6 +896,8 @@ class SubMethods_03:
         self.report['rows'] = []
         self.consecutive_number = 1
 
+
+
     #   UPDATING RESULTS AND GUI
     # ------------------------------------------------
 
@@ -1216,12 +1227,36 @@ class SubMethods_03:
 
     # STORE AND RESTORE SETTINGS
     # -------------------------------------------------
-    def storage(self, data = None):
-        ''' Stores the data in self.eleana.subprog_storage.
-            If data is None then read from self.subprog_storage and send
-            back to the subprog
+    def to_store(self, to_save: dict):
+        ''' Create entry for each storage values.
         '''
 
+        if self.subprog_settings['restore']:
+            self.subprog_storage_data.append(to_save)
+        else:
+            if self.eleana.devel_mode:
+                print('SubprogMethods3:store, if RESTORE is False or to_save parameter is None')
+
+    def save_storage_on_close(self):
+        ''' Create entry for all subprog storge values in
+            self.eleana.subprog_storage
+        '''
+        elements = self.save_settings()
+        for element in elements:
+            self.to_store(element)
+        storage = copy.deepcopy(self.subprog_storage_data)
+        self.eleana.subprog_storage[self.subprog_id] = storage
+
+
+    def restore(self, element):
+        ''' Get data from self.eleana.subprog_storage
+            for widget and returns stored values
+        '''
+        subprog_field = self.eleana.subprog_storage.get(self.subprog_id, None)
+        if subprog_field is None:
+            return None
+        to_restore = next(line[element] for line in subprog_field if element in line)
+        return to_restore
 
     # DECORATORS FOR ERROR HANDLING
     # -------------------------------------------------

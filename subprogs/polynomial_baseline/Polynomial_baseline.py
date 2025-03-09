@@ -1,9 +1,13 @@
 #!/usr/bin/python3
 # IMPORT MODULES NEEDED
 # -- Here is an example --
+from asyncio import set_event_loop_policy
+
 import numpy as np
 from pathlib import Path
 import copy
+
+from scipy.spatial import delaunay_plot_2d
 
 ''' GENERAL SETTINGS '''
 # If True all active subprog windows will be closed on start this subprog
@@ -207,8 +211,9 @@ class PolynomialBaseline(Methods, WindowGUI):                                   
             # Initialize window if app is defined and not commandline                               #|
             WindowGUI.__init__(self, app.mainwindow)                                                #|
         # Create settings for the subprog                                                           #|
-        self.subprog_settings = {'title': TITLE, 'on_top': ON_TOP, 'data_label': DATA_LABEL, 'name_suffix': NAME_SUFFIX, 'auto_calculate': AUTO_CALCULATE, 'result': RESULT_CREATE, 'result_ignore':RESULT_IGNORE}
-        self.regions = {'from': REGIONS_FROM, 'orig_in_odd_idx':int(ORIG_IN_ODD_IDX),'restore':RESTORE_SETTINGS}
+        self.subprog_settings = {'folder':SUBPROG_FOLDER, 'title': TITLE, 'on_top': ON_TOP, 'data_label': DATA_LABEL, 'name_suffix': NAME_SUFFIX,
+                                 'restore':RESTORE_SETTINGS, 'auto_calculate': AUTO_CALCULATE, 'result': RESULT_CREATE, 'result_ignore':RESULT_IGNORE}
+        self.regions = {'from': REGIONS_FROM, 'orig_in_odd_idx':int(ORIG_IN_ODD_IDX)}
         self.report = {'nr': 1, 'create': REPORT_CREATE, 'headers': REPORT_HEADERS, 'rows': [], 'x_name': REPORT_NAME_X, 'y_name': REPORT_NAME_Y, 'default_x': REPORT_HEADERS[REPORT_DEFAULT_X], 'default_y': REPORT_HEADERS[REPORT_DEFAULT_Y],
                        'x_unit': REPORT_UNIT_X, 'y_unit': REPORT_UNIT_Y, 'to_group': REPORT_TO_GROUP, 'report_skip_for_stk': REPORT_SKIP_FOR_STK, 'report_window_title': REPORT_WINDOW_TITLE, 'report_name': REPORT_NAME}
         self.subprog_cursor = {'type': CURSOR_TYPE, 'changing': CURSOR_CHANGING, 'limit': CURSOR_LIMIT, 'clear_on_start': CURSOR_CLEAR_ON_START, 'cursor_required': CURSOR_REQUIRED, 'cursor_req_text':CURSOR_REQ_TEXT,
@@ -265,7 +270,10 @@ class PolynomialBaseline(Methods, WindowGUI):                                   
         # HERE DEFINE YOUR REFERENCES TO WIDGETS
         self.sel_polynomial = self.builder.get_object('sel_polynomial', self.mainwindow)
         self.sel_polynomial.set(value='Linear')
+        self.keep_baseline = self.builder.get_object('keep_baseline', self.mainwindow)
         self.degree = 1
+
+
 
         # Storage of the baseline
         self.baseline = {'x': np.array([]),
@@ -388,6 +396,30 @@ class PolynomialBaseline(Methods, WindowGUI):                                   
         row_to_report = None
 
         return row_to_report
+
+    def save_settings(self):
+        ''' Stores required values to self.eleana.subprog_storage
+            This is stored in memory only, not in disk
+            define each list element as:
+            {'key_for_storage' : function_for_getting_value()}
+        '''
+        return  [
+            {'sel_polynomial'    : self.sel_polynomial.get()    },
+            {'keep_baseline'     : self.keep_baseline.get()     },
+                ]
+
+    def restore_settings(self):
+        val = self.restore('sel_polynomial')
+        if val:
+            self.sel_polynomial.set(value = val)
+            self.sel_polynomial_clicked(val)
+
+        val = self.restore('keep_baseline')
+        if val == True:
+            self.keep_baseline.select()
+        elif val == False:
+            self.keep_baseline.deselect()
+
 
 if __name__ == "__main__":
     tester = TemplateClass()
