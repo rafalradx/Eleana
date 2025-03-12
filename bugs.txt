@@ -1,9 +1,8 @@
 Problemy:
 
-Polynomial baseline: wydaje się, że ostatnie widmo w stack nie odejmuje się linia bazowa. Trzeba sprawdzić dlaczego
-obliczenia kończą się na przedostatnim widmem. Podobnie się dzieje w przypadku integrate region. Też ostatniego ni liczy.
 
-Błędu tego nie ma dla Distance Mesurements więc nie wiem czy to nie jest przypadkiem tak, że liczy się wszystko,
-a na końcu się jakoś dziwnie podmienia ostatnie widmo
+1. COś źle liczy odejowanie polynomial od danych zespolonych
+2. Przy tworzeniu Create static plot jest jakiś problem z dodaniem pozycji menu i przez to nie pojawia się lista
+    utworzonych wykresów.
 
-COś źle liczy odejowanie polynomial od danych zespolonych
+   

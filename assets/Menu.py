@@ -325,16 +325,17 @@ class MainMenu:
         # Remove the current submenu and check if there are plots in the self.eleana.static_plots
         # If not then return
         try:
-            self.menu_plots.delete("Show plot")
-        except:
+            self.menu_showPlots.delete("Show plot")
+        except AttributeError:
             pass
+
         if not self.eleana.static_plots:
             return
         # Create new menu
         self.menu_showPlots = tk.Menu(self.menu_file, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                       activebackground=self.activebg, activeforeground=self.activefg,
                                       borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        self.menu_plots.add_cascade(label="Show plot", menu=self.menu_showPlots, image=self.icon_dropdown,
+        self.menu_tools.add_cascade(label="Show plot", menu=self.menu_showPlots, image=self.icon_dropdown,
                                     compound="left")
         # Scan the content of self.eleana.static_plots to populate menu items
         i = 0

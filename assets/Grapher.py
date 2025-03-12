@@ -11,6 +11,7 @@ import customtkinter as ctk
 import copy
 from CTkListbox import CTkListbox
 import numpy as np
+from Plots import Staticplotwindow
 
 # Make matplotlib to use tkinter
 matplotlib.use('TkAgg')
