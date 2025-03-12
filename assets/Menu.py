@@ -325,8 +325,8 @@ class MainMenu:
         # Remove the current submenu and check if there are plots in the self.eleana.static_plots
         # If not then return
         try:
-            self.menu_showPlots.delete("Show plot")
-        except AttributeError:
+            self.menu_tools.delete("Show plot")
+        except:
             pass
 
         if not self.eleana.static_plots:
