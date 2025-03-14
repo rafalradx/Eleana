@@ -4,11 +4,11 @@ import tkinter as tk
 import pygubu
 
 PROJECT_PATH = pathlib.Path(__file__).parent
-PROJECT_UI = PROJECT_PATH / "polynomial_baseline.ui"
+PROJECT_UI = PROJECT_PATH / "spline_baseline.ui"
 RESOURCE_PATHS = [PROJECT_PATH]
 
 
-class BaselinePolynomUI:
+class SplineBaselineUI:
     def __init__(
         self,
         master=None,
@@ -79,5 +79,5 @@ class BaselinePolynomUI:
 
 
 if __name__ == "__main__":
-    app = BaselinePolynomUI()
+    app = SplineBaselineUI()
     app.run()

@@ -55,6 +55,7 @@ class MainMenu:
         self.icon_trashres = self.prepare_icon("trash_res.png")
         self.icon_fromclipboard =self.prepare_icon("fromclipboard.png")
         self.icon_baselineplynom = self.prepare_icon("baseline.png")
+        self.icon_splinebaseline = self.prepare_icon("spline.png")
 
         ''' BUILD MENU '''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth_bar, activeborderwidth=self.borderwidth)
@@ -227,10 +228,13 @@ class MainMenu:
 
         self.menu_modifications.add_separator()
 
-        self.menu_modifications.add_command(label="Polynomial baseline", command=self.app.polynomial_baseline,
+        # - Subtract Polynomial baseline
+        self.menu_modifications.add_command(label="Subtract polynomial baseline", command=self.app.polynomial_baseline,
                                             image=self.icon_baselineplynom, compound="left")
 
-
+        # - Subtract Spline baseline
+        self.menu_modifications.add_command(label="Subtract spline baseline", command=self.app.spline_baseline,
+                                            image=self.icon_splinebaseline, compound="left")
 
 
         ''' Menu EPR '''

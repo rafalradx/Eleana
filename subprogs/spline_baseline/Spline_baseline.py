@@ -14,16 +14,16 @@ from scipy.spatial import delaunay_plot_2d
 CLOSE_SUBPROGS: bool = False
 
 # Folder name containing THIS file
-SUBPROG_FOLDER: str = 'polynomial_baseline'
+SUBPROG_FOLDER: str = 'spline_baseline'
 
 # Name of GUI python file created by pygubu-designer. Usually with ...ui.py endings
-GUI_FILE: str = 'BaselinePolynomui.py'
+GUI_FILE: str = 'SplineBaselineui.py'
 
 # Name of class in GUI_FILE used to create the window
-GUI_CLASS: str = 'BaselinePolynomUI'
+GUI_CLASS: str = 'SplineBaselineUI'
 
 # Title of the window that shown in the main bar
-TITLE: str = 'Polynomial baseline subtraction'
+TITLE: str = 'Spline baseline subtraction'
 
 # If True, this window will be always on top
 # self.subprog_settings['on_top']
@@ -205,7 +205,7 @@ else:                                                                           
     cmd_to_import = f'from {SUBPROG_FOLDER}.{GUI_FILE[:-3]} import {GUI_CLASS} as WindowGUI'        #|
 exec(cmd_to_import)                                                                                 #|
 from subprogs.general_methods.SubprogMethods3 import SubMethods_03 as Methods                       #|
-class PolynomialBaseline(Methods, WindowGUI):                                                       #|
+class SplineBaseline(Methods, WindowGUI):                                                           #|
     def __init__(self, app=None, which='first', commandline=False):                                 #|
         if app and not commandline:                                                                 #|
             # Initialize window if app is defined and not commandline                               #|

@@ -2,12 +2,12 @@
 <interface version="1.4" author="PygubuDesigner 0.40.2">
   <project>
     <settings>
-      <setting id="name">baseline_polynom</setting>
-      <setting id="description">Window for polynomial baseline creation</setting>
-      <setting id="module_name">BaselinePolynom</setting>
+      <setting id="name">spline_polynom</setting>
+      <setting id="description">Window for spline baseline creation</setting>
+      <setting id="module_name">SplineBaseline</setting>
       <setting id="template">application</setting>
       <setting id="main_widget">toplevel1</setting>
-      <setting id="main_classname">BaselinePolynom</setting>
+      <setting id="main_classname">SplineBaseline</setting>
       <setting id="main_menu" />
       <setting id="output_dir">.</setting>
       <setting id="output_dir2" />

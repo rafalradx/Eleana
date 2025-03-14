@@ -54,6 +54,7 @@ from DataClasses import Stack
 # append.(['name of instance without self., 'Command to close']
 
 list_of_subprogs = []
+from spline_baseline.Spline_baseline import SplineBaseline
 from polynomial_baseline.Polynomial_baseline import PolynomialBaseline
 list_of_subprogs.append(['subprog_polynomial_baseline', 'cancel'])
 from distance_read.Distance_read import DistanceRead
@@ -1552,6 +1553,9 @@ class MainApp:
 
     def polynomial_baseline(self):
         self.subprog_polynomial_baseline = PolynomialBaseline(self, which = 'first')
+
+    def spline_baseline(self):
+        self.subprog_spline_baseline = SplineBaseline(self, which = 'first')
 
     '''***********************************************
     *           GRAPH SWITCHES AND BUTTONS           *

@@ -620,7 +620,7 @@ class SubMethods_03:
         # Add non extracted data if ORIG_IN_ODD_IDX is True
         if self.regions['orig_in_odd_idx']:
             x_data1_orig = copy.deepcopy(self.original_data1.x)
-            y_data1_orig = copy.deepcopy(self.original_data1.y[self.stk_index])
+            y_data1_orig = copy.deepcopy(self.original_data1.y)
             z_data1_orig = copy.deepcopy(self.original_data1.z)
             data_1_orig = {'x': x_data1_orig,
                            'y': y_data1_orig,
