@@ -139,14 +139,18 @@ class MainMenu:
         self.menu_edit = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                  activebackground=self.activebg, activeforeground=self.activefg,
                                  borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        #self.main_menu.add_cascade(label="Edit", menu=self.menu_edit, image = self.icon_dropdown, compound="left")
         self.main_menu.add_cascade(label=" Edit ", menu=self.menu_edit)
 
-        self.menu_spreadsheet = tk.Menu(self.menu_edit, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
-                                 activebackground=self.activebg, activeforeground=self.activefg,
-                                 borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
 
-        self.menu_edit.add_cascade(label="Spreadsheet", menu=self.menu_spreadsheet, image=self.icon_dropdown, compound="left")
+        # self.menu_spreadsheet = tk.Menu(self.menu_edit, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+        #                          activebackground=self.activebg, activeforeground=self.activefg,
+        #                          borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        #
+        # self.menu_edit.add_cascade(label="Spreadsheet", menu=self.menu_spreadsheet, image=self.icon_dropdown, compound="left")
+
+        # - Data in spreadsheet
+        self.menu_edit.add_command(label="Edit data in table", command=self.app.edit_data_in_table,
+                                   image=self.icon_table, compound="left")
 
         # - Create from table
         self.menu_edit.add_command(label="Create data from table", command=self.app.create_from_table, image=self.icon_table, compound="left")
@@ -220,7 +224,6 @@ class MainMenu:
         self.menu_modifications = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                      activebackground=self.activebg, activeforeground=self.activefg,
                                      borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        #self.main_menu.add_cascade(label="Modifications", menu=self.menu_modifications, image=self.icon_dropdown, compound="left")
         self.main_menu.add_cascade(label=" Modifications ", menu=self.menu_modifications)
 
         # - Normalize amplitude
@@ -384,10 +387,20 @@ class ContextMenu:
         self.app.sel_first.bind("<Button-3>", self.show_context_menu_first)
         self.context_menu_first = tk.Menu(self.app.mainwindow, tearoff=0, bg=self.bg, fg=self.fg, font = self.font)
 
+        # FIRST STK
+        self.app.firstStkFrame.bind("<Button-3>", self.show_context_menu_first_stk)
+        self.app.f_stk.bind("<Button-3>", self.show_context_menu_first_stk)
+        self.context_menu_first_stk = tk.Menu(self.app.mainwindow, tearoff=0, bg=self.bg, fg=self.fg, font=self.font)
+
         # SECOND
         self.app.secondFrame.bind("<Button-3>", self.show_context_menu_second)
         self.app.sel_second.bind("<Button-3>", self.show_context_menu_second)
         self.context_menu_second = tk.Menu(self.app.mainwindow, tearoff=0, bg=self.bg, fg=self.fg, font = self.font)
+
+        # SECOND STK
+        self.app.secondStkFrame.bind("<Button-3>", self.show_context_menu_second_stk)
+        self.app.s_stk.bind("<Button-3>", self.show_context_menu_second_stk)
+        self.context_menu_second_stk = tk.Menu(self.app.mainwindow, tearoff=0, bg=self.bg, fg=self.fg, font=self.font)
 
         # RESULT
         self.app.resultFrame.bind("<Button-3>", self.show_context_menu_result)
@@ -399,6 +412,8 @@ class ContextMenu:
         self.build_menu_first()
         self.build_menu_second()
         self.build_menu_result()
+        self.build_menu_f_stk()
+        self.build_menu_s_stk()
 
     def build_menu_group(self):
         '''This creates positions for FIRST context menu '''
@@ -419,6 +434,12 @@ class ContextMenu:
         self.context_menu_first.add_command(label="Edit comment", command=lambda: self.app.edit_comment('first'))
         self.context_menu_first.add_command(label="Edit parameters", command = lambda: self.app.edit_parameters('first'))
 
+    def build_menu_f_stk(self):
+        '''This creates positions for FIRST STK context menu '''
+        self.context_menu_first_stk.add_command(label="Delete", command=lambda: self.app.rename_data('first'))
+
+
+
     def build_menu_second(self):
         '''This creates positions for SECOND context menu '''
         self.context_menu_second.add_command(label="Rename", command=lambda: self.app.rename_data('second'))
@@ -429,6 +450,14 @@ class ContextMenu:
         self.context_menu_second.add_command(label="Edit comment", command=lambda: self.app.edit_comment('second'))
         self.context_menu_second.add_command(label="Edit parameters", command=lambda: self.app.edit_parameters('second'))
 
+    def build_menu_s_stk(self):
+        '''This creates positions for FIRST STK context menu '''
+        self.context_menu_second_stk.add_command(label="Delete", command=lambda: self.app.rename_data('first'))
+
+
+
+
+
     def build_menu_result(self):
         '''This creates positions for SECOND context menu '''
         self.context_menu_result.add_command(label="Rename", command=lambda: self.app.rename_data('result'))
@@ -437,8 +466,16 @@ class ContextMenu:
 
     def show_context_menu_group(self, event):
         self.context_menu_group.tk_popup(event.x_root, event.y_root)
+
     def show_context_menu_first(self, event):
         self.context_menu_first.tk_popup(event.x_root, event.y_root)
+
+    def show_context_menu_first_stk(self, event):
+        self.context_menu_first_stk.tk_popup(event.x_root, event.y_root)
+
+    def show_context_menu_second_stk(self, event):
+        self.context_menu_second_stk.tk_popup(event.x_root, event.y_root)
+
 
     def show_context_menu_second(self, event):
         self.context_menu_second.tk_popup(event.x_root, event.y_root)

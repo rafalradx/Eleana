@@ -11,6 +11,7 @@ from assets.DataClasses import Single2D
 from tkinter import filedialog
 from modules.tksheet import Sheet
 import copy
+from subprogs.edit_parameters.edit_parameters import EditParameters
 
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "table.ui"
@@ -207,7 +208,27 @@ class CreateFromTable:
             info = CTkMessagebox(title="", message="The data was added to the dataset.", icon="info")
 
     def edit_parameters(self):
-        info = CTkMessagebox(title = "Edit parameters", message="This option is not implemented yet. Please edit parameters after addition of the data.")
+        if not self.set_parameters:
+            self.set_parameters = {
+                'name_x': self.x_axis_name.get(),
+                'unit_x': self.x_axis_unit.get(),
+                'name_y': self.y_axis_name.get(),
+                'unit_y': self.y_axis_unit.get()
+            }
+        edit_par = EditParameters(master = self.mainwindow, parameters=self.set_parameters)
+        self.set_parameters = edit_par.get()
+
+        self.x_axis_name.delete(0, "end")
+        self.x_axis_name.insert(0, self.set_parameters['name_x'])
+
+        self.x_axis_unit.delete(0, "end")
+        self.x_axis_unit.insert(0, self.set_parameters['unit_x'])
+
+        self.y_axis_name.delete(0, "end")
+        self.y_axis_name.insert(0, self.set_parameters['name_y'])
+
+        self.y_axis_unit.delete(0, "end")
+        self.y_axis_unit.insert(0, self.set_parameters['unit_y'])
 
     def generate_table(self, df=None, list2D=None):
         if df is not None:

@@ -1138,6 +1138,8 @@ class MainApp:
     *            METHODS FOR MENU               *
     ******************************************'''
 
+
+
     # --------------------------------------------
     # MENU: Analysis
     # --------------------------------------------
@@ -1466,6 +1468,11 @@ class MainApp:
                 exec(close_cmd)
             except:
                 pass
+
+
+    def edit_data_in_table(self):
+        print("To edit")
+
 
     def notes(self):
         self.notepad = Notepad(master=self.mainwindow, title="Edit notes", text=self.eleana.notes)
