@@ -54,7 +54,10 @@ from DataClasses import Stack
 # append.(['name of instance without self., 'Command to close']
 
 list_of_subprogs = []
+from trim_data.Trim_data import TrimData
+list_of_subprogs.append(['subprog_trim_data', 'cancel'])
 from spline_baseline.Spline_baseline import SplineBaseline
+list_of_subprogs.append(['subprog_spline_baseline', 'cancel'])
 from polynomial_baseline.Polynomial_baseline import PolynomialBaseline
 list_of_subprogs.append(['subprog_polynomial_baseline', 'cancel'])
 from distance_read.Distance_read import DistanceRead
@@ -1550,6 +1553,9 @@ class MainApp:
 
     def xy_distance(self):
         self.xy_distance = DistanceRead(self, which = 'first')
+
+    def trim_data(self):
+        self.subprog_trim_data = TrimData(self, which = "first")
 
     def polynomial_baseline(self):
         self.subprog_polynomial_baseline = PolynomialBaseline(self, which = 'first')

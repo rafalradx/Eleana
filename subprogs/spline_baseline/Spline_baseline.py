@@ -4,10 +4,8 @@
 from asyncio import set_event_loop_policy
 
 import numpy as np
-from pathlib import Path
-import copy
+from scipy.interpolate import CubicSpline, PchipInterpolator, Akima1DInterpolator, BarycentricInterpolator
 
-from scipy.spatial import delaunay_plot_2d
 
 ''' GENERAL SETTINGS '''
 # If True all active subprog windows will be closed on start this subprog
@@ -53,8 +51,8 @@ AUTO_CALCULATE: bool = False
 ''' INPUT DATA CONFIGURATION '''
 # Define if data for calculations should be extracted.
 # self.regions['from']
-#REGIONS_FROM: str = 'none'         # 'none' - do not extract
-REGIONS_FROM: str = 'selection'   # 'selection' - take data only from selected range on graph (Range selection)
+#REGIONS_FROM: str = 'none'        # 'none' - do not extract
+REGIONS_FROM: str = 'selection'    # 'selection' - take data only from selected range on graph (Range selection)
 #REGIONS_FROM: str = 'scale'       # ' scale' - take data from current x scale
 
 # Define if original, not extracted data are added to self.data_for_calculations in indexes +1
@@ -156,13 +154,13 @@ REPORT_TO_GROUP: str = 'RESULT Distance'
 ''' CURSOR SETTINGS '''
 # If False, the manual changing of cursor type in the main GUI Window is disabled.
 # self.subprog_cursor['changing']
-CURSOR_CHANGING: bool = False
+CURSOR_CHANGING: bool = True
 
 # Name of the cursor that is automatically switched on when the subprog window is opened.
 # Possible values: 'None', 'Continuous read XY', 'Selection of points with labels'
 #                  'Selection of points', 'Numbered selections', 'Free select', 'Crosshair', 'Range select'
 # self.subprog_cursor['type']
-CURSOR_TYPE: str = 'Range select'
+CURSOR_TYPE: str = 'Free select'
 
 # Set the maximum number of annotations that can be added to the graph.
 # Set to 0 for no limit
@@ -176,12 +174,12 @@ CURSOR_CLEAR_ON_START: bool = True
 # Minimum number of cursor annotations needed for calculations.
 # Set 0 for no checking
 # self.subprog_cursor['cursor_required']
-CURSOR_REQUIRED: int = 0
+CURSOR_REQUIRED: int = 2
 
 # A text string to show in a pop up window if number of cursors is less than required for calculations
 # Leve this empty if no error should be displayed
 # self.subprog_cursor['cursor_req_text']
-CURSOR_REQ_TEXT: str = 'Please select two points.'
+CURSOR_REQ_TEXT: str = 'Please select at least two points.'
 
 # Enable checking if all cursor annotations are between Xmin and Xmax of data_dor_calculations
 # self.subprog_cursor['cursor_outside_x']
@@ -271,8 +269,8 @@ class SplineBaseline(Methods, WindowGUI):                                       
         self.sel_polynomial = self.builder.get_object('sel_polynomial', self.mainwindow)
         self.sel_polynomial.set(value='Linear')
         self.keep_baseline = self.builder.get_object('keep_baseline', self.mainwindow)
-        self.degree = 1
-
+        self.interpolate_method = "akma"
+        self.sel_polynomial.set(value = "Spline")
 
 
         # Storage of the baseline
@@ -280,20 +278,20 @@ class SplineBaseline(Methods, WindowGUI):                                       
                          'y':np.array([])}
 
     def sel_polynomial_clicked(self, selection):
-        selection = selection[0]
-        if selection == 'C':
-            self.degree = 0
-        elif selection == "L":
-            self.degree = 1
-        elif selection == "P":
-            self.degree = 2
-        elif selection == "1":
-            self.degree = 10
-        else:
-            self.degree = int(selection)
+        method = selection[0:3].lower()
+        if method == "ner":
+            self.interpolate_method = "nearest"
+        elif method == "lin":
+            self.interpolate_method = "linear"
+        elif method == "qub":
+            self.interpolate_method = "qubic"
+        elif method == "phi":
+            self.interpolate_method = "phip"
+        elif method == "akm":
+            self.interpolate_method == "akma"
+        elif method == "bar":
+            self.interpolate_method = "barycentric"
 
-
-    #@Methods.skip_if_empty_graph
 
     def calculate_stack(self, commandline = False):
         ''' If STACK_SEP is False it means that data in stack should
@@ -371,24 +369,41 @@ class SplineBaseline(Methods, WindowGUI):                                       
         cursor_positions = self.grapher.cursor_annotations
         # ------------------------------------------
 
-
         # Get the x data that were not extracted
         x1_orig = self.data_for_calculations[1]['x']
         y1_orig = self.data_for_calculations[1]['y']
 
-        # (1) CALCULATE BASELINE AND SUBTRACT IT FROM ORIGINAL
-        polynom_coeff = np.polyfit(x1, y1, self.degree)
-        polynomial_y = np.polyval(polynom_coeff, x1_orig)
-        poly_curve = np.polyval(polynom_coeff, x1_orig)
+        # (1) GET X, Y FOR INTERPOLATE FROM RANGE OR POINTS
+        if self.app.sel_cursor_mode.get() != "Range select":
+            x1, y1 = self.get_selected_points()
+
+        # (2) CALCULATE BASELINE
+        if self.interpolate_method == "linear":
+            baseline = np.interp(x1_orig, x1, y1, left=None, right=None, period=None)
+        elif self.interpolate_method == "linear":
+            baseline = np.interp(x1_orig, x1, y1)
+        elif self.interpolate_method == "qubic":
+            interpolator = CubicSpline(x1, y1)
+            baseline = interpolator(x1_orig)
+        elif self.interpolate_method == "phip":
+            interpolator = PchipInterpolator(x1, y1)
+            baseline = interpolator(x1_orig)
+        elif self.interpolate_method == "akma":
+            interpolator = Akima1DInterpolator(x1, y1)
+            baseline = interpolator(x1_orig)
+        elif self.interpolate_method == "barycentric":
+            interpolator = BarycentricInterpolator(x1, y1)
+            baseline = interpolator(x1_orig)
+
 
         # Write original data to results
         self.data_for_calculations[0]['x'] = x1_orig
         if self.keep_baseline.get():
-            self.data_for_calculations[0]['y'] = poly_curve
+            self.data_for_calculations[0]['y'] = baseline
             self.clear_additional_plots()
         else:
-            self.data_for_calculations[0]['y'] = y1_orig - polynomial_y
-            self.add_to_additional_plots(x=x1_orig, y=poly_curve, clear=True)
+            self.data_for_calculations[0]['y'] = y1_orig - baseline
+            self.add_to_additional_plots(x=x1_orig, y=baseline, clear=True)
 
         # Add to additional plots
         #self.clear_additional_plots()

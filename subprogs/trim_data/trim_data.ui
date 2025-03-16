@@ -2,12 +2,12 @@
 <interface version="1.4" author="PygubuDesigner 0.39.3">
   <project>
     <settings>
-      <setting id="name">spline_polynom</setting>
-      <setting id="description">Window for spline baseline creation</setting>
-      <setting id="module_name">SplineBaseline</setting>
+      <setting id="name">trim_data</setting>
+      <setting id="description">Put description here</setting>
+      <setting id="module_name">TrimData</setting>
       <setting id="template">application</setting>
       <setting id="main_widget">toplevel1</setting>
-      <setting id="main_classname">SplineBaseline</setting>
+      <setting id="main_classname">TrimData</setting>
       <setting id="main_menu" />
       <setting id="output_dir">.</setting>
       <setting id="output_dir2" />
@@ -64,13 +64,13 @@
                   <property type="col" id="0" name="weight">1</property>
                 </containerlayout>
                 <child>
-                  <object class="customtkinter.CTkFrame" id="label_frame" named="True">
+                  <object class="customtkinter.CTkFrame" id="ctkframe4">
                     <property name="corner_radius">0</property>
                     <property name="width">100</property>
                     <layout manager="grid">
                       <property name="column">0</property>
-                      <property name="padx">4</property>
-                      <property name="pady">4</property>
+                      <property name="padx">2</property>
+                      <property name="pady">2</property>
                       <property name="row">0</property>
                       <property name="sticky">new</property>
                     </layout>
@@ -83,7 +83,7 @@
                         <property name="text" translatable="yes">DATA:</property>
                         <layout manager="grid">
                           <property name="column">0</property>
-                          <property name="padx">4</property>
+                          <property name="padx">2</property>
                           <property name="row">0</property>
                           <property name="sticky">w</property>
                         </layout>
@@ -95,50 +95,10 @@
                         <property name="text" translatable="yes"> </property>
                         <layout manager="grid">
                           <property name="column">1</property>
-                          <property name="padx">4</property>
+                          <property name="padx">2</property>
                           <property name="row">0</property>
                           <property name="sticky">ew</property>
                         </layout>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="customtkinter.CTkFrame" id="ctkframe6">
-                    <property name="corner_radius">0</property>
-                    <layout manager="grid">
-                      <property name="column">0</property>
-                      <property name="columnspan">2</property>
-                      <property name="padx">4</property>
-                      <property name="pady">4</property>
-                      <property name="row">1</property>
-                      <property name="sticky">ew</property>
-                    </layout>
-                    <containerlayout manager="grid">
-                      <property type="col" id="0" name="weight">1</property>
-                    </containerlayout>
-                    <child>
-                      <object class="customtkinter.CTkFrame" id="X_frame" named="True">
-                        <property name="corner_radius">0</property>
-                        <layout manager="grid">
-                          <property name="column">0</property>
-                          <property name="row">0</property>
-                          <property name="sticky">new</property>
-                        </layout>
-                        <containerlayout manager="grid">
-                          <property type="col" id="0" name="weight">1</property>
-                        </containerlayout>
-                        <child>
-                          <object class="customtkinter.CTkComboBox" id="sel_polynomial" named="True">
-                            <property name="command" type="command" cbtype="simple">sel_polynomial_clicked</property>
-                            <property name="values">["Nearest", "Linear", "Qubic", "PCHIP", "Akma (for moisy data)", "Barycentric (Lagrange-like)"]</property>
-                            <layout manager="grid">
-                              <property name="column">0</property>
-                              <property name="row">0</property>
-                              <property name="sticky">ew</property>
-                            </layout>
-                          </object>
-                        </child>
                       </object>
                     </child>
                   </object>
@@ -148,8 +108,8 @@
                     <property name="corner_radius">0</property>
                     <layout manager="grid">
                       <property name="column">0</property>
-                      <property name="padx">4</property>
-                      <property name="row">2</property>
+                      <property name="pady">2</property>
+                      <property name="row">1</property>
                       <property name="sticky">sew</property>
                     </layout>
                     <containerlayout manager="grid">
@@ -157,14 +117,12 @@
                       <property type="col" id="1" name="weight">1</property>
                     </containerlayout>
                     <child>
-                      <object class="customtkinter.CTkCheckBox" id="keep_baseline" named="True">
-                        <property name="command" type="command" cbtype="simple">keep_current_baseline</property>
-                        <property name="text" translatable="yes">Store only baselines</property>
+                      <object class="customtkinter.CTkSwitch" id="switch" named="True">
+                        <property name="command" type="command" cbtype="simple">switch_clicked</property>
+                        <property name="text" translatable="yes">Keep selection</property>
                         <layout manager="grid">
                           <property name="column">0</property>
-                          <property name="padx">2</property>
-                          <property name="pady">2</property>
-                          <property name="row">0</property>
+                          <property name="row">1</property>
                           <property name="sticky">w</property>
                         </layout>
                       </object>
@@ -181,7 +139,7 @@
             <layout manager="grid">
               <property name="column">0</property>
               <property name="columnspan">2</property>
-              <property name="pady">4</property>
+              <property name="pady">2</property>
               <property name="row">1</property>
               <property name="sticky">n</property>
             </layout>
@@ -208,8 +166,8 @@
                     <property name="text" translatable="yes">Calculate</property>
                     <layout manager="grid">
                       <property name="column">0</property>
-                      <property name="padx">8</property>
-                      <property name="pady">5</property>
+                      <property name="padx">2</property>
+                      <property name="pady">2</property>
                       <property name="row">0</property>
                     </layout>
                   </object>
@@ -217,12 +175,11 @@
                 <child>
                   <object class="customtkinter.CTkButton" id="ctkbutton3" named="True">
                     <property name="command" type="command" cbtype="simple">show_report_clicked</property>
-                    <property name="hover">False</property>
                     <property name="text" translatable="yes">Show report</property>
                     <layout manager="grid">
                       <property name="column">0</property>
-                      <property name="padx">8</property>
-                      <property name="pady">5</property>
+                      <property name="padx">2</property>
+                      <property name="pady">2</property>
                       <property name="row">1</property>
                     </layout>
                   </object>
@@ -246,8 +203,8 @@
                     <property name="text" translatable="yes">Process group</property>
                     <layout manager="grid">
                       <property name="column">0</property>
-                      <property name="padx">8</property>
-                      <property name="pady">5</property>
+                      <property name="padx">2</property>
+                      <property name="pady">2</property>
                       <property name="row">0</property>
                     </layout>
                   </object>
@@ -258,8 +215,8 @@
                     <property name="text" translatable="yes">Clear report</property>
                     <layout manager="grid">
                       <property name="column">0</property>
-                      <property name="padx">8</property>
-                      <property name="pady">5</property>
+                      <property name="padx">2</property>
+                      <property name="pady">2</property>
                       <property name="row">1</property>
                     </layout>
                   </object>
@@ -284,8 +241,8 @@
                     <property name="text" translatable="yes">Cancel</property>
                     <layout manager="grid">
                       <property name="column">0</property>
-                      <property name="padx">8</property>
-                      <property name="pady">5</property>
+                      <property name="padx">2</property>
+                      <property name="pady">2</property>
                       <property name="row">0</property>
                     </layout>
                   </object>

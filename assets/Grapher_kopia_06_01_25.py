@@ -892,6 +892,7 @@ class Grapher(GraphPreferences):
 
     def clear_all_annotations(self, skip=None):
         self.cursor_annotations = []
+
         self.eleana.custom_annotations = []
         self.eleana.set_selections(variable='grapher_action', value='annotations_cleared')
         try:

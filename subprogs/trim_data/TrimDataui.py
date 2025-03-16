@@ -4,11 +4,11 @@ import tkinter as tk
 import pygubu
 
 PROJECT_PATH = pathlib.Path(__file__).parent
-PROJECT_UI = PROJECT_PATH / "spline_baseline.ui"
+PROJECT_UI = PROJECT_PATH / "trim_data.ui"
 RESOURCE_PATHS = [PROJECT_PATH]
 
 
-class SplineBaselineUI:
+class TrimDataUI:
     def __init__(self, master=None):
         self.builder = pygubu.Builder()
         self.builder.add_resource_paths(RESOURCE_PATHS)
@@ -46,10 +46,7 @@ class SplineBaselineUI:
             self.center_map = self.mainwindow.bind("<Map>", self.center)
         self.mainwindow.mainloop()
 
-    def sel_polynomial_clicked(self, value):
-        pass
-
-    def keep_current_baseline(self):
+    def switch_clicked(self):
         pass
 
     def ok_clicked(self):
@@ -69,5 +66,5 @@ class SplineBaselineUI:
 
 
 if __name__ == "__main__":
-    app = SplineBaselineUI()
+    app = TrimDataUI()
     app.run()

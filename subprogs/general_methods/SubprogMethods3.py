@@ -742,6 +742,25 @@ class SubMethods_03:
                   'parameters': parameters1
                   }
         self.data_for_calculations.append(data_1)
+
+        # Add non extracted data if ORIG_IN_ODD_IDX is True
+        if self.regions['orig_in_odd_idx']:
+            x_data1_orig = copy.deepcopy(self.original_data1.x)
+            y_data1_orig = copy.deepcopy(self.original_data1.y)
+            z_data1_orig = copy.deepcopy(self.original_data1.z)
+            data_1_orig = {'x': x_data1_orig,
+                           'y': y_data1_orig,
+                           'z': z_data1_orig,
+                           'name': name1,
+                           'stk_value': 'None',
+                           'complex': complex1,
+                           'type': datatype1,
+                           'origin': origin1,
+                           'comment': comment1,
+                           'parameters': parameters1
+                           }
+        self.data_for_calculations.append(data_1_orig)
+
         if self.use_second:
             # Check if the second selected data is single 2D
             is_2D = self.original_data2.y.ndim == 2
@@ -789,6 +808,25 @@ class SubMethods_03:
                               'parameters': parameters2
                               }
                 self.data_for_calculations.append(data_2)
+
+                # Add non extracted data if ORIG_IN_ODD_IDX is True
+                if self.regions['orig_in_odd_idx']:
+                    x_data1_orig = copy.deepcopy(self.original_data1.x)
+                    y_data1_orig = copy.deepcopy(self.original_data1.y)
+                    z_data1_orig = copy.deepcopy(self.original_data1.z)
+                    data_1_orig = {'x': x_data1_orig,
+                                   'y': y_data1_orig,
+                                   'z': z_data1_orig,
+                                   'name': name1,
+                                   'stk_value': 'None',
+                                   'complex': complex1,
+                                   'type': datatype1,
+                                   'origin': origin1,
+                                   'comment': comment1,
+                                   'parameters': parameters1
+                                   }
+                self.data_for_calculations.append(data_1_orig)
+
             else:
                 Error.show(info='If the first data is 2D, the second must also be 2D, not a stack.', details='')
                 return False
@@ -1079,6 +1117,21 @@ class SubMethods_03:
 
     # METHODS FOR CUSTOM CURSOR HANDLING
     # ------------------------------------------------
+    def get_selected_points(self):
+        ''' Returns unique x and y data for selected points '''
+        if self.grapher.cursor_annotations:
+            x = []
+            y = []
+            for selection in self.grapher.cursor_annotations:
+                nxt_x = selection['point'][0]
+                nxt_y = selection['point'][1]
+                if nxt_x not in x:
+                    x.append(nxt_x)
+                    y.append(nxt_y)
+        else:
+            return None, None
+        return x, y
+
 
     def clear_custom_annotations_list(self):
         ''' Clear the list of added custom_annotations'''

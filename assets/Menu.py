@@ -56,6 +56,7 @@ class MainMenu:
         self.icon_fromclipboard =self.prepare_icon("fromclipboard.png")
         self.icon_baselineplynom = self.prepare_icon("baseline.png")
         self.icon_splinebaseline = self.prepare_icon("spline.png")
+        self.icon_trimdata = self.prepare_icon("trim.png")
 
         ''' BUILD MENU '''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth_bar, activeborderwidth=self.borderwidth)
@@ -225,6 +226,10 @@ class MainMenu:
         # - Normalize amplitude
         self.menu_modifications.add_command(label="Normalize amplitude", command=self.app.normalize,
                                        image=self.icon_normalize, compound="left")
+
+        # - Trim data
+        self.menu_modifications.add_command(label="Trim data", command=self.app.trim_data,
+                                            image=self.icon_trimdata, compound="left")
 
         self.menu_modifications.add_separator()
 
