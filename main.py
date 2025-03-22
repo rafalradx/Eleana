@@ -1627,6 +1627,45 @@ class MainApp:
             update.group_list()
             update.all_lists()
 
+    def delete_single_stk_data(self, which):
+        ''' Remove single data from stk stack '''
+        if which == 'first':
+            data_index = self.eleana.selections['first']
+            stk_index = self.eleana.selections['f_stk']
+        elif which == 'second':
+            data_index = self.eleana.selections['second']
+            stk_index = self.eleana.selections['s_stk']
+        else:
+            return
+
+        data_y = self.eleana.dataset[data_index].y
+        data_z = self.eleana.dataset[data_index].z
+        data_names = self.eleana.dataset[data_index].stk_names
+        if data_y.size == 0:
+            # Already empty np.array. Return
+            return
+
+        # Remove stk data from dataset.y
+        new_y = np.delete(data_y, stk_index, axis=0)
+        self.eleana.dataset[data_index].y = new_y
+
+        # Remove values from z axis of stk data
+        new_z = np.delete(data_z, stk_index)
+        self.eleana.dataset[data_index].z = new_z
+
+        # Remove stk names
+        del self.eleana.dataset[data_index].stk_names[stk_index]
+
+        if which == 'first':
+            self.eleana.selections['f_stk'] = 0
+        elif which == 'second':
+            self.eleana.selections['s_stk'] = 0
+
+        # Update all GUI elements
+        update.dataset_list()
+        update.all_lists()
+        self.grapher.plot_graph()
+
     def rename_data(self, which):
         index = self.eleana.selections[which]
         index_f = self.eleana.selections['first']

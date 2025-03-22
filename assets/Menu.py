@@ -436,8 +436,7 @@ class ContextMenu:
 
     def build_menu_f_stk(self):
         '''This creates positions for FIRST STK context menu '''
-        self.context_menu_first_stk.add_command(label="Delete", command=lambda: self.app.rename_data('first'))
-
+        self.context_menu_first_stk.add_command(label="Delete", command=lambda: self.app.delete_single_stk_data('first'))
 
 
     def build_menu_second(self):
@@ -451,11 +450,8 @@ class ContextMenu:
         self.context_menu_second.add_command(label="Edit parameters", command=lambda: self.app.edit_parameters('second'))
 
     def build_menu_s_stk(self):
-        '''This creates positions for FIRST STK context menu '''
-        self.context_menu_second_stk.add_command(label="Delete", command=lambda: self.app.rename_data('first'))
-
-
-
+        '''This creates positions for SECOND STK context menu '''
+        self.context_menu_second_stk.add_command(label="Delete", command=lambda: self.app.delete_single_stk_data('second'))
 
 
     def build_menu_result(self):
