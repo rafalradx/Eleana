@@ -57,6 +57,7 @@ class MainMenu:
         self.icon_baselineplynom = self.prepare_icon("baseline.png")
         self.icon_splinebaseline = self.prepare_icon("spline.png")
         self.icon_trimdata = self.prepare_icon("trim.png")
+        self.icon_btog = self.prepare_icon("Btog.png")
 
         ''' BUILD MENU '''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth_bar, activeborderwidth=self.borderwidth)
@@ -162,7 +163,8 @@ class MainMenu:
         self.menu_edit.add_separator()
 
         # - Copy to clipboard
-        self.menu_edit.add_command(label="Copy", command=self.app.quick_paste, image=self.icon_clipboard, compound="left", accelerator='Ctrl+C')
+        self.menu_edit.add_command(label="Copy", command=self.app.quick_copy, image=self.icon_clipboard, compound="left", accelerator='Ctrl+C')
+
         # - Create from clipboard
         self.menu_edit.add_command(label="Paste", command=self.app.quick_paste,  image=self.icon_fromclipboard, compound="left", accelerator='Ctrl+V')
 
@@ -251,6 +253,11 @@ class MainMenu:
                                           borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
         #self.main_menu.add_cascade(label="EPR", menu=self.menu_EPR, image=self.icon_dropdown, compound="left")
         self.main_menu.add_cascade(label="EPR ", menu=self.menu_EPR)
+
+        # - B to g
+        self.menu_EPR.add_command(label="B to g value", command=self.app.epr_b_to_g,
+                                            image=self.icon_btog, compound="left")
+
 
         ''' Menu Tools '''
         self.menu_tools = tk.Menu(self.main_menu, tearoff=1, bg=self.bg, fg=self.fg, font=self.font,

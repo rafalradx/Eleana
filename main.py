@@ -31,7 +31,6 @@ sys.path.insert(0,str(WIDGETS))
 # Import External modules required
 import numpy as np
 import pandas
-import pyperclip
 
 # Import modules from ./modules folder
 import pygubu
@@ -54,6 +53,8 @@ from DataClasses import Stack
 # append.(['name of instance without self., 'Command to close']
 
 list_of_subprogs = []
+from EPR_B_to_g.B_to_g import EPR_B_to_g
+list_of_subprogs.append(['subprog_epr_b_to_b', 'cancel'])
 from trim_data.Trim_data import TrimData
 list_of_subprogs.append(['subprog_trim_data', 'cancel'])
 from spline_baseline.Spline_baseline import SplineBaseline
@@ -1428,8 +1429,47 @@ class MainApp:
         except Exception as e:
             Error.show(info='Unable to import Excel file. Please verify that you have selected the correct format for import.', details=e)
 
+    def quick_copy(self):
+        curves = self.grapher.ax.get_lines()
+        the_longest = 0
+        collected_list = []
+
+        for curve in curves:
+            label = curve.get_label()
+            x_data = [str(element) for element in curve.get_xdata()]
+            if x_data:
+                x_data.insert(0, f'{label} [X]')
+                collected_list.append(x_data)
+                y_data = [str(element) for element in curve.get_ydata()]
+                y_data.insert(0, f'{label} [Y]')
+                collected_list.append(y_data)
+                length = len(x_data)
+
+                if length > the_longest:
+                    the_longest = length
+
+        # Replenish shorter lists with empty strings
+        even_collected_list = []
+        for row in collected_list:
+            row_length = len(row)
+            diff = the_longest - row_length
+            if diff > 0:
+                row.extend([""] * diff)
+            even_collected_list.append(row)
+
+        # Transpose list
+        transposed_data = list(map(list, zip(*even_collected_list)))
+        text_output = "\n".join("\t".join(row) for row in transposed_data)
+        self.mainwindow.clipboard_clear()
+        self.mainwindow.clipboard_append(text_output)
+        self.mainwindow.update()
+
+    # def quick_paste(self, event=None):
+    #     text = pyperclip.paste()
+    #     self.import_ascii(text)
+
     def quick_paste(self, event=None):
-        text = pyperclip.paste()
+        text = self.mainwindow.clipboard_get()  # Pobiera tekst ze schowka
         self.import_ascii(text)
 
     def export_first(self):
@@ -1569,6 +1609,13 @@ class MainApp:
 
     def spline_baseline(self):
         self.subprog_spline_baseline = SplineBaseline(self, which = 'first')
+
+    # --------------------------------------------
+    # MENU: EPR
+    # --------------------------------------------
+
+    def epr_b_to_g(self):
+        self.subprog_epr_b_to_g = EPR_B_to_g(self)
 
     '''***********************************************
     *           GRAPH SWITCHES AND BUTTONS           *

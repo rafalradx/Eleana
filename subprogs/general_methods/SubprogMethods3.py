@@ -498,7 +498,7 @@ class SubMethods_03:
                               'comment': copy.deepcopy(comment1),
                               'parameters': copy.deepcopy(parameters1)
                               }
-        self.data_for_calculations.append(data_1_orig)
+            self.data_for_calculations.append(data_1_orig)
 
         if self.use_second:
             # Check if the second selected data is single 2D
@@ -633,7 +633,7 @@ class SubMethods_03:
                            'comment': comment1,
                            'parameters': parameters1
                            }
-        self.data_for_calculations.append(data_1_orig)
+            self.data_for_calculations.append(data_1_orig)
 
         if self.use_second:
             # Check if the second selected data is single 2D
@@ -664,6 +664,7 @@ class SubMethods_03:
                           'parameters': parameters2
                           }
                 self.data_for_calculations.append(data_2)
+
                 # Add original data
                 if self.regions['orig_in_odd_idx']:
                     x_data2_orig = copy.deepcopy(self.original_data2.x)
@@ -759,7 +760,7 @@ class SubMethods_03:
                            'comment': comment1,
                            'parameters': parameters1
                            }
-        self.data_for_calculations.append(data_1_orig)
+            self.data_for_calculations.append(data_1_orig)
 
         if self.use_second:
             # Check if the second selected data is single 2D

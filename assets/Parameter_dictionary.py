@@ -16,6 +16,6 @@ parameter_dictionary = {
     "Power": "The microwave power used for detecting the EPR signal, measured in milliwatts.",
     "PowAtten": "The attenuation of microwave power, measured in units of decibels.",
     "Compl": "If true the amplitude of the spectrum is complex",
-    "origin": 'The source of the data. It is "@result" for data created by Eleana as a result.'
-
+    "origin": 'The source of the data. It is "@result" for data created by Eleana as a result.',
+    "MmFreq": "Microwave frequency in GHz"
 }

@@ -118,7 +118,7 @@ class Spectrum_complex:
             y = np.append(y, complex_nr)
             i += 2
         working_parameters = self.parameters
-        fill_missing_keys = ['name_z', 'unit_z', 'name_x', 'unit_x', 'name_y', 'unit_y']
+        fill_missing_keys = ['name_z', 'unit_z', 'name_x', 'unit_x', 'name_y', 'unit_y', 'MwFreq']
         for key in fill_missing_keys:
             try:
                 bruker_key = dsc2eleana(key)
