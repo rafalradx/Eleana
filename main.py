@@ -48,49 +48,52 @@ from Sounds import Sound
 from Error import Error
 from CommandProcessor import CommandProcessor
 from DataClasses import Stack
+from Error import Error
 
 # Import Eleana subprograms and windows
 # append.(['name of instance without self., 'Command to close']
 
 list_of_subprogs = []
+from edit_in_table.edit_in_table import EditInTable
+#list_of_subprogs.append(['edit_in_table', 'cancel'])
 from EPR_B_to_g.B_to_g import EPR_B_to_g
-list_of_subprogs.append(['subprog_epr_b_to_b', 'cancel'])
+#list_of_subprogs.append(['subprog_epr_b_to_b', 'cancel'])
 from trim_data.Trim_data import TrimData
-list_of_subprogs.append(['subprog_trim_data', 'cancel'])
+#list_of_subprogs.append(['subprog_trim_data', 'cancel'])
 from spline_baseline.Spline_baseline import SplineBaseline
-list_of_subprogs.append(['subprog_spline_baseline', 'cancel'])
+#list_of_subprogs.append(['subprog_spline_baseline', 'cancel'])
 from polynomial_baseline.Polynomial_baseline import PolynomialBaseline
-list_of_subprogs.append(['subprog_polynomial_baseline', 'cancel'])
+#list_of_subprogs.append(['subprog_polynomial_baseline', 'cancel'])
 from distance_read.Distance_read import DistanceRead
-list_of_subprogs.append(['xy_distance', 'cancel'])
+#list_of_subprogs.append(['xy_distance', 'cancel'])
 from integrate_region.IntegrateRegion import IntegrateRegion
-list_of_subprogs.append(['integrate_region', 'cancel'])
+#list_of_subprogs.append(['integrate_region', 'cancel'])
 from normalize.normalize_2 import Normalize
-list_of_subprogs.append(['normalize', 'cancel'])
+#list_of_subprogs.append(['normalize', 'cancel'])
 from group_edit.add_group import Groupcreate
-list_of_subprogs.append(['group_create', 'cancel'])
+#list_of_subprogs.append(['group_create', 'cancel'])
 from group_edit.assign_to_group import Groupassign
-list_of_subprogs.append(['group_assign', 'cancel'])
+#list_of_subprogs.append(['group_assign', 'cancel'])
 from user_input.single_dialog import SingleDialog
-list_of_subprogs.append(['single_dialog', 'cancel'])
+#list_of_subprogs.append(['single_dialog', 'cancel'])
 from select_data.select_data import SelectData
-list_of_subprogs.append(['select_items', 'cancel'])
+#list_of_subprogs.append(['select_items', 'cancel'])
 from select_data.select_items import SelectItems
-list_of_subprogs.append(['select_data', 'cancel'])
+#list_of_subprogs.append(['select_data', 'cancel'])
 from notepad.notepad import Notepad
-list_of_subprogs.append(['notepad', 'cancel'])
+#list_of_subprogs.append(['notepad', 'cancel'])
 from table.table import CreateFromTable
-list_of_subprogs.append(['spreadsheet', 'cancel'])
+#list_of_subprogs.append(['spreadsheet', 'cancel'])
 from edit_parameters.edit_parameters import EditParameters
-list_of_subprogs.append(['edit_par', 'cancel'])
+#list_of_subprogs.append(['edit_par', 'cancel'])
 from modify.modify import ModifyData
-list_of_subprogs.append(['modify_data', 'cancel'])
+#list_of_subprogs.append(['modify_data', 'cancel'])
 from group_edit.move_to_group import MoveToGroup
-list_of_subprogs.append(['move_to_group', 'cancel'])
+#list_of_subprogs.append(['move_to_group', 'cancel'])
 from preferences.preferences import PreferencesApp
-list_of_subprogs.append(['prefereces', 'cancel'])
+#list_of_subprogs.append(['prefereces', 'cancel'])
 from group_edit.stack_to_group import StackToGroup
-list_of_subprogs.append(['convert_stack_to_group', 'cancel'])
+#list_of_subprogs.append(['convert_stack_to_group', 'cancel'])
 
 # Widgets used by main application
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
@@ -411,9 +414,14 @@ class MainApp:
             return
         av_data = self.sel_first._values
         av_data.pop(0)
-        self.select_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'],
+        #self.select_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'],
+        #                              items=av_data)
+        #names = self.select_data.get()
+
+        select_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'],
                                       items=av_data)
-        names = self.select_data.get()
+        names = select_data.get()
+
         if not names:
             return
         indexes = self.get_indexes_by_name(names)
@@ -451,8 +459,12 @@ class MainApp:
             return
 
         # Open dialog
-        self.move_to_group = MoveToGroup(self.mainwindow, self)
-        new_group = self.move_to_group.get()
+        #self.move_to_group = MoveToGroup(self.mainwindow, self)
+        #new_group = self.move_to_group.get()
+
+        move_to_group = MoveToGroup(self.mainwindow, self)
+        new_group = move_to_group.get()
+
         if new_group == None:
             return
         elif new_group == 'All' and move:
@@ -696,12 +708,15 @@ class MainApp:
             return
         if not which:
             which = 'first'
-        try:
-            self.modify_data.cancel()
-        except AttributeError:
-            pass
-        self.modify_data = ModifyData(self, which)
-        response = self.modify_data.get()
+        # try:
+        #     self.modify_data.cancel()
+        # except AttributeError:
+        #     pass
+        #self.modify_data = ModifyData(self, which)
+        #response = self.modify_data.get()
+
+        modify_data = ModifyData(self, which)
+        response = modify_data.get()
 
     @check_busy
     def second_show(self):
@@ -1146,12 +1161,13 @@ class MainApp:
     # --------------------------------------------
     def integrate_region(self):
         ''' Integration of the selected range '''
-        self.integrate_region = IntegrateRegion(self, which = 'first')
+        #self.integrate_region = IntegrateRegion(self, which = 'first')
+        integrate_region = IntegrateRegion(self, which='first')
 
     def normalize(self):
         ''' Normalization of the amplitutes'''
-        self.normalize = Normalize(self, which = 'first')
-
+        # self.normalize = Normalize(self, which = 'first')
+        normalize = Normalize(self, which='first')
 
     def delete_selected_data(self, index_to_delete=None):
         av_data = self.sel_first._values
@@ -1464,10 +1480,6 @@ class MainApp:
         self.mainwindow.clipboard_append(text_output)
         self.mainwindow.update()
 
-    # def quick_paste(self, event=None):
-    #     text = pyperclip.paste()
-    #     self.import_ascii(text)
-
     def quick_paste(self, event=None):
         text = self.mainwindow.clipboard_get()  # Pobiera tekst ze schowka
         self.import_ascii(text)
@@ -1510,21 +1522,52 @@ class MainApp:
                 pass
 
 
-    def edit_data_in_table(self):
+    def edit_data_in_table(self, which = 'first'):
+        if which == 'first' or which == 'second':
+            index_in_data = self.eleana.selections[which]
+        if index_in_data < 0:
+            Error.show(info = 'No data selected to edit.')
+            return
+
+        data = self.eleana.dataset[index_in_data]
+        if data.type == 'single 2D':
+            pass
+        x = [['', ''], ['', '']]
+        headers = ['A', 'B']
+        empty = pandas.DataFrame(x, columns=headers)
+        table = EditInTable(eleana_app=self.eleana,
+                                master=self.mainwindow,
+                                df=empty,
+                                name = data.name,
+                                window_title = f"Edit {data.name}"
+                                )
+        response = table.get()
+
+
+        update.dataset_list()
+        update.group_list()
+        update.all_lists()
+        Save.save_settings_paths(self.eleana)
         print("To edit")
 
 
     def notes(self):
-        self.notepad = Notepad(master=self.mainwindow, title="Edit notes", text=self.eleana.notes)
-        response = self.notepad.get()
+        #self.notepad = Notepad(master=self.mainwindow, title="Edit notes", text=self.eleana.notes)
+        #response = self.notepad.get()
+
+        notepad = Notepad(master=self.mainwindow, title="Edit notes", text=self.eleana.notes)
+        response = notepad.get()
         if response == None:
             return
         else:
             self.eleana.notes = response
 
     def create_new_group(self):
-        self.group_create = Groupcreate(self.mainwindow, eleana)
-        response = self.group_create.get()
+        # self.group_create = Groupcreate(self.mainwindow, eleana)
+        # response = self.group_create.get()
+        group_create = Groupcreate(self.mainwindow, eleana)
+        response = group_create.get()
+
         update.list_in_combobox('sel_group')
 
     def create_from_table(self):
@@ -1532,14 +1575,19 @@ class MainApp:
         date = [['', '', '']]
         df = pandas.DataFrame(columns=headers, data=date)
         name = 'new'
-        self.spreadsheet = CreateFromTable(self.eleana, self.mainwindow, df=df, name=name,
+        #self.spreadsheet = CreateFromTable(self.eleana, self.mainwindow, df=df, name=name,
+        #                                   group=self.eleana.selections['group'])
+        spreadsheet = CreateFromTable(self.eleana, self.mainwindow, df=df, name=name,
                                            group=self.eleana.selections['group'])
 
     def first_to_group(self):
         if self.eleana.selections['first'] < 0:
             return
-        self.group_assign = Groupassign(master=app, which='first')
-        response = self.group_assign.get()
+        #self.group_assign = Groupassign(master=app, which='first')
+        #response = self.group_assign.get()
+
+        group_assign = Groupassign(master=app, which='first')
+        response = group_assign.get()
         update.group_list()
         update.all_lists()
 
@@ -1599,23 +1647,31 @@ class MainApp:
         main_menu.create_showplots_menu()
 
     def xy_distance(self):
-        self.xy_distance = DistanceRead(self, which = 'first')
+        #self.xy_distance = DistanceRead(self, which = 'first')
+        xy_distance = DistanceRead(self, which='first')
 
     def trim_data(self):
-        self.subprog_trim_data = TrimData(self, which = "first")
+        #self.subprog_trim_data = TrimData(self, which = "first")
+        subprog_trim_data = TrimData(self, which="first")
 
     def polynomial_baseline(self):
-        self.subprog_polynomial_baseline = PolynomialBaseline(self, which = 'first')
+        #self.subprog_polynomial_baseline = PolynomialBaseline(self, which = 'first')
+        subprog_polynomial_baseline = PolynomialBaseline(self, which='first')
 
     def spline_baseline(self):
-        self.subprog_spline_baseline = SplineBaseline(self, which = 'first')
+        #self.subprog_spline_baseline = SplineBaseline(self, which = 'first')
+        subprog_spline_baseline = SplineBaseline(self, which='first')
+
+    def filter_savitzky_golay(self):
+        print("Savitztky Golay")
 
     # --------------------------------------------
     # MENU: EPR
     # --------------------------------------------
 
     def epr_b_to_g(self):
-        self.subprog_epr_b_to_g = EPR_B_to_g(self)
+        # self.subprog_epr_b_to_g = EPR_B_to_g(self)
+        subprog_epr_b_to_g = EPR_B_to_g(self)
 
     '''***********************************************
     *           GRAPH SWITCHES AND BUTTONS           *
@@ -1666,8 +1722,11 @@ class MainApp:
         if not data.type == 'stack 2D':
             CTkMessagebox(title="Conversion to group", message="The data you selected is not a 2D stack")
         else:
-            self.convert_stack_to_group = StackToGroup(app, which)
-            response = self.convert_stack_to_group.get()
+            #self.convert_stack_to_group = StackToGroup(app, which)
+            #response = self.convert_stack_to_group.get()
+
+            convert_stack_to_group = StackToGroup(app, which)
+            response = convert_stack_to_group.get()
             if response == None:
                  return
             update.dataset_list()
@@ -1728,8 +1787,12 @@ class MainApp:
         elif which == 'result':
             title = 'Rename Result'
             name = self.eleana.results_dataset[index_r].name
-        self.single_dialog = SingleDialog(master=app, title=title, label='Enter new name', text=name)
-        response = self.single_dialog.get()
+        #self.single_dialog = SingleDialog(master=app, title=title, label='Enter new name', text=name)
+        #response = self.single_dialog.get()
+
+        single_dialog = SingleDialog(master=app, title=title, label='Enter new name', text=name)
+        response = single_dialog.get()
+
         if response == None:
             return
         if not which == 'result':
@@ -1765,8 +1828,11 @@ class MainApp:
             return
         par_to_edit = self.eleana.dataset[idx].parameters
         name_nr = self.eleana.dataset[idx].name_nr
-        self.edit_par = EditParameters(self.mainwindow, parameters=par_to_edit, name=name_nr)
-        response = self.edit_par.get()
+        #self.edit_par = EditParameters(self.mainwindow, parameters=par_to_edit, name=name_nr)
+        #response = self.edit_par.get()
+        edit_par = EditParameters(self.mainwindow, parameters=par_to_edit, name=name_nr)
+        response = edit_par.get()
+
         if response:
             self.eleana.dataset[idx].parameters = response
         else:
