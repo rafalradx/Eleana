@@ -1535,9 +1535,13 @@ class MainApp:
         x = [['', ''], ['', '']]
         headers = ['A', 'B']
         empty = pandas.DataFrame(x, columns=headers)
+
+        headers = ['A', 'B', 'C']
+        date = [['', '', '']]
+        df = pandas.DataFrame(columns=headers, data=date)
         table = EditInTable(eleana_app=self.eleana,
                                 master=self.mainwindow,
-                                df=empty,
+                                df=df,
                                 name = data.name,
                                 window_title = f"Edit {data.name}"
                                 )

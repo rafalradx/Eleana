@@ -14,7 +14,7 @@ import copy
 from subprogs.edit_parameters.edit_parameters import EditParameters
 
 PROJECT_PATH = pathlib.Path(__file__).parent
-PROJECT_UI = PROJECT_PATH / "table.ui"
+PROJECT_UI = PROJECT_PATH / "edit_in_table.ui"
 
 class EditInTable:
     def __init__(self, eleana_app,
