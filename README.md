@@ -10,18 +10,18 @@ The software is freely available for scientific and educational use, while comme
 
 1. Install project dependencies:
 
-```bash
-pipenv install
-```
+    ```bash
+    pipenv install
+    ```
 
 1. Activate the virtual environment:
 
-```bash
-pipenv shell
-```
+    ```bash
+    pipenv shell
+    ```
 
 1. Start the **Eleana** by running the main script:
 
-```bash
-python3 main.py
-```
+    ```bash
+    python3 main.py
+    ```
