@@ -56,6 +56,8 @@ class CreateFromTable:
         self.sel_x_axis = builder.get_object('sel_x_axis', master)
         self.sel_rey_axis = builder.get_object('sel_rey_axis', master)
         self.sel_imy_axis = builder.get_object('sel_imy_axis', master)
+        self.edit_frame = builder.get_object('ctkframe4', master)
+        self.edit_frame.grid_remove()
 
         # Take a list of parameters to add to the data.
         self.set_parameters = set_parameters
@@ -186,16 +188,31 @@ class CreateFromTable:
         data['parameters']['unit_x'] = self.x_axis_unit.get()
         data['parameters']['unit_y'] = self.y_axis_unit.get()
 
-        data['x'] = self.get_data_from_column(x_column)
-        rey = np.array(self.get_data_from_column(rey_column))
+        x_data = self.get_data_from_column(x_column)
+        rey = self.get_data_from_column(rey_column)
+        if isinstance(x_data, str):
+            info = CTkMessagebox(title="", message=x_data, icon="cancel")
+            return
+        elif isinstance(rey, str):
+            info = CTkMessagebox(title="", message=rey, icon="cancel")
+            return
+        if rey.size != x_data.size:
+            info = CTkMessagebox(title="", message="X and Y tables have different lenght.", icon="cancel")
+            return
         data['y'] = rey
+        data['x'] = x_data
 
         if imy_column == 'None':
             data['complex'] = False
         else:
             data['complex'] = True
             imy = self.get_data_from_column(imy_column)
-            imy = np.array(imy)
+            if isinstance(imy, str):
+                info = CTkMessagebox(title="", messaage=imy, icon="cancel")
+                return
+            elif imy.size != reY.size:
+                info = CTkMessagebox(title="", message="ReY and ImY tables have different lenght.", icon="cancel")
+                return
             data_complex = rey + 1j * imy
             data['y'] = data_complex
         data['type'] = 'single 2D'
@@ -250,6 +267,15 @@ class CreateFromTable:
         if index < 0:
             return
         column_data = self.table.get_column_data(index - 1)
+        filtered_data = [x.strip() for x in column_data if isinstance(x, str) and x.strip() != ""]
+        floats_data = []
+        for each in filtered_data:
+            try:
+                floats_data.append(float(each))
+            except ValueError:
+                error = f"There is non-numeric value: {each} in the table."
+                return error
+        column_data = np.array(floats_data)
         return column_data
 
     def paste_event(self, event):

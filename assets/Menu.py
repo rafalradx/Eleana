@@ -151,7 +151,7 @@ class MainMenu:
         # self.menu_edit.add_cascade(label="Spreadsheet", menu=self.menu_spreadsheet, image=self.icon_dropdown, compound="left")
 
         # - Data in spreadsheet
-        self.menu_edit.add_command(label="Edit data in table", command=self.app.edit_data_in_table,
+        self.menu_edit.add_command(label="Edit data in table", command=self.app.edit_values_in_table,
                                    image=self.icon_table, compound="left")
 
         # - Create from table

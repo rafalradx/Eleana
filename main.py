@@ -54,8 +54,8 @@ from Error import Error
 # append.(['name of instance without self., 'Command to close']
 
 list_of_subprogs = []
-from edit_in_table.edit_in_table import EditInTable
-#list_of_subprogs.append(['edit_in_table', 'cancel'])
+from edit_values_in_table.edit_values_in_table import EditValuesInTable
+#list_of_subprogs.append(['edit_values_in_table', 'cancel'])
 from EPR_B_to_g.B_to_g import EPR_B_to_g
 #list_of_subprogs.append(['subprog_epr_b_to_b', 'cancel'])
 from trim_data.Trim_data import TrimData
@@ -1522,7 +1522,7 @@ class MainApp:
                 pass
 
 
-    def edit_data_in_table(self, which = 'first'):
+    def edit_values_in_table(self, which ='first'):
         if which == 'first' or which == 'second':
             index_in_data = self.eleana.selections[which]
         if index_in_data < 0:
@@ -1530,29 +1530,38 @@ class MainApp:
             return
 
         data = self.eleana.dataset[index_in_data]
-        if data.type == 'single 2D':
-            pass
-        x = [['', ''], ['', '']]
-        headers = ['A', 'B']
-        empty = pandas.DataFrame(x, columns=headers)
+        x_header = f"{data.parameters['name_x']} [{data.parameters['unit_x']}]"
+        if data.type == 'single 2D' or data.type == "":
+            y_header = f"{data.parameters['name_y']} [{data.parameters['unit_y']}]"
+            headers = [[x_header, y_header]]
+        elif data.type == 'stack 2D':
+            headers = [x_header]
+            headers.extend(data.stk_names)
+        else:
+            Error.show(info = "Data type not specified. Expected 'single 2D' or 'stack 2D'")
+            return
 
-        headers = ['A', 'B', 'C']
-        date = [['', '', '']]
-        df = pandas.DataFrame(columns=headers, data=date)
-        table = EditInTable(eleana_app=self.eleana,
+        x_data = np.atleast_1d(data.x)
+        y_data = np.atleast_2d(data.y).T
+        for_table = [ [x_data[i], *y_data[i]] for i in range(0, len(x_data)) ]
+
+        table = EditValuesInTable(eleana_app=self.eleana,
                                 master=self.mainwindow,
-                                df=df,
+
+                                list2D=for_table,
                                 name = data.name,
-                                window_title = f"Edit {data.name}"
+                                window_title = f"Edit {data.name}",
+                                headers = headers
                                 )
         response = table.get()
-
+        if not response:
+            return
+        print(response)
 
         update.dataset_list()
         update.group_list()
         update.all_lists()
         Save.save_settings_paths(self.eleana)
-        print("To edit")
 
 
     def notes(self):
@@ -1576,13 +1585,18 @@ class MainApp:
 
     def create_from_table(self):
         headers = ['A', 'B', 'C']
-        date = [['', '', '']]
+        date = [['', '', ''],['', '', ''],['', '', ''],['', '', ''],['', '', ''],['', '', '']]
         df = pandas.DataFrame(columns=headers, data=date)
         name = 'new'
         #self.spreadsheet = CreateFromTable(self.eleana, self.mainwindow, df=df, name=name,
         #                                   group=self.eleana.selections['group'])
         spreadsheet = CreateFromTable(self.eleana, self.mainwindow, df=df, name=name,
                                            group=self.eleana.selections['group'])
+        response = spreadsheet.get()
+        update.group_list()
+        update.dataset_list()
+        update.all_lists()
+
 
     def first_to_group(self):
         if self.eleana.selections['first'] < 0:

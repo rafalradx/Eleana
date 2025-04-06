@@ -12,7 +12,7 @@
       <property type="row" id="3" name="weight">1</property>
     </containerlayout>
     <child>
-      <object class="customtkinter.CTkFrame" id="ctkframe8">
+      <object class="customtkinter.CTkFrame" id="frame_1" named="True">
         <property name="corner_radius">0</property>
         <layout manager="grid">
           <property name="column">0</property>
@@ -192,7 +192,7 @@
       </object>
     </child>
     <child>
-      <object class="customtkinter.CTkFrame" id="ctkframe12">
+      <object class="customtkinter.CTkFrame" id="frame_2" named="True">
         <property name="corner_radius">0</property>
         <layout manager="grid">
           <property name="column">0</property>
@@ -346,7 +346,7 @@
       </object>
     </child>
     <child>
-      <object class="customtkinter.CTkFrame" id="ctkframe4">
+      <object class="customtkinter.CTkFrame" id="frame_3" named="True">
         <layout manager="grid">
           <property name="column">0</property>
           <property name="row">2</property>

@@ -14,12 +14,13 @@ import copy
 from subprogs.edit_parameters.edit_parameters import EditParameters
 
 PROJECT_PATH = pathlib.Path(__file__).parent
-PROJECT_UI = PROJECT_PATH / "edit_in_table.ui"
+PROJECT_UI = PROJECT_PATH / "edit_values_in_table.ui"
 
-class EditInTable:
+class EditValuesInTable:
     def __init__(self, eleana_app,
                  master=None,
                  list2D = None,
+                 headers = None,
                  df = None,
                  name = None,
                  group = None,
@@ -57,6 +58,15 @@ class EditInTable:
         self.sel_rey_axis = builder.get_object('sel_rey_axis', master)
         self.sel_imy_axis = builder.get_object('sel_imy_axis', master)
 
+
+        ''' SWITCHING OFF THE FRAMES WITH FIELDS '''
+        self.frame_1 = builder.get_object('frame_1', master)
+        self.frame_2 = builder.get_object('frame_2', master)
+        self.frame_3 = builder.get_object('frame_3', master)
+        self.frame_1.grid_remove()
+        self.frame_2.grid_remove()
+        self.frame_3.grid_remove()
+
         # Take a list of parameters to add to the data.
         self.set_parameters = set_parameters
 
@@ -73,19 +83,8 @@ class EditInTable:
         if y_name:
             self.y_axis_name.insert(0, y_name)
 
-        self.headers = ['None']
-        self.headers.extend(df.columns)
+        self.headers = headers
 
-        self.sel_x_axis.configure(values = self.headers)
-        self.sel_rey_axis.configure(values=self.headers)
-        self.sel_imy_axis.configure(values=self.headers)
-        self.sel_x_axis.set(self.headers[1])
-        self.sel_rey_axis.set(self.headers[2])
-        self.sel_imy_axis.set(self.headers[0])
-        if default_x_axis:
-            self.sel_x_axis.set(default_x_axis)
-        if default_y_axis:
-            self.sel_rey_axis.set(default_y_axis)
         self.generate_table(df, list2D)
 
         self.response = None
@@ -96,56 +95,6 @@ class EditInTable:
             if dialog == 'cancel':
                 self.cancel
         self.mainwindow.attributes('-topmost', True)
-
-    def loadExcel(self):
-        self.mainwindow.iconify()
-        filename = filedialog.askopenfilename(parent=self.mainwindow,
-                                              defaultextension='.xls',
-                                              title = "Import Excel/LibreOffice Calc",
-                                              filetypes=[("xlsx", "*.xlsx"),
-                                                         ("xls", "*.xls"),
-                                                         ("ods", "*.ods"),
-                                                         ("All files", "*.*")])
-        if len(filename) == 0:
-            self.cancel()
-            return 'cancel'
-
-        self.eleana.paths['last_import_dir'] = str(Path(filename).parent)
-        name = str(Path(filename).name)
-        self.entry_group.insert(0, 'All')
-        self.mainwindow.deiconify()
-        self.entry_name.delete(0, "end")
-        self.entry_name.insert(0, name)
-        xl = pandas.ExcelFile(filename)
-        names = xl.sheet_names
-        d = MultipleValDialog(title='Import Sheet',
-                              initialvalues=([names]),
-                              labels=(['Sheet']),
-                              types=(['combobox']),
-                              parent=self.mainwindow)
-        if not d.result:
-            return
-        df = xl.parse(d.results[0])
-        df = df.map(lambda x: round(float(x), 8)).astype(object)
-        self.generate_table(df)
-        self.headers = ['None']
-        col_names = df.columns.tolist()
-        self.headers.extend(col_names)
-        self.sel_x_axis.configure(values=self.headers)
-        self.sel_rey_axis.configure(values=self.headers)
-        self.sel_imy_axis.configure(values=self.headers)
-        try:
-            self.sel_imy_axis.set(self.headers[0])
-        except:
-            pass
-        try:
-            self.sel_x_axis.set(self.headers[1])
-        except:
-            pass
-        try:
-            self.sel_rey_axis.set(self.headers[2])
-        except:
-            pass
 
     def get(self):
         if self.mainwindow.winfo_exists():
@@ -207,29 +156,6 @@ class EditInTable:
         if show_info == True:
             info = CTkMessagebox(title="", message="The data was added to the dataset.", icon="info")
 
-    def edit_parameters(self):
-        if not self.set_parameters:
-            self.set_parameters = {
-                'name_x': self.x_axis_name.get(),
-                'unit_x': self.x_axis_unit.get(),
-                'name_y': self.y_axis_name.get(),
-                'unit_y': self.y_axis_unit.get()
-            }
-        edit_par = EditParameters(master = self.mainwindow, parameters=self.set_parameters)
-        self.set_parameters = edit_par.get()
-
-        self.x_axis_name.delete(0, "end")
-        self.x_axis_name.insert(0, self.set_parameters['name_x'])
-
-        self.x_axis_unit.delete(0, "end")
-        self.x_axis_unit.insert(0, self.set_parameters['unit_x'])
-
-        self.y_axis_name.delete(0, "end")
-        self.y_axis_name.insert(0, self.set_parameters['name_y'])
-
-        self.y_axis_unit.delete(0, "end")
-        self.y_axis_unit.insert(0, self.set_parameters['unit_y'])
-
     def generate_table(self, df=None, list2D=None):
         if df is not None:
             self.table = Sheet(self.tableFrame)
@@ -242,7 +168,15 @@ class EditInTable:
             self.table.change_theme(ctk.get_appearance_mode())
             self.table.enable_bindings( "ctrl_select", "all", "right_click_popup_menu")
         elif list2D:
-            print('table.py - generate_table')
+            self.table = Sheet(self.tableFrame)
+            column_names = self.headers
+            table_data = list2D
+            self.table.set_sheet_data(table_data)
+            self.table.headers(column_names)
+            self.table.grid(row=0, column=0, sticky="nswe")
+
+            self.table.change_theme(ctk.get_appearance_mode())
+            self.table.enable_bindings("ctrl_select", "all", "right_click_popup_menu")
             return
 
     def get_data_from_column(self, column_name):
