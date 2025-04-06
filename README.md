@@ -6,22 +6,46 @@ Eleana supports direct data import from **Bruker** spectrometers (ESP300E, EMX, 
 
 The software is freely available for scientific and educational use, while commercial use requires authorization.
 
-### Setup
+### Requirements
 
-1. Install project dependencies:
+- **Python** 3.12 or higher
+- **pip** or **pipenv**
+
+### Setup
+1. Clone the **Eleana** repository:
+    ```bash
+    clone https://github.com/KarritPrimorph/Eleana
+    ```
+2. Navigate into **Eleana** directory:
+
+    ```bash
+    cd Eleana
+    ```
+
+3. Install project dependencies using `pipenv`:
 
     ```bash
     pipenv install
     ```
 
-1. Activate the virtual environment:
+4. Activate the virtual environment:
 
     ```bash
     pipenv shell
     ```
 
-1. Start the **Eleana** by running the main script:
+5. Start the **Eleana** by running the main script:
 
     ```bash
-    python3 main.py
+    python main.py
     ```
+
+### Without pipenv
+
+If you prefer using `pip` directly clone the repo, enter **Eleana**, then:
+
+```bash
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+pip install -r requirements.txt
+```
