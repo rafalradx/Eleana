@@ -8,7 +8,7 @@ The software is freely available for scientific and educational use, while comme
 
 ### Requirements
 
-- **Python** 3.12 or higher
+- [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3123/)
 - **pip** or **pipenv**
 
 ### Setup
