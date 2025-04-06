@@ -1532,8 +1532,8 @@ class MainApp:
         data = self.eleana.dataset[index_in_data]
         x_header = f"{data.parameters['name_x']} [{data.parameters['unit_x']}]"
         if data.type == 'single 2D' or data.type == "":
-            y_header = f"{data.parameters['name_y']} [{data.parameters['unit_y']}]"
-            headers = [[x_header, y_header]]
+            y_header = f"{data.parameters.get('name_y', '')} [{data.parameters.get('unit_y', '')}]"
+            headers = [x_header, y_header]
         elif data.type == 'stack 2D':
             headers = [x_header]
             headers.extend(data.stk_names)
@@ -1541,18 +1541,15 @@ class MainApp:
             Error.show(info = "Data type not specified. Expected 'single 2D' or 'stack 2D'")
             return
 
-        x_data = np.atleast_1d(data.x)
-        y_data = np.atleast_2d(data.y).T
-        for_table = [ [x_data[i], *y_data[i]] for i in range(0, len(x_data)) ]
-
         table = EditValuesInTable(eleana_app=self.eleana,
                                 master=self.mainwindow,
-
-                                list2D=for_table,
+                                x = data.x,
+                                y = data.y,
                                 name = data.name,
                                 window_title = f"Edit {data.name}",
-                                headers = headers
-                                )
+                                column_names = headers,
+                                complex = data.complex
+                                  )
         response = table.get()
         if not response:
             return
