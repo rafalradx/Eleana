@@ -14,7 +14,7 @@ The software is freely available for scientific and educational use, while comme
 ### Setup
 1. Clone the **Eleana** repository:
     ```bash
-    clone https://github.com/KarritPrimorph/Eleana
+    git clone https://github.com/KarritPrimorph/Eleana
     ```
 2. Navigate into **Eleana** directory:
 
@@ -42,10 +42,11 @@ The software is freely available for scientific and educational use, while comme
 
 ### Without pipenv
 
-If you prefer using `pip` directly clone the repo, enter **Eleana**, then:
+If you prefer using `pip` directly clone the repo, enter **Eleana** directory, then:
 
 ```bash
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
+python main.py
 ```
