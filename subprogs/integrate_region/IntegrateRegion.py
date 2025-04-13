@@ -2,6 +2,7 @@
 
 # IMPORT MODULES NEEDED
 from scipy.integrate import cumulative_trapezoid, trapezoid
+import importlib
 
 # General setting of the application. Here is an example
 # File/Path/Class settings
@@ -78,15 +79,16 @@ CURSOR_OUTSIDE_TEXT = \
 #    END OF SUBPROG SETTINGS     #
 #  DO NOT MODIFY LINES BELOW     #
 ##################################'''
-
-cmd_to_import = GUI_FILE[:-3] + ' import ' + GUI_CLASS + ' as WindowGUI'
-if __name__ == "__main__":
-    cmd_to_import = 'from ' + cmd_to_import
-    cmd_to_import = cmd_to_import + '\nfrom assets.Eleana import Eleana'
-else:
-    cmd_to_import = 'from ' + SUBPROG_FOLDER + '.' + cmd_to_import
-exec(cmd_to_import)
 from subprogs.general_methods.SubprogMethods2 import SubMethods_02
+if __name__ == "__main__":
+    module_path = f"subprogs.{SUBPROG_FOLDER}.{GUI_FILE[:-3]}"
+    class_name = GUI_CLASS
+    from assets.Eleana import Eleana
+else:
+    module_path = f"{SUBPROG_FOLDER}.{GUI_FILE[:-3]}"
+    class_name = GUI_CLASS
+mod = importlib.import_module(module_path)
+WindowGUI = getattr(mod, class_name)
 
 class IntegrateRegion(SubMethods_02, WindowGUI):
     ''' THIS IS STANDARD CONSTRUCTOR THAT SHOULD NOT BE MODIFIED '''

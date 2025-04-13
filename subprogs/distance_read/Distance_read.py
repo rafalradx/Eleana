@@ -3,7 +3,7 @@
 # -- Here is an example --
 
 import numpy as np
-
+import importlib
 from subprogs.integrate_region.IntegrateRegion import RESULT_CREATE
 
 # General setting of the application. Here is an example
@@ -83,13 +83,16 @@ CURSOR_OUTSIDE_TEXT = \
 #    END OF SUBPROG SETTINGS     #
 #  DO NOT MODIFY LINES BELOW     #
 ##################################'''
-
-cmd_to_import = GUI_FILE[:-3] + ' import ' + GUI_CLASS + ' as WindowGUI'                            #|
-if __name__ == "__main__":                                                                          #|
-    cmd_to_import = 'from ' + cmd_to_import                                                         #|
-else:                                                                                               #|
-    cmd_to_import = 'from ' + SUBPROG_FOLDER + '.' + cmd_to_import                                  #|
-exec(cmd_to_import)                                                                                 #|
+if __name__ == "__main__":
+    module_path = f"subprogs.{SUBPROG_FOLDER}.{GUI_FILE[:-3]}"
+    class_name = GUI_CLASS
+    from assets.Eleana import Eleana
+else:
+    module_path = f"{SUBPROG_FOLDER}.{GUI_FILE[:-3]}"
+    class_name = GUI_CLASS
+mod = importlib.import_module(module_path)
+WindowGUI = getattr(mod, class_name)
+                                                                                 #|
 from subprogs.general_methods.SubprogMethods2 import SubMethods_02 as Methods                                                    #|
 class DistanceRead(Methods, WindowGUI):                                                       #|
     def __init__(self, app=None, which='first', commandline=False):  # |

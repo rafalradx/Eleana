@@ -115,7 +115,6 @@ class EditValuesInTable:
                     Error.show(info = f"Could not convert data in cell ({i}, {j}) to a number: {cell_value}")
                     return None
             data.append(row_data)
-
         return np.array(data)
 
     def generate_table(self, headers, list2D):

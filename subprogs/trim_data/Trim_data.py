@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 # IMPORT MODULES NEEDED
 # -- Here is an example --
-from asyncio import set_event_loop_policy
 
+import importlib
 import numpy as np
 from scipy.interpolate import CubicSpline, PchipInterpolator, Akima1DInterpolator, BarycentricInterpolator
 
@@ -197,11 +197,16 @@ CURSOR_OUTSIDE_TEXT: str = 'One or more selected points are outside the (x, y) r
 '''**************************************************************************************************
 *                      THE DEFAULT CONSTRUCTOR (LINES BETWEEN **)                                   * 
 **************************************************************************************************'''
-if __name__ == "__main__":                                                                          #|
-    cmd_to_import = 'from subprogs.general_methods.Testui import TestUI as WindowGUI'
-else:                                                                                               #|
-    cmd_to_import = f'from {SUBPROG_FOLDER}.{GUI_FILE[:-3]} import {GUI_CLASS} as WindowGUI'        #|
-exec(cmd_to_import)                                                                                 #|
+if __name__ == "__main__":
+    module_path = f"subprogs.{SUBPROG_FOLDER}.{GUI_FILE[:-3]}"
+    class_name = GUI_CLASS
+    from assets.Eleana import Eleana
+else:
+    module_path = f"{SUBPROG_FOLDER}.{GUI_FILE[:-3]}"
+    class_name = GUI_CLASS
+mod = importlib.import_module(module_path)
+WindowGUI = getattr(mod, class_name)
+
 from subprogs.general_methods.SubprogMethods3 import SubMethods_03 as Methods                       #|
 class TrimData(Methods, WindowGUI):                                                           #|
     def __init__(self, app=None, which='first', commandline=False):                                 #|

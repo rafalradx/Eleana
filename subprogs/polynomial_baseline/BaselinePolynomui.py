@@ -18,8 +18,7 @@ class BaselinePolynomUI:
     ):
         self.builder = pygubu.Builder(
             translator=translator,
-            on_first_object=on_first_object_cb,
-            data_pool=data_pool
+            on_first_object=on_first_object_cb
         )
         self.builder.add_resource_paths(RESOURCE_PATHS)
         self.builder.add_from_file(PROJECT_UI)
