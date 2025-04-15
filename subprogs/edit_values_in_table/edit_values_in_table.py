@@ -51,12 +51,11 @@ class EditValuesInTable:
         # Create data for table:
         self.row_counts = len(x)
         x_data = np.atleast_1d(x)
-        if len(y.shape) == 0:
-            self.column_counts = 2
+        shape = y.shape
+        if len(shape) == 2:
+            self.column_counts = shape[0] + 1
         else:
-            self.column_counts = y.shape[0]
-        print(f"wiersze = {self.row_counts}")
-        print(f"kolumny = {self.column_counts}")
+            self.column_counts = 2
         y_data = np.atleast_2d(y).T
 
         if complex is None:
@@ -93,7 +92,9 @@ class EditValuesInTable:
         self.mainwindow.mainloop()
 
     def ok(self):
-        self.prepare_results()
+        self.response = self.prepare_results()
+        if self.response is None:
+            return
         self.mainwindow.destroy()
 
     def prepare_results(self):
@@ -112,10 +113,15 @@ class EditValuesInTable:
                         # The value is not complex
                         row_data.append(float(cell_value))
                 except ValueError:
-                    Error.show(info = f"Could not convert data in cell ({i}, {j}) to a number: {cell_value}")
+                    Error.show(info = f'Could not convert entry "{cell_value}" to float. See column {m}, row {n+1}.')
                     return None
             data.append(row_data)
-        return np.array(data)
+        x_axis = [row.pop(0) for row in data]
+        x = np.array(x_axis)
+        if self.column_counts == 2:
+            data = [value[0] for value in data]
+        y = np.array(data).T
+        return [x, y]
 
     def generate_table(self, headers, list2D):
         self.table = Sheet(self.tableFrame)

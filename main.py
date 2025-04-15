@@ -1521,7 +1521,6 @@ class MainApp:
             except:
                 pass
 
-
     def edit_values_in_table(self, which ='first'):
         if which == 'first' or which == 'second':
             index_in_data = self.eleana.selections[which]
@@ -1551,15 +1550,14 @@ class MainApp:
                                 complex = data.complex
                                   )
         response = table.get()
-        if not response:
+        if response is None:
             return
-        print(response)
-
+        data.x = response[0]
+        data.y = response[1]
         update.dataset_list()
         update.group_list()
         update.all_lists()
-        Save.save_settings_paths(self.eleana)
-
+        self.grapher.plot_graph()
 
     def notes(self):
         #self.notepad = Notepad(master=self.mainwindow, title="Edit notes", text=self.eleana.notes)
