@@ -223,8 +223,9 @@ class MainApp:
     def set_pane_height(self):
         self.mainwindow.update_idletasks()
         self.panedwindow2.sashpos(0, 700)
-        self.panedwindow4.sashpos(0, 300)
-        self.pane5.sashpos(0, 1000)
+        self.panedwindow4.sashpos(0, 400)
+        self.pane5.sashpos(0, 1100)
+        self.mainwindow.update_idleasks()
 
     def center_window(self, window, width, height):
         screen_width = window.winfo_screenwidth()
@@ -1049,6 +1050,10 @@ class MainApp:
         self.sel_first.set(name)
 
     @check_busy
+    def replace_group(self):
+        print("Replace Group")
+
+    @check_busy
     def result_to_main(self):
         if self.eleana.selections['result'] < 0:
             return
@@ -1677,6 +1682,7 @@ class MainApp:
 
     def filter_savitzky_golay(self):
         print("Savitztky Golay")
+
 
     # --------------------------------------------
     # MENU: EPR
