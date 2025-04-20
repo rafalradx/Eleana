@@ -493,16 +493,18 @@ class MainApp:
         self.sel_group.set('All')
 
     @check_busy
-    def delete_data_from_group(self):
+    def delete_data_from_group(self, skip_questions=False):
         group = self.eleana.selections['group']
         data_indexes = self.eleana.assignmentToGroups.get(group, None)
-        if group == 'All':
+        if group == 'All' and not skip_questions:
             info = CTkMessagebox(title = 'Delete Data from Group', message = 'You cannot delete data from the group "All". Please use "Delete Dataset" instead.', icon = 'cancel' )
-        else:
+        elif not skip_questions:
             info = CTkMessagebox(title= 'Delete Data from Group', icon="warning", option_1="Cancel", option_2="Delete", message = f'Are you sure you want to delete data from the group "{group}"?')
             response = info.get()
             if response == 'Cancel' or not data_indexes:
                 return
+        if data_indexes is None:
+            return
         data_indexes = sorted(data_indexes, reverse=True)
         for index in data_indexes:
             self.eleana.dataset.pop(index)
@@ -1051,7 +1053,14 @@ class MainApp:
 
     @check_busy
     def replace_group(self):
-        print("Replace Group")
+        group = self.eleana.selections['group']
+        info = CTkMessagebox(title='Replace data in group', icon="warning", option_1="Cancel", option_2="Replace",
+                             message=f'Are you sure you want to replace the data in the group: "{group}" with the results?')
+        response = info.get()
+        if response == 'Cancel':
+            return
+        self.delete_data_from_group(skip_questions=True)
+        self.all_results_to_current_group()
 
     @check_busy
     def result_to_main(self):
