@@ -20,7 +20,7 @@ class MoveToGroup:
         self.mainwindow = builder.get_object("toplevel1", master)
         builder.connect_callbacks(self)
 
-        self.mainwindow.grab_set()  # Set as modal
+        #self.mainwindow.grab_set()  # Set as modal
         self.mainwindow.attributes('-topmost', True)  # Always on top
         self.mainwindow.title('Move data to other group')
 

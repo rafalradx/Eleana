@@ -238,7 +238,7 @@ class Eleana:
         x = data.x
         y = data.y
         type = data.type
-        
+
 
 if __name__ == "__main__":
     eleana = Eleana()

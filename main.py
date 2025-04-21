@@ -450,7 +450,7 @@ class MainApp:
         # Select data
         av_data = self.sel_first._values
         av_data.pop(0)
-        self.select_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'],
+        self.select_data = SelectData(master=self.mainwindow, title='Select data', group=self.eleana.selections['group'],
                                       items=av_data)
         names = self.select_data.get()
         if not names:
@@ -514,11 +514,13 @@ class MainApp:
             self.eleana.assignmentToGroups['<group-list/>'] = group_list
         update.dataset_list()
         update.groups()
-        update.all_lists()
-        update.gui_widgets()
         self.sel_group.set('All')
         self.sel_first.set('None')
+        self.eleana.selections['first'] = -1
         self.sel_second.set('None')
+        self.eleana.selections['second'] = -1
+        update.all_lists()
+        update.gui_widgets()
 
     @check_busy
     def convert_group_to_stack(self, all = False):
@@ -1277,6 +1279,72 @@ class MainApp:
             self.resultFrame.grid_remove()
             self.grapher.plot_graph()
 
+    def gui_to_selections(self):
+        ''' Get values from self.eleana.selections
+            and update gui buttons accordingly'''
+        select = self.eleana.selections
+        self.sel_group.set(select['group'])
+
+        # Set First, Second, Result visibility
+        if select['f_dsp']:
+            self.check_first_show.select()
+        else:
+            self.check_first_show.deselect()
+        if select['s_dsp']:
+            self.check_second_show.select()
+        else:
+            self.check_second_show.deselect()
+        if select['r_dsp']:
+            self.check_result_show.select()
+        else:
+            self.check_result_show.deselect()
+
+
+        # Set Values in comboboxes
+        # FIRST
+        if select['first'] >= 0:
+            f_name = self.eleana.dataset[select['first']].name_nr
+            self.sel_first.set(f_name)
+            if self.eleana.dataset[select['first']].type == 'stack 2D':
+                stk_names = self.eleana.dataset[select['first']].stk_names
+                stk_name = stk_names[select['f_stk']]
+                self.f_stk.set(stk_name)
+            if self.eleana.dataset[select['first']].complex:
+                self.firstComplex.grid()
+                self.firstComplex.set(select['f_cpl'])
+            else:
+                self.firstComplex.grid_remove()
+
+        # SECOND
+        if select['second'] >= 0:
+            s_name = self.eleana.dataset[select['second']].name_nr
+            self.sel_second.set(s_name)
+            if self.eleana.dataset[select['second']].type == 'stack 2D':
+                stk_names = self.eleana.dataset[select['second']].stk_names
+                stk_name = stk_names[select['s_stk']]
+                self.s_stk.set(stk_name)
+            if self.eleana.dataset[select['second']].complex:
+                self.secondComplex.grid()
+                self.secondComplex.set(select['s_cpl'])
+            else:
+                self.secondComplex.grid_remove()
+
+        # RESULT
+        if select['result'] >= 0:
+            r_name = self.eleana.results_dataset[select['result']].name
+            self.sel_result.set(r_name)
+            if self.eleana.results_dataset[select['result']].type == 'stack 2D':
+                stk_names = self.eleana.result_dataset[select['result']].stk_names
+                stk_name = stk_names[select['r_stk']]
+                self.r_stk.set(stk_name)
+            if self.eleana.results_dataset[select['result']].complex:
+                self.resultComplex.grid()
+                self.resultComplex.set(select['r_cpl'])
+            else:
+                self.resultComplex.grid_remove()
+
+        self.grapher.plot_graph()
+
     def clear_dataset(self):
         quit_dialog = CTkMessagebox(title="Clear dataset",
                                     message="Are you sure you want to clear the entire dataset?",
@@ -1306,6 +1374,7 @@ class MainApp:
     def load_project(self, event=None, recent=None):
         ''' Load project created with the Application '''
         project = load.load_project(recent)
+        print(self.eleana.selections)
         if not project:
             return
         update.dataset_list()
@@ -1316,25 +1385,48 @@ class MainApp:
         app.mainwindow.title(name + ' - Eleana')
         self.eleana.paths['last_project_dir'] = str(Path(path_to_file).parent)
         main_menu.last_projects_menu()
-        try:
-            selected_value_text = self.eleana.dataset[self.eleana.selections['first']].name_nr
-            self.first_selected(selected_value_text)
-            self.sel_first.set(selected_value_text)
-        except:
-            pass
-        try:
-            selected_value_text = self.eleana.dataset[self.eleana.selections['second']].name_nr
-            self.second_selected(selected_value_text)
-            self.sel_second.set(selected_value_text)
-        except:
-            pass
-        try:
-            selected_value_text = self.eleana.results_dataset[self.eleana.selections['result']].name
-            self.result_selected(selected_value_text)
-            self.sel_result.set(selected_value_text)
-        except:
-            pass
-        self.grapher.plot_graph()
+
+        # Set settings to GUI
+        # try:
+        #     selected_value_text = self.eleana.dataset[self.eleana.selections['first']].name_nr
+        #     self.first_selected(selected_value_text)
+        #     self.sel_first.set(selected_value_text)
+        # except:
+        #     pass
+        # try:
+        #     selected_value_text = self.eleana.dataset[self.eleana.selections['second']].name_nr
+        #     self.second_selected(selected_value_text)
+        #     self.sel_second.set(selected_value_text)
+        # except:
+        #     pass
+        # try:
+        #     selected_value_text = self.eleana.results_dataset[self.eleana.selections['result']].name
+        #     self.result_selected(selected_value_text)
+        #     self.sel_result.set(selected_value_text)
+        # except:
+        #     pass
+        # self.grapher.plot_graph()
+
+        self.gui_to_selections()
+        # try:
+        #     selected_value_text = self.eleana.dataset[self.eleana.selections['first']].name_nr
+        #     self.first_selected(selected_value_text)
+        #     self.sel_first.set(selected_value_text)
+        # except:
+        #     pass
+        # try:
+        #     selected_value_text = self.eleana.dataset[self.eleana.selections['second']].name_nr
+        #     self.second_selected(selected_value_text)
+        #     self.sel_second.set(selected_value_text)
+        # except:
+        #     pass
+        # try:
+        #     selected_value_text = self.eleana.results_dataset[self.eleana.selections['result']].name
+        #     self.result_selected(selected_value_text)
+        #     self.sel_result.set(selected_value_text)
+        # except:
+        #     pass
+        # self.grapher.plot_graph()
 
     def load_recent(self, selected_value_text):
         """ Load a project selected from Last Projects Menu"""
