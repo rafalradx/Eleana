@@ -1165,8 +1165,8 @@ class Grapher(GraphPreferences):
             curve['style'] = copy.deepcopy(self.style_second)
             curve['x'] = copy.copy(data['x'])
             curve['re_y'] = copy.deepcopy(data['re_y'])
-            curve['im_y'] = copy.deppcopycopy(data['im_y'])
-            curve['disp'] = copy.deepcopycopy(self.eleana.selections['s_cpl'])
+            curve['im_y'] = copy.deepcopy(data['im_y'])
+            curve['disp'] = copy.deepcopy(self.eleana.selections['s_cpl'])
             if data['complex'] and self.eleana.selections['s_cpl'] == 'im':
                 curve['re_y'] = None
             elif data['complex'] and self.eleana.selections['s_cpl'] == 're':

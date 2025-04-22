@@ -225,7 +225,7 @@ class MainApp:
         self.panedwindow2.sashpos(0, 700)
         self.panedwindow4.sashpos(0, 400)
         self.pane5.sashpos(0, 1100)
-        self.mainwindow.update_idleasks()
+        self.mainwindow.update_idletasks()
 
     def center_window(self, window, width, height):
         screen_width = window.winfo_screenwidth()
@@ -643,6 +643,7 @@ class MainApp:
             name = self.eleana.dataset[i].name_nr
             if name == selected_value_text:
                 self.eleana.set_selections('first', i)
+                self.sel_first.set(name)
                 break
             i += 1
         update.list_in_combobox('sel_first')
@@ -1463,7 +1464,7 @@ class MainApp:
         if win_title == 'new project - Eleana':
             self.save_as(filename = None)
         else:
-            file = win_title[:-9].strip()
+            file = win_title[:-13]
             file = file + '.ele'
             filename = Path(self.eleana.paths['last_project_dir'], file)
             self.save_as(filename)
@@ -1479,6 +1480,9 @@ class MainApp:
             update.dataset_list()
             update.all_lists()
             Save.save_settings_paths(self.eleana)
+            last_in_list = self.sel_first._values
+            self.first_selected(last_in_list[-1])
+
         except Exception as e:
             Error.show(info='Unable to import Elexsys file. Please verify that you have selected the correct format for import.', details=e)
 
@@ -1587,7 +1591,7 @@ class MainApp:
         self.mainwindow.update()
 
     def quick_paste(self, event=None):
-        text = self.mainwindow.clipboard_get()  # Pobiera tekst ze schowka
+        text = self.mainwindow.clipboard_get()
         self.import_ascii(text)
 
     def export_first(self):

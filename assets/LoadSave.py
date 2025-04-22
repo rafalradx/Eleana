@@ -90,6 +90,8 @@ class Load:
         extract_dir = Path(self.eleana.paths['tmp_dir'], tmp_folder)
         archive_format = 'zip'
         try:
+            if not Path.exists(filename):
+                raise FileExistsError('File not found.')
             shutil.unpack_archive(filename, extract_dir, archive_format)
             # Check project version
             info_file = Path(extract_dir, 'info.txt')
@@ -263,12 +265,12 @@ class Load:
             filename = filedialog.askopenfilename(initialdir=path, filetypes=filetypes)
             if not filename:
                 return
-            preview = AsciFilePreview(master = self.app.mainwindow, filename=filename)
+            preview = AsciFilePreview(master = self.app.mainwindow, filename=filename, eleana = self.eleana)
             response = preview.get()
             last_import_dir = Path(filename).parent
             self.eleana.paths['last_import_dir'] = last_import_dir
         else:
-            preview = AsciFilePreview(master=self.app.mainwindow, filename=None, clipboard = from_clipboard)
+            preview = AsciFilePreview(master=self.app.mainwindow, filename=None, clipboard = from_clipboard, eleana = self.eleana)
             response = preview.get()
             filename = None
 
@@ -309,10 +311,12 @@ class Load:
                                  icon="cancel")
             return {'Error':True}
 
-        if filename != None:
-            name = Path(filename).name
-        else:
-            name = ''
+        name = response['name']
+        if name == "" or name is None:
+            if filename != None:
+                name = Path(filename).name
+            else:
+                name = ''
         spreadsheet = CreateFromTable(self.eleana, self.app.mainwindow, df=df, name=name, group = self.eleana.selections['group'])
         response = spreadsheet.get()
 

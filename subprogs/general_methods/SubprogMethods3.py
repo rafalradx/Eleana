@@ -1301,7 +1301,6 @@ class SubMethods_03:
         storage = copy.deepcopy(self.subprog_storage_data)
         self.eleana.subprog_storage[self.subprog_id] = storage
 
-
     def restore(self, element):
         ''' Get data from self.eleana.subprog_storage
             for widget and returns stored values

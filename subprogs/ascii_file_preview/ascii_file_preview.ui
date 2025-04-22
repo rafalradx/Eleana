@@ -1,5 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
-<interface version="1.3">
+<interface version="1.4" author="PygubuDesigner 0.41">
+  <project>
+    <settings />
+    <customwidgets />
+  </project>
   <object class="tk.Toplevel" id="toplevel1">
     <property name="height">400</property>
     <property name="width">400</property>
@@ -150,7 +154,7 @@
                         </child>
                         <child>
                           <object class="customtkinter.CTkComboBox" id="box_sel_separator" named="True">
-                            <property name="command" type="command" cbtype="simple">sel_separator</property>
+                            <property name="command" type="command" cbtype="simple">sel_separator_changed</property>
                             <property name="values">["Comma", "Tab", "Semicolon", "Space", "Custom"]</property>
                             <layout manager="grid">
                               <property name="column">0</property>
@@ -177,6 +181,17 @@
                               <property name="padx">4</property>
                               <property name="pady">4</property>
                               <property name="row">9</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="customtkinter.CTkCheckBox" id="check_whitemarks" named="True">
+                            <property name="command" type="command" cbtype="simple">show_preview</property>
+                            <property name="text" translatable="yes">Show white marks</property>
+                            <layout manager="grid">
+                              <property name="column">0</property>
+                              <property name="pady">5</property>
+                              <property name="row">10</property>
                             </layout>
                           </object>
                         </child>

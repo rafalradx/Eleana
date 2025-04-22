@@ -267,7 +267,7 @@ class CreateFromTable:
         if index < 0:
             return
         column_data = self.table.get_column_data(index - 1)
-        filtered_data = [x.strip() for x in column_data if isinstance(x, str) and x.strip() != ""]
+        filtered_data = [x.strip() if isinstance(x, str) else x for x in column_data]
         floats_data = []
         for each in filtered_data:
             try:
