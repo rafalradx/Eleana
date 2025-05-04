@@ -381,13 +381,31 @@ class SplineBaseline(Methods, WindowGUI):                                       
         # (1) GET X, Y FOR INTERPOLATE FROM RANGE OR POINTS
         if self.app.sel_cursor_mode.get() != "Range select":
             x1, y1 = self.get_selected_points()
+        else:
+            x1, y1 = [], []  # default empty values
+
+        # (2) Prepare dante
+        x1, y1 = np.array(x1), np.array(y1)
+        sorted_indices = np.argsort(x1)
+        x1_sorted = x1[sorted_indices]
+        y1_sorted = y1[sorted_indices]
+
+        x1_unique, unique_indices = np.unique(x1_sorted, return_index=True)
+        y1_unique = y1_sorted[unique_indices]
+
+        if len(x1_unique) < 2:
+            return False
+            #Error.show("Potrzeba co najmniej dwóch unikalnych punktów do interpolacji.")
+
+        x1 = x1_unique
+        y1 = y1_unique
 
         # (2) CALCULATE BASELINE
         if self.interpolate_method == "linear":
             baseline = np.interp(x1_orig, x1, y1, left=None, right=None, period=None)
         elif self.interpolate_method == "linear":
             baseline = np.interp(x1_orig, x1, y1)
-        elif self.interpolate_method == "qubic":
+        elif self.interpolate_method == "cubic":
             interpolator = CubicSpline(x1, y1)
             baseline = interpolator(x1_orig)
         elif self.interpolate_method == "phip":
@@ -400,6 +418,48 @@ class SplineBaseline(Methods, WindowGUI):                                       
             interpolator = BarycentricInterpolator(x1, y1)
             baseline = interpolator(x1_orig)
 
+
+        x1_orig = self.data_for_calculations[1]['x']
+        y1_orig = self.data_for_calculations[1]['y']
+
+        # (1) GET X, Y FOR INTERPOLATE FROM RANGE OR POINTS
+        if self.app.sel_cursor_mode.get() != "Range select":
+            x1, y1 = self.get_selected_points()
+        else:
+            x1, y1 = [], []  # lub odpowiednie domyślne wartości
+
+        # (2) Przygotuj i zweryfikuj dane
+        x1, y1 = np.array(x1), np.array(y1)
+        sorted_indices = np.argsort(x1)
+        x1_sorted = x1[sorted_indices]
+        y1_sorted = y1[sorted_indices]
+
+        # Usuń powtórzenia w x1
+        x1_unique, unique_indices = np.unique(x1_sorted, return_index=True)
+        y1_unique = y1_sorted[unique_indices]
+
+        if len(x1_unique) < 2:
+            raise ValueError("Potrzeba co najmniej dwóch unikalnych punktów do interpolacji.")
+
+        # (3) INTERPOLACJA
+        method = self.interpolate_method.lower()
+
+        if method == "linear":
+            baseline = np.interp(x1_orig, x1_unique, y1_unique)
+        elif method == "cubic":
+            interpolator = CubicSpline(x1_unique, y1_unique)
+            baseline = interpolator(x1_orig)
+        elif method == "phip":
+            interpolator = PchipInterpolator(x1_unique, y1_unique)
+            baseline = interpolator(x1_orig)
+        elif method == "akma":
+            interpolator = Akima1DInterpolator(x1_unique, y1_unique)
+            baseline = interpolator(x1_orig)
+        elif method == "barycentric":
+            interpolator = BarycentricInterpolator(x1_unique, y1_unique)
+            baseline = interpolator(x1_orig)
+        else:
+            raise ValueError(f"Unknown method: {self.interpolate_method}")
 
         # Write original data to results
         self.data_for_calculations[0]['x'] = x1_orig

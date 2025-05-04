@@ -90,7 +90,7 @@ class Load:
         extract_dir = Path(self.eleana.paths['tmp_dir'], tmp_folder)
         archive_format = 'zip'
         try:
-            if not Path.exists(filename):
+            if not Path.exists(Path(filename)):
                 raise FileExistsError('File not found.')
             shutil.unpack_archive(filename, extract_dir, archive_format)
             # Check project version
