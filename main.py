@@ -12,7 +12,6 @@ import io
 import re
 import os
 from functools import wraps
-import inspect
 
 # Set paths for assets, modules, subprogs and widgets
 PROJECT_PATH = Path(__file__).parent
@@ -36,6 +35,7 @@ import pandas
 import pygubu
 from CTkListbox import CTkListbox
 from CTkMessagebox import CTkMessagebox
+from CTkScrollableDropdown import CTkScrollableDropdown
 
 # Import Eleana specific classes
 from Eleana import Eleana
@@ -213,6 +213,24 @@ class MainApp:
         # Ctk styles
         self.gui_appearence = 'light'
         self.color_theme = 'dark-blue'
+
+    def scrollable_dropdown(self, selection, combobox):
+        ''' Interconnects CTkScrollableDropdown to standard CTkCombobox'
+            This function translates the events of item selection to event
+            of standard combobox selection
+        '''
+        if combobox == 'sel_first':
+            self.first_selected(selection)
+            self.sel_first.set(selection)
+        elif combobox == 'f_stk':
+            self.f_stk_selected(selection)
+            self.f_stk.set(selection)
+        elif combobox == 'sel_second':
+            self.second_selected(selection)
+            self.sel_second.set(selection)
+
+        self.mainwindow.focus_set()
+
 
     def set_grapher(self, grapher):
         self.grapher = grapher
