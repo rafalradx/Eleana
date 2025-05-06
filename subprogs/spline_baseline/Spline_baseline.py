@@ -274,8 +274,8 @@ class SplineBaseline(Methods, WindowGUI):                                       
         self.sel_polynomial = self.builder.get_object('sel_polynomial', self.mainwindow)
         self.sel_polynomial.set(value='Linear')
         self.keep_baseline = self.builder.get_object('keep_baseline', self.mainwindow)
-        self.interpolate_method = "akma"
-        self.sel_polynomial.set(value = "Spline")
+        self.interpolate_method = "Cubic"
+        self.sel_polynomial.set(value = "Cubic")
 
 
         # Storage of the baseline
@@ -284,16 +284,14 @@ class SplineBaseline(Methods, WindowGUI):                                       
 
     def sel_polynomial_clicked(self, selection):
         method = selection[0:3].lower()
-        if method == "ner":
-            self.interpolate_method = "nearest"
-        elif method == "lin":
+        if method == "lin":
             self.interpolate_method = "linear"
-        elif method == "qub":
-            self.interpolate_method = "qubic"
-        elif method == "phi":
-            self.interpolate_method = "phip"
-        elif method == "akm":
-            self.interpolate_method == "akma"
+        elif method == "cub":
+            self.interpolate_method = "cubic"
+        elif method == "pch":
+            self.interpolate_method = "pchip"
+        elif method == "aki":
+            self.interpolate_method = "akima"
         elif method == "bar":
             self.interpolate_method = "barycentric"
 
@@ -374,50 +372,6 @@ class SplineBaseline(Methods, WindowGUI):                                       
         cursor_positions = self.grapher.cursor_annotations
         # ------------------------------------------
 
-        # Get the x data that were not extracted
-        x1_orig = self.data_for_calculations[1]['x']
-        y1_orig = self.data_for_calculations[1]['y']
-
-        # (1) GET X, Y FOR INTERPOLATE FROM RANGE OR POINTS
-        if self.app.sel_cursor_mode.get() != "Range select":
-            x1, y1 = self.get_selected_points()
-        else:
-            x1, y1 = [], []  # default empty values
-
-        # (2) Prepare dante
-        x1, y1 = np.array(x1), np.array(y1)
-        sorted_indices = np.argsort(x1)
-        x1_sorted = x1[sorted_indices]
-        y1_sorted = y1[sorted_indices]
-
-        x1_unique, unique_indices = np.unique(x1_sorted, return_index=True)
-        y1_unique = y1_sorted[unique_indices]
-
-        if len(x1_unique) < 2:
-            return False
-            #Error.show("Potrzeba co najmniej dwóch unikalnych punktów do interpolacji.")
-
-        x1 = x1_unique
-        y1 = y1_unique
-
-        # (2) CALCULATE BASELINE
-        if self.interpolate_method == "linear":
-            baseline = np.interp(x1_orig, x1, y1, left=None, right=None, period=None)
-        elif self.interpolate_method == "linear":
-            baseline = np.interp(x1_orig, x1, y1)
-        elif self.interpolate_method == "cubic":
-            interpolator = CubicSpline(x1, y1)
-            baseline = interpolator(x1_orig)
-        elif self.interpolate_method == "phip":
-            interpolator = PchipInterpolator(x1, y1)
-            baseline = interpolator(x1_orig)
-        elif self.interpolate_method == "akma":
-            interpolator = Akima1DInterpolator(x1, y1)
-            baseline = interpolator(x1_orig)
-        elif self.interpolate_method == "barycentric":
-            interpolator = BarycentricInterpolator(x1, y1)
-            baseline = interpolator(x1_orig)
-
 
         x1_orig = self.data_for_calculations[1]['x']
         y1_orig = self.data_for_calculations[1]['y']
@@ -426,22 +380,19 @@ class SplineBaseline(Methods, WindowGUI):                                       
         if self.app.sel_cursor_mode.get() != "Range select":
             x1, y1 = self.get_selected_points()
         else:
-            x1, y1 = [], []  # lub odpowiednie domyślne wartości
+            x1, y1 = [], []
 
-        # (2) Przygotuj i zweryfikuj dane
+        # (2) Prepare and sort data
         x1, y1 = np.array(x1), np.array(y1)
         sorted_indices = np.argsort(x1)
         x1_sorted = x1[sorted_indices]
         y1_sorted = y1[sorted_indices]
 
-        # Usuń powtórzenia w x1
+        # Remove duplications
         x1_unique, unique_indices = np.unique(x1_sorted, return_index=True)
         y1_unique = y1_sorted[unique_indices]
 
-        if len(x1_unique) < 2:
-            raise ValueError("Potrzeba co najmniej dwóch unikalnych punktów do interpolacji.")
-
-        # (3) INTERPOLACJA
+        # (3) INTERPOLATION
         method = self.interpolate_method.lower()
 
         if method == "linear":
@@ -449,10 +400,10 @@ class SplineBaseline(Methods, WindowGUI):                                       
         elif method == "cubic":
             interpolator = CubicSpline(x1_unique, y1_unique)
             baseline = interpolator(x1_orig)
-        elif method == "phip":
+        elif method == "pchip":
             interpolator = PchipInterpolator(x1_unique, y1_unique)
             baseline = interpolator(x1_orig)
-        elif method == "akma":
+        elif method == "akima":
             interpolator = Akima1DInterpolator(x1_unique, y1_unique)
             baseline = interpolator(x1_orig)
         elif method == "barycentric":
@@ -469,10 +420,6 @@ class SplineBaseline(Methods, WindowGUI):                                       
         else:
             self.data_for_calculations[0]['y'] = y1_orig - baseline
             self.add_to_additional_plots(x=x1_orig, y=baseline, clear=True)
-
-        # Add to additional plots
-        #self.clear_additional_plots()
-        #self.add_to_additional_plots(x = x1_orig, y = poly_curve, clear=True)
 
         # Send calculated values to result (if needed). This will be sent to command line
         result = None # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
