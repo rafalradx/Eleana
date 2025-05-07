@@ -54,6 +54,7 @@ from Error import Error
 # append.(['name of instance without self., 'Command to close']
 
 list_of_subprogs = []
+from filter_savitzky_golay.sav_gol import SavGol
 from edit_values_in_table.edit_values_in_table import EditValuesInTable
 #list_of_subprogs.append(['edit_values_in_table', 'cancel'])
 from EPR_B_to_g.B_to_g import EPR_B_to_g
@@ -1804,7 +1805,7 @@ class MainApp:
         subprog_spline_baseline = SplineBaseline(self, which='first')
 
     def filter_savitzky_golay(self):
-        print("Savitztky Golay")
+        subprog_sav_gol = SavGol(self, which = 'first')
 
 
     # --------------------------------------------

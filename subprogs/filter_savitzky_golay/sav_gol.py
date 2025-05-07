@@ -13,16 +13,16 @@ from scipy.interpolate import CubicSpline, PchipInterpolator, Akima1DInterpolato
 CLOSE_SUBPROGS: bool = False
 
 # Folder name containing THIS file
-SUBPROG_FOLDER: str = 'spline_baseline'
+SUBPROG_FOLDER: str = 'filter_savitzky_golay'
 
 # Name of GUI python file created by pygubu-designer. Usually with ...ui.py endings
-GUI_FILE: str = 'SplineBaselineui.py'
+GUI_FILE: str = 'savgolui.py'
 
 # Name of class in GUI_FILE used to create the window
-GUI_CLASS: str = 'SplineBaselineUI'
+GUI_CLASS: str = 'SavGolUI'
 
 # Title of the window that shown in the main bar
-TITLE: str = 'Spline baseline subtraction'
+TITLE: str = 'Savitzky-Golay Filter'
 
 # If True, this window will be always on top
 # self.subprog_settings['on_top']
@@ -209,7 +209,7 @@ mod = importlib.import_module(module_path)
 WindowGUI = getattr(mod, class_name)
 
 from subprogs.general_methods.SubprogMethods3 import SubMethods_03 as Methods                       #|
-class SplineBaseline(Methods, WindowGUI):                                                           #|
+class SavGol(Methods, WindowGUI):                                                                   #|
     def __init__(self, app=None, which='first', commandline=False):                                 #|
         if app and not commandline:                                                                 #|
             # Initialize window if app is defined and not commandline                               #|
@@ -272,16 +272,14 @@ class SplineBaseline(Methods, WindowGUI):                                       
         #self.mainwindow =
 
         # HERE DEFINE YOUR REFERENCES TO WIDGETS
-        self.sel_polynomial = self.builder.get_object('sel_polynomial', self.mainwindow)
-        self.sel_polynomial.set(value='Linear')
-        self.keep_baseline = self.builder.get_object('keep_baseline', self.mainwindow)
-        self.interpolate_method = "akma"
-        self.sel_polynomial.set(value = "Spline")
+        from widgets.CTkSpinbox import CTkSpinbox
+        self.windowFrame = self.builder.get_object('windowFrame', self.mainwindow)
+        self.polynomFrame = self.builder.get_object('polynomFrame', self.mainwindow)
 
-
-        # Storage of the baseline
-        self.baseline = {'x': np.array([]),
-                         'y':np.array([])}
+        self.window_length = CTkSpinbox(master = self.windowFrame, min_value=1, max_value=1000, step_value=1)
+        self.window_length.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
+        self.polynomial_order = CTkSpinbox(master = self.polynomFrame, min_value=1, max_value=30, step_value=1)
+        self.polynomial_order.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
 
     def sel_polynomial_clicked(self, selection):
         method = selection[0:3].lower()
@@ -430,12 +428,12 @@ class SplineBaseline(Methods, WindowGUI):                                       
             {'key_for_storage' : function_for_getting_value()}
         '''
         return  [
-            {'sel_polynomial'    : self.sel_polynomial.get()    },
-            {'keep_baseline'     : self.keep_baseline.get()     },
+            {'window_length'    : self.window_length.get()    },
+            {'polynomial_order' : self.polynomial_order.get() },
                 ]
 
     def restore_settings(self):
-        val = self.restore('sel_polynomial')
+        val = self.restore('window_length')
         if val:
             self.sel_polynomial.set(value = val)
             self.sel_polynomial_clicked(val)

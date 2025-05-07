@@ -58,6 +58,7 @@ class MainMenu:
         self.icon_splinebaseline = self.prepare_icon("spline.png")
         self.icon_trimdata = self.prepare_icon("trim.png")
         self.icon_btog = self.prepare_icon("Btog.png")
+        self.icon_sav_gol = self.prepare_icon("sav_gol.png")
 
         ''' BUILD MENU '''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth_bar, activeborderwidth=self.borderwidth)
@@ -246,6 +247,11 @@ class MainMenu:
         self.menu_modifications.add_command(label="Subtract spline baseline", command=self.app.spline_baseline,
                                             image=self.icon_splinebaseline, compound="left")
 
+        self.menu_modifications.add_separator()
+
+        # - Filter
+        self.menu_modifications.add_command(label="Savitzky-Golay Filter", command=self.app.filter_savitzky_golay,
+                                            image=self.icon_sav_gol, compound="left")
 
         ''' Menu EPR '''
         self.menu_EPR = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
