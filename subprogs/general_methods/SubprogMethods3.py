@@ -134,6 +134,8 @@ class SubMethods_03:
         ''' Makes a copy of the selected data and stores it in self.original_data.
             You may perform calculations on self.original_data. '''
         index = self.eleana.selections[self.which]
+        if index < 0:
+            return False
         parameters = self.eleana.dataset[index].parameters
         origin = parameters.get('origin', None)
         if self.eleana.selections[self.which] >= 0:  # If selection is not None

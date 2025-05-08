@@ -2,10 +2,10 @@
 # IMPORT MODULES NEEDED
 # -- Here is an example --
 from asyncio import set_event_loop_policy
-
+from assets.Error import Error
 import numpy as np
 import importlib
-from scipy.interpolate import CubicSpline, PchipInterpolator, Akima1DInterpolator, BarycentricInterpolator
+from scipy.signal import savgol_filter
 
 
 ''' GENERAL SETTINGS '''
@@ -43,7 +43,7 @@ DATA_LABEL: str = 'data_label'
 # For example if "Spectrum" is processed and NAME_SUFFIX = "_MODIFIED"
 # you will get "Spectrum_MODIFIED" name in result
 # self.subprog_settings['name_suffix']
-NAME_SUFFIX: str = '_BASELINE'
+NAME_SUFFIX: str = '_FILTERED'
 
 # If true, calculations are done automatically upon selection of data in the main GUI
 # self.subprog_settings['auto_calculate']
@@ -52,8 +52,8 @@ AUTO_CALCULATE: bool = False
 ''' INPUT DATA CONFIGURATION '''
 # Define if data for calculations should be extracted.
 # self.regions['from']
-#REGIONS_FROM: str = 'none'        # 'none' - do not extract
-REGIONS_FROM: str = 'selection'    # 'selection' - take data only from selected range on graph (Range selection)
+REGIONS_FROM: str = 'none'        # 'none' - do not extract
+#REGIONS_FROM: str = 'selection'    # 'selection' - take data only from selected range on graph (Range selection)
 #REGIONS_FROM: str = 'scale'       # ' scale' - take data from current x scale
 
 # Define if original, not extracted data are added to self.data_for_calculations in indexes +1
@@ -69,7 +69,7 @@ ORIG_IN_ODD_IDX: bool = True
 USE_SECOND: bool = False
 
 # If each subspectrum in a Stack 2D can be processed separately set this to True
-# When the calculations requires all data fro the stack in x and y set this  to False
+# When the calculations requires all data from the stack in x and y set this  to False
 # If False then the method 'calculate_stack must contain appropriate method
 # self.stack_sep
 STACK_SEP: bool = True
@@ -161,7 +161,7 @@ CURSOR_CHANGING: bool = True
 # Possible values: 'None', 'Continuous read XY', 'Selection of points with labels'
 #                  'Selection of points', 'Numbered selections', 'Free select', 'Crosshair', 'Range select'
 # self.subprog_cursor['type']
-CURSOR_TYPE: str = 'Free select'
+CURSOR_TYPE: str = 'None'
 
 # Set the maximum number of annotations that can be added to the graph.
 # Set to 0 for no limit
@@ -170,17 +170,17 @@ CURSOR_LIMIT: int = 0
 
 # If True the any added cursors in the graph will be removed
 # self.subprog_cursor['clear_on_start']
-CURSOR_CLEAR_ON_START: bool = True
+CURSOR_CLEAR_ON_START: bool = False
 
 # Minimum number of cursor annotations needed for calculations.
 # Set 0 for no checking
 # self.subprog_cursor['cursor_required']
-CURSOR_REQUIRED: int = 2
+CURSOR_REQUIRED: int = 0
 
 # A text string to show in a pop up window if number of cursors is less than required for calculations
 # Leve this empty if no error should be displayed
 # self.subprog_cursor['cursor_req_text']
-CURSOR_REQ_TEXT: str = 'Please select at least two points.'
+CURSOR_REQ_TEXT: str = ''
 
 # Enable checking if all cursor annotations are between Xmin and Xmax of data_dor_calculations
 # self.subprog_cursor['cursor_outside_x']
@@ -259,7 +259,41 @@ class SavGol(Methods, WindowGUI):                                               
             DO NOT USE FUNCTIONS USING GRAPHER METHODS HERE!'''
 
     def finish_action(self, by_method):
-        ''' This method is called when all calculations are finished and main window
+        ''' This method is called when alif self.app.sel_cursor_mode.get() != "Range select":
+            x1, y1 = self.get_selected_points()
+
+        # (2) CALCULATE BASELINE
+        if self.interpolate_method == "linear":
+            baseline = np.interp(x1_orig, x1, y1, left=None, right=None, period=None)
+        elif self.interpolate_method == "linear":
+            baseline = np.interp(x1_orig, x1, y1)
+        elif self.interpolate_method == "qubic":
+            interpolator = CubicSpline(x1, y1)
+            baseline = interpolator(x1_orig)
+        elif self.interpolate_method == "phip":
+            interpolator = PchipInterpolator(x1, y1)
+            baseline = interpolator(x1_orig)
+        elif self.interpolate_method == "akma":
+            interpolator = Akima1DInterpolator(x1, y1)
+            baseline = interpolator(x1_orig)
+        elif self.interpolate_method == "barycentric":
+            interpolator = BarycentricInterpolator(x1, y1)
+            baseline = interpolator(x1_orig)
+
+
+        # Write original data to results
+        self.data_for_calculations[0]['x'] = x1_orig
+        if self.keep_baseline.get():
+            self.data_for_calculations[0]['y'] = baseline
+            self.clear_additional_plots()
+        else:
+            self.data_for_calculations[0]['y'] = y1_orig - baseline
+            self.add_to_additional_plots(x=x1_orig, y=baseline, clear=True)
+
+        # Add to additional plots
+        #self.clear_additional_plots()
+        #self.add_to_additional_plots(x = x1_orig, y = poly_curve, clear=True)
+l calculations are finished and main window
             awaits for action. This is useful if you need to put annotations to the graph etc.
             by_method - the name of a method that triggered the action.
         '''
@@ -276,26 +310,18 @@ class SavGol(Methods, WindowGUI):                                               
         self.windowFrame = self.builder.get_object('windowFrame', self.mainwindow)
         self.polynomFrame = self.builder.get_object('polynomFrame', self.mainwindow)
 
-        self.window_length = CTkSpinbox(master = self.windowFrame, min_value=1, max_value=1000, step_value=1)
+        self.window_length = CTkSpinbox(master = self.windowFrame, min_value=1, max_value=1000, step_value=1, command=self.spinbox_changed)
         self.window_length.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
-        self.polynomial_order = CTkSpinbox(master = self.polynomFrame, min_value=1, max_value=30, step_value=1)
+        self.polynomial_order = CTkSpinbox(master = self.polynomFrame, min_value=1, max_value=30, step_value=1, command=self.spinbox_changed)
         self.polynomial_order.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
 
-    def sel_polynomial_clicked(self, selection):
-        method = selection[0:3].lower()
-        if method == "ner":
-            self.interpolate_method = "nearest"
-        elif method == "lin":
-            self.interpolate_method = "linear"
-        elif method == "qub":
-            self.interpolate_method = "qubic"
-        elif method == "phi":
-            self.interpolate_method = "phip"
-        elif method == "akm":
-            self.interpolate_method == "akma"
-        elif method == "bar":
-            self.interpolate_method = "barycentric"
-
+    def spinbox_changed(self, value=None):
+        try:
+            self.window = int(self.window_length.get())
+            self.order = int(self.polynomial_order.get())
+        except ValueError:
+            Error.show(info="Window length and polynomial order must both be integer values.")
+        self.ok_clicked()
 
     def calculate_stack(self, commandline = False):
         ''' If STACK_SEP is False it means that data in stack should
@@ -362,7 +388,7 @@ class SavGol(Methods, WindowGUI):                                               
         if self.use_second:
             x2 = self.data_for_calculations[1+sft]['x']
             y2 = self.data_for_calculations[1+sft]['y']
-            z2 = self.data_for_calculations[1]+sft['z']
+            z2 = self.data_for_calculations[1+sft]['z']
             name2 = self.data_for_calculations[1+sft]['name']
             stk_value2 = self.data_for_calculations[1+sft]['stk_value']
             complex2 = self.data_for_calculations[1+sft]['complex']
@@ -373,45 +399,13 @@ class SavGol(Methods, WindowGUI):                                               
         cursor_positions = self.grapher.cursor_annotations
         # ------------------------------------------
 
-        # Get the x data that were not extracted
-        x1_orig = self.data_for_calculations[1]['x']
-        y1_orig = self.data_for_calculations[1]['y']
-
-        # (1) GET X, Y FOR INTERPOLATE FROM RANGE OR POINTS
-        if self.app.sel_cursor_mode.get() != "Range select":
-            x1, y1 = self.get_selected_points()
-
-        # (2) CALCULATE BASELINE
-        if self.interpolate_method == "linear":
-            baseline = np.interp(x1_orig, x1, y1, left=None, right=None, period=None)
-        elif self.interpolate_method == "linear":
-            baseline = np.interp(x1_orig, x1, y1)
-        elif self.interpolate_method == "qubic":
-            interpolator = CubicSpline(x1, y1)
-            baseline = interpolator(x1_orig)
-        elif self.interpolate_method == "phip":
-            interpolator = PchipInterpolator(x1, y1)
-            baseline = interpolator(x1_orig)
-        elif self.interpolate_method == "akma":
-            interpolator = Akima1DInterpolator(x1, y1)
-            baseline = interpolator(x1_orig)
-        elif self.interpolate_method == "barycentric":
-            interpolator = BarycentricInterpolator(x1, y1)
-            baseline = interpolator(x1_orig)
-
-
-        # Write original data to results
-        self.data_for_calculations[0]['x'] = x1_orig
-        if self.keep_baseline.get():
-            self.data_for_calculations[0]['y'] = baseline
-            self.clear_additional_plots()
-        else:
-            self.data_for_calculations[0]['y'] = y1_orig - baseline
-            self.add_to_additional_plots(x=x1_orig, y=baseline, clear=True)
-
-        # Add to additional plots
-        #self.clear_additional_plots()
-        #self.add_to_additional_plots(x = x1_orig, y = poly_curve, clear=True)
+        try:
+            self.data_for_calculations[0]['y'] = savgol_filter(x=y1, window_length=self.window, polyorder=self.order)
+        except ValueError as e:
+            Error.show(info = 'Window length must be larger or equal to the polynomial order.')
+            self.window += self.order
+            self.window_length.set(self.window)
+            return False
 
         # Send calculated values to result (if needed). This will be sent to command line
         result = None # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
@@ -435,14 +429,16 @@ class SavGol(Methods, WindowGUI):                                               
     def restore_settings(self):
         val = self.restore('window_length')
         if val:
-            self.sel_polynomial.set(value = val)
-            self.sel_polynomial_clicked(val)
+            self.window_length.set(value = val)
+        else:
+            self.window_length.set(value = 3)
 
-        val = self.restore('keep_baseline')
-        if val == True:
-            self.keep_baseline.select()
-        elif val == False:
-            self.keep_baseline.deselect()
+        val = self.restore('polynomial_order')
+        if val:
+            self.polynomial_order.set(value = val)
+        else:
+            self.polynomial_order.set(value = 2)
+        self.spinbox_changed()
 
 
 if __name__ == "__main__":
