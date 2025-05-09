@@ -54,6 +54,7 @@ from Error import Error
 # append.(['name of instance without self., 'Command to close']
 
 list_of_subprogs = []
+from filter_fft.fft_filter import FFTFilter
 from filter_savitzky_golay.sav_gol import SavGol
 from edit_values_in_table.edit_values_in_table import EditValuesInTable
 #list_of_subprogs.append(['edit_values_in_table', 'cancel'])
@@ -1806,6 +1807,9 @@ class MainApp:
 
     def filter_savitzky_golay(self):
         subprog_sav_gol = SavGol(self, which = 'first')
+
+    def filter_fft_lowpass(self):
+        subprog_fft_lowpass = FFTFilter(self, which = 'first')
 
 
     # --------------------------------------------

@@ -210,7 +210,7 @@ class MainMenu:
                             activebackground=self.activebg, activeforeground=self.activefg,
                             borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
         #self.main_menu.add_cascade(label="Analysis", menu=self.menu_analysis, image=self.icon_dropdown, compound="left")
-        self.main_menu.add_cascade(label=" Analysis ", menu=self.menu_analysis)
+        self.main_menu.add_cascade(label="Analysis ", menu=self.menu_analysis)
 
         #  - Distance read
         self.menu_analysis.add_command(label="Calculate XY Distance", command=self.app.xy_distance,
@@ -250,14 +250,24 @@ class MainMenu:
         self.menu_modifications.add_separator()
 
         # - Filter
-        self.menu_modifications.add_command(label="Savitzky-Golay Filter", command=self.app.filter_savitzky_golay,
+        self.menu_filters = tk.Menu(self.menu_modifications, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                                  activebackground=self.activebg, activeforeground=self.activefg,
+                                  borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.menu_modifications.add_cascade(label = "Filters", menu=self.menu_filters)
+
+        # --- Savitzky-Golay
+        self.menu_filters.add_command(label="Savitzky-Golay Filter", command=self.app.filter_savitzky_golay,
                                             image=self.icon_sav_gol, compound="left")
+
+        # --- FFT Lowpass filter
+        self.menu_filters.add_command(label="FFT lowpass filter", command = self.app.filter_fft_lowpass,
+                                      image=self.icon_sav_gol, compound="left")
 
         ''' Menu EPR '''
         self.menu_EPR = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                           activebackground=self.activebg, activeforeground=self.activefg,
                                           borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        #self.main_menu.add_cascade(label="EPR", menu=self.menu_EPR, image=self.icon_dropdown, compound="left")
+
         self.main_menu.add_cascade(label="EPR ", menu=self.menu_EPR)
 
         # - B to g

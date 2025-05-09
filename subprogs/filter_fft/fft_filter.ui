@@ -2,12 +2,12 @@
 <interface version="1.4" author="PygubuDesigner 0.40.2">
   <project>
     <settings>
-      <setting id="name">savgol</setting>
-      <setting id="description">Savitzky Golay</setting>
-      <setting id="module_name">savgol</setting>
+      <setting id="name">fft_filter</setting>
+      <setting id="description">FFT Lowpass filter</setting>
+      <setting id="module_name">fft_filter</setting>
       <setting id="template">application</setting>
       <setting id="main_widget">toplevel1</setting>
-      <setting id="main_classname">SavGol</setting>
+      <setting id="main_classname">FFTFilter</setting>
       <setting id="main_menu" />
       <setting id="output_dir">.</setting>
       <setting id="output_dir2" />
@@ -116,11 +116,9 @@
                 </layout>
                 <containerlayout manager="grid">
                   <property type="col" id="0" name="weight">1</property>
-                  <property type="col" id="1" name="weight">1</property>
                 </containerlayout>
                 <child>
-                  <object class="customtkinter.CTkFrame" id="windowFrame" named="True">
-                    <property name="corner_radius">0</property>
+                  <object class="customtkinter.CTkFrame" id="ctkframe6">
                     <layout manager="grid">
                       <property name="column">0</property>
                       <property name="row">0</property>
@@ -130,33 +128,57 @@
                       <property type="col" id="0" name="weight">1</property>
                     </containerlayout>
                     <child>
-                      <object class="customtkinter.CTkLabel" id="ctklabel6">
-                        <property name="text" translatable="yes">Window length</property>
+                      <object class="customtkinter.CTkLabel" id="ctklabel1">
+                        <property name="text" translatable="yes">Cut-off frequency (relative)</property>
                         <layout manager="grid">
                           <property name="column">0</property>
                           <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="customtkinter.CTkFrame" id="cutoffFrame" named="True">
+                        <property name="corner_radius">0</property>
+                        <layout manager="grid">
+                          <property name="column">0</property>
+                          <property name="row">1</property>
                           <property name="sticky">ew</property>
                         </layout>
+                        <containerlayout manager="grid">
+                          <property type="col" id="0" name="weight">1</property>
+                        </containerlayout>
+                        <child>
+                          <object class="customtkinter.CTkEntry" id="remove" named="True">
+                            <property name="text" translatable="yes">ctkentry3</property>
+                            <layout manager="grid">
+                              <property name="column">0</property>
+                              <property name="row">0</property>
+                              <property name="sticky">ew</property>
+                            </layout>
+                          </object>
+                        </child>
                       </object>
                     </child>
                   </object>
                 </child>
                 <child>
-                  <object class="customtkinter.CTkFrame" id="polynomFrame" named="True">
-                    <property name="corner_radius">0</property>
+                  <object class="customtkinter.CTkFrame" id="ctkframe8">
                     <layout manager="grid">
-                      <property name="column">1</property>
-                      <property name="row">0</property>
-                      <property name="sticky">ew</property>
+                      <property name="column">0</property>
+                      <property name="row">1</property>
+                      <property name="sticky">nsew</property>
                     </layout>
                     <containerlayout manager="grid">
                       <property type="col" id="0" name="weight">1</property>
                     </containerlayout>
                     <child>
-                      <object class="customtkinter.CTkLabel" id="ctklabel7">
-                        <property name="text" translatable="yes">Polynomial order</property>
+                      <object class="customtkinter.CTkSwitch" id="ctkswitch1">
+                        <property name="command" type="command" cbtype="simple">low_high_switch</property>
+                        <property name="text" translatable="yes">lowpass filter</property>
                         <layout manager="grid">
                           <property name="column">0</property>
+                          <property name="padx">2</property>
+                          <property name="pady">2</property>
                           <property name="row">0</property>
                           <property name="sticky">ew</property>
                         </layout>

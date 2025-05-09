@@ -13,16 +13,16 @@ from scipy.signal import savgol_filter
 CLOSE_SUBPROGS: bool = False
 
 # Folder name containing THIS file
-SUBPROG_FOLDER: str = 'filter_savitzky_golay'
+SUBPROG_FOLDER: str = 'filter_fft'
 
 # Name of GUI python file created by pygubu-designer. Usually with ...ui.py endings
-GUI_FILE: str = 'savgolui.py'
+GUI_FILE: str = 'fft_filterui.py'
 
 # Name of class in GUI_FILE used to create the window
-GUI_CLASS: str = 'SavGolUI'
+GUI_CLASS: str = 'FFTFilterUI'
 
 # Title of the window that shown in the main bar
-TITLE: str = 'Savitzky-Golay Filter'
+TITLE: str = 'FFT filter'
 
 # If True, this window will be always on top
 # self.subprog_settings['on_top']
@@ -209,7 +209,7 @@ mod = importlib.import_module(module_path)
 WindowGUI = getattr(mod, class_name)
 
 from subprogs.general_methods.SubprogMethods3 import SubMethods_03 as Methods                       #|
-class SavGol(Methods, WindowGUI):                                                                   #|
+class FFTFilter(Methods, WindowGUI):                                                                   #|
     def __init__(self, app=None, which='first', commandline=False):                                 #|
         if app and not commandline:                                                                 #|
             # Initialize window if app is defined and not commandline                               #|
@@ -307,20 +307,19 @@ l calculations are finished and main window
 
         # HERE DEFINE YOUR REFERENCES TO WIDGETS
         from widgets.CTkSpinbox import CTkSpinbox
-        self.windowFrame = self.builder.get_object('windowFrame', self.mainwindow)
-        self.polynomFrame = self.builder.get_object('polynomFrame', self.mainwindow)
+        self.cutoffFrame = self.builder.get_object('cutoffFrame', self.mainwindow)
+        self.remove = self.builder.get_object('remove', self.mainwindow)
+        self.remove.grid_remove()
 
-        self.window_length = CTkSpinbox(master = self.windowFrame, min_value=1, max_value=1000, step_value=1, command=self.spinbox_changed)
-        self.window_length.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
-        self.polynomial_order = CTkSpinbox(master = self.polynomFrame, min_value=1, max_value=30, step_value=1, command=self.spinbox_changed)
-        self.polynomial_order.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
+        self.cutoff_box = CTkSpinbox(master = self.cutoffFrame, min_value=0, max_value=100000000, step_value=1, command=self.cutoff_changed, scroll_value=1)
+        self.cutoff_box.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
 
-    def spinbox_changed(self, value=None):
+
+    def cutoff_changed(self, value=None):
         try:
-            self.window = int(self.window_length.get())
-            self.order = int(self.polynomial_order.get())
+            self.freq = float(self.cutoff_box.get())
         except ValueError:
-            Error.show(info="Window length and polynomial order must both be integer values.")
+            return
         self.ok_clicked()
 
     def calculate_stack(self, commandline = False):
@@ -399,13 +398,18 @@ l calculations are finished and main window
         cursor_positions = self.grapher.cursor_annotations
         # ------------------------------------------
 
-        try:
-            self.data_for_calculations[0]['y'] = savgol_filter(x=y1, window_length=self.window, polyorder=self.order)
-        except ValueError as e:
-            Error.show(info = 'Window length must be larger or equal to the polynomial order.')
-            self.window = self.order + 1
-            self.window_length.set(self.window)
+        min = np.min(y1)
+        max = np.max(y1)
+        n = np.size(y1)
+        if n > 0:
+            sampling_rate = (max - min) / n
+        else:
             return False
+
+        fft_vals = np.fft.fft(y1)
+        freqs = np.fft.fftfreq(len(y1), d = sampling_rate)
+        fft_vals[np.abs(freqs) > self.freq] = 0
+        self.data_for_calculations[0]['y'] =  np.fft.ifft(fft_vals)
 
         # Send calculated values to result (if needed). This will be sent to command line
         result = None # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
@@ -422,23 +426,16 @@ l calculations are finished and main window
             {'key_for_storage' : function_for_getting_value()}
         '''
         return  [
-            {'window_length'    : self.window_length.get()    },
-            {'polynomial_order' : self.polynomial_order.get() },
+            {'cutoff_box'    : self.cutoff_box.get()    }
                 ]
 
     def restore_settings(self):
-        val = self.restore('window_length')
+        val = self.restore('cutoff_box')
         if val:
-            self.window_length.set(value = val)
+            self.cutoff_box.set(value = val)
         else:
-            self.window_length.set(value = 3)
-
-        val = self.restore('polynomial_order')
-        if val:
-            self.polynomial_order.set(value = val)
-        else:
-            self.polynomial_order.set(value = 2)
-        self.spinbox_changed()
+            self.cutoff_box.set(value = 1)
+        self.cutoff_changed()
 
 
 if __name__ == "__main__":
