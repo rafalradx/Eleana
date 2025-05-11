@@ -12,6 +12,8 @@ import io
 import re
 import os
 from functools import wraps
+import customtkinter as ctk
+from PIL import Image
 
 # Set paths for assets, modules, subprogs and widgets
 PROJECT_PATH = Path(__file__).parent
@@ -49,6 +51,7 @@ from Error import Error
 from CommandProcessor import CommandProcessor
 from DataClasses import Stack
 from Error import Error
+from IconToWidget import IconToWidget
 
 # Import Eleana subprograms and windows
 # append.(['name of instance without self., 'Command to close']
@@ -217,6 +220,9 @@ class MainApp:
         # Ctk styles
         self.gui_appearence = 'light'
         self.color_theme = 'dark-blue'
+
+        # Set icons for buttons and widgets
+        IconToWidget.to_all(app = self)
 
     def scrollable_dropdown(self, selection, combobox):
         ''' Interconnects CTkScrollableDropdown to standard CTkCombobox'

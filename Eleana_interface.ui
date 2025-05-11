@@ -490,7 +490,7 @@
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkButton" id="btn_modify" named="True">
+                                          <object class="customtkinter.CTkButton" id="btn_first_modify" named="True">
                                             <property name="command" type="command" cbtype="simple">modify_first</property>
                                             <property name="corner_radius">5</property>
                                             <property name="fg_color">#c6484c</property>
@@ -796,7 +796,7 @@
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkButton" id="ctkbutton5">
+                                          <object class="customtkinter.CTkButton" id="btn_second_modify" named="True">
                                             <property name="command" type="command" cbtype="simple">modify_second</property>
                                             <property name="corner_radius">5</property>
                                             <property name="fg_color">#20acdc</property>
@@ -1130,7 +1130,7 @@
                                                   <property type="col" id="all" name="weight">1</property>
                                                 </containerlayout>
                                                 <child>
-                                                  <object class="customtkinter.CTkButton" id="ctkbutton8" named="True">
+                                                  <object class="customtkinter.CTkButton" id="btn_replace_first" named="True">
                                                     <property name="command" type="command" cbtype="simple">replace_first</property>
                                                     <property name="corner_radius">5</property>
                                                     <property name="fg_color">#3c9b59</property>
@@ -1200,7 +1200,7 @@
                                                   <property type="col" id="all" name="weight">1</property>
                                                 </containerlayout>
                                                 <child>
-                                                  <object class="customtkinter.CTkButton" id="ctkbutton13" named="True">
+                                                  <object class="customtkinter.CTkButton" id="btn_replace_group" named="True">
                                                     <property name="command" type="command" cbtype="simple">replace_group</property>
                                                     <property name="corner_radius">5</property>
                                                     <property name="fg_color">#3c9b59</property>
