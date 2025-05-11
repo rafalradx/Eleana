@@ -2,10 +2,10 @@
 # IMPORT MODULES NEEDED
 # -- Here is an example --
 from asyncio import set_event_loop_policy
-from assets.Error import Error
+
 import numpy as np
 import importlib
-from scipy.signal import savgol_filter
+import scipy.signal
 
 
 ''' GENERAL SETTINGS '''
@@ -13,16 +13,16 @@ from scipy.signal import savgol_filter
 CLOSE_SUBPROGS: bool = False
 
 # Folder name containing THIS file
-SUBPROG_FOLDER: str = 'filter_fft'
+SUBPROG_FOLDER: str = 'pseudomodulation'
 
 # Name of GUI python file created by pygubu-designer. Usually with ...ui.py endings
-GUI_FILE: str = 'fft_filterui.py'
+GUI_FILE: str = 'pseudomodulationui.py'
 
 # Name of class in GUI_FILE used to create the window
-GUI_CLASS: str = 'FFTFilterUI'
+GUI_CLASS: str = 'PseudomodulationUI'
 
 # Title of the window that shown in the main bar
-TITLE: str = 'FFT filter'
+TITLE: str = 'Pseudomodulation'
 
 # If True, this window will be always on top
 # self.subprog_settings['on_top']
@@ -43,7 +43,7 @@ DATA_LABEL: str = 'data_label'
 # For example if "Spectrum" is processed and NAME_SUFFIX = "_MODIFIED"
 # you will get "Spectrum_MODIFIED" name in result
 # self.subprog_settings['name_suffix']
-NAME_SUFFIX: str = '_FILTERED'
+NAME_SUFFIX: str = '_PSMOD'
 
 # If true, calculations are done automatically upon selection of data in the main GUI
 # self.subprog_settings['auto_calculate']
@@ -62,14 +62,14 @@ REGIONS_FROM: str = 'none'        # 'none' - do not extract
 # When USE_SECOND is set True then Second data extracted is in [2] and original in [3].
 # This is very useful if something must be calculated on selected fragments and then used he results on original data.
 # self.regions['orig_in_odd_idx'] <-- this will keep 0 or 1
-ORIG_IN_ODD_IDX: bool = True
+ORIG_IN_ODD_IDX: bool = False
 
 # If both First and Second data are needed set this True
 # self.use_second
 USE_SECOND: bool = False
 
 # If each subspectrum in a Stack 2D can be processed separately set this to True
-# When the calculations requires all data from the stack in x and y set this  to False
+# When the calculations requires all data fro the stack in x and y set this  to False
 # If False then the method 'calculate_stack must contain appropriate method
 # self.stack_sep
 STACK_SEP: bool = True
@@ -180,7 +180,7 @@ CURSOR_REQUIRED: int = 0
 # A text string to show in a pop up window if number of cursors is less than required for calculations
 # Leve this empty if no error should be displayed
 # self.subprog_cursor['cursor_req_text']
-CURSOR_REQ_TEXT: str = ''
+CURSOR_REQ_TEXT: str = 'Please select at least two points.'
 
 # Enable checking if all cursor annotations are between Xmin and Xmax of data_dor_calculations
 # self.subprog_cursor['cursor_outside_x']
@@ -209,7 +209,7 @@ mod = importlib.import_module(module_path)
 WindowGUI = getattr(mod, class_name)
 
 from subprogs.general_methods.SubprogMethods3 import SubMethods_03 as Methods                       #|
-class FFTFilter(Methods, WindowGUI):                                                                   #|
+class PseudoModulation(Methods, WindowGUI):                                                           #|
     def __init__(self, app=None, which='first', commandline=False):                                 #|
         if app and not commandline:                                                                 #|
             # Initialize window if app is defined and not commandline                               #|
@@ -259,41 +259,7 @@ class FFTFilter(Methods, WindowGUI):                                            
             DO NOT USE FUNCTIONS USING GRAPHER METHODS HERE!'''
 
     def finish_action(self, by_method):
-        ''' This method is called when alif self.app.sel_cursor_mode.get() != "Range select":
-            x1, y1 = self.get_selected_points()
-
-        # (2) CALCULATE BASELINE
-        if self.interpolate_method == "linear":
-            baseline = np.interp(x1_orig, x1, y1, left=None, right=None, period=None)
-        elif self.interpolate_method == "linear":
-            baseline = np.interp(x1_orig, x1, y1)
-        elif self.interpolate_method == "qubic":
-            interpolator = CubicSpline(x1, y1)
-            baseline = interpolator(x1_orig)
-        elif self.interpolate_method == "phip":
-            interpolator = PchipInterpolator(x1, y1)
-            baseline = interpolator(x1_orig)
-        elif self.interpolate_method == "akma":
-            interpolator = Akima1DInterpolator(x1, y1)
-            baseline = interpolator(x1_orig)
-        elif self.interpolate_method == "barycentric":
-            interpolator = BarycentricInterpolator(x1, y1)
-            baseline = interpolator(x1_orig)
-
-
-        # Write original data to results
-        self.data_for_calculations[0]['x'] = x1_orig
-        if self.keep_baseline.get():
-            self.data_for_calculations[0]['y'] = baseline
-            self.clear_additional_plots()
-        else:
-            self.data_for_calculations[0]['y'] = y1_orig - baseline
-            self.add_to_additional_plots(x=x1_orig, y=baseline, clear=True)
-
-        # Add to additional plots
-        #self.clear_additional_plots()
-        #self.add_to_additional_plots(x = x1_orig, y = poly_curve, clear=True)
-l calculations are finished and main window
+        ''' This method is called when all calculations are finished and main window
             awaits for action. This is useful if you need to put annotations to the graph etc.
             by_method - the name of a method that triggered the action.
         '''
@@ -307,31 +273,68 @@ l calculations are finished and main window
 
         # HERE DEFINE YOUR REFERENCES TO WIDGETS
         from widgets.CTkSpinbox import CTkSpinbox
-        self.cutoffFrame = self.builder.get_object('cutoffFrame', self.mainwindow)
-        self.remove = self.builder.get_object('remove', self.mainwindow)
-        self.remove.grid_remove()
+        self.harmFrame = self.builder.get_object('harmFrame', self.mainwindow)
+        self.modFrame = self.builder.get_object('modFrame', self.mainwindow)
+        self.entry1 = self.builder.get_object('ctkentry1', self.mainwindow)
+        self.entry2 = self.builder.get_object('ctkentry2', self.mainwindow)
+        self.entry1.grid_remove()
+        self.entry2.grid_remove()
 
-        self.cutoff_box = CTkSpinbox(master = self.cutoffFrame, min_value=0, max_value=100000000, step_value=1, command=self.cutoff_changed, scroll_value=1)
-        self.cutoff_box.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
+        self.harm_box = CTkSpinbox(master=self.harmFrame, min_value=0, max_value=2, step_value=1,  command=self.parameters_changed, scroll_value = 1)
+        self.harm_box.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
 
-        self.switch = self.builder.get_object('switch', self.mainwindow)
-        self.switch.select()
-        self.lowpass = True
+        self.mod_box = CTkSpinbox(master=self.modFrame, min_value=0, max_value=10000, step_value=0.1, command = self.parameters_changed, scroll_value = 1)
+        self.mod_box.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
 
-    def low_high_switch(self):
-        self.lowpass = bool(self.switch.get())
-        if self.lowpass:
-            self.switch.configure(text = 'low-pass filter')
+        self.normalize_box = self.builder.get_object('normalize', self.mainwindow)
+
+    def parameters_changed(self, selection=None):
+        self.harmonic = int(self.harm_box.get())
+        self.modulation = float(self.mod_box.get())
+        self.normalize = bool(self.normalize_box.get())
+        self.ok_clicked()
+
+    def pseudomodulation(self,x, y, mod_amp, harmonic=0, normalize=False):
+        """
+        Simulated pseudomodulation for EPR data for different harmonics.
+        Parameters:
+            x (np.array): the x axis of the spectrum
+            yb(np.array): the amplitude of EPR signal.
+            mod_amp (float): modulation amplitude in unit of x axis.
+            harmonic (int): number of harmonic (0, 1, 2).
+            normalize (bool): normalize to amplitude to input signal?
+        Returns:
+            np.array: pseudomodulation array
+        """
+        dx = x[1] - x[0]
+        signal = y
+        shift_points = int(np.round(mod_amp / dx))
+        n = len(signal)
+        if shift_points >= n // 2:
+            raise ValueError("Modulation is too large in relation to the signal")
+        # Shifts
+        plus = np.roll(signal, -shift_points)
+        minus = np.roll(signal, shift_points)
+        plus[-shift_points:] = 0
+        minus[:shift_points] = 0
+        # Modulation by harmonic number
+        if harmonic == 0:
+            window_width = 2 * shift_points + 1
+            kernel = np.ones(window_width) / window_width
+            modulated = scipy.signal.convolve(signal, kernel, mode='same')
+        elif harmonic == 1:
+            modulated = plus - minus
+        elif harmonic == 2:
+            modulated = plus - 2 * signal + minus
         else:
-            self.switch.configure(text = 'high-pass filter')
-        self.ok_clicked()
-
-    def cutoff_changed(self, value=None):
-        try:
-            self.freq = float(self.cutoff_box.get())
-        except ValueError:
-            return
-        self.ok_clicked()
+            raise ValueError("Wrong harmonic number. It should be 0, 1, 2.")
+        # Normalize amplitude
+        if normalize:
+            orig_amp = np.max(np.abs(signal))
+            mod_amp = np.max(np.abs(modulated))
+            if mod_amp > 0:
+                modulated *= (orig_amp / mod_amp)
+        return modulated
 
     def calculate_stack(self, commandline = False):
         ''' If STACK_SEP is False it means that data in stack should
@@ -398,7 +401,7 @@ l calculations are finished and main window
         if self.use_second:
             x2 = self.data_for_calculations[1+sft]['x']
             y2 = self.data_for_calculations[1+sft]['y']
-            z2 = self.data_for_calculations[1+sft]['z']
+            z2 = self.data_for_calculations[1]+sft['z']
             name2 = self.data_for_calculations[1+sft]['name']
             stk_value2 = self.data_for_calculations[1+sft]['stk_value']
             complex2 = self.data_for_calculations[1+sft]['complex']
@@ -409,21 +412,11 @@ l calculations are finished and main window
         cursor_positions = self.grapher.cursor_annotations
         # ------------------------------------------
 
-        min = np.min(y1)
-        max = np.max(y1)
-        n = np.size(y1)
-        if n > 0:
-            sampling_rate = (max - min) / n
-        else:
-            return False
-
-        fft_vals = np.fft.fft(y1)
-        freqs = np.fft.fftfreq(len(y1), d = sampling_rate)
-        if self.lowpass:
-            fft_vals[np.abs(freqs) > self.freq] = 0
-        else:
-            fft_vals[np.abs(freqs) < self.freq] = 0
-        self.data_for_calculations[0]['y'] =  np.fft.ifft(fft_vals)
+        self.data_for_calculations[0]['y'] = self.pseudomodulation(x = x1,
+                                             y = y1,
+                                             mod_amp=self.modulation,
+                                             harmonic=self.harmonic,
+                                             normalize=self.normalize)
 
         # Send calculated values to result (if needed). This will be sent to command line
         result = None # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
@@ -440,26 +433,30 @@ l calculations are finished and main window
             {'key_for_storage' : function_for_getting_value()}
         '''
         return  [
-            {'cutoff_box'    : self.cutoff_box.get()    },
-            {'switch'        : self.switch.get()}
+            {'harm_box'    : self.harm_box.get()    },
+            {'mod_box'     : self.mod_box.get()     },
+            {'normalize'   : self.normalize_box.get() }
                 ]
 
     def restore_settings(self):
-        val = self.restore('cutoff_box')
+        val = self.restore('harm_box')
         if val:
-            self.cutoff_box.set(value = val)
+            self.harm_box.set(value = val)
         else:
-            self.cutoff_box.set(value = 1)
-        self.cutoff_changed()
+            self.harm_box.set(value = 0)
 
-        val = self.restore('switch')
+        val = self.restore('mod_box')
         if val:
-            self.switch.select()
-        elif val is None:
-            self.switch.select()
+            self.mod_box.set(value = val)
         else:
-            self.switch.deselect()
-        self.low_high_switch()
+            self.mod_box.set(value = 1)
+        val = self.restore('normalize')
+        if val == True:
+            self.normalize_box.select()
+        else:
+            self.normalize_box.deselect()
+        self.parameters_changed()
+
 
 if __name__ == "__main__":
     tester = TemplateClass()

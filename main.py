@@ -57,6 +57,8 @@ list_of_subprogs = []
 from filter_fft.fft_filter import FFTFilter
 from filter_savitzky_golay.sav_gol import SavGol
 from edit_values_in_table.edit_values_in_table import EditValuesInTable
+from subprogs.pseudomodulation.pseudomodulation import PseudoModulation
+
 #list_of_subprogs.append(['edit_values_in_table', 'cancel'])
 from EPR_B_to_g.B_to_g import EPR_B_to_g
 #list_of_subprogs.append(['subprog_epr_b_to_b', 'cancel'])
@@ -1192,7 +1194,6 @@ class MainApp:
     ******************************************'''
 
 
-
     # --------------------------------------------
     # MENU: Analysis
     # --------------------------------------------
@@ -1811,13 +1812,14 @@ class MainApp:
     def filter_fft_lowpass(self):
         subprog_fft_lowpass = FFTFilter(self, which = 'first')
 
+    def pseudomodulation(self):
+        subprog_pseudomodulation = PseudoModulation(self, which = 'first')
 
     # --------------------------------------------
     # MENU: EPR
     # --------------------------------------------
 
     def epr_b_to_g(self):
-        # self.subprog_epr_b_to_g = EPR_B_to_g(self)
         subprog_epr_b_to_g = EPR_B_to_g(self)
 
     '''***********************************************

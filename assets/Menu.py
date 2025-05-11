@@ -59,6 +59,9 @@ class MainMenu:
         self.icon_trimdata = self.prepare_icon("trim.png")
         self.icon_btog = self.prepare_icon("Btog.png")
         self.icon_sav_gol = self.prepare_icon("sav_gol.png")
+        self.icon_filter_general = self.prepare_icon('filter_general.png')
+        self.icon_pseudomod = self.prepare_icon('pseudomod.png')
+        self.icon_fftfilter = self.prepare_icon('fftfilter.png')
 
         ''' BUILD MENU '''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth_bar, activeborderwidth=self.borderwidth)
@@ -253,15 +256,19 @@ class MainMenu:
         self.menu_filters = tk.Menu(self.menu_modifications, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                   activebackground=self.activebg, activeforeground=self.activefg,
                                   borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        self.menu_modifications.add_cascade(label = "Filters", menu=self.menu_filters)
+        self.menu_modifications.add_cascade(label = "Filters", menu=self.menu_filters, image=self.icon_filter_general, compound='left')
 
         # --- Savitzky-Golay
         self.menu_filters.add_command(label="Savitzky-Golay Filter", command=self.app.filter_savitzky_golay,
                                             image=self.icon_sav_gol, compound="left")
 
-        # --- FFT Lowpass filter
-        self.menu_filters.add_command(label="FFT lowpass filter", command = self.app.filter_fft_lowpass,
-                                      image=self.icon_sav_gol, compound="left")
+        # --- FFT filter
+        self.menu_filters.add_command(label="FFT filter", command = self.app.filter_fft_lowpass,
+                                      image=self.icon_fftfilter, compound="left")
+
+        # --- Pseudomodulation
+        self.menu_filters.add_command(label="Pseudomodulation", command=self.app.pseudomodulation,
+                                      image=self.icon_pseudomod, compound="left")
 
         ''' Menu EPR '''
         self.menu_EPR = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,

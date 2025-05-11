@@ -4,11 +4,11 @@ import tkinter as tk
 import pygubu
 
 PROJECT_PATH = pathlib.Path(__file__).parent
-PROJECT_UI = PROJECT_PATH / "fft_filter.ui"
+PROJECT_UI = PROJECT_PATH / "pseudomodulation.ui"
 RESOURCE_PATHS = [PROJECT_PATH]
 
 
-class FFTFilterUI:
+class PseudomodulationUI:
     def __init__(
         self,
         master=None,
@@ -69,7 +69,7 @@ class FFTFilterUI:
             self.center_window()
         self.mainwindow.mainloop()
 
-    def low_high_switch(self):
+    def parameters_changed(self):
         pass
 
     def ok_clicked(self):
@@ -89,5 +89,5 @@ class FFTFilterUI:
 
 
 if __name__ == "__main__":
-    app = FFTFilterUI()
+    app = PseudomodulationUI()
     app.run()
