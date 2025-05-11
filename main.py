@@ -222,7 +222,7 @@ class MainApp:
         self.color_theme = 'dark-blue'
 
         # Set icons for buttons and widgets
-        IconToWidget.to_all(app = self)
+        IconToWidget.eleana(app = self)
 
     def scrollable_dropdown(self, selection, combobox):
         ''' Interconnects CTkScrollableDropdown to standard CTkCombobox'

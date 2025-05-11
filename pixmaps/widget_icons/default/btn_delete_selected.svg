@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="20"
+   height="20"
+   viewBox="0 0 24 24"
+   fill="none"
+   stroke="#aaaaaa"
+   stroke-width="1.5"
+   stroke-linecap="round"
+   stroke-linejoin="round"
+   class="feather feather-arrow-up-circle"
+   version="1.1"
+   id="svg431"
+   sodipodi:docname="btn_delete_selected.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   inkscape:export-filename="btn_delete_selected.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs435" />
+  <sodipodi:namedview
+     id="namedview433"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="39.95"
+     inkscape:cx="9.6620776"
+     inkscape:cy="11.677096"
+     inkscape:window-width="1920"
+     inkscape:window-height="1008"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg431" />
+  <circle
+     cx="12"
+     cy="12"
+     r="10"
+     id="circle425"
+     style="stroke:#f6f6f6;stroke-opacity:1" />
+  <g
+     id="g1379"
+     transform="matrix(1.1991872,0,0,1.2321391,-2.9163958,-2.9330375)"
+     style="stroke-width:1.23401">
+    <polyline
+       points="16 12 12 8 8 12"
+       id="polyline427"
+       style="stroke:#f6f6f6;stroke-width:1.23401;stroke-opacity:1"
+       transform="translate(0.62350099,3.9858172)" />
+    <polyline
+       points="16 12 12 8 8 12"
+       id="polyline427-3"
+       style="stroke:#f6f6f6;stroke-width:1.23401;stroke-opacity:1"
+       transform="rotate(180,12.206857,10.137066)" />
+  </g>
+</svg>

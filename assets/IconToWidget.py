@@ -16,7 +16,7 @@ class IconToWidget:
         IconToWidget.set(widget, png, iconset = iconset, size=size)
 
     @staticmethod
-    def to_all(app, iconset = 'default'):
+    def eleana(app, iconset = 'default'):
 
          #          PYGUBU ID                   PNG FILE (no suffix)                SIZE
          #          ----------------------      --------------------------          ------------
@@ -27,8 +27,10 @@ class IconToWidget:
                   ( 'btn_second_to_result'      ,'to_result',                       (20,20)),
                   ( 'btn_replace_first'         ,'replace_first',                   (20,20)),
                   ( 'btn_replace_group'         ,'replace_group',                   (20,20)),
-                  ( 'btn_clear_results'         ,'clear_results',                   (20,20))
-
+                  ( 'btn_clear_results'         ,'clear_results',                   (20,20)),
+                  ( 'btn_add_to_group'          ,'btn_add_to_group',                (20,20)),
+                  ( 'btn_delete_selected'       ,'btn_delete_selected',             (20,20)),
+                  ( 'btn_all_to_group'          ,'btn_all_to_group',                (20,20))
                 )
 
          for item in items:

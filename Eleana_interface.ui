@@ -1147,7 +1147,7 @@
                                                   </object>
                                                 </child>
                                                 <child>
-                                                  <object class="customtkinter.CTkButton" id="ctkbutton9" named="True">
+                                                  <object class="customtkinter.CTkButton" id="btn_delete_selected" named="True">
                                                     <property name="command" type="command" cbtype="simple">delete_sel_result</property>
                                                     <property name="corner_radius">5</property>
                                                     <property name="fg_color">#3c9b59</property>
@@ -1164,7 +1164,7 @@
                                                   </object>
                                                 </child>
                                                 <child>
-                                                  <object class="customtkinter.CTkButton" id="ctkbutton12" named="True">
+                                                  <object class="customtkinter.CTkButton" id="btn_add_to_group" named="True">
                                                     <property name="command" type="command" cbtype="simple">result_to_main</property>
                                                     <property name="corner_radius">5</property>
                                                     <property name="fg_color">#3c9b59</property>
@@ -1233,7 +1233,7 @@
                                                   </object>
                                                 </child>
                                                 <child>
-                                                  <object class="customtkinter.CTkButton" id="ctkbutton15" named="True">
+                                                  <object class="customtkinter.CTkButton" id="btn_all_to_group" named="True">
                                                     <property name="command" type="command" cbtype="simple">result_to_main</property>
                                                     <property name="corner_radius">5</property>
                                                     <property name="fg_color">#3c9b59</property>
