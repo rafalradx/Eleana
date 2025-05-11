@@ -1,8 +1,0 @@
-Problemy:
-
-
-1. COś źle liczy odejowanie polynomial od danych zespolonych
-2. Przy tworzeniu Create static plot jest jakiś problem z dodaniem pozycji menu i przez to nie pojawia się lista
-    utworzonych wykresów.
-
-   
