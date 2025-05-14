@@ -150,8 +150,8 @@ class MainApp:
         self.groupFrame = builder.get_object("groupFrame", self.mainwindow)
         self.rightFrame = builder.get_object("rightFrame", self.mainwindow)
         self.graphButtons = builder.get_object('graphButtons', self.mainwindow)
-        self.listFrame = builder.get_object("listFrame", self.mainwindow)
-        self.listFrame.grid_remove()
+
+        self.listFrame = ctk.CTkFrame(master=self.selectionsFrame)
         self.firstFrame = builder.get_object("firstFrame", self.mainwindow)
         self.secondFrame = builder.get_object("secondFrame", self.mainwindow)
         self.resultFrame = builder.get_object("resultFrame", self.mainwindow)
@@ -289,7 +289,8 @@ class MainApp:
             self.secondFrame.grid_remove()
             self.resultFrame.grid_remove()
             self.swapFrame.grid_remove()
-            self.listFrame.grid(column=0, row=2, rowspan=3)
+
+            self.listFrame.grid(column=0, row=2, rowspan=3, sticky = "nsew")
             self.listbox = CTkListbox(self.listFrame, command=self.list_selected, multiple_selection=True, height=400)
             self.listbox.grid(column=0, columnspan=1, rowspan=4, padx=4, pady=4, row=0, sticky="nsew")
 
@@ -1720,8 +1721,6 @@ class MainApp:
         date = [['', '', ''],['', '', ''],['', '', ''],['', '', ''],['', '', ''],['', '', '']]
         df = pandas.DataFrame(columns=headers, data=date)
         name = 'new'
-        #self.spreadsheet = CreateFromTable(self.eleana, self.mainwindow, df=df, name=name,
-        #                                   group=self.eleana.selections['group'])
         spreadsheet = CreateFromTable(self.eleana, self.mainwindow, df=df, name=name,
                                            group=self.eleana.selections['group'])
         response = spreadsheet.get()
@@ -1733,9 +1732,6 @@ class MainApp:
     def first_to_group(self):
         if self.eleana.selections['first'] < 0:
             return
-        #self.group_assign = Groupassign(master=app, which='first')
-        #response = self.group_assign.get()
-
         group_assign = Groupassign(master=app, which='first')
         response = group_assign.get()
         update.group_list()
@@ -1797,19 +1793,15 @@ class MainApp:
         main_menu.create_showplots_menu()
 
     def xy_distance(self):
-        #self.xy_distance = DistanceRead(self, which = 'first')
         xy_distance = DistanceRead(self, which='first')
 
     def trim_data(self):
-        #self.subprog_trim_data = TrimData(self, which = "first")
         subprog_trim_data = TrimData(self, which="first")
 
     def polynomial_baseline(self):
-        #self.subprog_polynomial_baseline = PolynomialBaseline(self, which = 'first')
         subprog_polynomial_baseline = PolynomialBaseline(self, which='first')
 
     def spline_baseline(self):
-        #self.subprog_spline_baseline = SplineBaseline(self, which = 'first')
         subprog_spline_baseline = SplineBaseline(self, which='first')
 
     def filter_savitzky_golay(self):

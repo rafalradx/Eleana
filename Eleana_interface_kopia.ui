@@ -350,7 +350,6 @@
                                         <property name="command" type="command" cbtype="simple">first_selected</property>
                                         <property name="corner_radius">5</property>
                                         <property name="fg_color">#505050</property>
-                                        <property name="font">{Arial} 12 {}</property>
                                         <property name="text_color">#ced9d9</property>
                                         <property name="values">['None']</property>
                                         <property name="width">200</property>
@@ -530,235 +529,22 @@
                                         <property name="fg_color">#505050</property>
                                         <layout manager="grid">
                                           <property name="column">0</property>
+                                          <property name="ipadx">2</property>
                                           <property name="padx">2</property>
-                                          <property name="pady">5</property>
                                           <property name="row">4</property>
-                                          <property name="sticky">nsew</property>
+                                          <property name="sticky">ew</property>
                                         </layout>
-                                        <containerlayout manager="grid">
-                                          <property type="col" id="all" name="weight">1</property>
-                                        </containerlayout>
                                         <child>
-                                          <object class="customtkinter.CTkFrame" id="ctkframe8">
+                                          <object class="customtkinter.CTkLabel" id="ctklabel3">
                                             <property name="corner_radius">0</property>
                                             <property name="fg_color">#505050</property>
+                                            <property name="font">{Arial} 12 {}</property>
+                                            <property name="text" translatable="yes">Shift x</property>
+                                            <property name="text_color">#eeeeee</property>
                                             <layout manager="grid">
                                               <property name="column">0</property>
-                                              <property name="padx">2</property>
-                                              <property name="pady">2</property>
                                               <property name="row">0</property>
-                                              <property name="sticky">nsew</property>
                                             </layout>
-                                            <child>
-                                              <object class="customtkinter.CTkLabel" id="ctklabel4">
-                                                <property name="font">{Arial} 12 {}</property>
-                                                <property name="text" translatable="yes">  Shift  X</property>
-                                                <property name="text_color">#eeeeee</property>
-                                                <layout manager="grid">
-                                                  <property name="column">0</property>
-                                                  <property name="padx">4</property>
-                                                  <property name="row">0</property>
-                                                </layout>
-                                              </object>
-                                            </child>
-                                            <child>
-                                              <object class="customtkinter.CTkEntry" id="ctkentry3">
-                                                <property name="text" translatable="yes">ctkentry3</property>
-                                                <layout manager="grid">
-                                                  <property name="column">1</property>
-                                                  <property name="row">0</property>
-                                                  <property name="sticky">e</property>
-                                                </layout>
-                                              </object>
-                                            </child>
-                                            <child>
-                                              <object class="customtkinter.CTkLabel" id="ctklabel10">
-                                                <property name="font">{Arial} 12 {}</property>
-                                                <property name="text" translatable="yes"> Step (X)</property>
-                                                <property name="text_color">#eeeeee</property>
-                                                <layout manager="grid">
-                                                  <property name="column">0</property>
-                                                  <property name="padx">2</property>
-                                                  <property name="row">1</property>
-                                                </layout>
-                                              </object>
-                                            </child>
-                                            <child>
-                                              <object class="customtkinter.CTkEntry" id="ctkentry7">
-                                                <property name="text" translatable="yes">ctkentry7</property>
-                                                <layout manager="grid">
-                                                  <property name="column">1</property>
-                                                  <property name="row">1</property>
-                                                  <property name="sticky">e</property>
-                                                </layout>
-                                              </object>
-                                            </child>
-                                          </object>
-                                        </child>
-                                        <child>
-                                          <object class="customtkinter.CTkFrame" id="ctkframe19">
-                                            <property name="corner_radius">0</property>
-                                            <property name="fg_color">#505050</property>
-                                            <layout manager="grid">
-                                              <property name="column">1</property>
-                                              <property name="padx">2</property>
-                                              <property name="pady">2</property>
-                                              <property name="row">0</property>
-                                              <property name="sticky">nsew</property>
-                                            </layout>
-                                            <child>
-                                              <object class="customtkinter.CTkLabel" id="ctklabel5">
-                                                <property name="font">{Arial} 12 {}</property>
-                                                <property name="text" translatable="yes">Multiply X</property>
-                                                <property name="text_color">#eeeeee</property>
-                                                <layout manager="grid">
-                                                  <property name="column">0</property>
-                                                  <property name="padx">4</property>
-                                                  <property name="row">0</property>
-                                                </layout>
-                                              </object>
-                                            </child>
-                                            <child>
-                                              <object class="customtkinter.CTkEntry" id="ctkentry4">
-                                                <property name="text" translatable="yes">ctkentry4</property>
-                                                <layout manager="grid">
-                                                  <property name="column">1</property>
-                                                  <property name="row">0</property>
-                                                </layout>
-                                              </object>
-                                            </child>
-                                            <child>
-                                              <object class="customtkinter.CTkLabel" id="ctklabel12">
-                                                <property name="font">{Arial} 12 {}</property>
-                                                <property name="text" translatable="yes">   Step (X)</property>
-                                                <property name="text_color">#eeeeee</property>
-                                                <layout manager="grid">
-                                                  <property name="column">0</property>
-                                                  <property name="padx">2</property>
-                                                  <property name="row">1</property>
-                                                </layout>
-                                              </object>
-                                            </child>
-                                            <child>
-                                              <object class="customtkinter.CTkEntry" id="ctkentry9">
-                                                <property name="text" translatable="yes">ctkentry7</property>
-                                                <layout manager="grid">
-                                                  <property name="column">1</property>
-                                                  <property name="row">1</property>
-                                                  <property name="sticky">e</property>
-                                                </layout>
-                                              </object>
-                                            </child>
-                                          </object>
-                                        </child>
-                                        <child>
-                                          <object class="customtkinter.CTkFrame" id="ctkframe23">
-                                            <property name="corner_radius">0</property>
-                                            <property name="fg_color">#505050</property>
-                                            <layout manager="grid">
-                                              <property name="column">0</property>
-                                              <property name="padx">2</property>
-                                              <property name="row">1</property>
-                                              <property name="sticky">nsew</property>
-                                            </layout>
-                                            <child>
-                                              <object class="customtkinter.CTkLabel" id="ctklabel8">
-                                                <property name="font">{Arial} 12 {}</property>
-                                                <property name="text" translatable="yes">  Shift  Y</property>
-                                                <property name="text_color">#eeeeee</property>
-                                                <layout manager="grid">
-                                                  <property name="column">0</property>
-                                                  <property name="padx">4</property>
-                                                  <property name="row">0</property>
-                                                </layout>
-                                              </object>
-                                            </child>
-                                            <child>
-                                              <object class="customtkinter.CTkEntry" id="ctkentry5">
-                                                <property name="text" translatable="yes">ctkentry5</property>
-                                                <layout manager="grid">
-                                                  <property name="column">1</property>
-                                                  <property name="row">0</property>
-                                                  <property name="sticky">e</property>
-                                                </layout>
-                                              </object>
-                                            </child>
-                                            <child>
-                                              <object class="customtkinter.CTkLabel" id="ctklabel11">
-                                                <property name="font">{Arial} 12 {}</property>
-                                                <property name="text" translatable="yes">Step (Y)</property>
-                                                <property name="text_color">#eeeeee</property>
-                                                <layout manager="grid">
-                                                  <property name="column">0</property>
-                                                  <property name="padx">4</property>
-                                                  <property name="row">1</property>
-                                                </layout>
-                                              </object>
-                                            </child>
-                                            <child>
-                                              <object class="customtkinter.CTkEntry" id="ctkentry8">
-                                                <property name="text" translatable="yes">ctkentry5</property>
-                                                <layout manager="grid">
-                                                  <property name="column">1</property>
-                                                  <property name="row">1</property>
-                                                  <property name="sticky">e</property>
-                                                </layout>
-                                              </object>
-                                            </child>
-                                          </object>
-                                        </child>
-                                        <child>
-                                          <object class="customtkinter.CTkFrame" id="ctkframe24">
-                                            <property name="corner_radius">0</property>
-                                            <property name="fg_color">#505050</property>
-                                            <layout manager="grid">
-                                              <property name="column">1</property>
-                                              <property name="padx">2</property>
-                                              <property name="row">1</property>
-                                              <property name="sticky">nsew</property>
-                                            </layout>
-                                            <child>
-                                              <object class="customtkinter.CTkLabel" id="ctklabel9">
-                                                <property name="font">{Arial} 12 {}</property>
-                                                <property name="text" translatable="yes">Multiply Y</property>
-                                                <property name="text_color">#eeeeee</property>
-                                                <layout manager="grid">
-                                                  <property name="column">0</property>
-                                                  <property name="padx">4</property>
-                                                  <property name="row">0</property>
-                                                </layout>
-                                              </object>
-                                            </child>
-                                            <child>
-                                              <object class="customtkinter.CTkEntry" id="ctkentry6">
-                                                <property name="text" translatable="yes">ctkentry6</property>
-                                                <layout manager="grid">
-                                                  <property name="column">1</property>
-                                                  <property name="row">0</property>
-                                                </layout>
-                                              </object>
-                                            </child>
-                                            <child>
-                                              <object class="customtkinter.CTkLabel" id="ctklabel14">
-                                                <property name="font">{Arial} 12 {}</property>
-                                                <property name="text" translatable="yes">   Step (Y)</property>
-                                                <property name="text_color">#eeeeee</property>
-                                                <layout manager="grid">
-                                                  <property name="column">0</property>
-                                                  <property name="padx">2</property>
-                                                  <property name="row">1</property>
-                                                </layout>
-                                              </object>
-                                            </child>
-                                            <child>
-                                              <object class="customtkinter.CTkEntry" id="ctkentry10">
-                                                <property name="text" translatable="yes">ctkentry6</property>
-                                                <layout manager="grid">
-                                                  <property name="column">1</property>
-                                                  <property name="row">1</property>
-                                                </layout>
-                                              </object>
-                                            </child>
                                           </object>
                                         </child>
                                       </object>
@@ -1529,6 +1315,32 @@
                                             </child>
                                           </object>
                                         </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="customtkinter.CTkFrame" id="listFrame" named="True">
+                                    <property name="corner_radius">0</property>
+                                    <property name="height">2</property>
+                                    <property name="width">2</property>
+                                    <layout manager="grid">
+                                      <property name="column">0</property>
+                                      <property name="padx">4</property>
+                                      <property name="pady">4</property>
+                                      <property name="row">2</property>
+                                      <property name="sticky">nsew</property>
+                                    </layout>
+                                    <containerlayout manager="grid">
+                                      <property type="col" id="0" name="weight">1</property>
+                                    </containerlayout>
+                                    <child>
+                                      <object class="customtkinter.CTkLabel" id="ctklabel2">
+                                        <property name="text" translatable="yes">ctklabel2</property>
+                                        <layout manager="grid">
+                                          <property name="column">0</property>
+                                          <property name="row">0</property>
+                                        </layout>
                                       </object>
                                     </child>
                                   </object>

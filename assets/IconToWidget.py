@@ -20,7 +20,7 @@ class IconToWidget:
 
          #          PYGUBU ID                   PNG FILE (no suffix)                SIZE
          #          ----------------------      --------------------------          ------------
-         items = (( 'btn_swap'                  ,'btn_swap',                        (42,20)),
+         items = (( 'btn_swap'                  ,'btn_swap',                        (30,20)),
                   ( 'btn_second_modify'         ,'btn_modify',                      (20,20)),
                   ( 'btn_first_modify'          ,'btn_modify',                      (20,20)),
                   ( 'btn_first_to_result'       ,'to_result',                       (20,20)),
@@ -30,7 +30,8 @@ class IconToWidget:
                   ( 'btn_clear_results'         ,'clear_results',                   (20,20)),
                   ( 'btn_add_to_group'          ,'btn_add_to_group',                (20,20)),
                   ( 'btn_delete_selected'       ,'btn_delete_selected',             (20,20)),
-                  ( 'btn_all_to_group'          ,'btn_all_to_group',                (20,20))
+                  ( 'btn_all_to_group'          ,'btn_all_to_group',                (20,20)),
+                  ( 'btn_all_to_new'            ,'btn_all_to_new',                  (20,20))
                 )
 
          for item in items:
