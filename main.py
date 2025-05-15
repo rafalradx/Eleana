@@ -38,6 +38,7 @@ import pygubu
 from CTkListbox import CTkListbox
 from CTkMessagebox import CTkMessagebox
 from CTkScrollableDropdown import CTkScrollableDropdown
+from widgets.CTkSpinbox import CTkSpinbox
 
 # Import Eleana specific classes
 from Eleana import Eleana
@@ -171,6 +172,32 @@ class MainApp:
         self.check_second_show = builder.get_object('check_second_show', self.mainwindow)
         self.check_result_show = builder.get_object('check_result_show', self.mainwindow)
         self.annotationsFrame = builder.get_object('annotationsFrame', self.mainwindow)
+
+        # Modification Panel FIRST
+        self.first_modFrame = builder.get_object('first_modFrame', self.mainwindow)
+        self.first_mod_panel_1 = builder.get_object('first_mod_panel_1', self.mainwindow)
+        self.first_mod_panel_1.grid_remove()
+        self.first_mod_panel_2 = builder.get_object('first_mod_panel_2', self.mainwindow)
+        self.first_mod_panel_2.grid_remove()
+        self.first_mod_panel_3 = builder.get_object('first_mod_panel_3', self.mainwindow)
+        self.first_mod_panel_3.grid_remove()
+        self.first_mod_panel_4 = builder.get_object('first_mod_panel_4', self.mainwindow)
+        self.first_mod_panel_4.grid_remove()
+        self.first_mod_panel_5 = builder.get_object('first_mod_panel_5', self.mainwindow)
+        self.first_mod_panel_5.grid_remove()
+        self.first_mod_panel_6 = builder.get_object('first_mod_panel_6', self.mainwindow)
+        self.first_mod_panel_6.grid_remove()
+        self.first_mod_panel_7 = builder.get_object('first_mod_panel_7', self.mainwindow)
+        self.first_mod_panel_7.grid_remove()
+        self.first_mod_panel_8 = builder.get_object('first_mod_panel_8', self.mainwindow)
+        self.first_mod_panel_8.grid_remove()
+
+        # Place CTkSpinboxex
+        self.ctkframe8  = builder.get_object('ctkframe8', self.mainwindow)
+        self.first_mod_panel_1 = CTkSpinbox(master = self.ctkframe8, min_value=-1000000000, max_value=1000000000, step_value=1,  scroll_value = 1)
+        self.first_mod_panel_1.grid(row=0, column=1, sticky="ew")
+        self.first_mod_panel_2 = CTkSpinbox(master=self.ctkframe8, min_value=0, max_value=1000000, step_value=1, scroll_value=1)
+        self.first_mod_panel_2.grid(row=1, column=1, sticky="ew")
 
         # Graph Buttons
         self.check_autoscale_x = builder.get_object('check_autoscale_X', self.mainwindow)

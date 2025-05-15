@@ -31,7 +31,7 @@ class IconToWidget:
                   ( 'btn_add_to_group'          ,'btn_add_to_group',                (20,20)),
                   ( 'btn_delete_selected'       ,'btn_delete_selected',             (20,20)),
                   ( 'btn_all_to_group'          ,'btn_all_to_group',                (20,20)),
-                  ( 'btn_all_to_new'            ,'btn_all_to_new',                  (20,20))
+
                 )
 
          for item in items:

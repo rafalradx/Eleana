@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<interface version="1.4" author="PygubuDesigner 0.40.2">
+<interface version="1.4" author="PygubuDesigner 0.41">
   <project>
     <settings />
     <customwidgets />
@@ -523,6 +523,19 @@
                                             </layout>
                                           </object>
                                         </child>
+                                        <child>
+                                          <object class="customtkinter.CTkLabel" id="ctklabel2">
+                                            <property name="bg_color">#505050</property>
+                                            <property name="corner_radius">20</property>
+                                            <property name="fg_color">#c4a235</property>
+                                            <property name="font">{Arial} 9 {bold}</property>
+                                            <property name="text" translatable="yes">[ ]</property>
+                                            <layout manager="grid">
+                                              <property name="column">3</property>
+                                              <property name="row">0</property>
+                                            </layout>
+                                          </object>
+                                        </child>
                                       </object>
                                     </child>
                                     <child>
@@ -531,7 +544,7 @@
                                         <layout manager="grid">
                                           <property name="column">0</property>
                                           <property name="padx">2</property>
-                                          <property name="pady">5</property>
+                                          <property name="pady">6</property>
                                           <property name="row">4</property>
                                           <property name="sticky">nsew</property>
                                         </layout>
@@ -549,6 +562,9 @@
                                               <property name="row">0</property>
                                               <property name="sticky">nsew</property>
                                             </layout>
+                                            <containerlayout manager="grid">
+                                              <property type="col" id="1" name="weight">1</property>
+                                            </containerlayout>
                                             <child>
                                               <object class="customtkinter.CTkLabel" id="ctklabel4">
                                                 <property name="font">{Arial} 12 {}</property>
@@ -562,12 +578,12 @@
                                               </object>
                                             </child>
                                             <child>
-                                              <object class="customtkinter.CTkEntry" id="ctkentry3">
+                                              <object class="customtkinter.CTkEntry" id="first_mod_panel_1" named="True">
                                                 <property name="text" translatable="yes">ctkentry3</property>
                                                 <layout manager="grid">
                                                   <property name="column">1</property>
                                                   <property name="row">0</property>
-                                                  <property name="sticky">e</property>
+                                                  <property name="sticky">ew</property>
                                                 </layout>
                                               </object>
                                             </child>
@@ -584,12 +600,12 @@
                                               </object>
                                             </child>
                                             <child>
-                                              <object class="customtkinter.CTkEntry" id="ctkentry7">
+                                              <object class="customtkinter.CTkEntry" id="first_mod_panel_2" named="True">
                                                 <property name="text" translatable="yes">ctkentry7</property>
                                                 <layout manager="grid">
                                                   <property name="column">1</property>
                                                   <property name="row">1</property>
-                                                  <property name="sticky">e</property>
+                                                  <property name="sticky">ew</property>
                                                 </layout>
                                               </object>
                                             </child>
@@ -607,7 +623,7 @@
                                               <property name="sticky">nsew</property>
                                             </layout>
                                             <child>
-                                              <object class="customtkinter.CTkLabel" id="ctklabel5">
+                                              <object class="customtkinter.CTkLabel" id="multiply_x_first" named="True">
                                                 <property name="font">{Arial} 12 {}</property>
                                                 <property name="text" translatable="yes">Multiply X</property>
                                                 <property name="text_color">#eeeeee</property>
@@ -619,7 +635,7 @@
                                               </object>
                                             </child>
                                             <child>
-                                              <object class="customtkinter.CTkEntry" id="ctkentry4">
+                                              <object class="customtkinter.CTkEntry" id="first_mod_panel_5" named="True">
                                                 <property name="text" translatable="yes">ctkentry4</property>
                                                 <layout manager="grid">
                                                   <property name="column">1</property>
@@ -640,7 +656,7 @@
                                               </object>
                                             </child>
                                             <child>
-                                              <object class="customtkinter.CTkEntry" id="ctkentry9">
+                                              <object class="customtkinter.CTkEntry" id="first_mod_panel_6" named="True">
                                                 <property name="text" translatable="yes">ctkentry7</property>
                                                 <layout manager="grid">
                                                   <property name="column">1</property>
@@ -674,7 +690,7 @@
                                               </object>
                                             </child>
                                             <child>
-                                              <object class="customtkinter.CTkEntry" id="ctkentry5">
+                                              <object class="customtkinter.CTkEntry" id="first_mod_panel_3" named="True">
                                                 <property name="text" translatable="yes">ctkentry5</property>
                                                 <layout manager="grid">
                                                   <property name="column">1</property>
@@ -696,7 +712,7 @@
                                               </object>
                                             </child>
                                             <child>
-                                              <object class="customtkinter.CTkEntry" id="ctkentry8">
+                                              <object class="customtkinter.CTkEntry" id="first_mod_panel_4" named="True">
                                                 <property name="text" translatable="yes">ctkentry5</property>
                                                 <layout manager="grid">
                                                   <property name="column">1</property>
@@ -730,7 +746,7 @@
                                               </object>
                                             </child>
                                             <child>
-                                              <object class="customtkinter.CTkEntry" id="ctkentry6">
+                                              <object class="customtkinter.CTkEntry" id="first_mod_panel_7" named="True">
                                                 <property name="text" translatable="yes">ctkentry6</property>
                                                 <layout manager="grid">
                                                   <property name="column">1</property>
@@ -751,7 +767,7 @@
                                               </object>
                                             </child>
                                             <child>
-                                              <object class="customtkinter.CTkEntry" id="ctkentry10">
+                                              <object class="customtkinter.CTkEntry" id="first_mod_panel_8" named="True">
                                                 <property name="text" translatable="yes">ctkentry6</property>
                                                 <layout manager="grid">
                                                   <property name="column">1</property>
