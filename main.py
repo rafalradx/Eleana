@@ -196,8 +196,27 @@ class MainApp:
         self.ctkframe8  = builder.get_object('ctkframe8', self.mainwindow)
         self.first_mod_panel_1 = CTkSpinbox(master = self.ctkframe8, min_value=-1000000000, max_value=1000000000, step_value=1,  scroll_value = 1)
         self.first_mod_panel_1.grid(row=0, column=1, sticky="ew")
-        self.first_mod_panel_2 = CTkSpinbox(master=self.ctkframe8, min_value=0, max_value=1000000, step_value=1, scroll_value=1)
+        self.first_mod_panel_2 = CTkSpinbox(master=self.ctkframe8, min_value=0, max_value=1000000, command = self.first_mod_step_settings, step_value=1, scroll_value=0)
         self.first_mod_panel_2.grid(row=1, column=1, sticky="ew")
+
+        self.ctkframe23 = builder.get_object('ctkframe23', self.mainwindow)
+        self.first_mod_panel_3 = CTkSpinbox(master=self.ctkframe23, min_value=-1000000000, max_value=1000000000, step_value=1, scroll_value=1)
+        self.first_mod_panel_3.grid(row=0, column=1, sticky="ew")
+        self.first_mod_panel_4 = CTkSpinbox(master=self.ctkframe23, min_value=0, max_value=1000000, command = self.first_mod_step_settings, step_value=1, scroll_value=0)
+        self.first_mod_panel_4.grid(row=1, column=1, sticky="ew")
+
+        self.ctkframe19 = builder.get_object('ctkframe19', self.mainwindow)
+        self.first_mod_panel_5 = CTkSpinbox(master=self.ctkframe19, min_value=0, max_value=1000000, step_value=1, scroll_value=1)
+        self.first_mod_panel_5.grid(row=0, column=1, sticky="ew")
+        self.first_mod_panel_6 = CTkSpinbox(master=self.ctkframe19, min_value=0, max_value=1000000, command = self.first_mod_step_settings, step_value=1, scroll_value=0)
+        self.first_mod_panel_6.grid(row=1, column=1, sticky="ew")
+
+        self.ctkframe24 = builder.get_object('ctkframe24', self.mainwindow)
+        self.first_mod_panel_7 = CTkSpinbox(master=self.ctkframe24, min_value=0, max_value=1000000, step_value=1, scroll_value=1)
+        self.first_mod_panel_7.grid(row=0, column=1, sticky="ew")
+        self.first_mod_panel_8 = CTkSpinbox(master=self.ctkframe24, min_value=0, max_value=1000000, command = self.first_mod_step_settings, step_value=1, scroll_value=0)
+        self.first_mod_panel_8.grid(row=1, column=1, sticky="ew")
+
 
         # Graph Buttons
         self.check_autoscale_x = builder.get_object('check_autoscale_X', self.mainwindow)
@@ -416,6 +435,37 @@ class MainApp:
         else:
             self.comparison_settings['indexes'] = ()
             self.grapher.clear_plot()
+
+
+    def first_mod_step_settings(self, value):
+        ''' When modification panel is on an step is changed then it sets the step values
+            are set to spinboxes
+        '''
+        def __set_ranges(widget):
+            v = widget.get()
+            rs = (
+                (100000, 99999, 1),
+                (10000, 9999, 1),
+                (1000, 999, 1),
+                (100, 99, 1),
+                (10, 9, 1),
+                (1, 0, 0.1),
+                (0.1, 0.09, 1)
+            )
+
+        for r in rs:
+            if  r[1] <= v < r[0]:
+                widget.set(r[1]/10)
+                widget.configure()
+
+
+        shift_x_step = self.first_mod_panel_2.get()
+        shift_y_step = self.first_mod_panel_4.get()
+        multi_x_step = self.first_mod_panel_6.get()
+        multi_y_step = self.first_mod_panel_8.get()
+
+
+
 
     ''' *********************************************
     *              COMBOBOX SELECTIONS              *
