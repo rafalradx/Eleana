@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<interface version="1.4" author="PygubuDesigner 0.40.2">
+<interface version="1.4" author="PygubuDesigner 0.41">
   <project>
     <settings />
     <customwidgets />
@@ -524,12 +524,13 @@
                                           </object>
                                         </child>
                                         <child>
-                                          <object class="customtkinter.CTkLabel" id="ctklabel2">
-                                            <property name="bg_color">#505050</property>
-                                            <property name="corner_radius">20</property>
-                                            <property name="fg_color">#c4a235</property>
-                                            <property name="font">{Arial} 9 {bold}</property>
-                                            <property name="text" translatable="yes">[ ]</property>
+                                          <object class="customtkinter.CTkButton" id="btn_toggle_first_mod" named="True">
+                                            <property name="command" type="command" cbtype="simple">toggle_first_mod_panel</property>
+                                            <property name="corner_radius">10</property>
+                                            <property name="fg_color">#d99346</property>
+                                            <property name="font">{Arial} 10 {bold}</property>
+                                            <property name="text" translatable="yes">[---]</property>
+                                            <property name="width">10</property>
                                             <layout manager="grid">
                                               <property name="column">3</property>
                                               <property name="row">0</property>

@@ -196,27 +196,34 @@ class MainApp:
         self.ctkframe8  = builder.get_object('ctkframe8', self.mainwindow)
         self.first_mod_panel_1 = CTkSpinbox(master = self.ctkframe8, min_value=-1000000000, max_value=1000000000, step_value=1,  scroll_value = 1)
         self.first_mod_panel_1.grid(row=0, column=1, sticky="ew")
-        self.first_mod_panel_2 = CTkSpinbox(master=self.ctkframe8, min_value=0, max_value=1000000, command = self.first_mod_step_settings, step_value=1, scroll_value=0)
+        self.first_mod_panel_2 = CTkSpinbox(master=self.ctkframe8, min_value=0.000000001, max_value=10000000000, command = self.first_mod_step_settings, step_value=1, scroll_value=0)
         self.first_mod_panel_2.grid(row=1, column=1, sticky="ew")
+        self.first_mod_panel_2.set(1)
 
         self.ctkframe23 = builder.get_object('ctkframe23', self.mainwindow)
         self.first_mod_panel_3 = CTkSpinbox(master=self.ctkframe23, min_value=-1000000000, max_value=1000000000, step_value=1, scroll_value=1)
         self.first_mod_panel_3.grid(row=0, column=1, sticky="ew")
-        self.first_mod_panel_4 = CTkSpinbox(master=self.ctkframe23, min_value=0, max_value=1000000, command = self.first_mod_step_settings, step_value=1, scroll_value=0)
+        self.first_mod_panel_4 = CTkSpinbox(master=self.ctkframe23, min_value=0.000000001, max_value=10000000000, command = self.first_mod_step_settings, step_value=1, scroll_value=0)
         self.first_mod_panel_4.grid(row=1, column=1, sticky="ew")
+        self.first_mod_panel_4.set(1)
 
         self.ctkframe19 = builder.get_object('ctkframe19', self.mainwindow)
         self.first_mod_panel_5 = CTkSpinbox(master=self.ctkframe19, min_value=0, max_value=1000000, step_value=1, scroll_value=1)
         self.first_mod_panel_5.grid(row=0, column=1, sticky="ew")
-        self.first_mod_panel_6 = CTkSpinbox(master=self.ctkframe19, min_value=0, max_value=1000000, command = self.first_mod_step_settings, step_value=1, scroll_value=0)
+        self.first_mod_panel_6 = CTkSpinbox(master=self.ctkframe19, min_value=0.000000001, max_value=10000000000, command = self.first_mod_step_settings, step_value=1, scroll_value=0)
         self.first_mod_panel_6.grid(row=1, column=1, sticky="ew")
+        self.first_mod_panel_6.set(1)
 
         self.ctkframe24 = builder.get_object('ctkframe24', self.mainwindow)
         self.first_mod_panel_7 = CTkSpinbox(master=self.ctkframe24, min_value=0, max_value=1000000, step_value=1, scroll_value=1)
         self.first_mod_panel_7.grid(row=0, column=1, sticky="ew")
-        self.first_mod_panel_8 = CTkSpinbox(master=self.ctkframe24, min_value=0, max_value=1000000, command = self.first_mod_step_settings, step_value=1, scroll_value=0)
+        self.first_mod_panel_8 = CTkSpinbox(master=self.ctkframe24, min_value=0.000000001, max_value=10000000000, command = self.first_mod_step_settings, step_value=1, scroll_value=0)
         self.first_mod_panel_8.grid(row=1, column=1, sticky="ew")
+        self.first_mod_panel_8.set(1)
 
+        # Hide FIRST modifications
+        self.first_modFrame.grid_remove()
+        self.btn_toggle_first_mod = builder.get_object("btn_toggle_first_mod", self.mainwindow)
 
         # Graph Buttons
         self.check_autoscale_x = builder.get_object('check_autoscale_X', self.mainwindow)
@@ -436,35 +443,47 @@ class MainApp:
             self.comparison_settings['indexes'] = ()
             self.grapher.clear_plot()
 
+    # Handling the FIRST MODIFICATION PANNEL
+    # --------------------------------------------
+
+    def toggle_first_mod_panel(self):
+        ''' Hides of shows the first_modFrame upon clicking the toggle button '''
+        if self.first_modFrame.winfo_ismapped():
+            self.first_modFrame.grid_remove()
+            self.btn_toggle_first_mod.configure(text = "[---]")
+        else:
+            self.first_modFrame.grid()
+            self.btn_toggle_first_mod.configure(text=" [-] ")
+            Error.show(info = "This is not implemented yet")
 
     def first_mod_step_settings(self, value):
         ''' When modification panel is on an step is changed then it sets the step values
             are set to spinboxes
         '''
-        def __set_ranges(widget):
+        def _set_ranges(widget):
             v = widget.get()
-            rs = (
-                (100000, 99999, 1),
-                (10000, 9999, 1),
-                (1000, 999, 1),
-                (100, 99, 1),
-                (10, 9, 1),
-                (1, 0, 0.1),
-                (0.1, 0.09, 1)
-            )
+            step = widget.step_value
+            if v == step:
+                return False
+            difference = v - step
+            if difference > 0:
+                new_v = (v - step)  * 10
+            elif v == 0:
+                new_v = 1
+            else:
+                new_v = (v + step) / 10
+            if new_v > 1:
+                new_v = int(new_v)
+            widget.step_value = new_v
+            widget.set(value = new_v)
+            return True
 
-        for r in rs:
-            if  r[1] <= v < r[0]:
-                widget.set(r[1]/10)
-                widget.configure()
-
-
-        shift_x_step = self.first_mod_panel_2.get()
-        shift_y_step = self.first_mod_panel_4.get()
-        multi_x_step = self.first_mod_panel_6.get()
-        multi_y_step = self.first_mod_panel_8.get()
-
-
+        widget_list = (self.first_mod_panel_2, self.first_mod_panel_4, self.first_mod_panel_6, self.first_mod_panel_8)
+        for widget in widget_list:
+            result = _set_ranges(widget=widget)
+            if result:
+                return
+    # -------  END of FISRT MODIFICATION PANEL --------
 
 
     ''' *********************************************
