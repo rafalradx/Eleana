@@ -26,7 +26,7 @@ class Eleana:
         self.paths = {'program_dir': Path(__file__).resolve().parent,
              'home_dir': Path.home(),
              'tmp_dir': tempfile.gettempdir(),
-             'pixmaps': Path(Path(__file__).resolve().parent, "../pixmaps"),
+             'pixmaps': Path(Path(__file__).resolve().parent.parent, "pixmaps"),
              'last_import_dir': '',
              'last_project_dir': '',
              'last_projects': [],

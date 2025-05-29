@@ -72,7 +72,10 @@ class Init:
             # Read paths.pic
             file_to_read = open(filename, "rb")
             paths = pickle.load(file_to_read)
-            self.eleana.paths = paths
+            self.eleana.paths['last_import_dir'] = paths['last_import_dir']
+            self.eleana.paths['last_project_dir'] = paths['last_project_dir']
+            self.eleana.paths['last_projects'] = paths['last_projects']
+            self.eleana.paths['last_export_dir'] = paths['last_export']
             file_to_read.close()
             # Create last project list in the main menu
             last_projects = self.eleana.paths['last_projects']
