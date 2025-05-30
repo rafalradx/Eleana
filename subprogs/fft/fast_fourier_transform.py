@@ -5,8 +5,9 @@ from asyncio import set_event_loop_policy
 
 import numpy as np
 import importlib
-import scipy.signal
-
+from enum import Enum, auto
+from scipy.fft import fft, fftfreq
+from scipy.signal import windows
 
 ''' GENERAL SETTINGS '''
 # If True all active subprog windows will be closed on start this subprog
@@ -195,6 +196,32 @@ CURSOR_OUTSIDE_Y: bool = False
 CURSOR_OUTSIDE_TEXT: str = 'One or more selected points are outside the (x, y) range of data.'
 
 
+# simple enum class for selection of data part
+class DataPart(Enum):
+    REAL = auto()
+    IMAGINARY = auto()
+    COMPLEX = auto()
+
+class WindowType(Enum):
+    RECTANGULAR = auto()
+    HANN = auto()
+    HAMMING = auto()
+    BLACKMAN = auto()
+    BARTLETT = auto()
+    BOHMAN = auto()
+
+
+WINDOW_FUNCTIONS = {
+    WindowType.RECTANGULAR: lambda N: np.ones(N),
+    WindowType.HANN: windows.hann,
+    WindowType.HAMMING: windows.hamming,
+    WindowType.BLACKMAN: windows.blackman,
+    WindowType.BARTLETT: windows.bartlett,
+    WindowType.BOHMAN: windows.bohman,
+}
+
+
+
 '''**************************************************************************************************
 *                      THE DEFAULT CONSTRUCTOR (LINES BETWEEN **)                                   * 
 **************************************************************************************************'''
@@ -273,17 +300,23 @@ class FastFourierTransform(Methods, WindowGUI):                                 
 
         # HERE DEFINE YOUR REFERENCES TO WIDGETS
         self.windowing_selection = self.builder.get_object("ctkcombobox1", self.mainwindow)
-        self.windowing_selection.set(value="None")
+        self.windowing_selection.set(value="Rectangular")
+        self.window_type = WindowType.RECTANGULAR
         
         self.padding_number = self.builder.get_object("ctkentry4", self.mainwindow)
-        self.set_entry_value(entry=self.padding_number, value=10)
+        self.padded_data_size = 1024
+        self.set_entry_value(entry=self.padding_number, value=self.padded_data_size)
         self.set_validation_for_ctkentries(list_of_entries=[self.padding_number])
 
         self.radio_button_real = self.builder.get_object("realbutton", self.mainwindow)
         self.radio_button_imag = self.builder.get_object("ctkradiobutton2", self.mainwindow)
         self.radio_button_complex = self.builder.get_object("ctkradiobutton3", self.mainwindow)
         self.radio_button_real.select()
+        self.data_part_to_fft = DataPart.REAL
 
+        self.padded_data_size.bind("<Return>", self.command)
+
+        
     def calculate_stack(self, commandline = False):
         ''' If STACK_SEP is False it means that data in stack should
             not be treated as separate data but are calculated as whole
@@ -318,6 +351,8 @@ class FastFourierTransform(Methods, WindowGUI):                                 
             comment2 = self.data_for_calculations[1]['comment']
             parameters2 = self.data_for_calculations[1]['parameters']
         # ------------------------------------------
+
+        
 
     def calculate(self, commandline = False):
         ''' The algorithm for calculations on single x,y,z data.
@@ -360,7 +395,32 @@ class FastFourierTransform(Methods, WindowGUI):                                 
         cursor_positions = self.grapher.cursor_annotations
         # ------------------------------------------
 
-        print(self.data_for_calculations[0]['y'])
+        # only for plotting windowing
+        # windows are symetric and centered
+        x_values = self.data_for_calculations[0]['x']
+        data_size = len(x_values)
+        full_window = WINDOW_FUNCTIONS[self.window_type](2 * data_size)
+        # take the left side of windows
+        window = full_window[data_size:]
+        self.add_to_additional_plots(x=x_values, y=window, clear=True)
+
+        # select on which part of data to compute FFT
+        if self.data_part_to_fft == DataPart.REAL:
+            signal = self.data_for_calculations[0]['y'].real
+        elif self.data_part_to_fft == DataPart.IMAGINARY:
+            signal = self.data_for_calculations[0]['y'].imag
+        else:
+            signal = self.data_for_calculations[0]['y']
+
+        signal_windowed = signal * window
+        
+
+        zeros_right = self.padded_data_size - data_size
+        if zeros_right > 0:
+            x_padded, y_padded = FastFourierTransform.zero_pad_signal(self.data_for_calculations[0]['x'], signal_windowed, pad_left=0, pad_right=zeros_right)
+        
+        self.data_for_calculations[0]['x'] = x_padded
+        self.data_for_calculations[0]['y'] = y_padded
 
         # Send calculated values to result (if needed). This will be sent to command line
         result = None # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
@@ -370,8 +430,40 @@ class FastFourierTransform(Methods, WindowGUI):                                 
 
         return row_to_report
     
-    def windowing_selected(self, value):
-        print("dupa")
+    def windowing_selected(self, window_name):
+        #print(f"windowing selected: {window_name}")
+        #print(WindowType[window_name.upper()])
+        self.window_type = WindowType[window_name.upper()]
+        self.ok_clicked()
+    
+    @staticmethod
+    def zero_pad_signal(x: np.ndarray, y: np.ndarray, pad_left: int, pad_right: int):
+        """
+        Pads x and y arrays with zeros.
+        pad_left and pad_right specify how many zeros to add before and after the signal.
+        """
+        # Pad y with zeros
+        y_padded = np.pad(y, (pad_left, pad_right), mode='constant')
+
+        # Calculate spacing for x (assuming uniform)
+        dx = x[1] - x[0] if len(x) > 1 else 1.0
+        x_start = x[0] - pad_left * dx
+        x_end = x[-1] + pad_right * dx
+        x_padded = np.linspace(x_start, x_end, len(y_padded))
+
+        return x_padded, y_padded
+
+
+    
+    
+    def real_button_checked(self):
+        self.data_part_to_fft = DataPart.REAL
+
+    def imag_button_checked(self):
+        self.data_part_to_fft = DataPart.IMAGINARY
+
+    def complex_button_checked(self):
+        self.data_part_to_fft = DataPart.COMPLEX
 
     def save_settings(self):
         ''' Stores required values to self.eleana.subprog_storage

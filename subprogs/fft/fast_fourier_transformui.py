@@ -69,6 +69,15 @@ class FastFourierUI:
             self.center_window()
         self.mainwindow.mainloop()
 
+    def real_button_checked(self):
+        pass
+
+    def imag_button_checked(self):
+        pass
+
+    def complex_button_checked(self):
+        pass
+
     def windowing_selected(self, value):
         pass
 

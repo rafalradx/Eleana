@@ -143,6 +143,7 @@
                             </containerlayout>
                             <child>
                               <object class="customtkinter.CTkRadioButton" id="realbutton" named="True">
+                                <property name="command" type="command" cbtype="simple">real_button_checked</property>
                                 <property name="text" translatable="yes">Real</property>
                                 <property name="variable">string:datapart</property>
                                 <layout manager="grid">
@@ -166,6 +167,7 @@
                             </containerlayout>
                             <child>
                               <object class="customtkinter.CTkRadioButton" id="ctkradiobutton2">
+                                <property name="command" type="command" cbtype="simple">imag_button_checked</property>
                                 <property name="text" translatable="yes">Imag</property>
                                 <property name="variable">string:datapart</property>
                                 <layout manager="grid">
@@ -189,6 +191,7 @@
                             </containerlayout>
                             <child>
                               <object class="customtkinter.CTkRadioButton" id="ctkradiobutton3">
+                                <property name="command" type="command" cbtype="simple">complex_button_checked</property>
                                 <property name="text" translatable="yes">Complex</property>
                                 <property name="variable">string:datapart</property>
                                 <layout manager="grid">
@@ -234,7 +237,7 @@
                             <child>
                               <object class="customtkinter.CTkComboBox" id="ctkcombobox1">
                                 <property name="command" type="command" cbtype="simple">windowing_selected</property>
-                                <property name="values">["None", "Hamming"]</property>
+                                <property name="values">["Rectangular", "Hamming", "Hann", "Blackman","Bartlett","Bohman"]</property>
                                 <layout manager="grid">
                                   <property name="column">1</property>
                                   <property name="padx">5</property>
