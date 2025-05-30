@@ -61,7 +61,8 @@ list_of_subprogs = []
 from filter_fft.fft_filter import FFTFilter
 from filter_savitzky_golay.sav_gol import SavGol
 from edit_values_in_table.edit_values_in_table import EditValuesInTable
-from subprogs.pseudomodulation.pseudomodulation import PseudoModulation
+from pseudomodulation.pseudomodulation import PseudoModulation
+from fft.fast_fourier_transform import FastFourierTransform
 
 #list_of_subprogs.append(['edit_values_in_table', 'cancel'])
 from EPR_B_to_g.B_to_g import EPR_B_to_g
@@ -1909,6 +1910,8 @@ class MainApp:
     def pseudomodulation(self):
         subprog_pseudomodulation = PseudoModulation(self, which = 'first')
 
+    def fast_fourier_transform(self):
+        subprog_fft = FastFourierTransform(self, which = 'first')
     # --------------------------------------------
     # MENU: EPR
     # --------------------------------------------
