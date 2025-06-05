@@ -269,6 +269,10 @@ class MainMenu:
         # --- Pseudomodulation
         self.menu_filters.add_command(label="Pseudomodulation", command=self.app.pseudomodulation,
                                       image=self.icon_pseudomod, compound="left")
+        
+        # - Normalize amplitude
+        self.menu_modifications.add_command(label="FFT", command=self.app.fast_fourier_transform,
+                                       image=self.icon_normalize, compound="left")
 
         ''' Menu EPR '''
         self.menu_EPR = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
