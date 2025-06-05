@@ -6,7 +6,7 @@ from asyncio import set_event_loop_policy
 import numpy as np
 import importlib
 from enum import Enum, auto
-from scipy.fft import fft, fftfreq
+from scipy.fft import fft, fftfreq, fftshift
 from scipy.signal import windows
 
 ''' GENERAL SETTINGS '''
@@ -314,7 +314,7 @@ class FastFourierTransform(Methods, WindowGUI):                                 
         self.radio_button_real.select()
         self.data_part_to_fft = DataPart.REAL
 
-        self.padded_data_size.bind("<Return>", self.command)
+        #self.padded_data_size.bind("<Return>", self.command)
 
         
     def calculate_stack(self, commandline = False):
@@ -402,7 +402,8 @@ class FastFourierTransform(Methods, WindowGUI):                                 
         full_window = WINDOW_FUNCTIONS[self.window_type](2 * data_size)
         # take the left side of windows
         window = full_window[data_size:]
-        self.add_to_additional_plots(x=x_values, y=window, clear=True)
+        # window plot for diagnostics
+        #self.add_to_additional_plots(x=x_values, y=window, clear=True)
 
         # select on which part of data to compute FFT
         if self.data_part_to_fft == DataPart.REAL:
@@ -414,13 +415,25 @@ class FastFourierTransform(Methods, WindowGUI):                                 
 
         signal_windowed = signal * window
         
-
+        # apply padding if padded data size is longer than data size
+        x_prepared_to_fft = x_values
+        y_prepared_to_fft = signal_windowed
         zeros_right = self.padded_data_size - data_size
         if zeros_right > 0:
-            x_padded, y_padded = FastFourierTransform.zero_pad_signal(self.data_for_calculations[0]['x'], signal_windowed, pad_left=0, pad_right=zeros_right)
+            x_prepared_to_fft, y_prepared_to_fft = FastFourierTransform.zero_pad_signal(x_values, signal_windowed, pad_left=0, pad_right=zeros_right)
+
         
-        self.data_for_calculations[0]['x'] = x_padded
-        self.data_for_calculations[0]['y'] = y_padded
+        N = len(x_prepared_to_fft)
+        dt = x_prepared_to_fft[1]-x_prepared_to_fft[0]
+        freq = fftfreq(N, d=dt/1000)  # convert dt from ns to us, returned axis is in MHz
+        spectrum = fft(y_prepared_to_fft)
+
+        # swap order of negative and positive channels
+        self.data_for_calculations[0]['x'] = fftshift(freq)
+        self.data_for_calculations[0]['y'] = fftshift(spectrum)
+
+        parameters1["unit_x"] = "MHz"
+        parameters1["name_x"] = "Frequency"
 
         # Send calculated values to result (if needed). This will be sent to command line
         result = None # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
