@@ -257,29 +257,33 @@ def createFromElexsys(filename: str) -> object:
         }
 
     # Now create object containing particular type of data
+    # Process based on experiment type and data format
     if dsc['EXPT'] == 'CW':
         if dsc['YTYP'] == 'NODATA':
-            # This will create single CW EPR spectrum
+            # Single CW EPR spectrum (no Y-dimension)
             return Spectrum_CWEPR(filepath.stem, x_axis, dta, dsc)
         else:
-            # check for safety if the ygf file was loaded
-            print("dupa")
-            if not ygf:
+            # Stacked CW spectra (Y-dimension present)
+            # chech again if ygf was loaded
+            if len(ygf) == 0:
                 return {
                     'Error': True,
                     'desc': f"The required .YGF file for stack CW spectrum is missing."
-                    }
-                
-            cw_stack = Spectra_CWEPR_stack(filepath.stem, x_axis, dta, dsc, ygf)   # <-- This will create stacked CW EPR spectra
-            # not sure what's going on here
+                }
+
+            cw_stack = Spectra_CWEPR_stack(filepath.stem, x_axis, dta, dsc, ygf)
+
+            # Some Bruker files incorrectly label 'unit_y' as 's' (seconds),
+            # but the data is actually intensity → correct it to 'a.u.'
             unit = cw_stack.parameters.get('unit_y', 'a.u.')
             if unit == 's':
                 cw_stack.parameters['unit_y'] = 'a.u.'
+
             return cw_stack
+
     elif dsc['IKKF'] == 'CPLX':
-        # 1D pulse experiment spectrum or time trace
-        spectrum_complex = Spectrum_complex(filepath.stem, x_axis, dta, dsc)
-        return spectrum_complex
+        # Complex-valued spectrum (e.g., pulsed EPR)
+        return Spectrum_complex(filepath.stem, x_axis, dta, dsc)
 
 def createFromEMX(filename: str) -> object:
     emx_SPC = Path(filename[:-3] + 'spc')
