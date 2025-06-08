@@ -62,6 +62,7 @@ class MainMenu:
         self.icon_filter_general = self.prepare_icon('filter_general.png')
         self.icon_pseudomod = self.prepare_icon('pseudomod.png')
         self.icon_fftfilter = self.prepare_icon('fftfilter.png')
+        self.icon_fft = self.prepare_icon('fft.png')
 
         ''' BUILD MENU '''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth_bar, activeborderwidth=self.borderwidth)
@@ -270,9 +271,9 @@ class MainMenu:
         self.menu_filters.add_command(label="Pseudomodulation", command=self.app.pseudomodulation,
                                       image=self.icon_pseudomod, compound="left")
         
-        # - Normalize amplitude
+        # - FFT
         self.menu_modifications.add_command(label="FFT", command=self.app.fast_fourier_transform,
-                                       image=self.icon_normalize, compound="left")
+                                       image=self.icon_fft, compound="left")
 
         ''' Menu EPR '''
         self.menu_EPR = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
