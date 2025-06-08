@@ -271,7 +271,7 @@
                             </child>
                             <child>
                               <object class="customtkinter.CTkEntry" id="ctkentry4">
-                                <property name="text" translatable="yes">ctkentry4</property>
+                                <property name="text" translatable="yes">1024</property>
                                 <layout manager="grid">
                                   <property name="column">1</property>
                                   <property name="row">0</property>

@@ -44,7 +44,7 @@ DATA_LABEL: str = 'data_label'
 # For example if "Spectrum" is processed and NAME_SUFFIX = "_MODIFIED"
 # you will get "Spectrum_MODIFIED" name in result
 # self.subprog_settings['name_suffix']
-NAME_SUFFIX: str = '_PSMOD'
+NAME_SUFFIX: str = '_FFT'
 
 # If true, calculations are done automatically upon selection of data in the main GUI
 # self.subprog_settings['auto_calculate']
@@ -301,11 +301,15 @@ class FastFourierTransform(Methods, WindowGUI):                                 
         # HERE DEFINE YOUR REFERENCES TO WIDGETS
         self.windowing_selection = self.builder.get_object("ctkcombobox1", self.mainwindow)
         self.windowing_selection.set(value="Rectangular")
-        self.window_type = WindowType.RECTANGULAR
+        self.window_type = WindowType[self.windowing_selection.get().upper()]
         
         self.padding_number = self.builder.get_object("ctkentry4", self.mainwindow)
-        self.padded_data_size = 1024
-        self.set_entry_value(entry=self.padding_number, value=self.padded_data_size)
+
+        try:
+            self.padded_data_size = int(self.padding_number.get())
+        except ValueError:
+            print("Please enter a valid integer.")
+
         self.set_validation_for_ctkentries(list_of_entries=[self.padding_number])
 
         self.radio_button_real = self.builder.get_object("realbutton", self.mainwindow)
@@ -314,7 +318,15 @@ class FastFourierTransform(Methods, WindowGUI):                                 
         self.radio_button_real.select()
         self.data_part_to_fft = DataPart.REAL
 
-        #self.padded_data_size.bind("<Return>", self.command)
+        # enter key even bound
+        self.padding_number.bind("<Return>", self.on_padding_entered)
+
+    def on_padding_entered(self, event):
+        content = self.padding_number.get()
+        try:
+            self.padded_data_size = int(content)
+        except ValueError:
+            print("Please enter a valid integer.")
 
         
     def calculate_stack(self, commandline = False):
@@ -395,11 +407,21 @@ class FastFourierTransform(Methods, WindowGUI):                                 
         cursor_positions = self.grapher.cursor_annotations
         # ------------------------------------------
 
-        # only for plotting windowing
+        # special handling of added data size entry field
+        # get the value in case the user did not press enter to confirm
+        # and store it
+        try:
+            self.padded_data_size = int(self.padding_number.get())
+        except ValueError:
+            print("Please enter a valid integer.")
+
+        
+
         # windows are symetric and centered
         x_values = self.data_for_calculations[0]['x']
         data_size = len(x_values)
         full_window = WINDOW_FUNCTIONS[self.window_type](2 * data_size)
+        name1 = name1 + "_" + str(self.window_type).removeprefix("WindowType.")
         # take the left side of windows
         window = full_window[data_size:]
         # window plot for diagnostics
@@ -421,6 +443,7 @@ class FastFourierTransform(Methods, WindowGUI):                                 
         zeros_right = self.padded_data_size - data_size
         if zeros_right > 0:
             x_prepared_to_fft, y_prepared_to_fft = FastFourierTransform.zero_pad_signal(x_values, signal_windowed, pad_left=0, pad_right=zeros_right)
+            name1 += f"_PADDED_TO_{self.padded_data_size}"
 
         
         N = len(x_prepared_to_fft)
@@ -431,6 +454,7 @@ class FastFourierTransform(Methods, WindowGUI):                                 
         # swap order of negative and positive channels
         self.data_for_calculations[0]['x'] = fftshift(freq)
         self.data_for_calculations[0]['y'] = fftshift(spectrum)
+        self.data_for_calculations[0]['name'] = name1
 
         parameters1["unit_x"] = "MHz"
         parameters1["name_x"] = "Frequency"
