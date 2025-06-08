@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<interface version="1.4" author="PygubuDesigner 0.41.1">
+<interface version="1.4" author="PygubuDesigner 0.41">
   <project>
     <settings>
       <setting id="name">fast_fourier_transform</setting>
@@ -319,8 +319,6 @@
                 <child>
                   <object class="customtkinter.CTkButton" id="ctkbutton1" named="True">
                     <property name="command" type="command" cbtype="simple">ok_clicked</property>
-                    <property name="round_height_to_even_numbers">True</property>
-                    <property name="round_width_to_even_numbers">True</property>
                     <property name="text" translatable="yes">Calculate</property>
                     <layout manager="grid">
                       <property name="column">0</property>
@@ -333,8 +331,6 @@
                 <child>
                   <object class="customtkinter.CTkButton" id="ctkbutton3" named="True">
                     <property name="command" type="command" cbtype="simple">show_report_clicked</property>
-                    <property name="round_height_to_even_numbers">True</property>
-                    <property name="round_width_to_even_numbers">True</property>
                     <property name="text" translatable="yes">Show report</property>
                     <layout manager="grid">
                       <property name="column">0</property>
@@ -360,8 +356,6 @@
                 <child>
                   <object class="customtkinter.CTkButton" id="ctkbutton2" named="True">
                     <property name="command" type="command" cbtype="simple">process_group_clicked</property>
-                    <property name="round_height_to_even_numbers">True</property>
-                    <property name="round_width_to_even_numbers">True</property>
                     <property name="text" translatable="yes">Process group</property>
                     <layout manager="grid">
                       <property name="column">0</property>
@@ -374,8 +368,6 @@
                 <child>
                   <object class="customtkinter.CTkButton" id="ctkbutton4" named="True">
                     <property name="command" type="command" cbtype="simple">clear_report_clicked</property>
-                    <property name="round_height_to_even_numbers">True</property>
-                    <property name="round_width_to_even_numbers">True</property>
                     <property name="text" translatable="yes">Clear report</property>
                     <layout manager="grid">
                       <property name="column">0</property>
@@ -402,8 +394,6 @@
                 <child>
                   <object class="customtkinter.CTkButton" id="ctkbutton5" named="True">
                     <property name="command" type="command" cbtype="simple">cancel</property>
-                    <property name="round_height_to_even_numbers">True</property>
-                    <property name="round_width_to_even_numbers">True</property>
                     <property name="text" translatable="yes">Cancel</property>
                     <layout manager="grid">
                       <property name="column">0</property>
