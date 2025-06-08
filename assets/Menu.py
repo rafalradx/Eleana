@@ -63,6 +63,7 @@ class MainMenu:
         self.icon_pseudomod = self.prepare_icon('pseudomod.png')
         self.icon_fftfilter = self.prepare_icon('fftfilter.png')
         self.icon_fft = self.prepare_icon('fft.png')
+        self.icon_spectrasubtract = self.prepare_icon('subtract.png')
 
         ''' BUILD MENU '''
         self.main_menu = tk.Menu(self.app.mainwindow, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth_bar, activeborderwidth=self.borderwidth)
@@ -250,6 +251,12 @@ class MainMenu:
         # - Subtract Spline baseline
         self.menu_modifications.add_command(label="Subtract spline baseline", command=self.app.spline_baseline,
                                             image=self.icon_splinebaseline, compound="left")
+
+        self.menu_modifications.add_separator()
+
+        # - Spectra subtraction
+        self.menu_modifications.add_command(label="Spectra subtraction", command=self.app.spectra_subtraction,
+                                           image=self.icon_spectrasubtract, compound="left")
 
         self.menu_modifications.add_separator()
 

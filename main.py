@@ -1,4 +1,5 @@
 import sys
+
 # BASIC CONFIGURATION
 ELEANA_VERSION = 1              # Set the Eleana version. This will be stored in self.eleana.version
 INTERPRETER = sys.executable    # Defines python version
@@ -63,6 +64,7 @@ from filter_savitzky_golay.sav_gol import SavGol
 from edit_values_in_table.edit_values_in_table import EditValuesInTable
 from pseudomodulation.pseudomodulation import PseudoModulation
 from fft.fast_fourier_transform import FastFourierTransform
+from spectra_subtraction.spectra_subtration import SpectraSubtraction
 
 #list_of_subprogs.append(['edit_values_in_table', 'cancel'])
 from EPR_B_to_g.B_to_g import EPR_B_to_g
@@ -1912,6 +1914,10 @@ class MainApp:
 
     def fast_fourier_transform(self):
         subprog_fft = FastFourierTransform(self, which = 'first')
+
+    def spectra_subtraction(self):
+        subprog_spectra_subtraction = SpectraSubtraction(self, which = 'first')
+
     # --------------------------------------------
     # MENU: EPR
     # --------------------------------------------
