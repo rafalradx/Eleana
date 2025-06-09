@@ -6,7 +6,7 @@ from modules.Magnettech.magnettech import load_magnettech
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict
 
-# how bruker parameters are mpp
+# how bruker parameters are mapped to eleana parameters
 ELEANA_TO_BRUKER_KEY_MAP = {'title': 'TITL',
             'unit_x': 'XUNI',
             'name_x': 'XNAM',
@@ -33,6 +33,7 @@ def extract_eleana_parameters(dsc: dict) -> dict:
     result = {}
     for eleana_key, bruker_key in ELEANA_TO_BRUKER_KEY_MAP.items():
         if bruker_key in dsc:
+            #print(f"{bruker_key}: {dsc[bruker_key]}")
             val = dsc[bruker_key].split(' ')[0].replace("'", "")
             result[eleana_key] = val
     return result
@@ -85,14 +86,16 @@ class Spectrum_CWEPR:
         self.stk_names = []
         working_par = self.parameters
         fill_missing_keys =['title','MwFreq','ModAmp','ModFreq','SweepTime','ConvTime','TimeConst','Power','PowAtten']
-        for key in fill_missing_keys:
-            try:
-                if format == 'elexsys':
-                    working_par[key] = create_eleana_par(dsc, dsc2eleana(key))
-                elif format == 'emx' or format == 'esp':
+
+        if format =="elexsys":
+            working_par = extract_eleana_parameters(dsc)
+        elif format in ('emx', 'esp'):
+            for key in fill_missing_keys:
+                try:
                     working_par[key] = create_eleana_par(dsc, par2eleana(key, format))
-            except:
-                pass
+                except:
+                    pass
+
         self.parameters = working_par
         self.x = np.array(x_axis)
         self.y = np.array(dta)
@@ -137,61 +140,102 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         self.parameters = working_parameters
         self.comment = ''
 
-# class Spectrum_complex:
-#     def __init__(self, name: str, x_axis: np.ndarray, dta: np.ndarray, dsc: dict):
-#         self.parameters = {'title': '', 'unit_x': '', 'name_x': '', 'name_y': '', 'MwFreq': '', 'ModAmp': '',
-#                         'ModFreq': '',
-#                         'ConvTime': '', 'SweepTime': '', 'TimeConst': '', 'RESO': '', 'Power': '', 'PowerAtten': '',
-#                         'stk_names': []}
-#         length = len(dta)
-#         y = np.array([])
-#         i = 0
-#         while i < length:
-#             complex_nr = complex(dta[i], dta[i+1])
-#             y = np.append(y, complex_nr)
-#             i += 2
-#         working_parameters = self.parameters
-#         fill_missing_keys = ['name_z', 'unit_z', 'name_x', 'unit_x', 'name_y', 'unit_y', 'MwFreq']
-#         for key in fill_missing_keys:
-#             try:
-#                 bruker_key = dsc2eleana(key)
-#                 value = dsc[bruker_key]
-#                 value = value.split(' ')
-#                 value_txt = value[0]
-#                 value_txt = value_txt.replace("'", "")
-#                 working_parameters[key] = value_txt
-#             except:
-#                 pass
-#         self.parameters = working_parameters
-#         self.y = y
-#         self.x = np.array(x_axis)
-#         self.name = name
-#         self.complex = True
-#         self.type = 'single 2D'
-#         self.origin = 'Pulse EPR'
-#         self.name_nr = ''
-#         self.groups = ['All']
-#         self.comment = ''
-#         self.z = None
-
 @dataclass
 class Spectrum_complex:
     name: str
     x: np.ndarray
     y: np.ndarray
+    z: Optional[np.ndarray] = None
     parameters: Dict[str, str] = field(default_factory=dict)
-    complex: bool = True
     type: str = 'single 2D'
+    complex: bool = True
     origin: str = 'Pulse EPR'
     name_nr: str = ''
     groups: List[str] = field(default_factory=lambda: ['All'])
     comment: str = ''
-    z: Optional[np.ndarray] = None
+    stk_names: Optional[List[str]] = None
+    
 
     @classmethod
-    def from_bruker(cls, name: str, x_axis: np.ndarray, dta: np.ndarray, dsc: dict):
+    def from_bruker(cls, name: str, dta: np.ndarray, dsc: dict):
+
+        # create x axis
+        x_points = int(dsc['XPTS'])
+        x_min = float(dsc['XMIN'])
+        x_wid = float(dsc['XWID'])
+
+        if x_points < 2:
+            raise ValueError("XPTS must be at least 2")
+
+        x_max = x_min + x_wid
+        # linspace creates points from x_min to x_max inclusive
+        x_axis = np.linspace(x_min, x_max, x_points)
+
+        parameters = extract_eleana_parameters(dsc)
+
         # Convert interleaved real/imag to complex array
-        y = np.array([complex(dta[i], dta[i+1]) for i in range(0, len(dta), 2)])
+        values = np.array([complex(dta[i], dta[i+1]) for i in range(0, len(dta), 2)])
+
+        # check for single 2D spectrum (not stack)
+        if len(x_axis) == len(values):
+            return cls(
+            name=name,
+            x=np.array(x_axis),
+            y=values,
+            parameters=parameters
+        )
+
+        # if the size does not match, it means we have second dimention (stack spectrum)
+        # create y axis
+        try:
+            y_points = int(dsc['YPTS'])
+            y_min = float(dsc['YMIN'])
+            y_wid = float(dsc['YWID'])
+
+            if y_points < 2:
+                raise ValueError("YPTS must be at least 2")
+
+            y_max = y_min + y_wid
+            # linspace creates `points` points from x_min to x_max inclusive
+            y_axis = np.linspace(y_min, y_max, y_points)
+        except (KeyError, ValueError) as e:
+            return {'Error': True, 'desc': f'Cannot create Y axis for {name}: {e}'}
+        
+        # reshape values into 2D array
+        # each trace in rowd (YPTS, XPTS)
+        values_2D = values.reshape(y_points,x_points)
+
+
+        name_z = parameters.get('name_z','')
+        unit_z = parameters.get('unit_z','')
+
+        # stack names
+        stk_names = [f"{name_z}_{each}_{unit_z}" for each in y_axis]
+
+        return cls(
+            name=name,
+            x=np.array(x_axis),
+            y=values_2D,
+            z=y_axis, # it has to be that way
+            parameters=parameters,
+            stk_names=stk_names,
+            type = 'stack 2D'
+        )
+
+
+
+
+        
+
+               
+
+
+
+
+
+
+
+
 
         # # Default parameters
         # parameters = {
@@ -210,14 +254,9 @@ class Spectrum_complex:
         #     except Exception:
         #         pass
 
-        parameters = extract_eleana_parameters(dsc)
+        
 
-        return cls(
-            name=name,
-            x=np.array(x_axis),
-            y=y,
-            parameters=parameters
-        )
+        
 
 
 
@@ -364,7 +403,7 @@ def createFromElexsys(filename: str) -> object:
 
     elif dsc['IKKF'] == 'CPLX':
         # Complex-valued spectrum (e.g., pulsed EPR)
-        return Spectrum_complex.from_bruker(filepath.stem, x_axis, dta, dsc)
+        return Spectrum_complex.from_bruker(filepath.stem, dta, dsc)
 
 def createFromEMX(filename: str) -> object:
     emx_SPC = Path(filename[:-3] + 'spc')
