@@ -1,4 +1,3 @@
-import math, struct
 from pathlib import Path, PurePath
 import numpy as np
 import re
@@ -142,86 +141,149 @@ class Spectrum_complex:
         self.z = None
 
 def createFromElexsys(filename: str) -> object:
-    elexsys_DTA = Path(filename[:-3]+'DTA')
-    elexsys_DSC = Path(filename[:-3]+'DSC')
-    elexsys_YGF = Path(filename[:-3]+'YGF')
     # Loading dta and dsc from the files
     # DTA data will be in Y_data
     # DSC data will be in desc_data
     # YGF (if exist) will be in ygf_data
     # errors list contain list of encountered error in loading DTA and/or DSC not YGF
-    error = False
-    x_data = []
-    dta = []
-    dsc_text = ''
-    ygf = []
-    dsc = {}
+
+    filepath = Path(filename)
+    ext = filepath.suffix  # extract extension .dsc .dta. ygf
+
+    # Determine if extension is uppercase or lowercase
+    if ext.isupper():
+        ext_case = 'upper'
+    elif ext.islower():
+        ext_case = 'lower'
+    else:
+        ext_case = 'mixed'
+
+    # Pick suffix format based on the input extension
+    if ext_case == 'upper':
+        dta_ext = '.DTA'
+        dsc_ext = '.DSC'
+        ygf_ext = '.YGF'
+    elif ext_case == 'lower':
+        dta_ext = '.dta'
+        dsc_ext = '.dsc'
+        ygf_ext = '.ygf'
+    else:
+        # Fallback: default to lowercase
+        dta_ext = '.dta'
+        dsc_ext = '.dsc'
+        ygf_ext = '.ygf'
+
+    # create path to files
+    elexsys_DTA = filepath.with_suffix(dta_ext)
+    elexsys_DSC = filepath.with_suffix(dsc_ext)
+    elexsys_YGF = filepath.with_suffix(ygf_ext)
+
+    # Check whether .DTA nad .DSC files exist
+    if not elexsys_DSC.exists():
+        return {
+            "Error": True,
+            "desc": f"Missing file: {elexsys_DSC.name}"
+        }
+    
+    if not elexsys_DTA.exists():
+        return {
+            "Error": True,
+            "desc": f"Missing file: {elexsys_DSC.name}"
+        }
+
     # Load DTA from the elexsys_DTA
     try:
         dta = np.fromfile(elexsys_DTA, dtype='>d')
-    except:
-        elexsys_DTA = PurePath(elexsys_DTA).name
-        return {"Error":True,'desc':f"Error in loading {elexsys_DTA}"}
-    # If DTA sucessfully opened then read DSC
-    if error != True:
+    except Exception as e:
+        return {"Error": True, 'desc': f"Error in loading {elexsys_DTA.name}: {e}"}
+    
+    # If DTA sucessfully opened then read DSC and extract parameters into dictionary
+    dsc = {}
+    try:
+        with open(elexsys_DSC, "r") as f:
+            for line in f:
+                line = line.strip()
+
+                # Skip comments and empty lines
+                if not line or line.startswith('*') or line.startswith('#'):
+                    continue
+
+                # Split line into key and value
+                if '\t' in line:
+                    key, value = line.split('\t', 1)
+                elif ' ' in line:
+                    key, value = line.split(None, 1)  # split on first group of whitespace
+                else:
+                    key, value = line, ''
+
+                dsc[key.strip()] = value.strip()
+    except Exception as e:
+        return {"Error": True, 'desc': f"Error in loading {elexsys_DSC.name}: {e}"}
+    
+    # read YGF when exists
+    if elexsys_YGF.exists():
         try:
-            with open(elexsys_DSC, "r") as file:
-                dsc_text = file.read()
+            ygf = np.fromfile(elexsys_YGF, dtype='>d')
         except:
-            elexsys_DSC = PurePath(elexsys_DSC).name
-            return {"Error": True, 'desc': f"Error in loading {elexsys_DSC}"}
-    # Check if YGF exists
-    if error != True:
-        if elexsys_YGF.exists() == True:
-            try:
-                ygf = np.fromfile(elexsys_YGF, dtype='>d')
-            except:
-                    error = True
-                    elexsys_YGF = PurePath(elexsys_YGF).name
-                    return {"Error": True, 'desc': f"Error in loading {elexsys_YGF}" }
-        else:
+                return {"Error": True, 'desc': f"Error in loading {elexsys_YGF.name}" }
+    else:
             ygf = []
-    # Extract DSC to dictionary
-    # Divide into separate lines
-    dsc_lines = dsc_text.split('\n')
-    for i in dsc_lines:
-        element = re.split(r'\s+', i.strip(), maxsplit=1)
-        try:
-            dsc[element[0]] = element[1]
-        except:
-            pass
-    # Create X axis
-    error = False
+
+    # create xaxis
     try:
         points = int(dsc['XPTS'])
         x_min = float(dsc['XMIN'])
         x_wid = float(dsc['XWID'])
-        step = x_wid / points
-        x_axis = []
-        for i in range(0, points):
-            x_axis.append(i * step + x_min)
-    except:
-        return {'Error': True, 'desc': f'Cannot create x axis for {elexsys_DTA}'}
-    # Now create object containing particular type of data
-    filename = Path(filename).name
-    try:
-        val = dsc['EXPT']
-    except:
-        dsc['EXPT'] = 'none'
+        
+        if points < 2:
+            raise ValueError("XPTS must be at least 2")
 
-    if dsc['YTYP'] == 'NODATA' and dsc['EXPT'] == 'CW':
-        # This will create single CW EPR spectrum
-        cw_spectrum = Spectrum_CWEPR(filename[:-4], x_axis, dta, dsc)
-        return cw_spectrum # <--- Return object based on Spectrum_CWEPR
-    elif dsc['YTYP'] != 'NODATA' and dsc['EXPT'] == 'CW':
-        cw_stack = Spectra_CWEPR_stack(filename[:-4], x_axis, dta, dsc, ygf)   # <-- This will create stacked CW EPR spectra
-        unit = cw_stack.parameters.get('unit_y', 'a.u.')
-        if unit == 's':
-            cw_stack.parameters['unit_y'] = 'a.u.'
-        return cw_stack
-    elif dsc['IKKF'] != 'REAL':
-        spectrum_complex = Spectrum_complex(filename[:-4], x_axis, dta, dsc)
-        return spectrum_complex
+        x_max = x_min + x_wid
+        # linspace creates `points` points from x_min to x_max inclusive
+        x_axis = np.linspace(x_min, x_max, points)
+
+    except (KeyError, ValueError) as e:
+        return {'Error': True, 'desc': f'Cannot create X axis for {elexsys_DTA}: {e}'}
+    
+    # Check if specific key are present in DSC
+    # This keys are required for determination of spectrum type
+    required_keys = ['EXPT', 'YTYP', 'IKKF']
+    missing_keys = [key for key in required_keys if key not in dsc]
+
+    if missing_keys:
+        return {
+            'Error': True,
+            'desc': f"Cannot determine spectrum type. Missing required parameters in DSC file: {', '.join(missing_keys)}"
+        }
+
+    # Now create object containing particular type of data
+    # Process based on experiment type and data format
+    if dsc['EXPT'] == 'CW':
+        if dsc['YTYP'] == 'NODATA':
+            # Single CW EPR spectrum (no Y-dimension)
+            return Spectrum_CWEPR(filepath.stem, x_axis, dta, dsc)
+        else:
+            # Stacked CW spectra (Y-dimension present)
+            # chech again if ygf was loaded
+            if len(ygf) == 0:
+                return {
+                    'Error': True,
+                    'desc': f"The required .YGF file for stack CW spectrum is missing."
+                }
+
+            cw_stack = Spectra_CWEPR_stack(filepath.stem, x_axis, dta, dsc, ygf)
+
+            # Some Bruker files incorrectly label 'unit_y' as 's' (seconds),
+            # but the data is actually intensity → correct it to 'a.u.'
+            unit = cw_stack.parameters.get('unit_y', 'a.u.')
+            if unit == 's':
+                cw_stack.parameters['unit_y'] = 'a.u.'
+
+            return cw_stack
+
+    elif dsc['IKKF'] == 'CPLX':
+        # Complex-valued spectrum (e.g., pulsed EPR)
+        return Spectrum_complex(filepath.stem, x_axis, dta, dsc)
 
 def createFromEMX(filename: str) -> object:
     emx_SPC = Path(filename[:-3] + 'spc')
