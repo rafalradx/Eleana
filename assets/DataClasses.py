@@ -4,7 +4,7 @@ import re
 from modules.ShimadzuSPC.shimadzu_spc import load_shimadzu_spc
 from modules.Magnettech.magnettech import load_magnettech
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Literal
 
 # how bruker parameters are mapped to eleana parameters
 ELEANA_TO_BRUKER_KEY_MAP = {'title': 'TITL',
@@ -141,23 +141,22 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         self.comment = ''
 
 @dataclass
-class Spectrum_complex:
+class SpectrumEPR:
     name: str
     x: np.ndarray
     y: np.ndarray
     z: Optional[np.ndarray] = None
     parameters: Dict[str, str] = field(default_factory=dict)
-    type: str = 'single 2D'
-    complex: bool = True
-    origin: str = 'Pulse EPR'
+    complex: bool = False
+    type: Literal['single 2D', 'stack 2D'] = 'single 2D'
+    origin: Literal['CWEPR', 'Pulse EPR'] = 'CWEPR'
     name_nr: str = ''
     groups: List[str] = field(default_factory=lambda: ['All'])
     comment: str = ''
     stk_names: Optional[List[str]] = None
-    
 
     @classmethod
-    def from_bruker(cls, name: str, dta: np.ndarray, dsc: dict):
+    def from_elexsys(cls, name: str, dta: np.ndarray, dsc: dict, ygf: Optional[np.ndarray] = None):
 
         # create x axis
         x_points = int(dsc['XPTS'])
@@ -172,9 +171,24 @@ class Spectrum_complex:
         x_axis = np.linspace(x_min, x_max, x_points)
 
         parameters = extract_eleana_parameters(dsc)
-
-        # Convert interleaved real/imag to complex array
-        values = np.array([complex(dta[i], dta[i+1]) for i in range(0, len(dta), 2)])
+        
+        # DSC typically does not specify unit for intensity (empty IRUNI, IIUNI fields)
+        # assign a.u.
+        if parameters.get("unit_y") == '':
+            parameters["unit_y"] = "a.u."
+        
+        if dsc['IKKF'] == 'CPLX':
+            cplx = True
+            # Convert interleaved real/imag to complex array
+            values = np.array([complex(dta[i], dta[i+1]) for i in range(0, len(dta), 2)])
+        else:
+            cplx = False
+            values = dta
+        
+        if dsc['EXPT'] == 'CW':
+            exp_type = 'CWEPR'
+        else:
+            exp_type = 'Pulse EPR'
 
         # check for single 2D spectrum (not stack)
         if len(x_axis) == len(values):
@@ -182,29 +196,39 @@ class Spectrum_complex:
             name=name,
             x=np.array(x_axis),
             y=values,
-            parameters=parameters
+            parameters=parameters,
+            complex=cplx,
+            origin=exp_type
         )
 
         # if the size does not match, it means we have second dimention (stack spectrum)
+        # change data type
+        data_type = 'stack 2D'
+
         # create y axis
-        try:
-            y_points = int(dsc['YPTS'])
-            y_min = float(dsc['YMIN'])
-            y_wid = float(dsc['YWID'])
+        # read second axis from ygf file if present
+        if ygf is not None:
+            y_axis = ygf
+            y_points = len(ygf)
+        else:
+            # if not present, create second axis from parameters in dsc
+            try:
+                y_points = int(dsc['YPTS'])
+                y_min = float(dsc['YMIN'])
+                y_wid = float(dsc['YWID'])
 
-            if y_points < 2:
-                raise ValueError("YPTS must be at least 2")
+                if y_points < 2:
+                    raise ValueError("YPTS must be at least 2")
 
-            y_max = y_min + y_wid
-            # linspace creates `points` points from x_min to x_max inclusive
-            y_axis = np.linspace(y_min, y_max, y_points)
-        except (KeyError, ValueError) as e:
-            return {'Error': True, 'desc': f'Cannot create Y axis for {name}: {e}'}
+                y_max = y_min + y_wid
+                # linspace creates points from x_min to x_max inclusive
+                y_axis = np.linspace(y_min, y_max, y_points)
+            except (KeyError, ValueError) as e:
+                return {'Error': True, 'desc': f'Cannot create Y axis for {name}: {e}'}
         
         # reshape values into 2D array
-        # each trace in rowd (YPTS, XPTS)
+        # each trace in row (YPTS, XPTS)
         values_2D = values.reshape(y_points,x_points)
-
 
         name_z = parameters.get('name_z','')
         unit_z = parameters.get('unit_z','')
@@ -219,7 +243,9 @@ class Spectrum_complex:
             z=y_axis, # it has to be that way
             parameters=parameters,
             stk_names=stk_names,
-            type = 'stack 2D'
+            complex=cplx,
+            origin=exp_type,
+            type = data_type
         )
 
 
@@ -349,21 +375,21 @@ def createFromElexsys(filename: str) -> object:
     else:
             ygf = None
 
-    # create xaxis
-    try:
-        points = int(dsc['XPTS'])
-        x_min = float(dsc['XMIN'])
-        x_wid = float(dsc['XWID'])
+    # # create xaxis
+    # try:
+    #     points = int(dsc['XPTS'])
+    #     x_min = float(dsc['XMIN'])
+    #     x_wid = float(dsc['XWID'])
         
-        if points < 2:
-            raise ValueError("XPTS must be at least 2")
+    #     if points < 2:
+    #         raise ValueError("XPTS must be at least 2")
 
-        x_max = x_min + x_wid
-        # linspace creates `points` points from x_min to x_max inclusive
-        x_axis = np.linspace(x_min, x_max, points)
+    #     x_max = x_min + x_wid
+    #     # linspace creates `points` points from x_min to x_max inclusive
+    #     x_axis = np.linspace(x_min, x_max, points)
 
-    except (KeyError, ValueError) as e:
-        return {'Error': True, 'desc': f'Cannot create X axis for {elexsys_DTA}: {e}'}
+    # except (KeyError, ValueError) as e:
+    #     return {'Error': True, 'desc': f'Cannot create X axis for {elexsys_DTA}: {e}'}
     
     # Check if specific key are present in DSC
     # This keys are required for determination of spectrum type
@@ -375,35 +401,40 @@ def createFromElexsys(filename: str) -> object:
             'Error': True,
             'desc': f"Cannot determine spectrum type. Missing required parameters in DSC file: {', '.join(missing_keys)}"
         }
+    
+    return SpectrumEPR.from_elexsys(filepath.stem, dta, dsc, ygf)
 
-    # Now create object containing particular type of data
-    # Process based on experiment type and data format
-    if dsc['EXPT'] == 'CW':
-        if dsc['YTYP'] == 'NODATA':
-            # Single CW EPR spectrum (no Y-dimension)
-            return Spectrum_CWEPR(filepath.stem, x_axis, dta, dsc)
-        else:
-            # Stacked CW spectra (Y-dimension present)
-            # chech again if ygf was loaded
-            if ygf is None:
-                return {
-                    'Error': True,
-                    'desc': f"The required .YGF file for stack CW spectrum is missing."
-                }
+    # # Now create object containing particular type of data
+    # # Process based on experiment type and data format
+    # if dsc['EXPT'] == 'CW':
+    #     if dsc['YTYP'] == 'NODATA':
+    #         # Single CW EPR spectrum (no Y-dimension)
+    #         #return Spectrum_CWEPR(filepath.stem, x_axis, dta, dsc)
+    #         return SpectrumEPR.from_elexsys(filepath.stem, dta, dsc, ygf)
+    #     else:
+    #         # Stacked CW spectra (Y-dimension present)
+    #         # chech again if ygf was loaded
+    #         if ygf is None:
+    #             return {
+    #                 'Error': True,
+    #                 'desc': f"The required .YGF file for stack CW spectrum is missing."
+    #             }
+            
+    #         return SpectrumEPR.from_elexsys(filepath.stem, dta, dsc, ygf)
 
-            cw_stack = Spectra_CWEPR_stack(filepath.stem, x_axis, dta, dsc, ygf)
+    #         # cw_stack = Spectra_CWEPR_stack(filepath.stem, x_axis, dta, dsc, ygf)
 
-            # I don't know what's going on here
-            # Consult MS
-            unit = cw_stack.parameters.get('unit_y', 'a.u.')
-            if unit == 's':
-                cw_stack.parameters['unit_y'] = 'a.u.'
+    #         # # I don't know what's going on here
+    #         # # Consult MS
+    #         # unit = cw_stack.parameters.get('unit_y', 'a.u.')
+    #         # if unit == 's':
+    #         #     cw_stack.parameters['unit_y'] = 'a.u.'
 
-            return cw_stack
+    #         # return cw_stack
 
-    elif dsc['IKKF'] == 'CPLX':
-        # Complex-valued spectrum (e.g., pulsed EPR)
-        return Spectrum_complex.from_bruker(filepath.stem, dta, dsc)
+    # elif dsc['IKKF'] == 'CPLX':
+    #     # Complex-valued spectrum (e.g., pulsed EPR)
+    #     return SpectrumEPR.from_elexsys(filepath.stem, dta, dsc, ygf)
 
 def createFromEMX(filename: str) -> object:
     emx_SPC = Path(filename[:-3] + 'spc')
