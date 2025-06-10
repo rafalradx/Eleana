@@ -247,45 +247,7 @@ class SpectrumEPR:
             origin=exp_type,
             type = data_type
         )
-
-
-
-
         
-
-               
-
-
-
-
-
-
-
-
-
-        # # Default parameters
-        # parameters = {
-        #     'title': '', 'unit_x': '', 'name_x': '', 'name_y': '', 'MwFreq': '',
-        #     'ModAmp': '', 'ModFreq': '', 'ConvTime': '', 'SweepTime': '',
-        #     'TimeConst': '', 'RESO': '', 'Power': '', 'PowerAtten': '', 'stk_names': []
-        # }
-
-        # # Try to fill optional metadata fields
-        # fill_keys = ['name_z', 'unit_z', 'name_x', 'unit_x', 'name_y', 'unit_y', 'MwFreq']
-        # for key in fill_keys:
-        #     try:
-        #         bruker_key = dsc2eleana(key)
-        #         value = dsc[bruker_key].split(' ')[0].replace("'", "")
-        #         parameters[key] = value
-        #     except Exception:
-        #         pass
-
-        
-
-        
-
-
-
 def createFromElexsys(filename: str) -> object:
     # Loading dta and dsc from the files
     # DTA data will be in Y_data
