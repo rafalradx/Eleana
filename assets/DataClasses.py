@@ -52,6 +52,20 @@ class Single2D:
         self.name_nr = ''
         self.comment = data.get('comment', '')
 
+@dataclass
+class BaseDataModel:
+    name: str
+    x: np.ndarray
+    y: np.ndarray
+    z: Optional[np.ndarray] = None
+    parameters: Dict[str, str] = field(default_factory=dict)
+    complex: bool = False
+    type: Literal['single 2D', 'stack 2D'] = 'single 2D'
+    name_nr: str = ''
+    groups: List[str] = field(default_factory=lambda: ['All'])
+    comment: str = ''
+    stk_names: Optional[List[str]] = None
+
 class Stack:
     def __init__(self, data: dict):
         self.parameters: dict = data['parameters']
@@ -141,19 +155,8 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
         self.comment = ''
 
 @dataclass
-class SpectrumEPR:
-    name: str
-    x: np.ndarray
-    y: np.ndarray
-    z: Optional[np.ndarray] = None
-    parameters: Dict[str, str] = field(default_factory=dict)
-    complex: bool = False
-    type: Literal['single 2D', 'stack 2D'] = 'single 2D'
+class SpectrumEPR(BaseDataModel):
     origin: Literal['CWEPR', 'Pulse EPR'] = 'CWEPR'
-    name_nr: str = ''
-    groups: List[str] = field(default_factory=lambda: ['All'])
-    comment: str = ''
-    stk_names: Optional[List[str]] = None
 
     @classmethod
     def from_elexsys(cls, name: str, dta: np.ndarray, dsc: dict, ygf: Optional[np.ndarray] = None):
@@ -296,7 +299,7 @@ def createFromElexsys(filename: str) -> object:
     if not elexsys_DTA.exists():
         return {
             "Error": True,
-            "desc": f"Missing file: {elexsys_DSC.name}"
+            "desc": f"Missing file: {elexsys_DTA.name}"
         }
 
     # Load DTA from the elexsys_DTA
@@ -337,24 +340,6 @@ def createFromElexsys(filename: str) -> object:
     else:
             ygf = None
 
-    # # create xaxis
-    # try:
-    #     points = int(dsc['XPTS'])
-    #     x_min = float(dsc['XMIN'])
-    #     x_wid = float(dsc['XWID'])
-        
-    #     if points < 2:
-    #         raise ValueError("XPTS must be at least 2")
-
-    #     x_max = x_min + x_wid
-    #     # linspace creates `points` points from x_min to x_max inclusive
-    #     x_axis = np.linspace(x_min, x_max, points)
-
-    # except (KeyError, ValueError) as e:
-    #     return {'Error': True, 'desc': f'Cannot create X axis for {elexsys_DTA}: {e}'}
-    
-    # Check if specific key are present in DSC
-    # This keys are required for determination of spectrum type
     required_keys = ['EXPT', 'YTYP', 'IKKF']
     missing_keys = [key for key in required_keys if key not in dsc]
 
@@ -365,38 +350,6 @@ def createFromElexsys(filename: str) -> object:
         }
     
     return SpectrumEPR.from_elexsys(filepath.stem, dta, dsc, ygf)
-
-    # # Now create object containing particular type of data
-    # # Process based on experiment type and data format
-    # if dsc['EXPT'] == 'CW':
-    #     if dsc['YTYP'] == 'NODATA':
-    #         # Single CW EPR spectrum (no Y-dimension)
-    #         #return Spectrum_CWEPR(filepath.stem, x_axis, dta, dsc)
-    #         return SpectrumEPR.from_elexsys(filepath.stem, dta, dsc, ygf)
-    #     else:
-    #         # Stacked CW spectra (Y-dimension present)
-    #         # chech again if ygf was loaded
-    #         if ygf is None:
-    #             return {
-    #                 'Error': True,
-    #                 'desc': f"The required .YGF file for stack CW spectrum is missing."
-    #             }
-            
-    #         return SpectrumEPR.from_elexsys(filepath.stem, dta, dsc, ygf)
-
-    #         # cw_stack = Spectra_CWEPR_stack(filepath.stem, x_axis, dta, dsc, ygf)
-
-    #         # # I don't know what's going on here
-    #         # # Consult MS
-    #         # unit = cw_stack.parameters.get('unit_y', 'a.u.')
-    #         # if unit == 's':
-    #         #     cw_stack.parameters['unit_y'] = 'a.u.'
-
-    #         # return cw_stack
-
-    # elif dsc['IKKF'] == 'CPLX':
-    #     # Complex-valued spectrum (e.g., pulsed EPR)
-    #     return SpectrumEPR.from_elexsys(filepath.stem, dta, dsc, ygf)
 
 def createFromEMX(filename: str) -> object:
     emx_SPC = Path(filename[:-3] + 'spc')
