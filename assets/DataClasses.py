@@ -486,33 +486,29 @@ def createFromShimadzuSPC(filename: str) -> SpectrumUVVIS:
     )
 
 def createFromMagnettech(filename, mscope=1, pool = -1, rescale = -1, shift = 0):
+    name = Path(filename).name
     spectrum = load_magnettech(filename, mscope, pool, rescale, shift)
     if spectrum == None:
-        return {'Error': True, 'desc': 'Error'}
-    par = spectrum['parameters']
-    name = Path(filename).name
-    data = {'parameters':
-                {'unit_x': 'G',
-                 'name_x': 'Field',
-                 'unit_y': 'a.u.',
-                 'name_y': 'Intensity',
-                 'Compl': False,
-                 'unit_z': '',
-                 'ModAmp': par['ModAmp'],
-                 'PowAtten': par['PowAtten'],
-                 'Power': par['Power'],
-                 'SweepTime': par['SweepTime'],
-                  },
-           'groups': ['All'],
-           'x': np.array(spectrum['x']),
-           'y': np.array(spectrum['y']),
-           'name': name,
-           'complex': False,
-           'type': 'single2D',
-           'origin': 'Magnettech EPR'
-            }
-    spectrum = Single2D(data)
-    return spectrum
+        return {'Error': True, 'desc':f'Error when loading Shimadzu {name} file'}
+    parameters={
+        'unit_x': 'G',
+        'name_x': 'Field',
+        'unit_y': 'a.u.',
+        'name_y': 'Intensity',
+        'Compl': 'REAL',
+        'ModAmp': spectrum['parameters']['ModAmp'],
+        'PowAtten': spectrum['parameters']['PowAtten'],
+        'Power': spectrum['parameters']['Power'],
+        'SweepTime': spectrum['parameters']['SweepTime'],
+        }
+    
+    # spectrum = Single2D(data)
+    return SpectrumEPR(
+        name=name,
+        x=np.array(spectrum['x']),
+        y=np.array(spectrum['y']),
+        parameters=parameters        
+    )
 
 def createFromAdaniDat(filename, adani: dict):
     def _get_parameter(start: str, end: str, multiply: float):
@@ -560,7 +556,6 @@ def createFromAdaniDat(filename, adani: dict):
     data['origin'] = 'Adani ESR'
     spectrum = Single2D(data)
     return spectrum
-
 
 def create_eleana_par(dsc: dict, bruker_key: str) -> dict:
     value = dsc[bruker_key]
