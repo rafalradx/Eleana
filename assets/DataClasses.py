@@ -250,6 +250,10 @@ class SpectrumEPR(BaseDataModel):
             origin=exp_type,
             type = data_type
         )
+    
+@dataclass
+class SpectrumUVVIS(BaseDataModel):
+    origin: Literal["UV VIS spectrum"] = 'UV VIS spectrum'
         
 def createFromElexsys(filename: str) -> object:
     # Loading dta and dsc from the files
@@ -463,28 +467,23 @@ def createFromEMX(filename: str) -> object:
         print('DataClasses, line 284, create ESP Stack Loader')
         exit()
 
-def createFromShimadzuSPC(filename: str) -> object:
+def createFromShimadzuSPC(filename: str) -> SpectrumUVVIS:
+    name = Path(filename).name
     spectrum = load_shimadzu_spc(filename)
     if spectrum == None:
-        return {'Error':True, 'desc':'Error'}
-    name = Path(filename).name
-    data =  {'parameters':
-                {   'unit_x': 'nm',
+        return {'Error':True, 'desc':f'Error when loading Shimadzu {name} file'}
+    parameters = {   'unit_x': 'nm',
                     'name_x': 'Wavelength',
                     'unit_y': 'OD',
                     'name_y': 'Absorbance',
                     'unit_z': ''
-                },
-             'groups':['All'],
-             'x': np.array(spectrum['x']),
-             'y': np.array(spectrum['y']),
-             'name': name,
-             'complex': False,
-             'type': 'single2D',
-             'origin': 'UV VIS spectrum'
-             }
-    spectrum = Single2D(data)
-    return spectrum
+                }
+    return SpectrumUVVIS(
+        name=Path(filename).name,
+        x=np.array(spectrum['x']),
+        y=np.array(spectrum['y']),
+        parameters=parameters
+    )
 
 def createFromMagnettech(filename, mscope=1, pool = -1, rescale = -1, shift = 0):
     spectrum = load_magnettech(filename, mscope, pool, rescale, shift)
