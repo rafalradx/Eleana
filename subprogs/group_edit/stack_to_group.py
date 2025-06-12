@@ -3,7 +3,7 @@ import pathlib
 import pygubu
 import copy
 from subprogs.group_edit.add_group import Groupcreate
-from assets.DataClasses import Single2D
+from assets.DataClasses import BaseDataModel
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "stack_to_group.ui"
 import numpy as np
@@ -81,7 +81,7 @@ class StackToGroup:
         for stk in stk_names:
             data['name'] = name + '/' + stk
             data['y'] = dt.y[i]
-            new_data = Single2D(data)
+            new_data = BaseDataModel.from_dict(data)
             self.eleana.dataset.append(new_data)
             i += 1
             self.response = group

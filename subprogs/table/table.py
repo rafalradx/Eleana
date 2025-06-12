@@ -4,10 +4,9 @@ import customtkinter as ctk
 import numpy as np
 import pygubu
 import pandas
-from pandastable import MultipleValDialog
 from pathlib import Path
 from modules.CTkMessagebox import CTkMessagebox
-from assets.DataClasses import Single2D
+from assets.DataClasses import BaseDataModel
 from tkinter import filedialog
 from modules.tksheet import Sheet
 import copy
@@ -219,7 +218,7 @@ class CreateFromTable:
         data['origin'] = 'imported'
         if np.iscomplexobj(data['y']):
             data['complex'] =  True
-        spectrum = Single2D(data)
+        spectrum = BaseDataModel.from_dict(data)
         self.eleana.dataset.append(spectrum)
         if show_info == True:
             info = CTkMessagebox(title="", message="The data was added to the dataset.", icon="info")

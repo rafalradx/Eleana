@@ -173,7 +173,9 @@ class Load:
     def loadElexsys(self) -> object:
         path = self.eleana.paths['last_import_dir']
         filetypes = (
-            ('Elexsys', '*.DSC'),
+            ('Elexsys DTA', '*.DTA'),
+            ('Elexsys DSC', '*.DSC'),
+            ('Elexsys YGF', '*.YGF'),
             ('All files', '*.*')
             )
         filenames = filedialog.askopenfilenames(initialdir=path, filetypes=filetypes)
@@ -326,21 +328,18 @@ class Load:
             ('Adani dat', '*.dat'),
             ('All files', '*.*'),)
         filenames = filedialog.askopenfilenames(initialdir=path, filetypes=filetypes)
+        if len(filenames) == 0:
+            return
         error_list = []
         for filename in filenames:
-            if not filename:
-                return
-            filename = Path(filename)
+            filepath = Path(filename)
             try:
-                with open(filename, 'rb') as file:
-                    content = file.read()
-                    adani = content.decode('utf-8', errors='ignore')
-                spectrum = createFromAdaniDat(filename, adani)
+                spectrum = createFromAdaniDat(filename)
                 self.eleana.dataset.append(spectrum)
-                last_import_dir = Path(filename).parent
+                last_import_dir = filepath.parent
                 self.eleana.paths['last_import_dir'] = last_import_dir
             except:
-                 error_list.append(filename.name)
+                 error_list.append(filepath.name)
         if len(error_list) == 0:
             return
         list = ', '.join(error_list)
