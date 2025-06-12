@@ -6,30 +6,31 @@ from modules.Magnettech.magnettech import load_magnettech
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Literal
 
-# how bruker parameters are mapped to eleana parameters
+# how bruker Elexsys parameters are mapped to eleana parameters
 # If you want eleana to extract more parameters from dsc
 # just add them here
-ELEANA_ELEXSYS_KEY_MAP = {'title': 'TITL',
-            'unit_x': 'XUNI',
-            'name_x': 'XNAM',
-            'unit_y': 'IRUNI',
-            'name_y': 'IRNAM',
-            'unit_z': 'YUNI',
-            'name_z': 'YNAM',
-            'Compl': 'IKKF',
-            'MwFreq': 'FrequencyMon',
-            'ModAmp': 'ModAmp',
-            'ModFreq': 'ModFreq',
-            'ConvTime': 'ConvTime',
-            'SweepTime': 'SweepTime',
-            'TimeConst': 'TimeConst',
-            'Reson': 'RESO',
-            'Power': 'Power',
-            'PowAtten': 'PowerAtten',
-            'Harmonic': 'Harmonic',
-            'B_zero': 'B0VL',
-            'ShotRepTime': 'ShotRepTime'
-            }
+ELEANA_ELEXSYS_KEY_MAP = {
+    'title': 'TITL',
+    'unit_x': 'XUNI',
+    'name_x': 'XNAM',
+    'unit_y': 'IRUNI',
+    'name_y': 'IRNAM',
+    'unit_z': 'YUNI',
+    'name_z': 'YNAM',
+    'Compl': 'IKKF',
+    'MwFreq': 'FrequencyMon',
+    'ModAmp': 'ModAmp',
+    'ModFreq': 'ModFreq',
+    'ConvTime': 'ConvTime',
+    'SweepTime': 'SweepTime',
+    'TimeConst': 'TimeConst',
+    'Reson': 'RESO',
+    'Power': 'Power',
+    'PowAtten': 'PowerAtten',
+    'Harmonic': 'Harmonic',
+    'B_zero': 'B0VL',
+    'ShotRepTime': 'ShotRepTime'
+    }
 
 ELEANA_ADANI_KEY_MAP = {
     "ModAmp": "mod_amplitude_G",        
@@ -39,7 +40,52 @@ ELEANA_ADANI_KEY_MAP = {
     "ScansDone": "pass_number",       
 }
 
-def extract_eleana_parameters(input_pars: dict[str,str], mapped: dict[str,str]) -> dict:
+ELEANA_EMX_SINGLE_MAP = {
+    'unit_x': 'JUN',
+    'name_x': 'JEX',
+    'unit_y': '',
+    'name_y': '',
+    'unit_z': '',
+    'name_z': 'JEY',
+    'MwFreq': 'MF',
+    'ModAmp': 'RMA',
+    'ModFreq': 'ModFreq',
+    'ConvTime': 'RCT',
+    'SweepTime': 'HSW',
+    'TimeConst': 'RTC',
+    'Reson': 'RESO',
+    'Power': 'MP',
+    'PowAtten': 'MPD'
+    }
+
+ELEANA_EMX_STACK_MAP = {
+    'unit_x': 'JUN',
+    'name_x': 'JEX',
+    'unit_y': '',
+    'name_y': '',
+    'unit_z': '',
+    'name_z': 'JEY',
+    'MwFreq': 'MF',
+    'ModAmp': 'RMA',
+    'ModFreq': 'ModFreq',
+    'ConvTime': 'RCT',
+    'SweepTime': 'HSW',
+    'TimeConst': 'RTC',
+    'Reson': 'RESO',
+    'Power': 'MP',
+    'PowAtten': 'MPD'
+    }
+
+ELEANA_ESP_MAP = {
+    'MwFreq': 'MF',
+    'ModAmp': 'RMA',
+    'ConvTime': 'RCT',
+    'SweepTime': 'HSW',
+    'TimeConst': 'RTC',
+    'Power': 'MP',
+    }
+
+def extract_eleana_parameters(input_pars: Dict[str,str], mapped: Dict[str,str]) -> dict:
     result = {}
     for eleana_key, mapped_key in mapped.items():
         if mapped_key in input_pars:
@@ -237,7 +283,7 @@ class SpectrumEPR(BaseDataModel):
     
     @classmethod
     def from_adani(cls, name: str, data: list[tuple], parameters: dict[str,str]):
-        # unpack tuple int two lists 
+        # unpack tuple into two lists 
         x_vals, y_vals = zip(*data)
         x = np.array(x_vals, dtype=float)
         y = np.array(y_vals, dtype=float)
@@ -260,6 +306,40 @@ class SpectrumEPR(BaseDataModel):
             parameters=eleana_parameters,
             source='Adani'
         )
+    
+    @classmethod
+    def from_esp(cls, name: str, dta: np.ndarray, parameters: dict[str,str]):
+        try:
+            points = len(dta)
+            x_min = float(parameters['GST'])
+            x_wid = float(parameters['HSW'])
+            x_axis = np.linspace(start=x_min, stop=x_min+x_wid,num=points)
+        except ValueError:
+            return {'Error': True, 'desc': f'Cannot create x axis for {name}'}
+        
+        eleana_parameters={
+        'unit_x': 'G',
+        'name_x': 'Field',
+        'unit_y': 'a.u.',
+        'name_y': 'Intensity',
+        'Compl': 'REAL',
+        }
+
+        extracted_parameters = extract_eleana_parameters(parameters, ELEANA_ESP_MAP)
+        eleana_parameters.update(extracted_parameters)
+
+        return cls(
+            name=name,
+            x=x_axis,
+            y=dta,
+            parameters=eleana_parameters,
+            source='Bruker EMX'
+        )
+
+    @classmethod
+    def from_emx(cls, name: str, dta: np.ndarray, dsc: dict[str,str|float]):
+        pass
+
 
 @dataclass
 class SpectrumUVVIS(BaseDataModel):
@@ -342,15 +422,15 @@ def createFromElexsys(filename: str):
                     key, value = line, ''
 
                 dsc[key.strip()] = value.strip()
-    except Exception as e:
-        return {"Error": True, 'desc': f"Error in loading {elexsys_DSC.name}: {e}"}
+    except (FileNotFoundError, OSError, KeyError, ValueError) as e:
+        return {'Error': True, 'desc': f'Cannot load {elexsys_DSC.name}: {e}'}
     
     # read YGF when exists
     if elexsys_YGF.exists():
         try:
             ygf = np.fromfile(elexsys_YGF, dtype='>d')
-        except:
-                return {"Error": True, 'desc': f"Error in loading {elexsys_YGF.name}" }
+        except (FileNotFoundError, OSError, KeyError, ValueError) as e:
+                return {"Error": True, 'desc': f"Cannot load {elexsys_YGF.name}: {e}" }
     else:
             ygf = None
 
@@ -366,52 +446,59 @@ def createFromElexsys(filename: str):
     return SpectrumEPR.from_elexsys(filepath.stem, dta, dsc, ygf)
 
 def createFromEMX(filename: str) -> object:
-    emx_SPC = Path(filename[:-3] + 'spc')
-    emx_PAR = Path(filename[:-3] + 'par')
+    filepath = Path(filename)
+    emx_SPC = filepath.with_suffix('.spc')
+    emx_PAR = filepath.with_suffix('.par')
     dsc = {}
     dta = []
-    x_data = []
-    format = {'spectr':'', 'stack':False}
 
-    # Load PAR
+    # load parameters file and determine format
     try:
-       with open(emx_PAR, 'r', encoding='ascii', errors='ignore') as file:
-           dsc_text = file.read()
-       if re.search(r'DOS\s*Format', dsc_text):
-           format['spectr'] = 'emx'
-       else:
-           format['spectr'] = 'esp'
-    except:
-        return {'Error': True, 'desc': f'Cannot load {emx_PAR}'}
+        with open(emx_PAR, 'r', encoding='ascii') as file:
+            firstline = file.readline()
+            remaining_lines = file.readlines()
+    except (FileNotFoundError, OSError, KeyError, ValueError) as e:
+        return {'Error': True, 'desc': f'Cannot load {emx_SPC}: {e}'}
+    
+    if firstline.startswith("DOS FORMAT"):
+        spectr_format = 'emx'
+    else:
+        spectr_format = 'esp'
 
     # Load SPC to dta varaiable
     try:
-       with open(emx_SPC, 'rb') as file:
-           binary_data = file.read()
-           if format['spectr'] == 'emx':
-               dta = np.frombuffer(binary_data, dtype=np.float32)
-           else:
-               dta = np.frombuffer(binary_data, dtype='>i4')
-    except:
-        return {'Error': True, 'desc': f'Cannot load {emx_SPC}'}
+        if spectr_format == 'emx':
+            dta = np.fromfile(emx_SPC, dtype=np.float32)
+        else:
+            dta = np.fromfile(emx_SPC, dtype='>i4')  # big-endian int32
+    except (FileNotFoundError, OSError, ValueError) as e:
+        return {'Error': True, 'desc': f'Cannot load {emx_SPC}: {e}'}
 
     # Convert Par to dictionary and store in dsc dictionary
-    dsc_lines = dsc_text.split('\n')
-    for i in dsc_lines:
-        element = re.split(r'\s+', i.strip(), maxsplit=1)
+    # values converted into floats when applicable
+    for line in remaining_lines:
+        key, value = line.split(None, 1)
+        value = value.strip()
         try:
-            dsc[element[0]] = element[1]
-        except:
+            value = float(value)
+        except ValueError:
             pass
+        dsc[key]=f"{value}" # store back as a string
 
-    # Check if data contains stack or is single
+    # if the format is esp
+    if spectr_format == 'esp':
+        return SpectrumEPR.from_esp(filepath.name, dta, dsc)
+    else:
+        return SpectrumEPR.from_emx(filepath.name, dta, dsc)
+    
 
-    if dsc['JSS'] == '0' or format['spectr'] == 'esp':
+    # Check if data contains stack or is singl
+    if dsc['JSS'] == 0.0 or format['spectr'] == 'esp':
         format['stack'] = False
     else:
         format['stack'] = True
 
-    filename = Path(filename).name
+    name = filepath.name
 
     # Depending on the format create x axis and object with Given EPR Type
     if format['spectr'] == 'emx' and format['stack'] == False:
@@ -426,7 +513,7 @@ def createFromEMX(filename: str) -> object:
                 x_axis.append(i * step + x_min)
         except:
             return {'Error': True, 'desc': f'Cannot create x axis for {emx_SPC}'}
-        cw_spectrum = Spectrum_CWEPR(filename[:-4], x_axis, dta, dsc, 'emx')
+        cw_spectrum = Spectrum_CWEPR(name, x_axis, dta, dsc, 'emx')
         return cw_spectrum
 
     elif format['spectr'] == 'emx' and format['stack'] == True:
@@ -453,7 +540,7 @@ def createFromEMX(filename: str) -> object:
 
         except:
             return {'Error': True, 'desc': f'Cannot create x axis for {emx_SPC}'}
-        cw_stack = Spectra_CWEPR_stack(filename[:-4], x_axis, dta, dsc, ygf, 'emx_stack')
+        cw_stack = Spectra_CWEPR_stack(name, x_axis, dta, dsc, ygf, 'emx_stack')
         return cw_stack
 
 
@@ -708,7 +795,7 @@ def par2eleana(key: str, format = 'emx') -> str:
 
     else:
         try:
-            bruker_key = parESP2eleana[key]
+            bruker_key = parESP2eleana_single[key]
         except:
             bruker_key = ''
         return bruker_key
