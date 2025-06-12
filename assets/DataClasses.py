@@ -38,20 +38,6 @@ def extract_eleana_parameters(dsc: dict) -> dict:
             result[eleana_key] = val
     return result
 
-class Single2D:
-    def __init__(self, data: dict):
-        self.parameters: dict = data['parameters']
-        self.groups: list = data['groups']
-        self.x: np.ndarray = np.array(data['x'])
-        self.y: np.ndarray = np.array(data['y'])
-        self.z = None
-        self.name: str = data['name']
-        self.complex = data.get('complex', False)
-        self.type = 'single 2D'
-        self.origin = data.get('origin', '')
-        self.name_nr = ''
-        self.comment = data.get('comment', '')
-
 @dataclass
 class BaseDataModel:
     name: str
@@ -61,29 +47,17 @@ class BaseDataModel:
     parameters: Dict[str, str] = field(default_factory=dict)
     complex: bool = False
     type: Literal['single 2D', 'stack 2D'] = 'single 2D'
+    origin: Literal['@import', '@result'] = '@import'
     name_nr: str = ''
     groups: List[str] = field(default_factory=lambda: ['All'])
     comment: str = ''
     stk_names: Optional[List[str]] = None
 
-class Stack:
-    def __init__(self, data: dict):
-        self.parameters: dict = data['parameters']
-        self.groups: list = data['groups']
-        self.x: np.ndarray = np.array(data['x'])
-        self.y: np.ndarray = np.array(data['y'])
-        self.name: str = data['name']
-        self.complex = data.get('complex', False)
-        self.type = 'stack 2D'
-        self.origin = data.get('origin', '')
-        self.name_nr = ''
-        self.comment = data.get('comment', '')
-        self.stk_names = data['stk_names']
-        z_axis = data.get('z', None)
-        if not z_axis:
-            self.z = None
-        else:
-            self.z = np.array(z_axis)
+    @classmethod
+    def from_dict(cls, data):
+        return BaseDataModel(*data)
+
+
 
 class Spectrum_CWEPR:
     def __init__(self, name: str, x_axis: np.ndarray, dta: np.ndarray, dsc: dict, format="elexsys"):
@@ -156,7 +130,7 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
 
 @dataclass
 class SpectrumEPR(BaseDataModel):
-    origin: Literal['CWEPR', 'Pulse EPR'] = 'CWEPR'
+    source: Optional[Literal['Bruker Elexsys','Bruker ESP', 'Bruker EMX', 'Adani', 'Magnettech']] = None
 
     @classmethod
     def from_elexsys(cls, name: str, dta: np.ndarray, dsc: dict, ygf: Optional[np.ndarray] = None):
@@ -253,9 +227,9 @@ class SpectrumEPR(BaseDataModel):
     
 @dataclass
 class SpectrumUVVIS(BaseDataModel):
-    origin: Literal["UV VIS spectrum"] = 'UV VIS spectrum'
+    source: Literal['Shimadzu'] = 'Shimadzu'
         
-def createFromElexsys(filename: str) -> object:
+def createFromElexsys(filename: str) -> SpectrumEPR:
     # Loading dta and dsc from the files
     # DTA data will be in Y_data
     # DSC data will be in desc_data
@@ -502,7 +476,6 @@ def createFromMagnettech(filename, mscope=1, pool = -1, rescale = -1, shift = 0)
         'SweepTime': spectrum['parameters']['SweepTime'],
         }
     
-    # spectrum = Single2D(data)
     return SpectrumEPR(
         name=name,
         x=np.array(spectrum['x']),
@@ -543,19 +516,20 @@ def createFromAdaniDat(filename, adani: dict):
             y.append(amplitude)
         except:
             pass
-    data = {}
-    data['parameters'] = {}
-    data['parameters']['SweepTime'] = _get_parameter('Sweep time:', ' s\n', 1)
-    data['parameters']['PowAtten'] = _get_parameter('Power attenuation:', ' dB\n', 1)
-    data['parameters']['ModAmp'] = _get_parameter('Mod. amplitude:', ' uT\n', 0.01)
-    data['parameters']['name_x'] = 'Field'
-    data['parameters']['unit_x'] = 'G'
-    data['x'], data['y'] = x, y
-    data['name'] = filename.name
-    data['groups'] = ['All']
-    data['origin'] = 'Adani ESR'
-    spectrum = Single2D(data)
-    return spectrum
+    parameters = {
+    'SweepTime': _get_parameter('Sweep time:', ' s\n', 1),
+    'PowAtten': _get_parameter('Power attenuation:', ' dB\n', 1),
+    'ModAmp': _get_parameter('Mod. amplitude:', ' uT\n', 0.01),
+    'name_x': 'Field',
+    'unit_x': 'G'
+    }
+    return SpectrumEPR(
+        name=Path(filename).name,
+        x=x,
+        y=y,
+        parameters=parameters,
+        source='Adani'
+    )
 
 def create_eleana_par(dsc: dict, bruker_key: str) -> dict:
     value = dsc[bruker_key]

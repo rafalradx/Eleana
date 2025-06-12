@@ -51,7 +51,7 @@ from Menu import ContextMenu, MainMenu
 from Sounds import Sound
 from Error import Error
 from CommandProcessor import CommandProcessor
-from DataClasses import Stack
+from DataClasses import BaseDataModel
 from Error import Error
 from IconToWidget import IconToWidget
 
@@ -708,7 +708,7 @@ class MainApp:
                 'complex':template.complex,
                 'groups':'All',
                 }
-        created_stack = Stack(new_stack)
+        created_stack = BaseDataModel.from_dict(new_stack)
         self.add_to_results(created_stack)
 
     @check_busy

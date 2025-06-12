@@ -5,7 +5,6 @@ import numpy as np
 import pygubu
 import string
 from modules.CTkMessagebox import CTkMessagebox
-from assets.DataClasses import Single2D
 from modules.tksheet import Sheet
 import copy
 from assets.Error import Error
