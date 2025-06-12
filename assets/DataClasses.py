@@ -7,7 +7,9 @@ from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Literal
 
 # how bruker parameters are mapped to eleana parameters
-ELEANA_TO_BRUKER_KEY_MAP = {'title': 'TITL',
+# If you want eleana to extract more parameters from dsc
+# just add them here
+ELEANA_ELEXSYS_KEY_MAP = {'title': 'TITL',
             'unit_x': 'XUNI',
             'name_x': 'XNAM',
             'unit_y': 'IRUNI',
@@ -29,12 +31,19 @@ ELEANA_TO_BRUKER_KEY_MAP = {'title': 'TITL',
             'ShotRepTime': 'ShotRepTime'
             }
 
-def extract_eleana_parameters(dsc: dict) -> dict:
+ELEANA_ADANI_KEY_MAP = {
+    "ModAmp": "mod_amplitude_G",        
+    "PowAtten": "power_dB",  
+    "ReceivGain": "gain",       
+    "SweepTime": "sweep_time_s",        
+    "ScansDone": "pass_number",       
+}
+
+def extract_eleana_parameters(input_pars: dict[str,str], mapped: dict[str,str]) -> dict:
     result = {}
-    for eleana_key, bruker_key in ELEANA_TO_BRUKER_KEY_MAP.items():
-        if bruker_key in dsc:
-            #print(f"{bruker_key}: {dsc[bruker_key]}")
-            val = dsc[bruker_key].split(' ')[0].replace("'", "")
+    for eleana_key, mapped_key in mapped.items():
+        if mapped_key in input_pars:
+            val = input_pars[mapped_key].split(' ')[0].replace("'", "")
             result[eleana_key] = val
     return result
 
@@ -57,8 +66,6 @@ class BaseDataModel:
     def from_dict(cls, data):
         return BaseDataModel(*data)
 
-
-
 class Spectrum_CWEPR:
     def __init__(self, name: str, x_axis: np.ndarray, dta: np.ndarray, dsc: dict, format="elexsys"):
         self.parameters = {'title': '', 'unit_x': 'G', 'name_x': 'Field', 'name_y': 'Intensity', 'MwFreq': '', 'ModAmp': '', 'ModFreq': '',
@@ -76,7 +83,7 @@ class Spectrum_CWEPR:
         fill_missing_keys =['title','MwFreq','ModAmp','ModFreq','SweepTime','ConvTime','TimeConst','Power','PowAtten']
 
         if format =="elexsys":
-            working_par = extract_eleana_parameters(dsc)
+            working_par = extract_eleana_parameters(dsc, ELEANA_ELEXSYS_KEY_MAP)
         elif format in ('emx', 'esp'):
             for key in fill_missing_keys:
                 try:
@@ -131,6 +138,7 @@ class Spectra_CWEPR_stack(Spectrum_CWEPR):
 @dataclass
 class SpectrumEPR(BaseDataModel):
     source: Optional[Literal['Bruker Elexsys','Bruker ESP', 'Bruker EMX', 'Adani', 'Magnettech']] = None
+    exp_type: Literal['CWEPR','Pulse EPR','SR EPR'] = 'CWEPR'
 
     @classmethod
     def from_elexsys(cls, name: str, dta: np.ndarray, dsc: dict, ygf: Optional[np.ndarray] = None):
@@ -147,7 +155,7 @@ class SpectrumEPR(BaseDataModel):
         # linspace creates points from x_min to x_max inclusive
         x_axis = np.linspace(x_min, x_max, x_points)
 
-        parameters = extract_eleana_parameters(dsc)
+        parameters = extract_eleana_parameters(dsc, ELEANA_ELEXSYS_KEY_MAP)
         
         # DSC typically does not specify unit for intensity (empty IRUNI, IIUNI fields)
         # assign a.u.
@@ -175,7 +183,8 @@ class SpectrumEPR(BaseDataModel):
             y=values,
             parameters=parameters,
             complex=cplx,
-            origin=exp_type
+            exp_type=exp_type,
+            source='Bruker Elexsys'
         )
 
         # if the size does not match, it means we have second dimention (stack spectrum)
@@ -221,15 +230,42 @@ class SpectrumEPR(BaseDataModel):
             parameters=parameters,
             stk_names=stk_names,
             complex=cplx,
-            origin=exp_type,
-            type = data_type
+            exp_type=exp_type,
+            type = data_type,
+            source='Bruker Elexsys'
         )
     
+    @classmethod
+    def from_adani(cls, name: str, data: list[tuple], parameters: dict[str,str]):
+        # unpack tuple int two lists 
+        x_vals, y_vals = zip(*data)
+        x = np.array(x_vals, dtype=float)
+        y = np.array(y_vals, dtype=float)
+
+        eleana_parameters={
+        'unit_x': 'G',
+        'name_x': 'Field',
+        'unit_y': 'a.u.',
+        'name_y': 'Intensity',
+        'Compl': 'REAL',
+        }
+
+        extracted_parameters = extract_eleana_parameters(parameters, ELEANA_ADANI_KEY_MAP)
+        eleana_parameters.update(extracted_parameters)
+
+        return cls(
+            name=name,
+            x=x,
+            y=y,
+            parameters=eleana_parameters,
+            source='Adani'
+        )
+
 @dataclass
 class SpectrumUVVIS(BaseDataModel):
     source: Literal['Shimadzu'] = 'Shimadzu'
         
-def createFromElexsys(filename: str) -> SpectrumEPR:
+def createFromElexsys(filename: str):
     # Loading dta and dsc from the files
     # DTA data will be in Y_data
     # DSC data will be in desc_data
@@ -441,7 +477,7 @@ def createFromEMX(filename: str) -> object:
         print('DataClasses, line 284, create ESP Stack Loader')
         exit()
 
-def createFromShimadzuSPC(filename: str) -> SpectrumUVVIS:
+def createFromShimadzuSPC(filename: str):
     name = Path(filename).name
     spectrum = load_shimadzu_spc(filename)
     if spectrum == None:
@@ -480,56 +516,87 @@ def createFromMagnettech(filename, mscope=1, pool = -1, rescale = -1, shift = 0)
         name=name,
         x=np.array(spectrum['x']),
         y=np.array(spectrum['y']),
-        parameters=parameters        
+        parameters=parameters,
+        source='Magnettech'        
     )
 
-def createFromAdaniDat(filename, adani: dict):
-    def _get_parameter(start: str, end: str, multiply: float):
-        length = len(start)
-        cf_index = adani.find(start) + length
-        cf_end = adani.find(end)
-        parameter_value = adani[cf_index:cf_end].strip()
-        try:
-            parameter_value = float(parameter_value.replace(",", ".")) * multiply
-        except:
-            parameter_value = -1
-        return parameter_value
-    adani = adani.strip()
-    adani = adani.replace(',', '.')
-    adani_lines = adani.splitlines()
-    stripped_lines = []
-    for line in adani_lines:
+def createFromAdaniDat(filename: str | Path):
+    # parse Adani .dat file
+    # Beware of windows encoding - cp1252
+    filepath = Path(filename)
+    parameters = {}
+    data = []
+
+    # check for utf-8 encoding
+    # fallback to cp1252
+    try:
+        with open(filepath, encoding='utf-8') as f:
+            lines = f.readlines()
+    except UnicodeDecodeError:
+        with open(filepath, encoding='cp1252') as f:
+            lines = f.readlines()
+
+    for line in lines:
+        reading_data = False
         line = line.strip()
-        stripped_lines.append(line + '\n')
-    adani = ''.join(stripped_lines[1:])
-    adani_split = adani.split('==\n0')
-    numbers = '0' + adani_split[1]
-    rows = numbers.split('\n')
-    columns = [row.split() for row in rows]
-    x = []
-    y = []
-    for column in columns:
-        try:
-            field = float(column[1])*10
-            amplitude = float(column[2])
-            x.append(field)
-            y.append(amplitude)
-        except:
-            pass
-    parameters = {
-    'SweepTime': _get_parameter('Sweep time:', ' s\n', 1),
-    'PowAtten': _get_parameter('Power attenuation:', ' dB\n', 1),
-    'ModAmp': _get_parameter('Mod. amplitude:', ' uT\n', 0.01),
-    'name_x': 'Field',
-    'unit_x': 'G'
-    }
-    return SpectrumEPR(
-        name=Path(filename).name,
-        x=x,
-        y=y,
-        parameters=parameters,
-        source='Adani'
-    )
+
+        if not line or line.startswith('='):
+            continue
+
+        # Start of data section
+        if line[0].isdigit():
+            reading_data = True
+
+        if reading_data:
+            parts = line.split()
+            if len(parts) >= 3:
+                x = float(parts[1].replace(',', '.'))
+                y = float(parts[2].replace(',', '.'))
+                data.append((x, y))
+            continue
+
+        if line.startswith("Center field:"):
+            parameters["center_field_G"] = f"{float(line.split(":")[1].replace(',', '.').split()[0])*10.0}"
+            continue
+
+        if line.startswith("Sweep width:"):
+            parameters["sweep_width_G"] = f"{float(line.split(":")[1].replace(',', '.').split()[0])*10.0}"
+            continue
+
+        if line.startswith("Mod. amplitude:"):
+            parameters["mod_amplitude_G"] = f"{float(line.split(":")[1].replace(',', '.').split()[0])/100.0}"
+            continue
+
+        if line.startswith("Power attenuation:"):
+            parameters["power_dB"] = f"{float(line.split(":")[1].replace(',', '.').split()[0])}"
+            continue
+
+        if line.startswith("Gain value:"):
+            expr = line.split(":")[1].replace(',', '.').strip()
+            parameters["gain"] = f"{eval(expr)}"
+            continue
+
+        if line.startswith("Sweep time:"):
+            parameters["sweep_time_s"] = f"{float(line.split(":")[1].replace(',', '.').split()[0])}"
+            continue
+
+        if line.startswith("Pass number:"):
+            parameters["pass_number"] = f"{int(line.split(":")[1].strip())}"
+            continue
+
+        if line.startswith("g-factor:"):
+            parameters["g_factor"] = f"{float(line.split(":")[1].replace(',', '.').strip())}"
+            continue
+
+        if line.startswith("Sample temperature:"):
+            parameters["sample_temp_C"] = f"{float(line.split(":")[1].replace(',', '.').split()[0])}"
+            continue
+
+        if line.startswith("Set Sample temperature:"):
+            parameters["set_sample_temp_C"] = f"{float(line.split(":")[1].replace(',', '.').split()[0])}"
+            continue
+
+    return SpectrumEPR.from_adani(filepath.name, data, parameters)
 
 def create_eleana_par(dsc: dict, bruker_key: str) -> dict:
     value = dsc[bruker_key]
