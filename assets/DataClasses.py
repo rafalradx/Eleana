@@ -1,6 +1,5 @@
 from pathlib import Path
 import numpy as np
-import re
 from modules.ShimadzuSPC.shimadzu_spc import load_shimadzu_spc
 from modules.Magnettech.magnettech import load_magnettech
 from dataclasses import dataclass, field
@@ -255,8 +254,6 @@ class SpectrumEPR(BaseDataModel):
 
     @classmethod
     def from_emx(cls, name: str, dta: np.ndarray, parameters: dict[str,str]):
-
-        print(len(dta))
         
         eleana_parameters={
         'name_x': 'Field',
@@ -264,8 +261,6 @@ class SpectrumEPR(BaseDataModel):
         'name_y': 'Intensity',
         'Compl': 'REAL',
         }
-
-        print(parameters)
 
         if "SSY" in parameters:
             # stack of cw spectra
