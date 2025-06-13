@@ -96,6 +96,43 @@ class BaseDataModel:
     @classmethod
     def from_dict(cls, data):
         return BaseDataModel(*data)
+    
+    def is_stack(self) -> bool:
+        return self.type == 'stack 2D'
+    
+    def is_single(self) -> bool:
+        return self.type == 'single 2D'
+    
+    def unfolded_stack(self) -> List:
+        if not self.is_stack():
+            return []
+        if self.stk_names is not None:
+            unfolded_stack = []
+            for n, row in enumerate(self.y):
+                # new_z = self.z[n]
+                stk_name = self.stk_names[n]
+                new_name = f"{self.name}'/'{stk_name}"
+                new_data = BaseDataModel(
+                    name=new_name,
+                    x=self.x.copy(),
+                    y=row.copy(),
+                    parameters=self.parameters.copy(),
+                    type='single 2D',
+                    complex=self.complex,
+                    groups=self.groups.copy(),
+                )
+                unfolded_stack.append(new_data)
+            return unfolded_stack
+        else:
+            return []
+
+
+
+
+
+
+
+
 
 @dataclass
 class SpectrumEPR(BaseDataModel):
