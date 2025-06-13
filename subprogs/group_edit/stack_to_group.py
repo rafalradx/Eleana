@@ -65,27 +65,10 @@ class StackToGroup:
 
     def unfold_stack(self, group):
         dt = self.eleana.dataset[self.index]
-        group = [group]
-        stk_names = dt.stk_names
-        name = dt.name
-        data = {'parameters':   dt.parameters,
-                'groups':       group,
-                'x':            dt.x,
-                'y':            np.array([]),
-                'name':         name,
-                'complex':      dt.complex,
-                'type':         'single 2D',
-                'origin':       dt.origin,
-                }
-        i = 0
-        for stk in stk_names:
-            data['name'] = name + '/' + stk
-            data['y'] = dt.y[i]
-            new_data = BaseDataModel.from_dict(data)
+        for new_data in dt.unfolded_stack():
             self.eleana.dataset.append(new_data)
-            i += 1
-            self.response = group
-            self.quit()
+        self.response = [group]
+        self.quit()
 
     def display_data_groups(self):
         data_name = self.eleana.dataset[self.index].name_nr
