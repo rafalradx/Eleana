@@ -103,13 +103,12 @@ class BaseDataModel:
     def is_single(self) -> bool:
         return self.type == 'single 2D'
     
-    def unfolded_stack(self) -> List:
+    def unfolded_stack(self) -> List["BaseDataModel"]:
         if not self.is_stack():
             return []
         if self.stk_names is not None:
             unfolded_stack = []
             for n, row in enumerate(self.y):
-                # new_z = self.z[n]
                 stk_name = self.stk_names[n]
                 new_name = f"{self.name}'/'{stk_name}"
                 new_data = BaseDataModel(
