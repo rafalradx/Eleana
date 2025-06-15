@@ -64,7 +64,7 @@ class StackToGroup:
         self.unfold_stack(new_group)
 
     def unfold_stack(self, group):
-        dt = self.eleana.dataset[self.index]
+        dt: BaseDataModel = self.eleana.dataset[self.index]
         for new_data in dt.unfolded_stack():
             self.eleana.dataset.append(new_data)
         self.response = [group]
