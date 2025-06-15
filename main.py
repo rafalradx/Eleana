@@ -110,6 +110,7 @@ from group_edit.stack_to_group import StackToGroup
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
 
 def check_busy(method):
+
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         self.mainwindow.configure(cursor="watch")
@@ -133,13 +134,13 @@ class MainApp:
 
         # START BUILDER
         self.builder = builder = pygubu.Builder()
-        builder.add_resource_path(PROJECT_PATH)
-        builder.add_from_file(PROJECT_UI)
+        self.builder.add_resource_path(PROJECT_PATH)
+        self.builder.add_from_file(PROJECT_UI)
         # Main widget
         self.mainwindow = builder.get_object("Eleana", master)
         self.mainwindow.iconify()
         self.mainwindow.withdraw()
-        builder.connect_callbacks(self)
+        self.builder.connect_callbacks(self)
         # END OF PYGUBU BUILDER
 
         # Create references to Widgets and Frames
@@ -297,6 +298,9 @@ class MainApp:
 
         self.mainwindow.focus_set()
 
+    def create_f_stk(self):
+        #self.f_stk = self.builder.get_object('f_stk', self.mainwindow)
+        self.builder.connect_callbacks()
 
     def set_grapher(self, grapher):
         self.grapher = grapher
@@ -780,6 +784,7 @@ class MainApp:
             self.firstComplex.grid()
         else:
             self.firstComplex.grid_remove()
+        self.eleana.selections['f_stk'] = 0
         self.grapher.plot_graph()
 
     @check_busy
@@ -881,6 +886,7 @@ class MainApp:
             self.secondComplex.grid()
         else:
             self.secondComplex.grid_remove()
+        self.eleana.selections['s_stk'] = 0
         self.grapher.plot_graph()
 
     @check_busy
@@ -1052,6 +1058,7 @@ class MainApp:
             self.resultComplex.grid()
         else:
             self.resultComplex.grid_remove()
+        self.eleana.selections['r_stk'] = 0
         self.grapher.plot_graph()
 
     @check_busy

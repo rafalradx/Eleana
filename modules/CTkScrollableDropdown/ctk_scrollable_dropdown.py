@@ -140,6 +140,20 @@ class CTkScrollableDropdown(customtkinter.CTkToplevel):
         self.attach.bind("<Up>", self._key_up)
         self.bind("<Down>", self._key_down)
         self.bind("<Up>", self._key_up)
+        self.frame._parent_canvas.bind_all("<MouseWheel>", self._on_mousewheel)  # Windows & Mac
+        self.frame._parent_canvas.bind_all("<Button-4>", self._on_mousewheel)  # Linux scroll up
+        self.frame._parent_canvas.bind_all("<Button-5>", self._on_mousewheel)
+
+    def _on_mousewheel(self, event):
+        if sys.platform.startswith("darwin"):
+            delta = -1 * event.delta
+        elif event.num == 5 or event.delta < 0:
+            delta = 1
+        elif event.num == 4 or event.delta > 0:
+            delta = -1
+        else:
+            delta = -1 * event.delta // 120
+        self.frame._parent_canvas.yview_scroll(delta, "units")
 
     def _highlight_selected(self):
         for i, widget in self.widgets.items():
@@ -158,7 +172,6 @@ class CTkScrollableDropdown(customtkinter.CTkToplevel):
         if self.hide: return
         self.selected_index = (self.selected_index - 1) % self.button_num
         self._highlight_selected()
-
 
 
     def _destroy(self):
