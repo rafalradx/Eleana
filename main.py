@@ -41,6 +41,7 @@ from CTkMessagebox import CTkMessagebox
 from CTkScrollableDropdown import CTkScrollableDropdown
 from widgets.CTkSpinbox import CTkSpinbox
 
+
 # Import Eleana specific classes
 from Eleana import Eleana
 from LoadSave import Load, Save, Export
