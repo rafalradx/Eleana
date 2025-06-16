@@ -341,8 +341,6 @@ class SubMethods_03:
                 # Iterate over stk
                 name_nr = self.original_data1.name_nr + self.subprog_settings['name_suffix']
                 for stk_name in self.original_data1.stk_names:
-                    if stk_name == 'Time 1645.315 s':
-                        print('Stop here')
                     name = name_nr + '/' + stk_name + self.subprog_settings['name_suffix']
                     if self.data_label is not None:
                         self.data_label.configure(text=name)
