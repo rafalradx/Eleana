@@ -52,7 +52,9 @@ class CTkMessagebox(customtkinter.CTkToplevel):
                  topmost: bool = True,
                  fade_in_duration: int = 0,
                  sound: bool = False,
-                 option_focus: Literal[1, 2, 3] = None):
+                 option_focus: Literal[1, 2, 3] = None,
+
+                 ):
         
         super().__init__()
         
@@ -71,6 +73,8 @@ class CTkMessagebox(customtkinter.CTkToplevel):
             
         self.after(10)
         self.geometry(f"{self.width}x{self.height}+{self.spawn_x}+{self.spawn_y}")
+        #self.after(100, lambda: self.geometry(f"{self.width}x{self.height}+{self.spawn_x}+{self.spawn_y}"))
+
         self.title(title)
         self.resizable(width=False, height=False)
         self.fade = fade_in_duration
@@ -337,7 +341,23 @@ class CTkMessagebox(customtkinter.CTkToplevel):
                 self.button_1.bind("<Return>", lambda event: self.button_event(self.option_text_1))
  
         self.bind("<Escape>", lambda e: self.button_event())
-        
+
+        self.after(50, self.center_window)
+
+    def center_window(self):
+        self.update_idletasks()
+        if self.master_window is None:
+            spawn_x = int((self.winfo_screenwidth() - self.winfo_width()) / 2)
+            spawn_y = int((self.winfo_screenheight() - self.winfo_height()) / 2)
+        else:
+            spawn_x = int(self.master_window.winfo_width() * 0.5 +
+                          self.master_window.winfo_rootx() -
+                          0.5 * self.winfo_width())
+            spawn_y = int(self.master_window.winfo_height() * 0.5 +
+                          self.master_window.winfo_rooty() -
+                          0.5 * self.winfo_height())
+        self.geometry(f"+{spawn_x}+{spawn_y}")
+
     def focus_button(self, option_focus):
         try:
             self.selected_button = getattr(self, "button_"+str(option_focus))

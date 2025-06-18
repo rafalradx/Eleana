@@ -441,7 +441,7 @@ class MainApp:
                     self.info_show = True
                 if type == 'stack 2D' and self.info_show:
                     info = 'Data "' + name_nr + '" is a 2D stack. You need to convert the stack into a group to display it.'
-                    CTkMessagebox(title="", message=info)
+                    CTkMessagebox(master = self.mainwindow, title="", message=info)
                     selected_stack = self.listbox.curselection()
                     difference = set(selected_stack) - set(previous_selection)
                     difference = list(difference)
@@ -550,7 +550,8 @@ class MainApp:
             return
         current_group = self.eleana.selections['group']
         if current_group == 'All':
-            info = CTkMessagebox(title='',
+            info = CTkMessagebox(master = self.mainwindow,
+                                 title='',
                                  message="The group 'All' cannot be removed.",
                                  icon='cancel')
             return
@@ -584,8 +585,9 @@ class MainApp:
     @check_busy
     def data_to_other_group(self, move = True):
         if self.eleana.selections['group'] == 'All' and move:
-            info = CTkMessagebox(title='', message="Data from the 'All' group cannot be moved to another group. However, you can make an additional assignment.",
-                             icon='cancel')
+            info = CTkMessagebox(master = self.mainwindow,
+                                 title='', message="Data from the 'All' group cannot be moved to another group. However, you can make an additional assignment.",
+                                icon='cancel')
             return
 
         # Select data
@@ -605,7 +607,7 @@ class MainApp:
         if new_group == None:
             return
         elif new_group == 'All' and move:
-            info = CTkMessagebox(title = '', message = "You cannot move data from the group 'All' to another one.", icon='cancel')
+            info = CTkMessagebox(master = self.mainwindow, title = '', message = "You cannot move data from the group 'All' to another one.", icon='cancel')
             return
 
         # Replace current_group with new_group
@@ -633,9 +635,9 @@ class MainApp:
         group = self.eleana.selections['group']
         data_indexes = self.eleana.assignmentToGroups.get(group, None)
         if group == 'All' and not skip_questions:
-            info = CTkMessagebox(title = 'Delete Data from Group', message = 'You cannot delete data from the group "All". Please use "Delete Dataset" instead.', icon = 'cancel' )
+            info = CTkMessagebox(master = self.mainwindow, title = 'Delete Data from Group', message = 'You cannot delete data from the group "All". Please use "Delete Dataset" instead.', icon = 'cancel' )
         elif not skip_questions:
-            info = CTkMessagebox(title= 'Delete Data from Group', icon="warning", option_1="Cancel", option_2="Delete", message = f'Are you sure you want to delete data from the group "{group}"?')
+            info = CTkMessagebox(master = self.mainwindow, title= 'Delete Data from Group', icon="warning", option_1="Cancel", option_2="Delete", message = f'Are you sure you want to delete data from the group "{group}"?')
             response = info.get()
             if response == 'Cancel' or not data_indexes:
                 return
@@ -687,16 +689,16 @@ class MainApp:
             parameters = template.parameters
             comment = ''
             if template.type != compared.type:
-                info = CTkMessagebox(title='Convert to a Stack', message='At least one of the data elements is of a different type (for example, 2D and 3D).')
+                info = CTkMessagebox(master = self.mainwindow, title='Convert to a Stack', message='At least one of the data elements is of a different type (for example, 2D and 3D).')
                 return
             if template.complex != compared.complex:
-                info = CTkMessagebox(title='Convert to a Stack', message='At least one of the data elements has a different type of numbers (for example, real and complex).')
+                info = CTkMessagebox(master = self.mainwindow, title='Convert to a Stack', message='At least one of the data elements has a different type of numbers (for example, real and complex).')
                 return
             if template.x.size != compared.x.size:
-                info = CTkMessagebox(title='Convert to a Stack', message='At least one of the data elements has a different number of points. You can convert the data to a stack only if all of them are the same size.')
+                info = CTkMessagebox(master = self.mainwindow, title='Convert to a Stack', message='At least one of the data elements has a different number of points. You can convert the data to a stack only if all of them are the same size.')
                 return
             if not np.array_equal(template.x, compared.x):
-                dialog = CTkMessagebox(title="Convert to Stack", message="The x-axes of the selected items are not identical. You may still proceed, but the differing axes will be replaced with the x-axis from the first item in the list.", icon="warning", option_1="Cancel", option_2="OK")
+                dialog = CTkMessagebox(master = self.mainwindow, title="Convert to Stack", message="The x-axes of the selected items are not identical. You may still proceed, but the differing axes will be replaced with the x-axis from the first item in the list.", icon="warning", option_1="Cancel", option_2="OK")
                 response = dialog.get()
                 if response == 'Cancel':
                     return
@@ -847,16 +849,10 @@ class MainApp:
     @check_busy
     def modify(self, which=None):
         if len(self.eleana.dataset) == 0:
-            info = CTkMessagebox(title='', message='Empty dataset')
+            info = CTkMessagebox(master = self.mainwindow, title='', message='Empty dataset')
             return
         if not which:
             which = 'first'
-        # try:
-        #     self.modify_data.cancel()
-        # except AttributeError:
-        #     pass
-        #self.modify_data = ModifyData(self, which)
-        #response = self.modify_data.get()
 
         modify_data = ModifyData(self, which)
         response = modify_data.get()
@@ -1205,7 +1201,7 @@ class MainApp:
     @check_busy
     def replace_group(self):
         group = self.eleana.selections['group']
-        info = CTkMessagebox(title='Replace data in group', icon="warning", option_1="Cancel", option_2="Replace",
+        info = CTkMessagebox(master = self.mainwindow, title='Replace data in group', icon="warning", option_1="Cancel", option_2="Replace",
                              message=f'Are you sure you want to replace the data in the group: "{group}" with the results?')
         response = info.get()
         if response == 'Cancel':
@@ -1370,7 +1366,7 @@ class MainApp:
         index = self.eleana.selections[which]
         if index < 0:
             return
-        dialog = CTkMessagebox(title="Delete",
+        dialog = CTkMessagebox(master = self.mainwindow, title="Delete",
                                     message=f"Do you want to delete data selected in {which}?",
                                     icon="warning", option_1="No", option_2="Yes")
         response = dialog.get()
@@ -1390,7 +1386,7 @@ class MainApp:
         name = dialog.get()
 
         if not name:
-            info = CTkMessagebox(title='', message='Name cannot be empty')
+            info = CTkMessagebox(master = self.mainwindow, title='', message='Name cannot be empty')
             return
         dataset = []
         try:
@@ -1412,7 +1408,7 @@ class MainApp:
 
     def clear_results(self, skip_question = True):
         if not skip_question:
-            quit_dialog = CTkMessagebox(title="Clear results",
+            quit_dialog = CTkMessagebox(master = self.mainwindow, title="Clear results",
                                         message="Are you sure you want to clear the entire dataset in the results?",
                                         icon="warning", option_1="No", option_2="Yes")
             response = quit_dialog.get()
@@ -1494,7 +1490,7 @@ class MainApp:
         self.grapher.plot_graph()
 
     def clear_dataset(self):
-        quit_dialog = CTkMessagebox(title="Clear dataset",
+        quit_dialog = CTkMessagebox(master = self.mainwindow, title="Clear dataset",
                                     message="Are you sure you want to clear the entire dataset?",
                                     icon="warning", option_1="No", option_2="Yes")
         response = quit_dialog.get()
@@ -1750,7 +1746,7 @@ class MainApp:
     # --- Quit (also window close by clicking on X)
     def close_application(self, event=None):
         global list_of_subprogs
-        quit_dialog = CTkMessagebox(title="Quit", message="Do you want to close the program?",
+        quit_dialog = CTkMessagebox(master = self.mainwindow, title="Quit", message="Do you want to close the program?",
                                     icon="warning", option_1="No", option_2="Yes")
         response = quit_dialog.get()
         if response == "Yes":
@@ -1868,11 +1864,11 @@ class MainApp:
         that will be used to display independet matplotlib window
         '''
         if bool(self.switch_comparison.get()) == True:
-            info = CTkMessagebox(title="Info", message="This function is not yet available for comparison view.")
+            info = CTkMessagebox(master = self.mainwindow, title="Info", message="This function is not yet available for comparison view.")
             return
         static_plot = self.grapher.get_static_plot_data()
         if not static_plot:
-            info = CTkMessagebox(title="Info", message="An error occurred or there is no data for graph creation.")
+            info = CTkMessagebox(master = self.mainwindow, title="Info", message="An error occurred or there is no data for graph creation.")
             return
         dialog = SingleDialog(master=app, title='Enter a name for the graph', label='Enter the graph name', text='')
         name = dialog.get()
@@ -1992,7 +1988,7 @@ class MainApp:
             return
         data = copy.deepcopy(self.eleana.dataset[index])
         if not data.type == 'stack 2D':
-            CTkMessagebox(title="Conversion to group", message="The data you selected is not a 2D stack")
+            CTkMessagebox(master = self.mainwindow, title="Conversion to group", message="The data you selected is not a 2D stack")
         else:
             #self.convert_stack_to_group = StackToGroup(app, which)
             #response = self.convert_stack_to_group.get()
