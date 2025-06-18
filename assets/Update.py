@@ -27,7 +27,7 @@ class Update:
         # scroll_start defines minimum numer of items in combobox when scroll in list is activated
         self.scroll_start = scroll_start
         self.active_scrollable_dropdowns = {}
-
+        self.dropdowns = {}
 
     def group_list(self):
         ''' This scans for groups and creates assignments in eleana.assignmentToGroups'''
@@ -98,6 +98,7 @@ class Update:
 
         if len(self.eleana.dataset) == 0:
             box.configure(values=comboboxList)
+
             return
 
         # Fill list in FIRST or SECOND
@@ -115,7 +116,7 @@ class Update:
                     item = self.eleana.dataset[each].name_nr
                     comboboxList.append(item)
             box.configure(values=comboboxList)
-            CTkScrollableDropdown(attach = box, values=comboboxList, justify="left", button_color="transparent", command=lambda selection: self.app.scrollable_dropdown(selection=selection, combobox = comboboxID))
+            self.dropdowns[comboboxID] = CTkScrollableDropdown(attach = box, values=comboboxList, justify="left", button_color="transparent", command=lambda selection: self.app.scrollable_dropdown(selection=selection, combobox = comboboxID))
             return
 
         # Fill list in RESULT
@@ -127,7 +128,7 @@ class Update:
             for each in self.eleana.results_dataset:
                 comboboxList.append(each.name)
             box.configure(values=comboboxList)
-            CTkScrollableDropdown(attach=box, values=comboboxList, justify="left", button_color="transparent",
+            self.dropdowns[comboboxID] = CTkScrollableDropdown(attach=box, values=comboboxList, justify="left", button_color="transparent",
                                        command=lambda selection: self.app.scrollable_dropdown(selection=selection,combobox=comboboxID))
 
             return
@@ -141,7 +142,7 @@ class Update:
             if self.eleana.dataset[index].type == 'stack 2D':
                 stk_list = self.eleana.dataset[index].stk_names
                 box.configure(values=stk_list)
-                CTkScrollableDropdown(attach=box,
+                self.dropdowns[comboboxID] = CTkScrollableDropdown(attach=box,
                                       values=stk_list,
                                       justify="left",
                                       button_color="transparent",
@@ -164,8 +165,9 @@ class Update:
             if self.eleana.dataset[index].type == 'stack 2D':
                 stk_list = self.eleana.dataset[index].stk_names
                 box.configure(values=stk_list)
-                CTkScrollableDropdown(attach=box, values=stk_list, justify="left", button_color="transparent",
-                                           command=lambda selection: self.app.scrollable_dropdown(selection=selection))
+                self.dropdowns[comboboxID] = CTkScrollableDropdown(attach=box, values=stk_list, justify="left", button_color="transparent",
+                                           command=lambda selection: self.app.scrollable_dropdown(selection=selection,
+                                                                                                  combobox=comboboxID))
                 self.app.secondStkFrame.grid()
                 box.set(stk_list[0])
             else:
@@ -182,11 +184,12 @@ class Update:
                 box.configure(values=stk_list)
                 self.app.resultStkFrame.grid()
                 box.set(stk_list[0])
-                # if len(stk_list) >= self.scroll_start:
-                #     CTkScrollableDropdown(attach=box, values=stk_list, justify="left", button_color="transparent",
-                #                           command=lambda selection: self.app.scrollable_dropdown(selection=selection))
+                if len(stk_list) >= self.scroll_start:
+                    self.dropdowns[comboboxID] = CTkScrollableDropdown(attach=box, values=stk_list, justify="left", button_color="transparent",
+                                          command=lambda selection: self.app.scrollable_dropdown(selection=selection,
+                                                                                                 combobox = comboboxID))
 
-
+            else:
                 self.app.resultStkFrame.grid_remove()
             return
 

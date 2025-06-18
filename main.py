@@ -295,6 +295,15 @@ class MainApp:
         elif combobox == 'sel_second':
             self.second_selected(selection)
             self.sel_second.set(selection)
+        elif combobox == 's_stk':
+            self.s_stk_selected(selection)
+            self.s_stk.set(selection)
+        elif combobox == 'sel_result':
+            self.result_selected(selection)
+            self.sel_result.set(selection)
+        elif combobox == 'r_stk':
+            self.r_stk_selected(selection)
+            self.r_stk.set(selection)
 
         self.mainwindow.focus_set()
 
@@ -590,11 +599,6 @@ class MainApp:
         indexes = self.get_indexes_by_name(names)
         if not indexes:
             return
-
-        # Open dialog
-        #self.move_to_group = MoveToGroup(self.mainwindow, self)
-        #new_group = self.move_to_group.get()
-
         move_to_group = MoveToGroup(self.mainwindow, self)
         new_group = move_to_group.get()
 
@@ -1094,6 +1098,15 @@ class MainApp:
             self.sel_result.set(new_position)
             self.result_selected(new_position)
         except IndexError:
+            return
+        self.grapher.plot_graph()
+
+    @check_busy
+    def r_stk_selected(self, selected_value_text):
+        if selected_value_text in self.r_stk._values:
+            index = self.r_stk._values.index(selected_value_text)
+            self.eleana.set_selections('r_stk', index)
+        else:
             return
         self.grapher.plot_graph()
 

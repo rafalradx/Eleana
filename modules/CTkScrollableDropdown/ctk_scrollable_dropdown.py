@@ -140,20 +140,43 @@ class CTkScrollableDropdown(customtkinter.CTkToplevel):
         self.attach.bind("<Up>", self._key_up)
         self.bind("<Down>", self._key_down)
         self.bind("<Up>", self._key_up)
-        self.frame._parent_canvas.bind_all("<MouseWheel>", self._on_mousewheel)  # Windows & Mac
-        self.frame._parent_canvas.bind_all("<Button-4>", self._on_mousewheel)  # Linux scroll up
-        self.frame._parent_canvas.bind_all("<Button-5>", self._on_mousewheel)
+        # self.frame._parent_canvas.bind("<MouseWheel>", self._on_mousewheel)  # Windows & Mac
+        # self.frame._parent_canvas.bind("<Button-4>", self._on_mousewheel)  # Linux scroll up
+        # self.frame._parent_canvas.bind("<Button-5>", self._on_mousewheel)
+
+        self.bind("<Enter>", self._on_enter)
+        self.bind("<Leave>", self._on_leave)
+        self.bind("<MouseWheel>", self._on_mousewheel)  # Windows & Mac
+        self.bind("<Button-4>", self._on_mousewheel)  # Linux scroll up
+        self.bind("<Button-5>", self._on_mousewheel)  # Linux scroll down
+        self.has_mouse = False
+
+    def _on_enter(self, event):
+        self.has_mouse = True
+
+    def _on_leave(self, event):
+        self.has_mouse = False
 
     def _on_mousewheel(self, event):
-        if sys.platform.startswith("darwin"):
-            delta = -1 * event.delta
-        elif event.num == 5 or event.delta < 0:
+        # Get cursor position
+        x, y = self.winfo_pointerx(), self.winfo_pointery()
+        widget_under_cursor = self.winfo_containing(x, y)
+        # Check if the cursor is over the dropdown
+        if widget_under_cursor is None or not str(widget_under_cursor).startswith(str(self)):
+            return
+
+        # Calculate scrolls
+        delta = 0
+        if event.num == 4:  # Linux scroll up
             delta = 1
-        elif event.num == 4 or event.delta > 0:
+        elif event.num == 5:  # Linux scroll down
             delta = -1
-        else:
-            delta = -1 * event.delta // 120
-        self.frame._parent_canvas.yview_scroll(delta, "units")
+        elif hasattr(event, 'delta'):  # Windows / Mac
+            delta = event.delta // 120
+
+        # Scroll canvas
+        self.frame._parent_canvas.yview_scroll(-delta, "units")
+
 
     def _highlight_selected(self):
         for i, widget in self.widgets.items():
@@ -365,15 +388,17 @@ class CTkScrollableDropdown(customtkinter.CTkToplevel):
             
         if "fg_color" in kwargs:
             self.frame.configure(fg_color=kwargs.pop("fg_color"))
-            
+
         if "values" in kwargs:
             self.values = kwargs.pop("values")
             self.image_values = None
             self.button_num = len(self.values)
             for key in self.widgets.keys():
                 self.widgets[key].destroy()
+            self.widgets.clear()
+            self.i = 0
             self._init_buttons()
- 
+
         if "image_values" in kwargs:
             self.image_values = kwargs.pop("image_values")
             self.image_values = None if len(self.image_values)!=len(self.values) else self.image_values
