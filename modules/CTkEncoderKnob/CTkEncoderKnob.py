@@ -14,16 +14,16 @@ class EncoderKnob(ctk.CTkCanvas):
         self.radius = min(width, height) // 2 - 10
         self.angle = 0
 
-        # Tło pokrętła
+        # Background
         self.bg_circle = self.create_oval(
             10, 10, width - 10, height - 10,
             outline=outline_color, fill=bg_color, width=3
         )
 
         self.draw_ticks()
-        self.indicator = self.create_triangle(self.angle)  # spiczasta wskazówka
+        self.indicator = self.create_triangle(self.angle)
 
-        # Punkt centralny
+        # Center
         self.create_oval(
             self.center[0] - 6, self.center[1] - 6,
             self.center[0] + 6, self.center[1] + 6,
@@ -32,9 +32,32 @@ class EncoderKnob(ctk.CTkCanvas):
 
         self.bind("<Button-1>", self.start_rotate)
         self.bind("<B1-Motion>", self.rotate)
-        self.bind_all("<MouseWheel>", self.mouse_wheel)  # Obsługa scrolla myszy
+        self.bind_all("<MouseWheel>", self.mouse_wheel)
         self.last_angle = None
 
+        # Resize bind
+        self.bind("<Configure>", self.on_resize)
+
+    def on_resize(self, event):
+        self.width = event.width
+        self.height = event.height
+        self.center = (self.width // 2, self.height // 2)
+        self.radius = min(self.width, self.height) // 2 - 10
+
+        self.delete("all")  # usuwa wszystkie elementy
+        self.bg_circle = self.create_oval(
+            10, 10, self.width - 10, self.height - 10,
+            outline=self.outline_color, fill=self.bg_color, width=3
+        )
+        self.draw_ticks()
+        self.indicator = self.create_triangle(self.angle)
+        self.create_oval(
+            self.center[0] - 6, self.center[1] - 6,
+            self.center[0] + 6, self.center[1] + 6,
+            fill="#00BFFF", outline=""
+        )
+
+    ''' Added for resize '''
     def draw_ticks(self, count=20):
         for i in range(count):
             angle = math.radians(i * (360 / count))
@@ -105,10 +128,10 @@ class EncoderKnob(ctk.CTkCanvas):
 
 if __name__ == "__main__":
     def on_knob_change(val):
-        print("Nowa wartość:", val)
+        print("New value:", val)
 
     root = ctk.CTk()
-    root.title("Endless Encoder z trójkątną wskazówką i scroll'em")
+    root.title("Endless Encoder")
 
     knob = EncoderKnob(root, command=on_knob_change, width=150, height=150)
     knob.pack(padx=20, pady=20)
