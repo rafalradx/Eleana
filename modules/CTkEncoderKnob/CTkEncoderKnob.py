@@ -1,7 +1,7 @@
 import customtkinter as ctk
 import math
 
-class EncoderKnob(ctk.CTkCanvas):
+class CTkEncoderKnob(ctk.CTkCanvas):
     def __init__(self, master, command=None, width=150, height=150, bg_color = '#222', outline_color = '#222', **kwargs):
         super().__init__(master, width=width, height=height, highlightthickness=0, **kwargs)
 
@@ -21,7 +21,7 @@ class EncoderKnob(ctk.CTkCanvas):
         )
 
         self.draw_ticks()
-        self.indicator = self.create_triangle(self.angle)  # spiczasta wskazówka
+        self.indicator = self.create_triangle(self.angle)
 
         # Punkt centralny
         self.create_oval(
@@ -34,6 +34,7 @@ class EncoderKnob(ctk.CTkCanvas):
         self.bind("<B1-Motion>", self.rotate)
         self.bind_all("<MouseWheel>", self.mouse_wheel)  # Obsługa scrolla myszy
         self.last_angle = None
+
 
     def draw_ticks(self, count=20):
         for i in range(count):

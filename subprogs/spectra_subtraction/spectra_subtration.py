@@ -6,7 +6,8 @@ from asyncio import set_event_loop_policy
 import numpy as np
 import importlib
 from scipy.interpolate import interp1d
-
+from modules.CTkEncoderKnob.CTkEncoderKnob import CTkEncoderKnob
+from widgets.CTkSpinbox import CTkSpinbox
 
 ''' GENERAL SETTINGS '''
 # If True all active subprog windows will be closed on start this subprog
@@ -273,25 +274,21 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
 
         # HERE DEFINE YOUR REFERENCES TO WIDGETS
         from widgets.CTkSpinbox import CTkSpinbox
-        self.harmFrame = self.builder.get_object('harmFrame', self.mainwindow)
-        self.modFrame = self.builder.get_object('modFrame', self.mainwindow)
-        self.entry1 = self.builder.get_object('ctkentry1', self.mainwindow)
-        self.entry2 = self.builder.get_object('ctkentry2', self.mainwindow)
-        self.entry1.grid_remove()
-        self.entry2.grid_remove()
+        self.encoder1frame = self.builder.get_object('encoder1frame', self.mainwindow)
+        self.encoder1 = CTkEncoderKnob(master = self.encoder1frame)
+        self.encoder1.grid(row = 0, column=0, sticky="nsew")
+        self.encoder2frame = self.builder.get_object('encoder2frame', self.mainwindow)
+        self.encoder2 = CTkEncoderKnob(master=self.encoder2frame)
+        self.encoder2.grid(row=0, column=0, sticky="nsew")
+        self.encoder3frame = self.builder.get_object('encoder3frame', self.mainwindow)
+        self.encoder3 = CTkEncoderKnob(master=self.encoder3frame)
+        self.encoder3.grid(row=0, column=0, sticky="nsew")
 
-        self.harm_box = CTkSpinbox(master=self.harmFrame, min_value=0, max_value=2, step_value=1,  command=self.parameters_changed, scroll_value = 1)
-        self.harm_box.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
-
-        self.mod_box = CTkSpinbox(master=self.modFrame, min_value=0, max_value=10000, step_value=0.1, command = self.parameters_changed, scroll_value = 1)
-        self.mod_box.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
-
-        self.normalize_box = self.builder.get_object('normalize', self.mainwindow)
 
     def parameters_changed(self, selection=None):
-        self.harmonic = int(self.harm_box.get())
-        self.modulation = float(self.mod_box.get())
-        self.normalize = bool(self.normalize_box.get())
+        # self.harmonic = int(self.harm_box.get())
+        # self.modulation = float(self.mod_box.get())
+        # self.normalize = bool(self.normalize_box.get())
         self.ok_clicked()
 
     import numpy as np
@@ -438,20 +435,25 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
     def restore_settings(self):
         val = self.restore('harm_box')
         if val:
-            self.harm_box.set(value = val)
+            #self.harm_box.set(value = val)
+            pass
         else:
-            self.harm_box.set(value = 0)
-
+            # self.harm_box.set(value = 0)
+            pass
         val = self.restore('mod_box')
         if val:
-            self.mod_box.set(value = val)
+            # self.mod_box.set(value = val)
+            pass
         else:
-            self.mod_box.set(value = 1)
+            #self.mod_box.set(value = 1)
+            pass
         val = self.restore('normalize')
         if val == True:
-            self.normalize_box.select()
+            # self.normalize_box.select()
+            pass
         else:
-            self.normalize_box.deselect()
+            # self.normalize_box.deselect()
+            pass
         self.parameters_changed()
 
 
