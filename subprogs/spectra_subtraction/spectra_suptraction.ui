@@ -188,7 +188,6 @@
                                     <layout manager="grid">
                                       <property name="column">0</property>
                                       <property name="row">1</property>
-                                      <property name="sticky">nsew</property>
                                     </layout>
                                   </object>
                                 </child>
@@ -202,9 +201,12 @@
                                   <property name="row">3</property>
                                   <property name="sticky">nsew</property>
                                 </layout>
+                                <containerlayout manager="grid">
+                                  <property type="col" id="0" name="weight">1</property>
+                                </containerlayout>
                                 <child>
                                   <object class="customtkinter.CTkLabel" id="ctklabel8">
-                                    <property name="text" translatable="yes">scale</property>
+                                    <property name="text" translatable="yes">X</property>
                                     <layout manager="grid">
                                       <property name="column">0</property>
                                       <property name="row">0</property>
@@ -217,7 +219,7 @@
                                     <layout manager="grid">
                                       <property name="column">0</property>
                                       <property name="row">1</property>
-                                      <property name="sticky">nsew</property>
+                                      <property name="sticky">ew</property>
                                     </layout>
                                   </object>
                                 </child>
@@ -282,7 +284,6 @@
                                     <layout manager="grid">
                                       <property name="column">0</property>
                                       <property name="row">1</property>
-                                      <property name="sticky">nsew</property>
                                     </layout>
                                   </object>
                                 </child>
@@ -296,9 +297,12 @@
                                   <property name="row">3</property>
                                   <property name="sticky">nsew</property>
                                 </layout>
+                                <containerlayout manager="grid">
+                                  <property type="col" id="0" name="weight">1</property>
+                                </containerlayout>
                                 <child>
                                   <object class="customtkinter.CTkLabel" id="ctklabel9">
-                                    <property name="text" translatable="yes">scale</property>
+                                    <property name="text" translatable="yes">X</property>
                                     <layout manager="grid">
                                       <property name="column">0</property>
                                       <property name="row">0</property>
@@ -311,7 +315,7 @@
                                     <layout manager="grid">
                                       <property name="column">0</property>
                                       <property name="row">1</property>
-                                      <property name="sticky">nsew</property>
+                                      <property name="sticky">ew</property>
                                     </layout>
                                   </object>
                                 </child>
@@ -376,7 +380,6 @@
                                     <layout manager="grid">
                                       <property name="column">0</property>
                                       <property name="row">1</property>
-                                      <property name="sticky">nsew</property>
                                     </layout>
                                   </object>
                                 </child>
@@ -390,9 +393,12 @@
                                   <property name="row">3</property>
                                   <property name="sticky">nsew</property>
                                 </layout>
+                                <containerlayout manager="grid">
+                                  <property type="col" id="0" name="weight">1</property>
+                                </containerlayout>
                                 <child>
                                   <object class="customtkinter.CTkLabel" id="ctklabel10">
-                                    <property name="text" translatable="yes">scale</property>
+                                    <property name="text" translatable="yes">X</property>
                                     <layout manager="grid">
                                       <property name="column">0</property>
                                       <property name="row">0</property>
@@ -405,7 +411,7 @@
                                     <layout manager="grid">
                                       <property name="column">0</property>
                                       <property name="row">1</property>
-                                      <property name="sticky">nsew</property>
+                                      <property name="sticky">ew</property>
                                     </layout>
                                   </object>
                                 </child>

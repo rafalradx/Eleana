@@ -6,7 +6,7 @@ from asyncio import set_event_loop_policy
 import numpy as np
 import importlib
 from scipy.interpolate import interp1d
-from modules.CTkEncoderKnob.CTkEncoderKnob import CTkEncoderKnob
+from modules.tkdial.tkdial import Dial
 from widgets.CTkSpinbox import CTkSpinbox
 
 ''' GENERAL SETTINGS '''
@@ -275,15 +275,27 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         # HERE DEFINE YOUR REFERENCES TO WIDGETS
         from widgets.CTkSpinbox import CTkSpinbox
         self.encoder1frame = self.builder.get_object('encoder1frame', self.mainwindow)
-        self.encoder1 = CTkEncoderKnob(master = self.encoder1frame)
+        self.encoder1 = Dial(master = self.encoder1frame)
         self.encoder1.grid(row = 0, column=0, sticky="nsew")
         self.encoder2frame = self.builder.get_object('encoder2frame', self.mainwindow)
-        self.encoder2 = CTkEncoderKnob(master=self.encoder2frame)
+        self.encoder2 = Dial(master=self.encoder2frame)
         self.encoder2.grid(row=0, column=0, sticky="nsew")
         self.encoder3frame = self.builder.get_object('encoder3frame', self.mainwindow)
-        self.encoder3 = CTkEncoderKnob(master=self.encoder3frame)
+        self.encoder3 = Dial(master=self.encoder3frame)
         self.encoder3.grid(row=0, column=0, sticky="nsew")
+        self.spinbox1frame = self.builder.get_object('spinbox1frame', self.mainwindow)
+        self.spinbox1frame.grid_columnconfigure(0, weight=1)
+        self.spinbox1 = CTkSpinbox(master = self.spinbox1frame)
+        self.spinbox1.grid(row = 0, column = 0, sticky = 'nsew')
 
+        self.spinbox2frame = self.builder.get_object('spinbox2frame', self.mainwindow)
+        self.spinbox2frame.grid_columnconfigure(0, weight=1)
+        self.spinbox2 = CTkSpinbox(master=self.spinbox2frame)
+        self.spinbox2.grid(row=0, column=0, sticky='nsew')
+        self.spinbox3frame = self.builder.get_object('spinbox3frame', self.mainwindow)
+        self.spinbox3frame.grid_columnconfigure(0, weight=1)
+        self.spinbox3 = CTkSpinbox(master=self.spinbox3frame)
+        self.spinbox3.grid(row=0, column=0, sticky='nsew')
 
     def parameters_changed(self, selection=None):
         # self.harmonic = int(self.harm_box.get())

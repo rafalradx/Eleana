@@ -37,8 +37,7 @@ class CTkSpinbox(ctk.CTkFrame):
                  button_border_color: str = ('#AAA', '#555'),
                  state: str = 'normal',
                  command: any = None,
-                 wait_for: float = 0.05,
-                 logarithm_step: bool = True):  # Add wait_for parameter
+                 wait_for: float = 0.05):  # Add wait_for parameter
         super().__init__(master,
                          height=height,
                          width=width,
@@ -46,8 +45,6 @@ class CTkSpinbox(ctk.CTkFrame):
                          border_color=border_color,
                          border_width=border_width,
                          corner_radius=corner_radius)
-
-        self.logarithm_step = logarithm_step
 
         # values
         self.start_value = max(min(start_value, max_value), min_value)
