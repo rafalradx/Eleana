@@ -12,6 +12,7 @@ pillow = "*"
 matplotlib = "*"
 scipy = "*"
 pyperclip = "*"
+colour = "*"
 
 [dev-packages]
 pygubu-designer = "*"
