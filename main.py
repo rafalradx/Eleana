@@ -41,6 +41,7 @@ from CTkMessagebox import CTkMessagebox
 from CTkScrollableDropdown import CTkScrollableDropdown
 from widgets.CTkSpinbox import CTkSpinbox
 
+
 # Import Eleana specific classes
 from Eleana import Eleana
 from LoadSave import Load, Save, Export
@@ -2012,23 +2013,26 @@ class MainApp:
         else:
             return
 
-        data_y = self.eleana.dataset[data_index].y
-        data_z = self.eleana.dataset[data_index].z
-        data_names = self.eleana.dataset[data_index].stk_names
-        if data_y.size == 0:
-            # Already empty np.array. Return
-            return
+        # data_y = self.eleana.dataset[data_index].y
+        # data_z = self.eleana.dataset[data_index].z
+        # data_names = self.eleana.dataset[data_index].stk_names
+        # if data_y.size == 0:
+        #     # Already empty np.array. Return
+        #     return
 
-        # Remove stk data from dataset.y
-        new_y = np.delete(data_y, stk_index, axis=0)
-        self.eleana.dataset[data_index].y = new_y
+        # # Remove stk data from dataset.y
+        # new_y = np.delete(data_y, stk_index, axis=0)
+        # self.eleana.dataset[data_index].y = new_y
 
-        # Remove values from z axis of stk data
-        new_z = np.delete(data_z, stk_index)
-        self.eleana.dataset[data_index].z = new_z
+        # # Remove values from z axis of stk data
+        # new_z = np.delete(data_z, stk_index)
+        # self.eleana.dataset[data_index].z = new_z
 
-        # Remove stk names
-        del self.eleana.dataset[data_index].stk_names[stk_index]
+        # # Remove stk names
+        # del self.eleana.dataset[data_index].stk_names[stk_index]
+
+        data_stack: BaseDataModel = self.eleana.dataset[data_index]
+        data_stack.remove_from_stack_by_index(stk_index)
 
         if which == 'first':
             self.eleana.selections['f_stk'] = 0

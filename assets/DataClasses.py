@@ -124,13 +124,20 @@ class BaseDataModel:
             return unfolded_stack
         else:
             return []
-
-
-
-
-
-
-
+        
+    def remove_from_stack_by_index(self, index: int):
+        if self.is_stack():
+            self.y = np.delete(self.y, index, axis=0)
+            self.z = np.delete(self.z, index, axis=0)
+            del self.stk_names[index]
+            # if only one trace left after removing
+            # convert to single 2d
+            if len(self.z) == 1:
+                self.type = "single 2D"
+                self.name = f"{self.name}_{self.stk_names[0]}"
+                self.y = self.y.flatten()
+                self.z = None
+                self.stk_names = None
 
 
 @dataclass

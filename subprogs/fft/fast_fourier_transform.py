@@ -455,6 +455,7 @@ class FastFourierTransform(Methods, WindowGUI):                                 
         self.data_for_calculations[0]['x'] = fftshift(freq)
         self.data_for_calculations[0]['y'] = fftshift(spectrum)
         self.data_for_calculations[0]['name'] = name1
+        self.data_for_calculations[0]['complex'] = True
 
         parameters1["unit_x"] = "MHz"
         parameters1["name_x"] = "Frequency"
