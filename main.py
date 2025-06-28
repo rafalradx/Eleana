@@ -499,7 +499,7 @@ class MainApp:
             result = _set_ranges(widget=widget)
             if result:
                 return
-    # -------  END of FISRT MODIFICATION PANEL --------
+    # -------  END of FIRST MODIFICATION PANEL --------
 
 
     ''' *********************************************

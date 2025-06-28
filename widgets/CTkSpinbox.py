@@ -38,7 +38,8 @@ class CTkSpinbox(ctk.CTkFrame):
                  state: str = 'normal',
                  command: any = None,
                  wait_for: float = 0.05,
-                 logarithm_step: bool = True):  # Add wait_for parameter
+                 logarithm_step: bool = True,
+                 disable_wheel = False):  # Add wait_for parameter
         super().__init__(master,
                          height=height,
                          width=width,
@@ -133,11 +134,14 @@ class CTkSpinbox(ctk.CTkFrame):
 
         # scroll bind
         # FOR WINDOWS
-        self.bind('<MouseWheel>', self.scroll)
+        # if logarithm_step:
+        #     disable_wheel = True
+        if disable_wheel == False:
+            self.bind('<MouseWheel>', self.scroll)
 
-        # FOR LINUX
-        self.bind('<Button-4>', self.scroll_up)
-        self.bind('<Button-5>', self.scroll_down)
+            # FOR LINUX
+            self.bind('<Button-4>', self.scroll_up)
+            self.bind('<Button-5>', self.scroll_down)
 
         # update state
         if self.state == 'disabled':
@@ -162,17 +166,25 @@ class CTkSpinbox(ctk.CTkFrame):
 
     def decrement_counter(self):
         '''Decrements the value of the counter by the step value.'''
-        new_value = self.counter_var.get() - self.step_value
-        self.counter_var.set(self.round_value(new_value))
-        self.manual_input = False
-        self.schedule_update()
+        if self.logarithm_step == False:
+            new_value = self.counter_var.get() - self.step_value
+            if new_value >= self.min_value:
+                self.counter_var.set(self.round_value(new_value))
+            self.manual_input = False
+        else:
+            self.use_log_step(increment=False)
 
     def increment_counter(self):
         '''Increments the value of the counter by the step value.'''
-        new_value = self.counter_var.get() + self.step_value
-        self.counter_var.set(self.round_value(new_value))
-        self.manual_input = False
-        self.schedule_update()
+        if self.logarithm_step == False:
+            new_value = self.counter_var.get() + self.step_value
+            if new_value <= self.max_value:
+                self.counter_var.set(self.round_value(new_value))
+            self.manual_input = False
+            self.schedule_update()
+        else:
+            self.use_log_step(increment=True)
+
 
     def scroll(self, scroll):
         '''Increments/Decrements the value of the counter by the scroll value depending on scroll direction.
@@ -189,18 +201,24 @@ class CTkSpinbox(ctk.CTkFrame):
     def scroll_up(self, event=None):
         '''Increments the value of the counter by the scroll value.'''
         if self.state == 'normal':
-            new_value = self.counter_var.get() + self.scroll_value
-            self.counter_var.set(self.round_value(new_value))
-            self.manual_input = False
-            self.schedule_update()
+            self.use_log_step(increment=True)
+            if self.logarithm_step == False:
+                new_value = self.counter_var.get() + self.scroll_value
+                if new_value <= self.max_value:
+                    self.counter_var.set(self.round_value(new_value))
+                self.manual_input = False
+                self.schedule_update()
 
     def scroll_down(self, event=None):
         '''Decrements the value of the counter by the scroll value.'''
         if self.state == 'normal':
-            new_value = self.counter_var.get() - self.scroll_value
-            self.counter_var.set(self.round_value(new_value))
-            self.manual_input = False
-            self.schedule_update()
+            self.use_log_step(increment=False)
+            if self.logarithm_step == False:
+                new_value = self.counter_var.get() - self.scroll_value
+                if new_value >= self.min_value:
+                    self.counter_var.set(self.round_value(new_value))
+                self.manual_input = False
+                self.schedule_update()
 
     def schedule_update(self):
         '''Schedules an update of the counter after a delay.'''
@@ -308,6 +326,17 @@ class CTkSpinbox(ctk.CTkFrame):
                 self.disable()
         super().configure(**kwargs)
 
+    def use_log_step(self, increment):
+        v = self.counter_var.get()
+        if self.logarithm_step:
+            if increment:
+                new_v = v * 10 # Decrement
+            else:
+                new_v = v / 10
+            if new_v < self.max_value and new_v > self.min_value:
+                self.counter_var.set(new_v)
+
+
 # Test the CTkSpinbox
 if __name__ == "__main__":
     def print_label(count):
@@ -318,13 +347,16 @@ if __name__ == "__main__":
 
     spin_var = ctk.DoubleVar()
     spinbox = CTkSpinbox(window,
-                         start_value=10.0,
-                         min_value=0.0,
-                         max_value=20.0,
-                         step_value=0.1,
-                         scroll_value=0.1,
+                         start_value=1.5,
+                         min_value=-2,
+                         max_value=7,
+                         step_value=1,
+                         scroll_value=1,
                          variable=spin_var,
-                         command=print_label)
+                         command=print_label,
+                         logarithm_step=False,
+                         disable_wheel = False
+                         )
 
     spinbox.pack(expand=True, fill='x')  # Use fill='x' to make it expand horizontally
 
