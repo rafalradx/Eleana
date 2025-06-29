@@ -152,8 +152,8 @@ class Dial(tk.Canvas):
         #
         if scroll==True:
             super().bind('<MouseWheel>', self.scroll_command)
-            super().bind("<Button-4>", lambda e: self.scroll_command(-1))
-            super().bind("<Button-5>", lambda e: self.scroll_command(1))
+            super().bind("<Button-5>", lambda e: self.scroll_command(-1))
+            super().bind("<Button-4>", lambda e: self.scroll_command(1))
         self.bind("<ButtonRelease-1>", lambda e: setattr(self, '__last_angle', None))
 
         self.value_text = self.create_text(
@@ -163,7 +163,6 @@ class Dial(tk.Canvas):
             font=("Helvetica", 10),
             fill="white"
         )
-
 
         self.__last_angle = None
 
@@ -360,13 +359,15 @@ class Dial(tk.Canvas):
         """
         Endless encoder z ruchem myszką: aktualizuje wartość na podstawie różnicy kątów
         """
-        angle = degrees(atan2(self.__y - event.y, event.x - self.__x))
+
+        if angle is None:
+            angle = degrees(atan2(self.__y - event.y, event.x - self.__x))
         if angle < 0:
             angle += 360
 
         if self.__last_angle is None:
             self.__last_angle = angle
-            return
+
 
         delta_angle = angle - self.__last_angle
 
@@ -408,6 +409,7 @@ class Dial(tk.Canvas):
         """
         This function is used to set the position of the needle
         """
+        self.value = value
         if self.__start<self.__end:
             if value<self.__start:
                 value = self.__start
@@ -421,7 +423,7 @@ class Dial(tk.Canvas):
                 
             if value<=self.__end:
                 value = self.__end
-                self.__rotate_needle(self, angle=-350)
+                self.__rotate_needle(self, angle=-360)
                 
         angle = float(-(360/(self.__end - self.__start))*(value - self.__start))
         self.__rotate_needle(self, angle=angle)

@@ -40,6 +40,7 @@ class CTkSpinbox(ctk.CTkFrame):
                  wait_for: float = 0.05,
                  logarithm_step: bool = True,
                  disable_wheel = False):  # Add wait_for parameter
+
         super().__init__(master,
                          height=height,
                          width=width,
@@ -49,7 +50,7 @@ class CTkSpinbox(ctk.CTkFrame):
                          corner_radius=corner_radius)
 
         self.logarithm_step = logarithm_step
-
+        self.command = command
         # values
         self.start_value = max(min(start_value, max_value), min_value)
         self.min_value = min_value
@@ -174,6 +175,9 @@ class CTkSpinbox(ctk.CTkFrame):
         else:
             self.use_log_step(increment=False)
 
+        if self.command is not None:
+            self.command()
+
     def increment_counter(self):
         '''Increments the value of the counter by the step value.'''
         if self.logarithm_step == False:
@@ -184,7 +188,8 @@ class CTkSpinbox(ctk.CTkFrame):
             self.schedule_update()
         else:
             self.use_log_step(increment=True)
-
+        if self.command is not None:
+            self.command()
 
     def scroll(self, scroll):
         '''Increments/Decrements the value of the counter by the scroll value depending on scroll direction.
@@ -209,6 +214,7 @@ class CTkSpinbox(ctk.CTkFrame):
                 self.manual_input = False
                 self.schedule_update()
 
+
     def scroll_down(self, event=None):
         '''Decrements the value of the counter by the scroll value.'''
         if self.state == 'normal':
@@ -226,6 +232,10 @@ class CTkSpinbox(ctk.CTkFrame):
             self.update_timer.cancel()
         self.update_timer = threading.Timer(self.wait_for, self.update_counter, [None])
         self.update_timer.start()
+
+        if self.command is not None:
+            self.command()
+
 
     def get(self):
         '''Returns the value of the counter.'''
@@ -359,5 +369,4 @@ if __name__ == "__main__":
                          )
 
     spinbox.pack(expand=True, fill='x')  # Use fill='x' to make it expand horizontally
-
     window.mainloop()

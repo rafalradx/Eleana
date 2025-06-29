@@ -2,12 +2,14 @@
 # IMPORT MODULES NEEDED
 # -- Here is an example --
 from asyncio import set_event_loop_policy
+from logging import setLogRecordFactory
 
 import numpy as np
 import importlib
 from scipy.interpolate import interp1d
 from modules.tkdial.tkdial import Dial
 from widgets.CTkSpinbox import CTkSpinbox
+
 
 ''' GENERAL SETTINGS '''
 # If True all active subprog windows will be closed on start this subprog
@@ -38,7 +40,7 @@ RESTORE_SETTINGS = True
 # CTkLabel with the same ID name must exist in the GUI.
 # If not used set this to None
 # self.subprog_settings['data_label']
-DATA_LABEL: str = 'data_label'
+DATA_LABEL: str = None
 
 # The suffix that will be added to the name of processed data.
 # For example if "Spectrum" is processed and NAME_SUFFIX = "_MODIFIED"
@@ -274,37 +276,54 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
 
         # HERE DEFINE YOUR REFERENCES TO WIDGETS
         from widgets.CTkSpinbox import CTkSpinbox
+
+        self.data_frame = self.builder.get_object('ctkframe4', self.mainwindow)
+        self.data_frame.grid_remove()
+
         self.encoder1frame = self.builder.get_object('encoder1frame', self.mainwindow)
-        self.encoder1 = Dial(master = self.encoder1frame)
+        self.encoder1 = Dial(master = self.encoder1frame, command=self.parameters_changed)
         self.encoder1.grid(row = 0, column=0, sticky="nsew")
         self.encoder2frame = self.builder.get_object('encoder2frame', self.mainwindow)
-        self.encoder2 = Dial(master=self.encoder2frame)
+        self.encoder2 = Dial(master=self.encoder2frame,  command=self.parameters_changed)
         self.encoder2.grid(row=0, column=0, sticky="nsew")
         self.encoder3frame = self.builder.get_object('encoder3frame', self.mainwindow)
-        self.encoder3 = Dial(master=self.encoder3frame)
+        self.encoder3 = Dial(master=self.encoder3frame,  command=self.parameters_changed)
         self.encoder3.grid(row=0, column=0, sticky="nsew")
         self.spinbox1frame = self.builder.get_object('spinbox1frame', self.mainwindow)
         self.spinbox1frame.grid_columnconfigure(0, weight=1)
-        self.spinbox1 = CTkSpinbox(master = self.spinbox1frame)
+        self.spinbox1 = CTkSpinbox(master = self.spinbox1frame, logarithm_step = True, disable_wheel = True, min_value = 1e-20, max_value = 1e+20, start_value = 1,  command=self.parameters_changed)
         self.spinbox1.grid(row = 0, column = 0, sticky = 'nsew')
 
         self.spinbox2frame = self.builder.get_object('spinbox2frame', self.mainwindow)
         self.spinbox2frame.grid_columnconfigure(0, weight=1)
-        self.spinbox2 = CTkSpinbox(master=self.spinbox2frame)
+        self.spinbox2 = CTkSpinbox(master=self.spinbox2frame, logarithm_step = True, disable_wheel = True, min_value = 1e-20, max_value = 1e+20, start_value = 1,  command=self.parameters_changed)
         self.spinbox2.grid(row=0, column=0, sticky='nsew')
         self.spinbox3frame = self.builder.get_object('spinbox3frame', self.mainwindow)
         self.spinbox3frame.grid_columnconfigure(0, weight=1)
-        self.spinbox3 = CTkSpinbox(master=self.spinbox3frame)
+        self.spinbox3 = CTkSpinbox(master=self.spinbox3frame, logarithm_step = True, disable_wheel = True, min_value = 1e-20, max_value = 1e+20, start_value = 1,  command=self.parameters_changed)
         self.spinbox3.grid(row=0, column=0, sticky='nsew')
 
-    def parameters_changed(self, selection=None):
-        # self.harmonic = int(self.harm_box.get())
-        # self.modulation = float(self.mod_box.get())
-        # self.normalize = bool(self.normalize_box.get())
-        self.ok_clicked()
+        # Entry Boxes
+        self.multiply_y_by = self.builder.get_object("ctkentry1", self.mainwindow)
+        self.shift_y_by = self.builder.get_object("ctkentry2", self.mainwindow)
+        self.shift_x_by =   self.builder.get_object("ctkentry3", self.mainwindow)
 
-    import numpy as np
-    from scipy.interpolate import InterpolatedUnivariateSpline
+        # Set validation for Entry boxes
+        self.set_validation_for_ctkentries(list_of_entries = [self.multiply_y_by, self.shift_y_by, self.shift_x_by])
+
+        # Settings comboboxes
+        self.sel_operation_mode = self.builder.get_object("ctkcombobox4", self.mainwindow)
+        self.sel_interpolation = self.builder.get_object("ctkcombobox1", self.mainwindow)
+        self.sel_alignment_interval = self.builder.get_object("ctkcombobox2", self.mainwindow)
+        self.sel_resampling_interval = self.builder.get_object("ctkcombobox3", self.mainwindow)
+
+        self.values = {}
+
+    def parameters_changed(self, selection=None):
+        ''' After manual modification of knob or spinbox '''
+        self.calculate_values()
+        self.update_entries()
+        #self.ok_clicked()
 
     def odejmij_widma_auto(self, X1, Y1, X2, Y2, method='auto', spline_order=3, fill_value=0.0):
         """
@@ -432,6 +451,23 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
 
         return row_to_report
 
+    def calculate_values(self):
+        mutliply_y = float(self.encoder1.get()) * float(self.spinbox1.get())
+        shift_y = float(self.encoder2.get()) * float(self.spinbox2.get())
+        shift_x = float(self.encoder3.get()) * float(self.spinbox3.get())
+        self.values = {'multiply_y' : mutliply_y,
+                       'shift_y' : shift_y,
+                       'shift_x' : shift_x
+                       }
+
+    def update_entries(self):
+        self.set_entry_value(entry = self.multiply_y_by,
+                             value = self.values['multiply_y'])
+        self.set_entry_value(entry=self.shift_y_by,
+                             value=self.values['shift_y'])
+        self.set_entry_value(entry=self.shift_x_by,
+                             value=self.values['shift_x'])
+
     def save_settings(self):
         ''' Stores required values to self.eleana.subprog_storage
             This is stored in memory only, not in disk
@@ -439,35 +475,81 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
             {'key_for_storage' : function_for_getting_value()}
         '''
         return  [
-            {'harm_box'    : self.harm_box.get()    },
-            {'mod_box'     : self.mod_box.get()     },
-            {'normalize'   : self.normalize_box.get() }
+            {'encoder1'     : self.encoder1.get()   },
+            {'encoder2'     : self.encoder2.get()   },
+            {'encoder3'     : self.encoder3.get()   },
+            {'spinbox1'     : self.spinbox1.get()   },
+            {'spinbox2'     : self.spinbox2.get()   },
+            {'spinbox3'     : self.spinbox3.get()   },
+            {'sel_operation_mode'   :   self.sel_operation_mode.get()},
+            {'sel_interpolation'    :   self.sel_interpolation.get()},
+            {'sel_alignment_interval':  self.sel_alignment_interval.get()},
+            {'sel_resampling_interval':  self.sel_resampling_interval.get()}
                 ]
 
     def restore_settings(self):
-        val = self.restore('harm_box')
+        val = self.restore('encoder1')
         if val:
-            #self.harm_box.set(value = val)
-            pass
+            self.encoder1.set(value = val)
         else:
-            # self.harm_box.set(value = 0)
-            pass
-        val = self.restore('mod_box')
-        if val:
-            # self.mod_box.set(value = val)
-            pass
-        else:
-            #self.mod_box.set(value = 1)
-            pass
-        val = self.restore('normalize')
-        if val == True:
-            # self.normalize_box.select()
-            pass
-        else:
-            # self.normalize_box.deselect()
-            pass
-        self.parameters_changed()
+            self.encoder1.set(value = 1)
 
+        val = self.restore('encoder2')
+        if val:
+            self.encoder2.set(value=val)
+        else:
+            self.encoder2.set(value=0)
+
+        val = self.restore('encoder3')
+        if val:
+            self.encoder3.set(value=val)
+        else:
+            self.encoder3.set(value=0)
+
+        val = self.restore('spinbox1')
+        if val:
+            self.spinbox1.set(value = val)
+        else:
+            self.spinbox1.set(value = 1)
+
+        val = self.restore('spinbox2')
+        if val:
+            self.spinbox2.set(value=val)
+        else:
+            self.spinbox2.set(value=1)
+
+        val = self.restore('spinbox3')
+        if val:
+            self.spinbox3.set(value=val)
+        else:
+            self.spinbox3.set(value=1)
+
+        val = self.restore('sel_operation_mode')
+        if val:
+            self.sel_operation_mode.set(value=val)
+        else:
+            self.sel_operation_mode.set(value = 'Subtraction (First - Second')
+
+        val = self.restore('sel_interpolation')
+        if val:
+            self.sel_interpolation.set(value=val)
+        else:
+            self.sel_interpolation.set(value='linear')
+
+        val = self.restore('sel_alignment_interval')
+        if val:
+            self.sel_alignment_interval.set(value=val)
+        else:
+            self.sel_alignment_interval.set(value='Common')
+
+        val = self.restore('sel_resampling_interval')
+        if val:
+            self.sel_resampling_interval.set(value=val)
+        else:
+            self.sel_resampling_interval.set(value='Lower')
+
+        self.calculate_values()
+        self.update_entries()
 
 if __name__ == "__main__":
     tester = TemplateClass()
