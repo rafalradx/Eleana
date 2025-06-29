@@ -308,6 +308,14 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         self.shift_y_by = self.builder.get_object("ctkentry2", self.mainwindow)
         self.shift_x_by =   self.builder.get_object("ctkentry3", self.mainwindow)
 
+        # Bind Enter and Return
+        self.multiply_y_by.bind("<Return>", self.value_entered)
+        self.multiply_y_by.bind("<KP_Enter>", self.value_entered)
+        self.shift_x_by.bind("<Return>", self.value_entered)
+        self.shift_x_by.bind("<KP_Enter>", self.value_entered)
+        self.shift_y_by.bind("<Return>", self.value_entered)
+        self.shift_y_by.bind("<KP_Enter>", self.value_entered)
+
         # Set validation for Entry boxes
         self.set_validation_for_ctkentries(list_of_entries = [self.multiply_y_by, self.shift_y_by, self.shift_x_by])
 
@@ -317,7 +325,23 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         self.sel_alignment_interval = self.builder.get_object("ctkcombobox2", self.mainwindow)
         self.sel_resampling_interval = self.builder.get_object("ctkcombobox3", self.mainwindow)
 
+        # Create value for calculations
         self.values = {}
+
+    def value_entered(self, event):
+        self.values['multiply_y'] = float(self.multiply_y_by.get())
+        self.values['shift_y'] = float(self.shift_y_by.get())
+        self.values['shift_x'] = float(self.shift_x_by.get())
+
+        factor = self.values['multiply_y'] / float(self.spinbox1.get())
+        self.encoder1.set(value = factor, skip_command=True)
+        self.encoder1.set(value=factor, skip_command=True)
+        factor = self.values['shift_y'] / float(self.spinbox2.get())
+        self.encoder2.set(value=factor, skip_command=True)
+        self.encoder2.set(value=factor, skip_command=True)
+        factor = self.values['shift_x'] / float(self.spinbox3.get())
+        self.encoder3.set(value=factor, skip_command=True)
+        self.encoder3.set(value=factor, skip_command=True)
 
     def parameters_changed(self, selection=None):
         ''' After manual modification of knob or spinbox '''
@@ -325,7 +349,7 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         self.update_entries()
         #self.ok_clicked()
 
-    def odejmij_widma_auto(self, X1, Y1, X2, Y2, method='auto', spline_order=3, fill_value=0.0):
+    def subtract_spectra(self, X1, Y1, X2, Y2, method='auto', spline_order=3, fill_value=0.0):
         """
         Interpoluje Y2 do X1 i odejmuje od Y1.
         Parametry:

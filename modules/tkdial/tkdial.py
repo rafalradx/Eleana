@@ -355,7 +355,7 @@ class Dial(tk.Canvas):
                         color = self.__palette[f"unit{i}"]
                     self.itemconfig(tagOrId=f"unit{i}", fill=color)
 
-    def __rotate_needle(self, event, angle=None) -> None:
+    def __rotate_needle(self, event, angle=None, skip_command = False) -> None:
         """
         Endless encoder z ruchem myszką: aktualizuje wartość na podstawie różnicy kątów
         """
@@ -381,6 +381,8 @@ class Dial(tk.Canvas):
         self.__last_angle = angle
         self.update_encoder_display()
 
+        if skip_command:
+            return
         if self.__command:
             self.__command(self.value)
 
@@ -405,7 +407,7 @@ class Dial(tk.Canvas):
         """
         return self.value
     
-    def set(self, value):
+    def set(self, value, skip_command = False):
         """
         This function is used to set the position of the needle
         """
@@ -426,7 +428,7 @@ class Dial(tk.Canvas):
                 self.__rotate_needle(self, angle=-360)
                 
         angle = float(-(360/(self.__end - self.__start))*(value - self.__start))
-        self.__rotate_needle(self, angle=angle)
+        self.__rotate_needle(self, angle=angle, skip_command = skip_command)
 
     def configure(self, **kwargs):
         """
