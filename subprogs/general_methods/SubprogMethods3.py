@@ -6,6 +6,9 @@ from subprogs.table.table import CreateFromTable
 import pandas
 import matplotlib.pyplot as plt
 from pathlib import Path
+from assets.Eleana import Eleana
+from assets.DataClasses import BaseDataModel
+#from main import MainApp
 from functools import wraps
 
 '''
@@ -41,13 +44,15 @@ class SubMethods_03:
             'linewidth': 2,
             'linestyle': 'dashed',
         }
+        self.original_data1: BaseDataModel | None = None
+        self.original_data2: BaseDataModel | None = None
 
         if app and not self.commandline:
             # Window start from Menu in GUI
             self.app = app
             self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
             self.master = self.app.mainwindow
-            self.eleana = self.app.eleana
+            self.eleana: Eleana = self.app.eleana
             self.eleana.active_subprog = self
             self.grapher = self.app.grapher
             self.update = self.app.update
@@ -143,7 +148,7 @@ class SubMethods_03:
             if origin == "@result" and ignore:
                 return False
             self.eleana.notify_on = False
-            self.original_data1 = copy.deepcopy(self.eleana.dataset[index])
+            self.original_data1 = self.eleana.dataset[index].copy()
             self.original_data2 = None
         else:
             if self.app:
@@ -157,7 +162,7 @@ class SubMethods_03:
                     Error.show(info='No second data selected', details='')
                 self.original_data2 = None
                 return False
-            self.original_data2 = copy.deepcopy(self.eleana.dataset[index2])
+            self.original_data2 = self.eleana.dataset[index2].copy()
         return True
 
     def data_changed(self, variable, value):

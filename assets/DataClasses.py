@@ -127,17 +127,34 @@ class BaseDataModel:
         
     def remove_from_stack_by_index(self, index: int):
         if self.is_stack():
-            self.y = np.delete(self.y, index, axis=0)
-            self.z = np.delete(self.z, index, axis=0)
-            del self.stk_names[index]
+            self.y = np.delete(self.y, index, axis=0)             
             # if only one trace left after removing
             # convert to single 2d
-            if len(self.z) == 1:
-                self.type = "single 2D"
-                self.name = f"{self.name}_{self.stk_names[0]}"
-                self.y = self.y.flatten()
-                self.z = None
-                self.stk_names = None
+            if self.z is not None and self.stk_names is not None:
+                del self.stk_names[index]
+                self.z = np.delete(self.z, index, axis=0)
+                if len(self.z) == 1:
+                    self.type = "single 2D"
+                    self.name = f"{self.name}_{self.stk_names[0]}"
+                    self.y = self.y.flatten()
+                    self.z = None
+                    self.stk_names = None
+
+    def copy(self) -> "BaseDataModel":
+        return BaseDataModel(
+            name=self.name,
+            x=self.x.copy(),
+            y=self.y.copy(),
+            z=self.z.copy() if self.z is not None else None,
+            parameters=self.parameters.copy(),
+            complex=self.complex,
+            type=self.type,
+            origin=self.origin,
+            name_nr=self.name_nr,
+            groups=self.groups.copy(),
+            comment=self.comment,
+            stk_names=self.stk_names.copy() if self.stk_names is not None else None
+        )
 
 
 @dataclass
