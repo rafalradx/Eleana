@@ -347,9 +347,10 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         ''' After manual modification of knob or spinbox '''
         self.calculate_values()
         self.update_entries()
+        print('Zmiana')
         #self.ok_clicked()
 
-    def subtract_spectra(self, X1, Y1, X2, Y2, method='auto', spline_order=3, fill_value=0.0):
+    def interpolate_data(self, X1, Y1, X2, Y2, method='auto', spline_order=3, fill_value=0.0):
         """
         Interpoluje Y2 do X1 i odejmuje od Y1.
         Parametry:
@@ -362,7 +363,7 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
 
         Zwraca:
         -------
-        X1, Y_roznica : ndarray – siatka i widmo różnicowe
+        interp_X1, interp_Y1: ndarray – siatka i widmo różnicowe
         """
 
         # Set method
@@ -382,8 +383,7 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
             Y2_interp = spline(X1)
         else:
             raise ValueError("Invalid interoplation method. Use: 'auto', 'linear' or 'spline'")
-        Y_difference = Y1 - Y2_interp
-        return X1, Y_difference
+        return Y2_interp
 
     def calculate_stack(self, commandline = False):
         ''' If STACK_SEP is False it means that data in stack should
@@ -450,7 +450,7 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         if self.use_second:
             x2 = self.data_for_calculations[1+sft]['x']
             y2 = self.data_for_calculations[1+sft]['y']
-            z2 = self.data_for_calculations[1]+sft['z']
+            z2 = self.data_for_calculations[1+sft]['z']
             name2 = self.data_for_calculations[1+sft]['name']
             stk_value2 = self.data_for_calculations[1+sft]['stk_value']
             complex2 = self.data_for_calculations[1+sft]['complex']
@@ -461,11 +461,10 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         cursor_positions = self.grapher.cursor_annotations
         # ------------------------------------------
 
-        self.data_for_calculations[0]['y'] = self.pseudomodulation(x = x1,
-                                             y = y1,
-                                             mod_amp=self.modulation,
-                                             harmonic=self.harmonic,
-                                             normalize=self.normalize)
+        # Data from SECOND to interpolate
+        y2 = self.interpolate_data(X1 = x1, Y1 = y1, X2 = x2, Y2 = y)
+        x2 = x1
+        print(x2, y2)
 
         # Send calculated values to result (if needed). This will be sent to command line
         result = None # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
@@ -514,21 +513,21 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
     def restore_settings(self):
         val = self.restore('encoder1')
         if val:
-            self.encoder1.set(value = val)
+            self.encoder1.set(value = val, skip_command=True)
         else:
-            self.encoder1.set(value = 1)
+            self.encoder1.set(value = 1, skip_command=True)
 
         val = self.restore('encoder2')
         if val:
-            self.encoder2.set(value=val)
+            self.encoder2.set(value=val, skip_command=True)
         else:
-            self.encoder2.set(value=0)
+            self.encoder2.set(value=0, skip_command=True)
 
         val = self.restore('encoder3')
         if val:
-            self.encoder3.set(value=val)
+            self.encoder3.set(value=val, skip_command=True)
         else:
-            self.encoder3.set(value=0)
+            self.encoder3.set(value=0, skip_command=True)
 
         val = self.restore('spinbox1')
         if val:

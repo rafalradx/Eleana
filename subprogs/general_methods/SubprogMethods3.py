@@ -681,7 +681,7 @@ class SubMethods_03:
                                    'comment': comment2,
                                    'parameters': parameters2
                                    }
-                self.data_for_calculations.append(data_2_orig)
+                    self.data_for_calculations.append(data_2_orig)
 
             else:
                 Error.show(info='If the first data is 2D, the second must also be 2D, not a stack.', details='')
