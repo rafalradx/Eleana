@@ -6,10 +6,8 @@ from logging import setLogRecordFactory
 
 import numpy as np
 import importlib
-from scipy.interpolate import interp1d
 from modules.tkdial.tkdial import Dial
-from widgets.CTkSpinbox import CTkSpinbox
-
+from scipy.interpolate import CubicSpline, PchipInterpolator, Akima1DInterpolator, BarycentricInterpolator
 
 ''' GENERAL SETTINGS '''
 # If True all active subprog windows will be closed on start this subprog
@@ -343,17 +341,20 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         self.encoder3.set(value=factor, skip_command=True)
         self.encoder3.set(value=factor, skip_command=True)
 
+    def settings_clicked(self, value):
+        self.values['interp_method'] = self.sel_interpolation.get()
+        self.values['operation'] = self.sel_operation_mode.get()[0]
+
     def parameters_changed(self, selection=None):
         ''' After manual modification of knob or spinbox '''
         self.calculate_values()
         self.update_entries()
-        print('Zmiana')
         #self.ok_clicked()
 
-    def interpolate_data(self, X1, Y1, X2, Y2, method='auto', spline_order=3, fill_value=0.0):
+    def interpolate_data(self, X1, Y1, X2, Y2, fill_value=0.0):
         """
-        Interpoluje Y2 do X1 i odejmuje od Y1.
-        Parametry:
+        Interpolate Y2 to X1.
+        Parameters:
         ----------
         X1, Y1 : ndarray – dane widma bazowego
         X2, Y2 : ndarray – dane widma do interpolacji
@@ -366,21 +367,12 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         interp_X1, interp_Y1: ndarray – siatka i widmo różnicowe
         """
 
-        # Set method
-        if method == 'auto':
-            if len(X2) < 50 or spline_order == 1:
-                method_final = 'linear'
-            else:
-                method_final = 'spline'
-        else:
-            method_final = method
-
         # Interpolate
-        if method_final == 'linear':
+        if self.values['interp_method'] == 'linear':
             Y2_interp = np.interp(X1, X2, Y2, left=fill_value, right=fill_value)
-        elif method_final == 'spline':
-            spline = InterpolatedUnivariateSpline(X2, Y2, k=spline_order)
-            Y2_interp = spline(X1)
+        elif self.values['interp_method'] == 'cubic':
+            interpolator = CubicSpline(X2, Y2)
+            Y2_interp = interpolator(X1)
         else:
             raise ValueError("Invalid interoplation method. Use: 'auto', 'linear' or 'spline'")
         return Y2_interp
@@ -461,10 +453,20 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         cursor_positions = self.grapher.cursor_annotations
         # ------------------------------------------
 
-        # Data from SECOND to interpolate
-        y2 = self.interpolate_data(X1 = x1, Y1 = y1, X2 = x2, Y2 = y)
-        x2 = x1
-        print(x2, y2)
+        # Shift X2
+        x2 = x2 + self.values['shift_x']
+
+        # Multiply Y2
+        y2 = y2 * self.values['multiply_y']
+
+        # Interpolate y2 to x1 axis
+        y2 = self.interpolate_data(X1 = x1, Y1 = y1, X2 = x2, Y2 = y2)
+
+        if self.values['operation'] == "S":
+            difference = y1 + y2
+
+        self.add_to_additional_plots(x=x1, y=difference, clear=True)
+
 
         # Send calculated values to result (if needed). This will be sent to command line
         result = None # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
@@ -480,7 +482,8 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         shift_x = float(self.encoder3.get()) * float(self.spinbox3.get())
         self.values = {'multiply_y' : mutliply_y,
                        'shift_y' : shift_y,
-                       'shift_x' : shift_x
+                       'shift_x' : shift_x,
+                       'interp_method' : self.sel_interpolation.get()
                        }
 
     def update_entries(self):
@@ -570,9 +573,9 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
             self.sel_resampling_interval.set(value=val)
         else:
             self.sel_resampling_interval.set(value='Lower')
-
         self.calculate_values()
         self.update_entries()
+        self.settings_clicked(None)
 
 if __name__ == "__main__":
     tester = TemplateClass()
