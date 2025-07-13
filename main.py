@@ -14,7 +14,8 @@ import re
 import os
 from functools import wraps
 import customtkinter as ctk
-from PIL import Image
+import ctypes
+
 
 # Set paths for assets, modules, subprogs and widgets
 PROJECT_PATH = Path(__file__).parent
@@ -2172,45 +2173,63 @@ if not DEVEL:
     warnings.simplefilter('ignore', np.exceptions.RankWarning)
 
 
-''' Create Main instances '''
-eleana = Eleana(version = ELEANA_VERSION, devel = DEVEL)
-sound = Sound()
-cmd = CommandProcessor()
-
-# Create GUI
-app = MainApp(eleana, cmd)  # This is GUI
-main_menu = MainMenu(app)
-grapher = Grapher(main_menu)
-app.set_grapher(grapher)
-
-load = Load(main_menu)
-save = Save(app)
-export = Export(app)
-init = Init(main_menu)
-context_menu = ContextMenu(app)
-update = Update(main_menu)  # This contains methods for update things like lists, settings, gui, groups etc.
-app.set_update(update)
-
-# Initialize basic settings: geometry, icon, graph, binding, etc
-init.main_window()
-init.paths(update)
-init.folders()
-init.graph()
-
-# Command Line and tests
-
-# Create Graph canvas
-grapher.plot_graph()
-# Hide or show widgets in GUI
-update.gui_widgets()
-update.all_lists()
-
-
-# Set graph Frame scalable
-app.graphFrame.columnconfigure(0, weight=1)
-app.graphFrame.rowconfigure(0, weight=1)
-main_menu.last_projects_menu()
 
 # Run
 if __name__ == "__main__":
+    # Check if the program is started with root privileges:
+    if os.name == 'nt':
+        # Windows
+        try:
+            disp_warn = ctypes.windll.shell32.IsUserAnAdmin()
+        except:
+            disp_warn = False
+    else:
+        # Unix (Linux, macOS)
+        disp_warn = os.geteuid() == 0
+
+    # When root privileges detected, display warning
+    if disp_warn:
+        msg = CTkMessagebox(title="Warning!", message="For safety reasons, this program should not be run with administrator privileges.",
+                            icon="warning", option_1="Quit", option_2="Ignore")
+        if msg.get() == "Quit":
+            sys.exit()
+
+    ''' Create Main instances '''
+    eleana = Eleana(version=ELEANA_VERSION, devel=DEVEL)
+    sound = Sound()
+    cmd = CommandProcessor()
+
+    # Create GUI
+    app = MainApp(eleana, cmd)  # This is GUI
+    main_menu = MainMenu(app)
+    grapher = Grapher(main_menu)
+    app.set_grapher(grapher)
+
+    load = Load(main_menu)
+    save = Save(app)
+    export = Export(app)
+    init = Init(main_menu)
+    context_menu = ContextMenu(app)
+    update = Update(main_menu)  # This contains methods for update things like lists, settings, gui, groups etc.
+    app.set_update(update)
+
+    # Initialize basic settings: geometry, icon, graph, binding, etc
+    init.main_window()
+    init.paths(update)
+    init.folders()
+    init.graph()
+
+    # Command Line and tests
+
+    # Create Graph canvas
+    grapher.plot_graph()
+    # Hide or show widgets in GUI
+    update.gui_widgets()
+    update.all_lists()
+
+    # Set graph Frame scalable
+    app.graphFrame.columnconfigure(0, weight=1)
+    app.graphFrame.rowconfigure(0, weight=1)
+    main_menu.last_projects_menu()
+
     app.run()
