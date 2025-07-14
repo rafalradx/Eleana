@@ -69,6 +69,10 @@ ORIG_IN_ODD_IDX: bool = False
 # self.use_second
 USE_SECOND: bool = True
 
+# If First and Second data have different dimensions, the error will be shown.
+# if you want to override checking if the dimmensions are the same set this parameter True
+IGNORE_DIMENSIONS: bool = True
+
 # If each subspectrum in a Stack 2D can be processed separately set this to True
 # When the calculations requires all data fro the stack in x and y set this  to False
 # If False then the method 'calculate_stack must contain appropriate method
@@ -217,7 +221,8 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
             WindowGUI.__init__(self, app.mainwindow)                                                #|
         # Create settings for the subprog                                                           #|
         self.subprog_settings = {'folder':SUBPROG_FOLDER, 'title': TITLE, 'on_top': ON_TOP, 'data_label': DATA_LABEL, 'name_suffix': NAME_SUFFIX,
-                                 'restore':RESTORE_SETTINGS, 'auto_calculate': AUTO_CALCULATE, 'result': RESULT_CREATE, 'result_ignore':RESULT_IGNORE}
+                                 'restore':RESTORE_SETTINGS, 'auto_calculate': AUTO_CALCULATE, 'result': RESULT_CREATE, 'result_ignore':RESULT_IGNORE,
+                                 'ignore_dimensions':IGNORE_DIMENSIONS}
         self.regions = {'from': REGIONS_FROM, 'orig_in_odd_idx':int(ORIG_IN_ODD_IDX)}
         self.report = {'nr': 1, 'create': REPORT_CREATE, 'headers': REPORT_HEADERS, 'rows': [], 'x_name': REPORT_NAME_X, 'y_name': REPORT_NAME_Y, 'default_x': REPORT_HEADERS[REPORT_DEFAULT_X], 'default_y': REPORT_HEADERS[REPORT_DEFAULT_Y],
                        'x_unit': REPORT_UNIT_X, 'y_unit': REPORT_UNIT_Y, 'to_group': REPORT_TO_GROUP, 'report_skip_for_stk': REPORT_SKIP_FOR_STK, 'report_window_title': REPORT_WINDOW_TITLE, 'report_name': REPORT_NAME}
@@ -349,22 +354,17 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         ''' After manual modification of knob or spinbox '''
         self.calculate_values()
         self.update_entries()
-        #self.ok_clicked()
+        self.ok_clicked()
 
     def interpolate_data(self, X1, Y1, X2, Y2, fill_value=0.0):
         """
         Interpolate Y2 to X1.
         Parameters:
         ----------
-        X1, Y1 : ndarray – dane widma bazowego
-        X2, Y2 : ndarray – dane widma do interpolacji
-        metoda : str – 'auto', 'linear', 'spline'
-        stopień_spline : int – stopień splajnu (1=liniowy, 3=kubiczny itd.)
-        fill_value : float – wartość poza zakresem X2
+        X1, Y1 : ndarray – data for base spectrum
+        X2, Y2 : ndarray – data for spectrum tu interpolate
+        fill_value : float – values to fill when outside X2
 
-        Zwraca:
-        -------
-        interp_X1, interp_Y1: ndarray – siatka i widmo różnicowe
         """
 
         # Interpolate
@@ -374,7 +374,7 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
             interpolator = CubicSpline(X2, Y2)
             Y2_interp = interpolator(X1)
         else:
-            raise ValueError("Invalid interoplation method. Use: 'auto', 'linear' or 'spline'")
+            raise ValueError("Invalid interpolation method. Use: 'linear' or 'spline'")
         return Y2_interp
 
     def calculate_stack(self, commandline = False):
@@ -453,6 +453,11 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         cursor_positions = self.grapher.cursor_annotations
         # ------------------------------------------
 
+        # Switch off visible second data
+        if self.eleana.selections['s_dsp']:
+            self.eleana.selections['s_dsp'] = False
+            self.app.check_second_show.deselect()
+
         # Shift X2
         x2 = x2 + self.values['shift_x']
 
@@ -461,11 +466,24 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
 
         # Interpolate y2 to x1 axis
         y2 = self.interpolate_data(X1 = x1, Y1 = y1, X2 = x2, Y2 = y2)
+        y2 = y2 + self.values['shift_y']
+
+        self.add_to_additional_plots(x=x2, y=y2, clear=True, style = self.app.grapher.style_second)
+
+        ''' jest jakiś problem, gdy odejmowane są dane tego samego wymiaru to jest additional plot się 
+        wyswietla. Jesli dane mają różny rozmiar to znika. Coś jest problem z odejmowaniem nierównych tablic'''
+
+
 
         if self.values['operation'] == "S":
-            difference = y1 + y2
+            wyn = y1 - y2
+        elif self.values['operation'] == "A":
+            wyn = y1 + y2
 
-        self.add_to_additional_plots(x=x1, y=difference, clear=True)
+        self.data_for_calculations[0]['x'] = x1
+        self.data_for_calculations[0]['y'] = wyn
+
+
 
 
         # Send calculated values to result (if needed). This will be sent to command line
@@ -483,7 +501,8 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         self.values = {'multiply_y' : mutliply_y,
                        'shift_y' : shift_y,
                        'shift_x' : shift_x,
-                       'interp_method' : self.sel_interpolation.get()
+                       'interp_method' : self.sel_interpolation.get(),
+                       'operation': self.sel_operation_mode.get()[0]
                        }
 
     def update_entries(self):

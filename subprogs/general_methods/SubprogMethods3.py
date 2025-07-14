@@ -1062,8 +1062,8 @@ class SubMethods_03:
             self.grapher.additional_plots = []
         if style is None:
             style = self.additional_plots_settings
-        if np.size(x) != np.size(y):
-            Error.show(info = f"X and Y have different dimensions.")
+        if np.size(x) != np.size(y) and not self.subprog_settings['ignore_dimensions']:
+            Error.show(master = self.mainwindow, info = f"X and Y have different dimensions.")
             return
         data = {'label':label, 'x':x, 'y':y, 'style': style}
         self.grapher.additional_plots.append(data)
