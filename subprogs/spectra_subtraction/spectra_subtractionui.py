@@ -56,7 +56,7 @@ class SpectraSubtractionUI:
             self.center_map = self.mainwindow.bind("<Map>", self.center)
         self.mainwindow.mainloop()
 
-    def settings_clicked(self, value):
+    def parameters_changed(self, value):
         pass
 
     def ok_clicked(self):

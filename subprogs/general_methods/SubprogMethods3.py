@@ -126,6 +126,7 @@ class SubMethods_03:
         self.mainwindow.destroy()
         self.eleana.active_subprog = None
         self.grapher.plot_graph()
+        self.eleana.busy = False
 
     # GETTING THE DATA ACCORDING TO ELEANA.SELECTION
     # ----------------------------------------------

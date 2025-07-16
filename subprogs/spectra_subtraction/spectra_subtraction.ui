@@ -152,7 +152,7 @@
                             </child>
                             <child>
                               <object class="customtkinter.CTkComboBox" id="ctkcombobox1">
-                                <property name="command" type="command" cbtype="simple">settings_clicked</property>
+                                <property name="command" type="command" cbtype="simple">parameters_changed</property>
                                 <property name="values">["linear", "cubic"]</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
@@ -257,7 +257,7 @@
                             </containerlayout>
                             <child>
                               <object class="customtkinter.CTkLabel" id="ctklabel4">
-                                <property name="text" translatable="yes">Alignment Interval</property>
+                                <property name="text" translatable="yes">Extrapolation</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
                                   <property name="row">0</property>
@@ -267,7 +267,8 @@
                             </child>
                             <child>
                               <object class="customtkinter.CTkComboBox" id="ctkcombobox2">
-                                <property name="values">["Common","Global"]</property>
+                                <property name="command" type="command" cbtype="simple">parameters_changed</property>
+                                <property name="values">["off","on", "periodic"]</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
                                   <property name="row">1</property>
@@ -372,7 +373,7 @@
                             </containerlayout>
                             <child>
                               <object class="customtkinter.CTkLabel" id="ctklabel7">
-                                <property name="text" translatable="yes">Resampling interval</property>
+                                <property name="text" translatable="yes">Show shifted</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
                                   <property name="row">0</property>
@@ -381,8 +382,10 @@
                               </object>
                             </child>
                             <child>
-                              <object class="customtkinter.CTkComboBox" id="ctkcombobox3">
-                                <property name="values">["Lower", "Higher"]</property>
+                              <object class="customtkinter.CTkCheckBox" id="checkbox1" named="True">
+                                <property name="command" type="command" cbtype="simple">parameters_changed</property>
+                                <property name="text" translatable="yes"> </property>
+                                <property name="width">10</property>
                                 <layout manager="grid">
                                   <property name="column">0</property>
                                   <property name="row">1</property>
@@ -499,6 +502,7 @@
                         </child>
                         <child>
                           <object class="customtkinter.CTkComboBox" id="ctkcombobox4">
+                            <property name="command" type="command" cbtype="simple">parameters_changed</property>
                             <property name="values">["Subtraction (First - Second)", "Addition (First + Second)"]</property>
                             <property name="width">300</property>
                             <layout manager="grid">

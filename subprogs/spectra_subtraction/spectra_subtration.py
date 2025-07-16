@@ -325,11 +325,15 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         # Settings comboboxes
         self.sel_operation_mode = self.builder.get_object("ctkcombobox4", self.mainwindow)
         self.sel_interpolation = self.builder.get_object("ctkcombobox1", self.mainwindow)
-        self.sel_alignment_interval = self.builder.get_object("ctkcombobox2", self.mainwindow)
-        self.sel_resampling_interval = self.builder.get_object("ctkcombobox3", self.mainwindow)
+        self.sel_extrapolation = self.builder.get_object("ctkcombobox2", self.mainwindow)
+        self.check_show_shifted = self.builder.get_object("checkbox1", self.mainwindow)
 
         # Create value for calculations
         self.values = {}
+
+        # Switch off X autoscale
+        self.app.check_autoscale_x
+        self.app.switch_autoscale_x
 
     def value_entered(self, event):
         self.values['multiply_y'] = float(self.multiply_y_by.get())
@@ -371,7 +375,11 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         if self.values['interp_method'] == 'linear':
             Y2_interp = np.interp(X1, X2, Y2, left=fill_value, right=fill_value)
         elif self.values['interp_method'] == 'cubic':
-            interpolator = CubicSpline(X2, Y2)
+            if self.values['extrapol'] == 2:
+                extrapolate = 'periodic'
+            else:
+                extrapolate = bool(self.values['extrapol'])
+            interpolator = CubicSpline(X2, Y2, extrapolate=extrapolate)
             Y2_interp = interpolator(X1)
         else:
             raise ValueError("Invalid interpolation method. Use: 'linear' or 'spline'")
@@ -464,27 +472,24 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         # Multiply Y2
         y2 = y2 * self.values['multiply_y']
 
+        if self.values['show_shifted']:
+            self.add_to_additional_plots(x=x2, y=y2, clear=True, style=self.app.grapher.style_second)
+        else:
+            self.clear_additional_plots()
+
         # Interpolate y2 to x1 axis
         y2 = self.interpolate_data(X1 = x1, Y1 = y1, X2 = x2, Y2 = y2)
         y2 = y2 + self.values['shift_y']
 
-        self.add_to_additional_plots(x=x2, y=y2, clear=True, style = self.app.grapher.style_second)
-
-        ''' jest jakiś problem, gdy odejmowane są dane tego samego wymiaru to jest additional plot się 
-        wyswietla. Jesli dane mają różny rozmiar to znika. Coś jest problem z odejmowaniem nierównych tablic'''
-
-
-
         if self.values['operation'] == "S":
-            wyn = y1 - y2
+            y2 = y1 - y2
         elif self.values['operation'] == "A":
-            wyn = y1 + y2
+            y2 = y1 + y2
+
+        x2, y2 = self.replenish_data(x1, y1, x2, y2)
 
         self.data_for_calculations[0]['x'] = x1
-        self.data_for_calculations[0]['y'] = wyn
-
-
-
+        self.data_for_calculations[0]['y'] = y2
 
         # Send calculated values to result (if needed). This will be sent to command line
         result = None # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
@@ -494,6 +499,28 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
 
         return row_to_report
 
+    def replenish_data(self, x1, y1, x2, y2):
+
+        mask_min = x1 < np.min(x2)
+        mask_max = x1 > np.max(x2)
+
+        # Find left part
+        if np.any(mask_min):
+            idx = np.where(mask_min)[0]
+            left_x = x1[idx]
+            left_y = y1[idx]
+            x2 = np.concatenate((left_x, x2))
+            y2 = np.concatenate((left_y, y2))
+
+        # Find right part
+        if np.any(mask_max):
+            idx = np.where(mask_max)[0]
+            right_x = x1[idx]
+            right_y = y1[idx]
+            x2 = np.concatenate((x2, right_x))
+            y2 = np.concatenate((y2, right_y))
+        return x2, y2
+
     def calculate_values(self):
         mutliply_y = float(self.encoder1.get()) * float(self.spinbox1.get())
         shift_y = float(self.encoder2.get()) * float(self.spinbox2.get())
@@ -502,8 +529,17 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
                        'shift_y' : shift_y,
                        'shift_x' : shift_x,
                        'interp_method' : self.sel_interpolation.get(),
-                       'operation': self.sel_operation_mode.get()[0]
+                       'operation': self.sel_operation_mode.get()[0],
+                       'show_shifted': self.check_show_shifted.get()
                        }
+        if self.sel_extrapolation.get() == 'periodic':
+            extrap = 2
+        elif self.sel_extrapolation.get() == 'on':
+            extrap = 1
+        else:
+            extrap = 0
+
+        self.values['extrapol'] = extrap
 
     def update_entries(self):
         self.set_entry_value(entry = self.multiply_y_by,
@@ -528,8 +564,8 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
             {'spinbox3'     : self.spinbox3.get()   },
             {'sel_operation_mode'   :   self.sel_operation_mode.get()},
             {'sel_interpolation'    :   self.sel_interpolation.get()},
-            {'sel_alignment_interval':  self.sel_alignment_interval.get()},
-            {'sel_resampling_interval':  self.sel_resampling_interval.get()}
+            {'sel_extrapolation'    :  self.sel_extrapolation.get()},
+            {'check_show_shifted'   :  self.check_show_shifted.get()}
                 ]
 
     def restore_settings(self):
@@ -581,20 +617,20 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         else:
             self.sel_interpolation.set(value='linear')
 
-        val = self.restore('sel_alignment_interval')
+        val = self.restore('sel_extrapolation')
         if val:
-            self.sel_alignment_interval.set(value=val)
+            self.sel_extrapolation.set(value=val)
         else:
-            self.sel_alignment_interval.set(value='Common')
+            self.sel_extrapolation.set(value='off')
 
-        val = self.restore('sel_resampling_interval')
-        if val:
-            self.sel_resampling_interval.set(value=val)
-        else:
-            self.sel_resampling_interval.set(value='Lower')
+        val = self.restore('self.check_show_shifted')
+        if val is True or val is None:
+            self.check_show_shifted.select()
+        elif val is False:
+            self.check_show_shifted.deselect()
         self.calculate_values()
         self.update_entries()
-        self.settings_clicked(None)
+
 
 if __name__ == "__main__":
     tester = TemplateClass()
