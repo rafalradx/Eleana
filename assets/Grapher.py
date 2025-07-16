@@ -524,7 +524,10 @@ class Grapher(GraphPreferences):
             label = data.get('label', None)
             x = data['x']
             y = data['y']
-            color = data['style']['color']
+            try:
+                color = data['style']['color']
+            except KeyError:
+                color = data['style']['color_re']
             linewidth = data['style']['linewidth']
             linestyle = data['style']['linestyle']
             if np.size(x) != np.size(y):

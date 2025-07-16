@@ -14,7 +14,8 @@ import re
 import os
 from functools import wraps
 import customtkinter as ctk
-from PIL import Image
+import ctypes
+
 
 # Set paths for assets, modules, subprogs and widgets
 PROJECT_PATH = Path(__file__).parent
@@ -507,7 +508,7 @@ class MainApp:
     *              COMBOBOX SELECTIONS              *
     **********************************************'''
 
-    @check_busy
+    #@check_busy
     def group_down_clicked(self):
         current_group = self.sel_group.get()
         group_list = self.sel_group._values
@@ -519,7 +520,7 @@ class MainApp:
         self.sel_group.set(new_group)
         self.group_selected(new_group)
 
-    @check_busy
+    #@check_busy
     def group_up_clicked(self):
         current_group = self.sel_group.get()
         group_list = self.sel_group._values
@@ -531,7 +532,7 @@ class MainApp:
         self.sel_group.set(new_group)
         self.group_selected(new_group)
 
-    @check_busy
+    #@check_busy
     def group_selected(self, value):
         self.eleana.set_selections('group', value)
         update.all_lists()
@@ -543,7 +544,7 @@ class MainApp:
         self.grapher.plot_graph()
         self.comparison_view()
 
-    @check_busy
+    #@check_busy
     def delete_group(self):
         if self.eleana.busy:
             if self.eleana.devel_mode:
@@ -583,7 +584,7 @@ class MainApp:
             self.sel_group.set('All')
             self.eleana.selections['group'] = 'All'
 
-    @check_busy
+    #@check_busy
     def data_to_other_group(self, move = True):
         if self.eleana.selections['group'] == 'All' and move:
             info = CTkMessagebox(master = self.mainwindow,
@@ -631,7 +632,7 @@ class MainApp:
         update.all_lists()
         self.sel_group.set('All')
 
-    @check_busy
+    #@check_busy
     def delete_data_from_group(self, skip_questions=False):
         group = self.eleana.selections['group']
         data_indexes = self.eleana.assignmentToGroups.get(group, None)
@@ -661,7 +662,7 @@ class MainApp:
         update.all_lists()
         update.gui_widgets()
 
-    @check_busy
+    #@check_busy
     def convert_group_to_stack(self, all = False):
         if all:
             # Convert whole data in the group to a stack
@@ -722,7 +723,7 @@ class MainApp:
         created_stack = BaseDataModel.from_dict(new_stack)
         self.add_to_results(created_stack)
 
-    @check_busy
+    #@check_busy
     def first_show(self):
         self.eleana.set_selections('f_dsp', bool(self.check_first_show.get()))
         selection = self.sel_first.get()
@@ -731,7 +732,7 @@ class MainApp:
         self.first_selected(selection)
         self.grapher.plot_additional_curves()
 
-    @check_busy
+    #@check_busy
     def first_down_clicked(self):
         current_position = self.sel_first.get()
         list_of_items = self.sel_first._values
@@ -749,7 +750,7 @@ class MainApp:
         except IndexError:
             return
 
-    @check_busy
+    #@check_busy
     def first_up_clicked(self):
         current_position = self.sel_first.get()
         list_of_items = self.sel_first._values
@@ -764,12 +765,12 @@ class MainApp:
         except IndexError:
             return
 
-    @check_busy
+    #@check_busy
     def first_complex_clicked(self, value):
         self.eleana.set_selections('f_cpl', value)
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def first_selected(self, selected_value_text):
         if selected_value_text == 'None':
             self.eleana.set_selections('first', -1)
@@ -794,7 +795,7 @@ class MainApp:
         self.eleana.selections['f_stk'] = 0
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def f_stk_selected(self, selected_value_text):
         if selected_value_text in self.f_stk._values:
             index = self.f_stk._values.index(selected_value_text)
@@ -803,7 +804,7 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def f_stk_up_clicked(self):
         current_position = self.f_stk.get()
         list_of_items = self.f_stk._values
@@ -820,7 +821,7 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def f_stk_down_clicked(self):
         current_position = self.f_stk.get()
         list_of_items = self.f_stk._values
@@ -839,15 +840,15 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def modify_first(self):
         self.modify('first')
 
-    @check_busy
+    #@check_busy
     def modify_second(self):
         self.modify('second')
 
-    @check_busy
+    #@check_busy
     def modify(self, which=None):
         if len(self.eleana.dataset) == 0:
             info = CTkMessagebox(master = self.mainwindow, title='', message='Empty dataset')
@@ -858,7 +859,7 @@ class MainApp:
         modify_data = ModifyData(self, which)
         response = modify_data.get()
 
-    @check_busy
+    #@check_busy
     def second_show(self):
         self.eleana.set_selections('s_dsp', bool(self.check_second_show.get()))
         selection = self.sel_second.get()
@@ -866,7 +867,7 @@ class MainApp:
             return
         self.second_selected(selection)
 
-    @check_busy
+    #@check_busy
     def second_selected(self, selected_value_text):
         if selected_value_text == 'None':
             self.eleana.set_selections('second', -1)
@@ -890,7 +891,7 @@ class MainApp:
         self.eleana.selections['s_stk'] = 0
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def second_down_clicked(self):
         current_position = self.sel_second.get()
         list_of_items = self.sel_second._values
@@ -908,7 +909,7 @@ class MainApp:
         except IndexError:
             return
 
-    @check_busy
+    #@check_busy
     def second_up_clicked(self):
         current_position = self.sel_second.get()
         list_of_items = self.sel_second._values
@@ -932,7 +933,7 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def s_stk_up_clicked(self):
         current_position = self.s_stk.get()
         list_of_items = self.s_stk._values
@@ -949,7 +950,7 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def s_stk_down_clicked(self):
         current_position = self.s_stk.get()
         list_of_items = self.s_stk._values
@@ -968,12 +969,12 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def second_complex_clicked(self, value):
         self.eleana.set_selections('s_cpl', value)
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def swap_first_second(self):
         first_pos = self.sel_first.get()
         second_pos = self.sel_second.get()
@@ -993,7 +994,7 @@ class MainApp:
         self.s_stk_selected(first_stk)
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def second_to_result(self):
         current = self.sel_second.get()
         if current == 'None':
@@ -1002,7 +1003,7 @@ class MainApp:
         spectrum = copy.deepcopy(self.eleana.dataset[index])
         self.add_to_results(spectrum)
 
-    @check_busy
+    #@check_busy
     def add_to_results(self, spectrum):
         # Check the name if the same already exists in eleana.result_dataset
         list_of_results = []
@@ -1030,7 +1031,7 @@ class MainApp:
     *                RESULT                   *
     ****************************************'''
 
-    @check_busy
+    #@check_busy
     def result_show(self):
         self.eleana.set_selections('r_dsp', bool(self.check_result_show.get()))
         selection = self.sel_result.get()
@@ -1038,7 +1039,7 @@ class MainApp:
             return
         self.result_selected(selection)
 
-    @check_busy
+    #@check_busy
     def result_selected(self, selected_value_text):
         if selected_value_text == 'None':
             self.eleana.set_selections('result', -1)
@@ -1062,7 +1063,7 @@ class MainApp:
         self.eleana.selections['r_stk'] = 0
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def result_up_clicked(self):
         current_position = self.sel_result.get()
         list_of_items = self.sel_result._values
@@ -1079,7 +1080,7 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def result_down_clicked(self):
         current_position = self.sel_result.get()
         list_of_items = self.sel_result._values
@@ -1098,7 +1099,7 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def r_stk_selected(self, selected_value_text):
         if selected_value_text in self.r_stk._values:
             index = self.r_stk._values.index(selected_value_text)
@@ -1107,7 +1108,7 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def r_stk_up_clicked(self):
         current_position = self.r_stk.get()
         list_of_items = self.r_stk._values
@@ -1124,7 +1125,7 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def r_stk_down_clicked(self):
         current_position = self.r_stk.get()
         list_of_items = self.r_stk._values
@@ -1143,12 +1144,12 @@ class MainApp:
             return
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def result_complex_clicked(self, value):
         self.eleana.set_selections('r_cpl', value)
         self.grapher.plot_graph()
 
-    @check_busy
+    #@check_busy
     def all_results_to_current_group(self):
         if len(self.eleana.results_dataset) == 0:
             return
@@ -1164,7 +1165,7 @@ class MainApp:
         self.sel_first.set(added_item)
         self.first_selected(added_item)
 
-    @check_busy
+    #@check_busy
     def all_results_to_new_group(self):
         if len(self.eleana.results_dataset) == 0:
             return
@@ -1180,7 +1181,7 @@ class MainApp:
         self.sel_first.set(added_item)
         self.first_selected(added_item)
 
-    @check_busy
+    #@check_busy
     def replace_first(self):
         if self.eleana.selections['result'] < 0:
             return
@@ -1199,7 +1200,7 @@ class MainApp:
         self.mainwindow.update_idletasks()
         self.sel_first.set(name)
 
-    @check_busy
+    #@check_busy
     def replace_group(self):
         group = self.eleana.selections['group']
         info = CTkMessagebox(master = self.mainwindow, title='Replace data in group', icon="warning", option_1="Cancel", option_2="Replace",
@@ -1210,7 +1211,7 @@ class MainApp:
         self.delete_data_from_group(skip_questions=True)
         self.all_results_to_current_group()
 
-    @check_busy
+    #@check_busy
     def result_to_main(self):
         if self.eleana.selections['result'] < 0:
             return
@@ -2172,45 +2173,63 @@ if not DEVEL:
     warnings.simplefilter('ignore', np.exceptions.RankWarning)
 
 
-''' Create Main instances '''
-eleana = Eleana(version = ELEANA_VERSION, devel = DEVEL)
-sound = Sound()
-cmd = CommandProcessor()
-
-# Create GUI
-app = MainApp(eleana, cmd)  # This is GUI
-main_menu = MainMenu(app)
-grapher = Grapher(main_menu)
-app.set_grapher(grapher)
-
-load = Load(main_menu)
-save = Save(app)
-export = Export(app)
-init = Init(main_menu)
-context_menu = ContextMenu(app)
-update = Update(main_menu)  # This contains methods for update things like lists, settings, gui, groups etc.
-app.set_update(update)
-
-# Initialize basic settings: geometry, icon, graph, binding, etc
-init.main_window()
-init.paths(update)
-init.folders()
-init.graph()
-
-# Command Line and tests
-
-# Create Graph canvas
-grapher.plot_graph()
-# Hide or show widgets in GUI
-update.gui_widgets()
-update.all_lists()
-
-
-# Set graph Frame scalable
-app.graphFrame.columnconfigure(0, weight=1)
-app.graphFrame.rowconfigure(0, weight=1)
-main_menu.last_projects_menu()
 
 # Run
 if __name__ == "__main__":
+    # Check if the program is started with root privileges:
+    if os.name == 'nt':
+        # Windows
+        try:
+            disp_warn = ctypes.windll.shell32.IsUserAnAdmin()
+        except:
+            disp_warn = False
+    else:
+        # Unix (Linux, macOS)
+        disp_warn = os.geteuid() == 0
+
+    # When root privileges detected, display warning
+    if disp_warn:
+        msg = CTkMessagebox(title="Warning!", message="For safety reasons, this program should not be run with administrator privileges.",
+                            icon="warning", option_1="Quit", option_2="Ignore")
+        if msg.get() == "Quit":
+            sys.exit()
+
+    ''' Create Main instances '''
+    eleana = Eleana(version=ELEANA_VERSION, devel=DEVEL)
+    sound = Sound()
+    cmd = CommandProcessor()
+
+    # Create GUI
+    app = MainApp(eleana, cmd)  # This is GUI
+    main_menu = MainMenu(app)
+    grapher = Grapher(main_menu)
+    app.set_grapher(grapher)
+
+    load = Load(main_menu)
+    save = Save(app)
+    export = Export(app)
+    init = Init(main_menu)
+    context_menu = ContextMenu(app)
+    update = Update(main_menu)  # This contains methods for update things like lists, settings, gui, groups etc.
+    app.set_update(update)
+
+    # Initialize basic settings: geometry, icon, graph, binding, etc
+    init.main_window()
+    init.paths(update)
+    init.folders()
+    init.graph()
+
+    # Command Line and tests
+
+    # Create Graph canvas
+    grapher.plot_graph()
+    # Hide or show widgets in GUI
+    update.gui_widgets()
+    update.all_lists()
+
+    # Set graph Frame scalable
+    app.graphFrame.columnconfigure(0, weight=1)
+    app.graphFrame.rowconfigure(0, weight=1)
+    main_menu.last_projects_menu()
+
     app.run()

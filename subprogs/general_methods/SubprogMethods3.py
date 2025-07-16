@@ -131,6 +131,7 @@ class SubMethods_03:
         self.mainwindow.destroy()
         self.eleana.active_subprog = None
         self.grapher.plot_graph()
+        self.eleana.busy = False
 
     # GETTING THE DATA ACCORDING TO ELEANA.SELECTION
     # ----------------------------------------------
@@ -686,7 +687,7 @@ class SubMethods_03:
                                    'comment': comment2,
                                    'parameters': parameters2
                                    }
-                self.data_for_calculations.append(data_2_orig)
+                    self.data_for_calculations.append(data_2_orig)
 
             else:
                 Error.show(info='If the first data is 2D, the second must also be 2D, not a stack.', details='')
@@ -1067,8 +1068,8 @@ class SubMethods_03:
             self.grapher.additional_plots = []
         if style is None:
             style = self.additional_plots_settings
-        if np.size(x) != np.size(y):
-            Error.show(info = f"X and Y have different dimensions.")
+        if np.size(x) != np.size(y) and not self.subprog_settings['ignore_dimensions']:
+            Error.show(master = self.mainwindow, info = f"X and Y have different dimensions.")
             return
         data = {'label':label, 'x':x, 'y':y, 'style': style}
         self.grapher.additional_plots.append(data)

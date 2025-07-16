@@ -6,8 +6,6 @@ import importlib
 import numpy as np
 
 
-from scipy.spatial import delaunay_plot_2d
-
 ''' GENERAL SETTINGS '''
 # If True all active subprog windows will be closed on start this subprog
 CLOSE_SUBPROGS: bool = False
