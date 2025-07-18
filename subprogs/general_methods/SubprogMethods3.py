@@ -134,7 +134,7 @@ class SubMethods_03:
     # GETTING THE DATA ACCORDING TO ELEANA.SELECTION
     # ----------------------------------------------
 
-    def get_data(self, variable=None, value=None):
+    def get_data(self, group_processing = False, variable=None, value=None):
         ''' Makes a copy of the selected data and stores it in self.original_data.
             You may perform calculations on self.original_data. '''
         index = self.eleana.selections[self.which]
@@ -221,8 +221,16 @@ class SubMethods_03:
                 print('ok_clicked - blocked by self.eleana.busy')
             return
         self.eleana.busy = True
-        self.start_single_calculations()
-        self.set_mouse_state(state='')
+        #self.app.mainwindow.configure(cursor='watch')
+        try:
+            self.start_single_calculations()
+        except Exception as e:
+            Error.show(info = e)
+        #self.set_mouse_state(state='')
+        del self.data_for_calculations
+        del self.original_data1
+        del self.original_data2
+
         self.eleana.busy = False
         self.after_ok_clicked()
         self.show_results_matching_first()
@@ -235,14 +243,19 @@ class SubMethods_03:
                 print('process_group_clicked - blocked by self.eleana.busy')
             return
         self.eleana.busy = True
+        self.set_mouse_state(state='watch')
+
         try:
             self.perform_group_calculations()
         except Exception as e:
             Error.show(info = e)
+        self.show_results_matching_first()
         self.set_mouse_state(state='')
         self.eleana.busy = False
         self.after_process_group_clicked()
-
+        del self.data_for_calculations
+        del self.original_data1
+        del self.original_data2
         self.show_results_matching_first()
 
     def show_report_clicked(self):
@@ -290,7 +303,7 @@ class SubMethods_03:
         '''
 
         skip_report_show = True
-        self.set_mouse_state("watch")
+        #self.set_mouse_state("watch")
         # Create result_dataset if add or replace is set
         if self.subprog_settings['result'] == 'add':
             # Simply add the result to the eleana.results_dataset
@@ -351,7 +364,8 @@ class SubMethods_03:
                     name = name_nr + '/' + stk_name + self.subprog_settings['name_suffix']
                     if self.data_label is not None:
                         self.data_label.configure(text=name)
-                        self.app.mainwindow.update()
+                        if group_processing == False:
+                            self.app.mainwindow.update()
                     status = self.do_calc_stk_data()
                     if status:
                         self.consecutive_number += 1
@@ -360,7 +374,7 @@ class SubMethods_03:
                         return status
                 # After stk calculations
                 self.stk_index = -1
-                self.set_mouse_state("")
+                #self.set_mouse_state("")
                 skip_report_show = self.report.get('report_skip_for_stk', False)
 
         # Single data that is not a stack
@@ -368,14 +382,16 @@ class SubMethods_03:
             self.stk_index = -1
             if self.data_label is not None:
                 self.data_label.configure(text=self.original_data1.name_nr)
-                self.app.mainwindow.update()
+                if group_processing == False:
+                    self.app.mainwindow.update()
             status = self.do_calc_single2D()
             if status:
                 self.consecutive_number += 1
             else:
                 return status
             skip_report_show = True
-            self.show_results_matching_first()
+            if group_processing == False:
+                self.show_results_matching_first()
 
         else:
             Error.show(info='The type of the selected data cannot be determined. Please define the "type" parameter.',
@@ -428,7 +444,7 @@ class SubMethods_03:
         # Do the single calculation for the each of the data in the
         for each in group_list:
             self.eleana.selections['first'] = each
-            status1 = self.get_data()
+            status1 = self.get_data(group_processing = True)
             if status1:
                 status2 = self.perform_single_calculations(group_processing=True)
                 if not status2:
@@ -709,7 +725,7 @@ class SubMethods_03:
             if self.report['create']:
                 self.add_to_report(row=row_to_report)
         self.create_result()
-        self.set_mouse_state(state='')
+        #self.set_mouse_state(state='')
         return True
 
     def stack_calc(self):
@@ -848,7 +864,7 @@ class SubMethods_03:
                 self.add_to_report(row=row_to_report)
         self.stk_index = -1
         self.create_result()
-        self.set_mouse_state(state='')
+        del self.data_for_calculations
         return True
 
     def extract_region_xy(self, x, y):
@@ -876,7 +892,6 @@ class SubMethods_03:
         else:
             raise ValueError('Extracted_xy method requires y 1D or 2D np.array')
         return extracted_x, extracted_y
-
 
 
     # CREATE, SHOW AND CLEAR REPORTS
@@ -1142,7 +1157,6 @@ class SubMethods_03:
             return None, None
         return x, y
 
-
     def clear_custom_annotations_list(self):
         ''' Clear the list of added custom_annotations'''
         self.eleana.custom_annotations = []
@@ -1282,6 +1296,7 @@ class SubMethods_03:
 
     def set_mouse_state(self, state=""):
         ''' Set cursor to watch or ready for Main GUI and Main Graph'''
+        self.mainwindow.configure(cursor=state)
         if self.app:
             self.grapher.canvas.get_tk_widget().config(cursor=state)
             self.app.mainwindow.configure(cursor=state)
