@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 # IMPORT MODULES NEEDED
 # -- Here is an example --
-from asyncio import set_event_loop_policy
-from logging import setLogRecordFactory
+from copy import copy
 
 import numpy as np
 import importlib
@@ -77,7 +76,7 @@ IGNORE_DIMENSIONS: bool = True
 # When the calculations requires all data fro the stack in x and y set this  to False
 # If False then the method 'calculate_stack must contain appropriate method
 # self.stack_sep
-STACK_SEP: bool = True
+STACK_SEP: bool = False
 
 # If this is True, data containing the parameter 'origin':@result
 # will be ignored for calculations.
@@ -270,6 +269,16 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
             by_method - the name of a method that triggered the action.
         '''
 
+    def after_quit_subprog(self):
+        ''' This method is called after clicking closing the window.
+            It is used to execute a code to upon clocsing the subprog
+        '''
+        if self.second_on_copy:
+            self.app.check_second_show.select()
+        else:
+            self.app.check_second_show.deselect()
+        self.app.second_show()
+
 
     # DEFINE YOUR CUSTOM METHODS FOR THIS ROUTINE
     # ----------------------------------------------
@@ -279,6 +288,8 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
 
         # HERE DEFINE YOUR REFERENCES TO WIDGETS
         from widgets.CTkSpinbox import CTkSpinbox
+
+        self.second_on_copy = copy(self.eleana.selections['s_dsp'])
 
         self.data_frame = self.builder.get_object('ctkframe4', self.mainwindow)
         self.data_frame.grid_remove()
@@ -335,6 +346,11 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         self.app.check_autoscale_x
         self.app.switch_autoscale_x
 
+        # Switch off visible second data
+        if self.eleana.selections['s_dsp']:
+            self.eleana.selections['s_dsp'] = False
+            self.app.check_second_show.deselect()
+
     def value_entered(self, event):
         self.values['multiply_y'] = float(self.multiply_y_by.get())
         self.values['shift_y'] = float(self.shift_y_by.get())
@@ -350,9 +366,6 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         self.encoder3.set(value=factor, skip_command=True)
         self.encoder3.set(value=factor, skip_command=True)
 
-    def settings_clicked(self, value):
-        self.values['interp_method'] = self.sel_interpolation.get()
-        self.values['operation'] = self.sel_operation_mode.get()[0]
 
     def parameters_changed(self, selection=None):
         ''' After manual modification of knob or spinbox '''
@@ -374,16 +387,67 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         # Interpolate
         if self.values['interp_method'] == 'linear':
             Y2_interp = np.interp(X1, X2, Y2, left=fill_value, right=fill_value)
+
+        # CUBIC interpolation
         elif self.values['interp_method'] == 'cubic':
             if self.values['extrapol'] == 2:
                 extrapolate = 'periodic'
-            else:
-                extrapolate = bool(self.values['extrapol'])
-            interpolator = CubicSpline(X2, Y2, extrapolate=extrapolate)
-            Y2_interp = interpolator(X1)
+                interpolator = CubicSpline(X2, Y2, extrapolate=extrapolate)
+                Y2_interp = interpolator(X1)
+            elif self.values['extrapol'] == 0:
+                interpolator = CubicSpline(X2, Y2, extrapolate=False)
+                Y2_interp = interpolator(X1)
+            elif self.values['extrapol'] == 1:
+                interpolator = CubicSpline(X2, Y2, extrapolate=False)
+                Y2_interp = interpolator(X1)
+                Y2_interp = np.nan_to_num(Y2_interp, nan=0.0)
+
+        # PCHIP
+        elif self.values['interp_method'] == 'phip':
+            if self.values['extrapol'] == 2:
+                extrapolate = 'periodic'
+                interpolator = PchipInterpolator(X2, Y2, extrapolate=extrapolate)
+                Y2_interp = interpolator(X1)
+            elif self.values['extrapol'] == 0:
+                interpolator = PchipInterpolator(X2, Y2, extrapolate=False)
+                Y2_interp = interpolator(X1)
+            elif self.values['extrapol'] == 1:
+                interpolator = PchipInterpolator(X2, Y2, extrapolate=False)
+                Y2_interp = interpolator(X1)
+                Y2_interp = np.nan_to_num(Y2_interp, nan=0.0)
+
+        # Akima
+        elif self.values['interp_method'] == 'akima':
+            if self.values['extrapol'] == 2:
+                extrapolate = 'periodic'
+                interpolator = PchipInterpolator(X2, Y2, extrapolate=extrapolate)
+                Y2_interp = interpolator(X1)
+            elif self.values['extrapol'] == 0:
+                interpolator = PchipInterpolator(X2, Y2, extrapolate=False)
+                Y2_interp = interpolator(X1)
+            elif self.values['extrapol'] == 1:
+                interpolator = PchipInterpolator(X2, Y2, extrapolate=False)
+                Y2_interp = interpolator(X1)
+                Y2_interp = np.nan_to_num(Y2_interp, nan=0.0)
+
+        # Barycentric
+        elif self.values['interp_method'] == 'barycentric':
+            if self.values['extrapol'] == 2:
+                extrapolate = 'periodic'
+                interpolator = PchipInterpolator(X2, Y2, extrapolate=extrapolate)
+                Y2_interp = interpolator(X1)
+            elif self.values['extrapol'] == 0:
+                interpolator = PchipInterpolator(X2, Y2, extrapolate=False)
+                Y2_interp = interpolator(X1)
+            elif self.values['extrapol'] == 1:
+                interpolator = PchipInterpolator(X2, Y2, extrapolate=False)
+                Y2_interp = interpolator(X1)
+                Y2_interp = np.nan_to_num(Y2_interp, nan=0.0)
+
         else:
             raise ValueError("Invalid interpolation method. Use: 'linear' or 'spline'")
-        return Y2_interp
+
+        return X2, Y2_interp
 
     def calculate_stack(self, commandline = False):
         ''' If STACK_SEP is False it means that data in stack should
@@ -419,6 +483,47 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
             comment2 = self.data_for_calculations[1]['comment']
             parameters2 = self.data_for_calculations[1]['parameters']
         # ------------------------------------------
+
+
+        # Shift X2
+        x2 = x2 + self.values['shift_x']
+
+        # Multiply Y2
+        y2 = y2 * self.values['multiply_y']
+
+        # Shift in y
+        y2 = y2 + self.values['shift_y']
+
+        if self.values['show_shifted']:
+            self.add_to_additional_plots(x=x2, y=y2, clear=True, style=self.app.grapher.style_second)
+        else:
+            self.clear_additional_plots()
+
+        processed_y2 = []
+        for single_y1 in y1:
+            # Interpolate y2 to x1 axis
+            x2_in, y2_in = self.interpolate_data(X1=x1, Y1=single_y1, X2=x2, Y2=y2)
+
+            if self.values['operation'] == "S":
+                y2_in = single_y1 - y2_in
+            elif self.values['operation'] == "A":
+                y2_in = single_y1 + y2_in
+
+            processed_y2.append(y2_in)
+
+        self.data_for_calculations[0]['x'] = x1
+        self.data_for_calculations[0]['y'] = np.array(processed_y2)
+
+        del processed_y2
+        del x1
+
+        # Send calculated values to result (if needed). This will be sent to command line
+        result = None  # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
+
+        # Create summary row to add to the report. The values must match the column names in REPORT_HEADERS
+        row_to_report = None
+
+        return row_to_report
 
     def calculate(self, commandline = False):
         ''' The algorithm for calculations on single x,y,z data.
@@ -461,16 +566,14 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         cursor_positions = self.grapher.cursor_annotations
         # ------------------------------------------
 
-        # Switch off visible second data
-        if self.eleana.selections['s_dsp']:
-            self.eleana.selections['s_dsp'] = False
-            self.app.check_second_show.deselect()
-
         # Shift X2
         x2 = x2 + self.values['shift_x']
 
         # Multiply Y2
         y2 = y2 * self.values['multiply_y']
+
+        # Shift in y
+        y2 = y2 + self.values['shift_y']
 
         if self.values['show_shifted']:
             self.add_to_additional_plots(x=x2, y=y2, clear=True, style=self.app.grapher.style_second)
@@ -478,18 +581,36 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
             self.clear_additional_plots()
 
         # Interpolate y2 to x1 axis
-        y2 = self.interpolate_data(X1 = x1, Y1 = y1, X2 = x2, Y2 = y2)
-        y2 = y2 + self.values['shift_y']
+        x2, y2 = self.interpolate_data(X1 = x1, Y1 = y1, X2 = x2, Y2 = y2)
 
         if self.values['operation'] == "S":
             y2 = y1 - y2
         elif self.values['operation'] == "A":
             y2 = y1 + y2
 
-        x2, y2 = self.replenish_data(x1, y1, x2, y2)
+        # Remove side parts when linear mode is selected and extapolation is off
+        if self.values['interp_method'] == 'linear' and self.values['extrapol'] == 0:
+            remove_down_to = 0
+            remove_up_to = len(x1)
+            upper_val = x2.max()
+            lower_val = x2.min()
+            if upper_val < x1.max():
+                remove_up_to = np.where(x1 > upper_val)[0]
+                if remove_up_to.size > 0:
+                    remove_up_to = remove_up_to[0]
+            if lower_val > x1.min():
+                remove_down_to = np.where(x1 < lower_val)[0]
+                if remove_down_to.size > 0:
+                    remove_down_to = remove_down_to[-1] + 1
+
+            x1 = x1[remove_down_to:remove_up_to]
+            y2 = y2[remove_down_to:remove_up_to]
 
         self.data_for_calculations[0]['x'] = x1
         self.data_for_calculations[0]['y'] = y2
+
+        del x1
+        del y2
 
         # Send calculated values to result (if needed). This will be sent to command line
         result = None # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE
@@ -499,26 +620,7 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
 
         return row_to_report
 
-    def replenish_data(self, x1, y1, x2, y2):
-
-        mask_min = x1 < np.min(x2)
-        mask_max = x1 > np.max(x2)
-
-        # Find left part
-        if np.any(mask_min):
-            idx = np.where(mask_min)[0]
-            left_x = x1[idx]
-            left_y = y1[idx]
-            x2 = np.concatenate((left_x, x2))
-            y2 = np.concatenate((left_y, y2))
-
-        # Find right part
-        if np.any(mask_max):
-            idx = np.where(mask_max)[0]
-            right_x = x1[idx]
-            right_y = y1[idx]
-            x2 = np.concatenate((x2, right_x))
-            y2 = np.concatenate((y2, right_y))
+    def prepare_arrays(self, x1, y1, x2, y2):
         return x2, y2
 
     def calculate_values(self):
@@ -532,10 +634,14 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
                        'operation': self.sel_operation_mode.get()[0],
                        'show_shifted': self.check_show_shifted.get()
                        }
-        if self.sel_extrapolation.get() == 'periodic':
+        if self.sel_extrapolation.get()[:2] == 'pe':
             extrap = 2
-        elif self.sel_extrapolation.get() == 'on':
+        elif self.sel_extrapolation.get()[:2] == 'on':
             extrap = 1
+        elif self.sel_extrapolation.get()[:2] == 'of':
+            extrap = 0
+        elif self.sel_extrapolation.get()[:2] == 'pa':
+            extrap = 3
         else:
             extrap = 0
 
@@ -623,14 +729,15 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         else:
             self.sel_extrapolation.set(value='off')
 
-        val = self.restore('self.check_show_shifted')
-        if val is True or val is None:
+        val = self.restore('check_show_shifted')
+        if val == 1:
             self.check_show_shifted.select()
-        elif val is False:
+        elif val is None:
+            self.check_show_shifted.select()
+        elif val == 0:
             self.check_show_shifted.deselect()
         self.calculate_values()
         self.update_entries()
-
 
 if __name__ == "__main__":
     tester = TemplateClass()

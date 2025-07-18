@@ -128,6 +128,9 @@ class SubMethods_03:
         self.grapher.plot_graph()
         self.eleana.busy = False
 
+        # Excecute additional code in subprog
+        self.after_quit_subprog()
+
     # GETTING THE DATA ACCORDING TO ELEANA.SELECTION
     # ----------------------------------------------
 
@@ -232,7 +235,10 @@ class SubMethods_03:
                 print('process_group_clicked - blocked by self.eleana.busy')
             return
         self.eleana.busy = True
-        self.perform_group_calculations()
+        try:
+            self.perform_group_calculations()
+        except Exception as e:
+            Error.show(info = e)
         self.set_mouse_state(state='')
         self.eleana.busy = False
         self.after_process_group_clicked()
@@ -428,7 +434,7 @@ class SubMethods_03:
                 if not status2:
                     self.eleana.selections = copy_selections
                     self.subprog_settings = copy_of_subprog_settings
-                    self.show_results_matching_first()
+                    #self.show_results_matching_first()
                     self.after_result_show_on_graph()
                     return False
 
@@ -564,7 +570,7 @@ class SubMethods_03:
                                    'comment': comment2,
                                    'parameters': parameters2
                                    }
-                self.data_for_calculations.append(data_2_orig)
+                    self.data_for_calculations.append(data_2_orig)
             else:
                 Error.show(info='If the first data is 2D, the second must also be 2D, not a stack.', details='')
                 return False
@@ -827,7 +833,7 @@ class SubMethods_03:
                                    'comment': comment1,
                                    'parameters': parameters1
                                    }
-                self.data_for_calculations.append(data_1_orig)
+                    self.data_for_calculations.append(data_1_orig)
 
             else:
                 Error.show(info='If the first data is 2D, the second must also be 2D, not a stack.', details='')
@@ -870,6 +876,8 @@ class SubMethods_03:
         else:
             raise ValueError('Extracted_xy method requires y 1D or 2D np.array')
         return extracted_x, extracted_y
+
+
 
     # CREATE, SHOW AND CLEAR REPORTS
     # ------------------------------------------------
@@ -1365,3 +1373,5 @@ class SubMethods_03:
     def finish_action(self, by_method):
         return
 
+    def after_quit_subprog(self):
+        return
