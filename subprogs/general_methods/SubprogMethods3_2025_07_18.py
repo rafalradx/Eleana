@@ -30,6 +30,7 @@ def check_busy(method):
 
 class SubMethods_03:
     def __init__(self, app=None, which='first', commandline=False, close_subprogs=False):
+        self.subprog_storage_data = []
         self.commandline = commandline
         self.general_error_skip = False
         self.update_gui = True
@@ -93,6 +94,10 @@ class SubMethods_03:
                         self.grapher.clear_selected_ranges()
                     else:
                         self.grapher.clear_all_annotations()
+            # Restore settings for the subporg
+            self.subprog_id = self.subprog_settings['folder'] + "|" + self.subprog_settings['title']
+            if self.subprog_settings['restore']:
+                self.restore_settings()
 
     # STANDARD METHODS FOR MAIN APPLICATION
     # ----------------------------------------------
@@ -105,6 +110,10 @@ class SubMethods_03:
 
     def cancel(self, event=None):
         ''' Close the window with self.response = None '''
+        # Store settings
+        if self.subprog_settings['restore']:
+             self.save_storage_on_close()
+
         self.response = None
         # Return cursor selection to enabled
         self.app.sel_cursor_mode.configure(state="normal")
@@ -113,8 +122,10 @@ class SubMethods_03:
         # Unregister observer
         self.eleana.detach(self.observer)
         self.grapher.clear_selected_ranges()
+        self.clear_additional_plots()
         self.mainwindow.destroy()
         self.eleana.active_subprog = None
+        self.grapher.plot_graph()
 
     # GETTING THE DATA ACCORDING TO ELEANA.SELECTION
     # ----------------------------------------------
@@ -123,6 +134,8 @@ class SubMethods_03:
         ''' Makes a copy of the selected data and stores it in self.original_data.
             You may perform calculations on self.original_data. '''
         index = self.eleana.selections[self.which]
+        if index < 0:
+            return False
         parameters = self.eleana.dataset[index].parameters
         origin = parameters.get('origin', None)
         if self.eleana.selections[self.which] >= 0:  # If selection is not None
@@ -275,10 +288,14 @@ class SubMethods_03:
         if self.subprog_settings['result'] == 'add':
             # Simply add the result to the eleana.results_dataset
             self.result_data = copy.deepcopy(self.original_data1)
+
             # Extract data from selections:
-            extr_x, extr_y = self.extract_region_xy(self.result_data.x, self.result_data.y)
-            self.result_data.x = extr_x
-            self.result_data.y = extr_y
+            # Only if ORIG_IN_ODD_IDX is False.
+            if not self.regions['orig_in_odd_idx']:
+                extr_x, extr_y = self.extract_region_xy(self.result_data.x, self.result_data.y)
+                self.result_data.x = extr_x
+                self.result_data.y = extr_y
+
             self.result_data.name = self.result_data.name + self.subprog_settings['name_suffix']
             self.result_data.name_nr = self.result_data.name_nr + self.subprog_settings['name_suffix']
             self.eleana.results_dataset.append(self.result_data)
@@ -287,19 +304,17 @@ class SubMethods_03:
         elif self.subprog_settings['result'] == 'replace':
             # The replace mode was set
             self.result_data = copy.deepcopy(self.original_data1)
-            # Extract data from selections:
-            extr_x, extr_y = self.extract_region_xy(self.result_data.x, self.result_data.y)
-            self.result_data.x = extr_x
-            self.result_data.y = extr_y
-
             self.result_data.name = self.result_data.name + self.subprog_settings['name_suffix']
             if len(self.eleana.results_dataset) == 0:
                 # Results_dataset is empty so new_result must be added
                 self.result_data = copy.deepcopy(self.original_data1)
+
                 # Extract data from selections:
-                extr_x, extr_y = self.extract_region_xy(self.result_data.x, self.result_data.y)
-                self.result_data.x = extr_x
-                self.result_data.y = extr_y
+                if not self.regions['orig_in_odd_idx']:
+                    extr_x, extr_y = self.extract_region_xy(self.result_data.x, self.result_data.y)
+                    self.result_data.x = extr_x
+                    self.result_data.y = extr_y
+
                 self.result_data.name = self.result_data.name + self.subprog_settings['name_suffix']
                 self.eleana.results_dataset.append(self.result_data)
                 self.current_index_in_results = 0
@@ -483,7 +498,7 @@ class SubMethods_03:
                               'comment': copy.deepcopy(comment1),
                               'parameters': copy.deepcopy(parameters1)
                               }
-        self.data_for_calculations.append(data_1_orig)
+            self.data_for_calculations.append(data_1_orig)
 
         if self.use_second:
             # Check if the second selected data is single 2D
@@ -560,10 +575,8 @@ class SubMethods_03:
         if isinstance(row_to_report, list):
             if self.report['create']:
                 self.add_to_report(row=row_to_report)
-                self.create_result()
-                return True
-        else:
-            return False
+        self.create_result()
+        return True
 
     def do_calc_single2D(self):
         ''' Gets data from original_data1 and original_data2 and send
@@ -607,7 +620,7 @@ class SubMethods_03:
         # Add non extracted data if ORIG_IN_ODD_IDX is True
         if self.regions['orig_in_odd_idx']:
             x_data1_orig = copy.deepcopy(self.original_data1.x)
-            y_data1_orig = copy.deepcopy(self.original_data1.y[self.stk_index])
+            y_data1_orig = copy.deepcopy(self.original_data1.y)
             z_data1_orig = copy.deepcopy(self.original_data1.z)
             data_1_orig = {'x': x_data1_orig,
                            'y': y_data1_orig,
@@ -620,7 +633,7 @@ class SubMethods_03:
                            'comment': comment1,
                            'parameters': parameters1
                            }
-        self.data_for_calculations.append(data_1_orig)
+            self.data_for_calculations.append(data_1_orig)
 
         if self.use_second:
             # Check if the second selected data is single 2D
@@ -651,6 +664,7 @@ class SubMethods_03:
                           'parameters': parameters2
                           }
                 self.data_for_calculations.append(data_2)
+
                 # Add original data
                 if self.regions['orig_in_odd_idx']:
                     x_data2_orig = copy.deepcopy(self.original_data2.x)
@@ -667,7 +681,7 @@ class SubMethods_03:
                                    'comment': comment2,
                                    'parameters': parameters2
                                    }
-                self.data_for_calculations.append(data_2_orig)
+                    self.data_for_calculations.append(data_2_orig)
 
             else:
                 Error.show(info='If the first data is 2D, the second must also be 2D, not a stack.', details='')
@@ -729,6 +743,25 @@ class SubMethods_03:
                   'parameters': parameters1
                   }
         self.data_for_calculations.append(data_1)
+
+        # Add non extracted data if ORIG_IN_ODD_IDX is True
+        if self.regions['orig_in_odd_idx']:
+            x_data1_orig = copy.deepcopy(self.original_data1.x)
+            y_data1_orig = copy.deepcopy(self.original_data1.y)
+            z_data1_orig = copy.deepcopy(self.original_data1.z)
+            data_1_orig = {'x': x_data1_orig,
+                           'y': y_data1_orig,
+                           'z': z_data1_orig,
+                           'name': name1,
+                           'stk_value': 'None',
+                           'complex': complex1,
+                           'type': datatype1,
+                           'origin': origin1,
+                           'comment': comment1,
+                           'parameters': parameters1
+                           }
+            self.data_for_calculations.append(data_1_orig)
+
         if self.use_second:
             # Check if the second selected data is single 2D
             is_2D = self.original_data2.y.ndim == 2
@@ -776,6 +809,25 @@ class SubMethods_03:
                               'parameters': parameters2
                               }
                 self.data_for_calculations.append(data_2)
+
+                # Add non extracted data if ORIG_IN_ODD_IDX is True
+                if self.regions['orig_in_odd_idx']:
+                    x_data1_orig = copy.deepcopy(self.original_data1.x)
+                    y_data1_orig = copy.deepcopy(self.original_data1.y)
+                    z_data1_orig = copy.deepcopy(self.original_data1.z)
+                    data_1_orig = {'x': x_data1_orig,
+                                   'y': y_data1_orig,
+                                   'z': z_data1_orig,
+                                   'name': name1,
+                                   'stk_value': 'None',
+                                   'complex': complex1,
+                                   'type': datatype1,
+                                   'origin': origin1,
+                                   'comment': comment1,
+                                   'parameters': parameters1
+                                   }
+                self.data_for_calculations.append(data_1_orig)
+
             else:
                 Error.show(info='If the first data is 2D, the second must also be 2D, not a stack.', details='')
                 return False
@@ -883,6 +935,8 @@ class SubMethods_03:
         self.report['rows'] = []
         self.consecutive_number = 1
 
+
+
     #   UPDATING RESULTS AND GUI
     # ------------------------------------------------
 
@@ -976,11 +1030,12 @@ class SubMethods_03:
 
         elif self.stk_index >= 0:
             index_in_result = len(results_dataset) - 1
-            if self.stk_index < len(results_dataset[index_in_result].y) - 1:
+            if self.stk_index <= len(results_dataset[index_in_result].y) - 1:
                 results_dataset[index_in_result].y[self.stk_index] = copy.deepcopy(new_result.y)
+
             else:
                 results_dataset[index_in_result].x = copy.deepcopy(new_result.x)
-                results_dataset[index_in_result].z = copy.deepcopy(new_result.x)
+                results_dataset[index_in_result].z = copy.deepcopy(new_result.z)
                 results_dataset[index_in_result].complex = copy.deepcopy(new_result.complex)
                 results_dataset[index_in_result].type = copy.deepcopy(new_result.type)
                 results_dataset[index_in_result].origin = copy.deepcopy(new_result.origin)
@@ -997,16 +1052,24 @@ class SubMethods_03:
         self.app.resultFrame.grid()
         self.app.sel_result.configure(values=results)
 
-    def show_additional_plots(self, data):
+    def add_to_additional_plots(self, x, y, label = None, style = None, clear = False):
         ''' This adds additional plots to the grapher
             for example showing baseline or fits, etc.
             The settings for the plot are taken from
             self.additional_plots_settings
         '''
-        if not isinstance(data, list):
-            Error.show(title='Wrong type', info='Argument: data for self.show_additional_plots must be a list of dicts')
+        if clear:
+            self.grapher.additional_plots = []
+        if style is None:
+            style = self.additional_plots_settings
+        if np.size(x) != np.size(y):
+            Error.show(info = f"X and Y have different dimensions.")
             return
-        list_of_plots = []
+        data = {'label':label, 'x':x, 'y':y, 'style': style}
+        self.grapher.additional_plots.append(data)
+
+    def clear_additional_plots(self):
+        self.grapher.additional_plots = []
 
     # ADDITIONAL METHODS FOR CHECKING CURSOR POSITIONS ON GRAPH
     # ------------------------------------------------
@@ -1055,6 +1118,21 @@ class SubMethods_03:
 
     # METHODS FOR CUSTOM CURSOR HANDLING
     # ------------------------------------------------
+    def get_selected_points(self):
+        ''' Returns unique x and y data for selected points '''
+        if self.grapher.cursor_annotations:
+            x = []
+            y = []
+            for selection in self.grapher.cursor_annotations:
+                nxt_x = selection['point'][0]
+                nxt_y = selection['point'][1]
+                if nxt_x not in x:
+                    x.append(nxt_x)
+                    y.append(nxt_y)
+        else:
+            return None, None
+        return x, y
+
 
     def clear_custom_annotations_list(self):
         ''' Clear the list of added custom_annotations'''
@@ -1199,6 +1277,39 @@ class SubMethods_03:
             self.grapher.canvas.get_tk_widget().config(cursor=state)
             self.app.mainwindow.configure(cursor=state)
         return
+
+
+    # STORE AND RESTORE SETTINGS
+    # -------------------------------------------------
+    def to_store(self, to_save: dict):
+        ''' Create entry for each storage values.
+        '''
+
+        if self.subprog_settings['restore']:
+            self.subprog_storage_data.append(to_save)
+        else:
+            if self.eleana.devel_mode:
+                print('SubprogMethods3:store, if RESTORE is False or to_save parameter is None')
+
+    def save_storage_on_close(self):
+        ''' Create entry for all subprog storge values in
+            self.eleana.subprog_storage
+        '''
+        elements = self.save_settings()
+        for element in elements:
+            self.to_store(element)
+        storage = copy.deepcopy(self.subprog_storage_data)
+        self.eleana.subprog_storage[self.subprog_id] = storage
+
+    def restore(self, element):
+        ''' Get data from self.eleana.subprog_storage
+            for widget and returns stored values
+        '''
+        subprog_field = self.eleana.subprog_storage.get(self.subprog_id, None)
+        if subprog_field is None:
+            return None
+        to_restore = next(line[element] for line in subprog_field if element in line)
+        return to_restore
 
     # DECORATORS FOR ERROR HANDLING
     # -------------------------------------------------

@@ -17,7 +17,7 @@ class Eleana:
         self.active_static_plot_windows = []
         self.devel_mode = devel
         self.cmd_error = ''                             # This contains the current error for command line
-        self.active_subprog = None                      # <-- This contains reference to the currently active subprog window
+        #self.active_subprog = None                      # <-- This contains reference to the currently active subprog window
 
         # Attribute "notes" contains general notes edited by Edit --> Notes in RTF
         self.notes = ""

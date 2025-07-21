@@ -776,7 +776,7 @@ class MainApp:
             self.eleana.set_selections('first', -1)
             self.firstComplex.grid_remove()
             self.firstStkFrame.grid_remove()
-            self.grapher.plot_graph()
+            #self.grapher.plot_graph()
             return
         i = 0
         while i < len(self.eleana.dataset):
@@ -786,14 +786,14 @@ class MainApp:
                 self.sel_first.set(name)
                 break
             i += 1
-        update.list_in_combobox('sel_first')
-        update.list_in_combobox('f_stk')
+        #update.list_in_combobox('sel_first')
+        #update.list_in_combobox('f_stk')
         if self.eleana.dataset[self.eleana.selections['first']].complex:
             self.firstComplex.grid()
         else:
             self.firstComplex.grid_remove()
         self.eleana.selections['f_stk'] = 0
-        self.grapher.plot_graph()
+        #self.grapher.plot_graph()
 
     #@check_busy
     def f_stk_selected(self, selected_value_text):
@@ -1768,6 +1768,8 @@ class MainApp:
                         print("Error: " + close_cmd)
             self.mainwindow.destroy()
 
+
+    ''' DO USUNIĘCIA '''
     def close_all_subprogs(self):
         for each in list_of_subprogs:
             close_cmd = 'self.' + each[0] + '.' + each[1] + '()'
@@ -1775,6 +1777,8 @@ class MainApp:
                 exec(close_cmd)
             except:
                 pass
+
+
 
     def edit_values_in_table(self, which ='first'):
         if which == 'first' or which == 'second':
@@ -1934,7 +1938,16 @@ class MainApp:
         subprog_fft = FastFourierTransform(self, which = 'first')
 
     def spectra_subtraction(self):
+        def count_alive_instances():
+            alive = [ref for ref in SpectraSubtraction._instances if ref() is not None]
+            print(f"🔎 Aktywnych instancji SpectraSubtraction: {len(alive)}")
+            return alive
+
+        #print(self.eleana._observers)
+        #count_alive_instances()
         subprog_spectra_subtraction = SpectraSubtraction(self, which = 'first')
+        count_alive_instances()
+
 
     # --------------------------------------------
     # MENU: EPR

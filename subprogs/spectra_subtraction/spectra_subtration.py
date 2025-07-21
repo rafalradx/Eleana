@@ -2,11 +2,12 @@
 # IMPORT MODULES NEEDED
 # -- Here is an example --
 from copy import copy
-
+import weakref
 import numpy as np
 import importlib
 from modules.tkdial.tkdial import Dial
 from scipy.interpolate import CubicSpline, PchipInterpolator, Akima1DInterpolator, BarycentricInterpolator
+import gc
 
 ''' GENERAL SETTINGS '''
 # If True all active subprog windows will be closed on start this subprog
@@ -212,9 +213,13 @@ else:
 mod = importlib.import_module(module_path)
 WindowGUI = getattr(mod, class_name)
 
-from subprogs.general_methods.SubprogMethods3 import SubMethods_03 as Methods                       #|
+from subprogs.general_methods.SubprogMethods4 import SubMethods_04 as Methods                       #|
 class SpectraSubtraction(Methods, WindowGUI):                                                           #|
+    _instances = []
     def __init__(self, app=None, which='first', commandline=False):                                 #|
+
+        SpectraSubtraction._instances.append(weakref.ref(self))
+
         if app and not commandline:                                                                 #|
             # Initialize window if app is defined and not commandline                               #|
             WindowGUI.__init__(self, app.mainwindow)                                                #|
@@ -279,6 +284,10 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
             self.app.check_second_show.deselect()
         self.app.second_show()
 
+        gc.collect()
+        for ref in gc.get_referrers(self.parameters_changed):
+            print(type(ref), ref)
+
 
     # DEFINE YOUR CUSTOM METHODS FOR THIS ROUTINE
     # ----------------------------------------------
@@ -295,26 +304,28 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
         self.data_frame.grid_remove()
 
         self.encoder1frame = self.builder.get_object('encoder1frame', self.mainwindow)
-        self.encoder1 = Dial(master = self.encoder1frame, command=self.parameters_changed)
+        self.encoder1 = self.custom_widget(Dial(master = self.encoder1frame, command=self.parameters_changed))
         self.encoder1.grid(row = 0, column=0, sticky="nsew")
+
         self.encoder2frame = self.builder.get_object('encoder2frame', self.mainwindow)
-        self.encoder2 = Dial(master=self.encoder2frame,  command=self.parameters_changed)
+        self.encoder2 = self.custom_widget(Dial(master=self.encoder2frame,  command=self.parameters_changed))
         self.encoder2.grid(row=0, column=0, sticky="nsew")
+
         self.encoder3frame = self.builder.get_object('encoder3frame', self.mainwindow)
-        self.encoder3 = Dial(master=self.encoder3frame,  command=self.parameters_changed)
+        self.encoder3 = self.custom_widget(Dial(master=self.encoder3frame,  command=self.parameters_changed))
         self.encoder3.grid(row=0, column=0, sticky="nsew")
         self.spinbox1frame = self.builder.get_object('spinbox1frame', self.mainwindow)
         self.spinbox1frame.grid_columnconfigure(0, weight=1)
-        self.spinbox1 = CTkSpinbox(master = self.spinbox1frame, logarithm_step = True, disable_wheel = True, min_value = 1e-20, max_value = 1e+20, start_value = 1,  command=self.parameters_changed)
+        self.spinbox1 = self.custom_widget(CTkSpinbox(master = self.spinbox1frame, logarithm_step = True, disable_wheel = True, min_value = 1e-20, max_value = 1e+20, start_value = 1,  command=self.parameters_changed))
         self.spinbox1.grid(row = 0, column = 0, sticky = 'nsew')
 
         self.spinbox2frame = self.builder.get_object('spinbox2frame', self.mainwindow)
         self.spinbox2frame.grid_columnconfigure(0, weight=1)
-        self.spinbox2 = CTkSpinbox(master=self.spinbox2frame, logarithm_step = True, disable_wheel = True, min_value = 1e-20, max_value = 1e+20, start_value = 1,  command=self.parameters_changed)
+        self.spinbox2 = self.custom_widget(CTkSpinbox(master=self.spinbox2frame, logarithm_step = True, disable_wheel = True, min_value = 1e-20, max_value = 1e+20, start_value = 1,  command=self.parameters_changed))
         self.spinbox2.grid(row=0, column=0, sticky='nsew')
         self.spinbox3frame = self.builder.get_object('spinbox3frame', self.mainwindow)
         self.spinbox3frame.grid_columnconfigure(0, weight=1)
-        self.spinbox3 = CTkSpinbox(master=self.spinbox3frame, logarithm_step = True, disable_wheel = True, min_value = 1e-20, max_value = 1e+20, start_value = 1,  command=self.parameters_changed)
+        self.spinbox3 = self.custom_widget(CTkSpinbox(master=self.spinbox3frame, logarithm_step = True, disable_wheel = True, min_value = 1e-20, max_value = 1e+20, start_value = 1,  command=self.parameters_changed))
         self.spinbox3.grid(row=0, column=0, sticky='nsew')
 
         # Entry Boxes
