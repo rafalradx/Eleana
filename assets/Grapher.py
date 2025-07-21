@@ -1,5 +1,4 @@
 
-
 from LoadSave import Load
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
@@ -19,9 +18,9 @@ matplotlib.use('TkAgg')
 matplotlib.rcParams['keymap.save'] = ''
 
 class GraphPreferences:
-    def __init__(self, main_menu):
-        self.app = main_menu.app
-        self.eleana = self.app.eleana
+    def __init__(self, eleana):
+        self.app = None
+        self.eleana = eleana
 
 
         ''' CURSOR DEFINITIONS '''
@@ -140,13 +139,13 @@ class GraphPreferences:
         self.app.sel_cursor_mode.set('None')
 
 class Grapher(GraphPreferences):
-    def __init__(self, main_menu):
+    def __init__(self, master, eleana):
         # Initialize GraphPreferences
-        super().__init__(main_menu)
+
         ''' Initialize app, eleana and graphs objects (fig, canvas, toolbar)'''
-        self.main_menu = main_menu
-        self.app = main_menu.app
-        self.eleana = self.app.eleana
+
+        self.graphFrame = master
+        self.eleana = eleana
         self.plt = plt
         self.mplcursors = mplcursors
         self.cursor = None
@@ -154,12 +153,12 @@ class Grapher(GraphPreferences):
         # Create canvas
         self.fig = Figure(figsize=(8, 4), dpi=100)
         self.ax = self.fig.add_subplot(111)
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.app.graphFrame)
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.graphFrame)
         self.canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
         self.canvas.draw()
 
         # Create toolbar
-        self.toolbar = NavigationToolbar2Tk(self.canvas, self.app.graphFrame, pack_toolbar=False)
+        self.toolbar = NavigationToolbar2Tk(self.canvas, self.graphFrame, pack_toolbar=False)
         self.toolbar.update()
         self.toolbar.grid(row=1, column=0, sticky="ew")
 
