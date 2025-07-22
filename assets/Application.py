@@ -18,6 +18,7 @@ from widgets.CTkSpinbox import CTkSpinbox
 # Import Eleana specific classes
 from MainMenu import MainMenu
 from Grapher import Grapher
+from Configure import Configure
 from IconToWidget import IconToWidget
 # from LoadSave import Load, Save, Export
 # from DataClasses import BaseDataModel
@@ -110,15 +111,6 @@ class Application():
         self.mainwindow.iconify()
         self.mainwindow.withdraw()
         self.builder.connect_callbacks(self)
-
-        # Create Main Menu
-        self.main_menubar = MainMenu(master = self.mainwindow, pixmap_folder = self.eleana.paths['pixmaps'],
-                             callbacks={
-                                 "load_project": self.load_project,
-                                 "save_as": self.save_as,
-                             })
-        self.main_menubar.create(master = self.mainwindow)
-
 
         # Create references to Widgets and Frames
         self.switch_comparison = builder.get_object("switch_comp_view", self.mainwindow)
@@ -239,6 +231,16 @@ class Application():
         self.pane9 = builder.get_object('pane9', self.mainwindow)
         #self.pane6 = builder.get_object('pane6', self.mainwindow)
 
+        # Create Main Menu
+        self._main_menubar = MainMenu(master = self.mainwindow, pixmap_folder = self.eleana.paths['pixmaps'],
+                             callbacks={
+                                 "load_project": self.load_project,
+                                 "save_as": self.save_as,
+                             })
+        self._main_menubar.create(master = self.mainwindow)
+
+
+
         # Keyboard bindings
         self.mainwindow.bind("<Control-c>", self.copy_to_clipboard)
         self.mainwindow.bind("<Control-s>", self.save_current)
@@ -254,12 +256,14 @@ class Application():
         # Comparison view
         self.comparison_settings = {'vsep': 0, 'hsep': 0, 'indexes': (), 'v_factor': '1', 'h_factor': '1'}
 
-        # Ctk styles
-        self.gui_appearence = 'light'
-        self.color_theme = 'dark-blue'
-
         # Set icons for buttons and widgets
         #IconToWidget.eleana(app = self)
+
+        # Configure Main Window
+        self.application_style = {}
+        configure = Configure(self.eleana)
+        configure.main_window(mainwindow = self.mainwindow, style = self.application_style)
+
 
     def scrollable_dropdown(self, selection, combobox):
         ''' Interconnects CTkScrollableDropdown to standard CTkCombobox'

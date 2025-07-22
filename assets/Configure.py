@@ -4,36 +4,37 @@ import tkinter as tk
 import customtkinter as ctk
 import pickle
 from subprogs.preferences.preferences import PreferencesApp
+from LoadSave import Load
 
-class Init:
-    def __init__(self, main_menu):
-        self.main_menu = main_menu
-        self.app = self.main_menu.app
-        self.eleana = self.app.eleana
-        self.grapher = self.app.grapher
-     
-    def main_window(self):
+class Configure:
+    def __init__(self, eleana):
+
+        self.eleana = eleana
+        self.load = Load()
+
+    def main_window(self, mainwindow, style):
         '''This method sets properties of the main window'''
 
-        width = self.app.mainwindow.winfo_screenwidth()  # Get screen width
-        height = self.app.mainwindow.winfo_screenheight()  # Get screen height
-        self.app.mainwindow.geometry('800x800')
-        self.app.mainwindow.geometry(str(width) + 'x' + str(height) + "+0+0")  # Set geometry to max
+        width = mainwindow.winfo_screenwidth()  # Get screen width
+        height = mainwindow.winfo_screenheight()  # Get screen height
+        mainwindow.geometry('800x800')
+        mainwindow.geometry(str(width) + 'x' + str(height) + "+0+0")  # Set geometry to max
 
         # Add icon to the top window bar form pixmaps folder
         top_window_icon = Path(self.eleana.paths['pixmaps'], "eleana_top_window.png")
         main_icon = tk.PhotoImage(file=top_window_icon)
-        self.app.mainwindow.iconphoto(True, main_icon)
-        self.app.mainwindow.title('new project - Eleana')
+        mainwindow.iconphoto(True, main_icon)
+        mainwindow.title('new project - Eleana')
 
         # Set color modes for GUI
-        settings = Load.load_preferences(self.eleana)
-        if not settings:
-            self.app.color_theme = 'dark-blue'
-            self.app.gui_appearence = 'dark'
-            preferences = PreferencesApp(self.app)
-            preferences.ok()
-            Save.save_preferences(self.eleana, self.app, self.grapher)
+        settings = self.load.load_preferences(self.eleana)
+        settings = None
+        if settings is None:
+            style['gui_appearence'] = 'dark'
+            style['color_theme'] = 'dark-blue'
+            #preferences = PreferencesApp(self.app)
+            #preferences.ok()
+            #Save.save_preferences(self.eleana, self.app, self.grapher)
         else:
             mode = settings.gui_appearence
             ctk.set_appearance_mode(mode)
@@ -42,7 +43,15 @@ class Init:
             ctk.set_default_color_theme(color)
             self.app.color_theme = color
 
-        # ---------------------- Set default values in GUI -------
+
+        #mode = settings.gui_appearence
+        ctk.set_appearance_mode(style['gui_appearence'])
+        #self.app.gui_appearence = mode
+        #color = settings.color_theme
+        #ctk.set_default_color_theme(color)
+        #self.app.color_theme = color
+        return
+# ---------------------- Set default values in GUI -------
         self.app.sel_group.configure(values=['All'])
         self.app.sel_group.set('All')
         self.app.sel_first.configure(values=['None'])

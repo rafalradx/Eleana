@@ -16,13 +16,14 @@ from subprogs.ascii_file_preview.ascii_file_preview import AsciFilePreview
 from subprogs.table.table import CreateFromTable
 
 class Load:
-    def __init__(self, menu_instance):
-        self.menu = menu_instance
-        self.app = self.menu.app
-        self.eleana = self.app.eleana
+    def __init__(self):
+        #self.menu = menu_instance
+        #self.app = self.menu.app
+        #self.eleana = eleana
+        pass
 
-    @classmethod
-    def load_preferences(cls, eleana):
+    @staticmethod
+    def load_preferences(eleana):
         ''' Load saved graph settings from home/.EleanaPy/preferences.pic'''
         try:
             filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'preferences.pic')
