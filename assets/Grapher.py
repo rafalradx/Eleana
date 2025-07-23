@@ -19,8 +19,8 @@ matplotlib.rcParams['keymap.save'] = ''
 
 class GraphPreferences:
     def __init__(self, eleana):
-        self.app = None
-        self.eleana = eleana
+        # self.app = None
+        # self.eleana = eleana
 
 
         ''' CURSOR DEFINITIONS '''
@@ -29,116 +29,78 @@ class GraphPreferences:
         #                                annot - display selection on graph
         #                                multp - enable multiple annotations on graph
         #                                store - enable collecting the selected points
-        self.cursor_modes = [
-                        {'label': 'None', 'hov':False, 'a_txt':False, 'annot':False, 'multip':False, 'store': False},
-                        {'label': 'Continuous read XY', 'hov':True, 'a_txt':True, 'annot':True, 'multip':False, 'store': False},
-                        {'label': 'Selection of points with labels', 'hov': False, 'annot':True, 'a_txt':True, 'multip':True, 'store': True},
-                        {'label': 'Selection of points', 'hov': False, 'annot':True, 'a_txt': False, 'multip':True, 'store': True},
-                        {'label': 'Numbered selections', 'hov':False, 'annot':True, 'a_txt': True, 'multip':True, 'store': True, 'nr': True},
-                        {'label': 'Free select'},
-                        {'label': 'Crosshair', 'hov':True, 'a_txt':True, 'annot':True, 'multip':False, 'store': False},
-                        {'label': 'Range select', 'hov':False, 'annot':True, 'a_txt': True, 'multip':True, 'store': True, 'nr': True}
-                            ]
+        # self.cursor_modes = [
+        #                 {'label': 'None', 'hov':False, 'a_txt':False, 'annot':False, 'multip':False, 'store': False},
+        #                 {'label': 'Continuous read XY', 'hov':True, 'a_txt':True, 'annot':True, 'multip':False, 'store': False},
+        #                 {'label': 'Selection of points with labels', 'hov': False, 'annot':True, 'a_txt':True, 'multip':True, 'store': True},
+        #                 {'label': 'Selection of points', 'hov': False, 'annot':True, 'a_txt': False, 'multip':True, 'store': True},
+        #                 {'label': 'Numbered selections', 'hov':False, 'annot':True, 'a_txt': True, 'multip':True, 'store': True, 'nr': True},
+        #                 {'label': 'Free select'},
+        #                 {'label': 'Crosshair', 'hov':True, 'a_txt':True, 'annot':True, 'multip':False, 'store': False},
+        #                 {'label': 'Range select', 'hov':False, 'annot':True, 'a_txt': True, 'multip':True, 'store': True, 'nr': True}
+        #                     ]
+
+        #self.cursor_modes = self.eleana.settings.grapher['cursor_modes']
 
        # Style of the custom annotation
        #  self.style_of_annotation = {'text':"Point: ", 'number':True,
        #                              'arrowprops' :{'facecolor':'yellow', 'edgecolor':'blue'}}
 
-        self.style_of_annotation = {'text': "", 'number': True,
-                                    'xytext':(0.03, 0.03),
-                                    'arrowprops':{
-                                            "arrowstyle": "->",  # Styl strzałki
-                                            "lw": 1.5,           # Grubość linii strzałki
-                                            "color": "black",    # Kolor strzałki
-                                                },
-                                    "bbox": {
-                                            "boxstyle": "round",  # Zaokrąglone pole tekstowe
-                                            "fc": "orange",       # Kolor wypełnienia pola tekstowego
-                                            "ec": "black",        # Kolor krawędzi pola tekstowego
-                                            "lw": 0.5            # Grubość krawędzi pola tekstowego
-                                            },
-                                    "fontsize": 10,          # Rozmiar czcionki
-                                    "color": "black"        # Kolor tekstu
-                                            }
-        # Scale settings
-        self.inverted_x_axis = False
+        # self.style_of_annotation = self.eleana.settings.grapher['style_of_annotation']
+        # # Scale settings
+        # self.inverted_x_axis = False
+        #
+        # # Set cursor modes
+        # self.set_cursor_modes()
+        # self.current_cursor_mode = self.cursor_modes[0]
+        # self.cursor_limit = 0
+        #
+        # # Load preferences from the settings file
+        # try:
+        #     preferences = Load.load_preferences(self.eleana)
+        #     if not preferences:
+        #         # Use default if not exists
+        #         self.default_settings()
+        #     else:
+        #         self.plt_style = preferences.plt_style
+        #         self.style_first = preferences.style_first
+        #         self.style_second = preferences.style_second
+        #         self.style_result = preferences.style_result
+        #
+        # except Exception as e:
+        #     print('Unable to read preferences.pic file.')
+        #     print(e)
+        #     self.default_settings()
+        # try:
+        #     plt.style.use(self.plt_style)
+        # except:
+        #     self.plt_style =  'Solarize_Light2'
+        #     plt.style.use(self.plt_style)
+        #
+        # self.additional_plots_style = self.eleana.settings.grapher['additional_plots_style']
+        #
+        # self.additional_plots = []
 
-        # Set cursor modes
-        self.set_cursor_modes()
-        self.current_cursor_mode = self.cursor_modes[0]
-        self.cursor_limit = 0
+    # def default_settings(self):
+    #     self.plt_style = self.eleana.settings.grapher['plt_style']
+    #     self.style_first = self.eleana.settings.grapher['style_first']
+    #     self.style_second = self.eleana.settings.grapher['style_second']
+    #     self.style_result = self.eleana.settings.grapher['style_result']
+    #
+    #     ctk.set_appearance_mode('light')
 
-        # Load preferences from the settings file
-        try:
-            preferences = Load.load_preferences(self.eleana)
-            if not preferences:
-                # Use default if not exists
-                self.default_settings()
-            else:
-                self.plt_style = preferences.plt_style
-                self.style_first = preferences.style_first
-                self.style_second = preferences.style_second
-                self.style_result = preferences.style_result
+    # def set_cursor_modes(self):
+    #     ''' This function creates list of cursor
+    #         modes in cursor combobox'''
+    #     print("set_cursor_modes - wyłączone")
+    #     return
+    #     box_values = []
+    #     for each in self.cursor_modes:
+    #         box_values.append(each['label'])
+    #     self.app.sel_cursor_mode.configure(values=box_values)
+    #     self.app.sel_cursor_mode.set('None')
 
-        except Exception as e:
-            print('Unable to read preferences.pic file.')
-            print(e)
-            self.default_settings()
-        try:
-            plt.style.use(self.plt_style)
-        except:
-            self.plt_style =  'Solarize_Light2'
-            plt.style.use(self.plt_style)
-
-        self.additional_plots_style = {
-                                        'color': 'gray',
-                                        'linewidth': 2,
-                                        'linestyle': 'dashed',
-                                        }
-
-        self.additional_plots = []
-
-    def default_settings(self):
-        self.plt_style = 'Solarize_Light2'
-        self.style_first = {'plot_type': 'line',
-                            'linewidth': 2,
-                            'linestyle':'solid',
-                            'marker': '.',
-                            's': 5,
-                            'color_re': "#d53422",
-                            'color_im': "#ef6f74"
-                            }
-        self.style_second = {'plot_type': 'line',
-                             'linewidth': 2,
-                             'linestyle': 'solid',
-                             's': 5,
-                             'marker':'.',
-                             'color_re': '#008cb3',
-                             'color_im': '#07bbed'
-                             }
-        self.style_result = {'plot_type': 'line',
-                             'linewidth': 2,
-                             'linestyle': 'solid',
-                             's': 5,
-                             'marker': '.',
-                             'color_re': '#108d3d',
-                             'color_im': '#32ab5d'
-                             }
-
-
-
-        ctk.set_appearance_mode('light')
-
-    def set_cursor_modes(self):
-        ''' This function creates list of cursor
-            modes in cursor combobox'''
-        box_values = []
-        for each in self.cursor_modes:
-            box_values.append(each['label'])
-        self.app.sel_cursor_mode.configure(values=box_values)
-        self.app.sel_cursor_mode.set('None')
-
-class Grapher(GraphPreferences):
+class Grapher():
     def __init__(self, master, eleana):
         # Initialize GraphPreferences
 
@@ -162,8 +124,28 @@ class Grapher(GraphPreferences):
         self.toolbar.update()
         self.toolbar.grid(row=1, column=0, sticky="ew")
 
+        # Create references to settings
+        self.cursor_modes = self.eleana.settings.grapher['cursor_modes']
+        self.style_of_annotation = self.eleana.settings.grapher['style_of_annotation']
+        self.plt_style = self.eleana.settings.grapher['plt_style']
+        self.style_first = self.eleana.settings.grapher['style_first']
+        self.style_second = self.eleana.settings.grapher['style_second']
+        self.style_result =  self.eleana.settings.grapher['style_result']
+        self.additional_plots_style = self.eleana.settings.grapher['additional_plots_style']
+
+        # Additional plots
+        self.additional_plots = self.eleana.storage.additional_plots
+
+        # Apply plt style
+        try:
+            plt.style.use(self.plt_style)
+        except:
+             self.plt_style =  'Solarize_Light2'
+             plt.style.use(self.plt_style)
+
+
         # Create empty list of created annotations
-        self.cursor_annotations = []
+        self.cursor_annotations = self.eleana.storage.cursor_annotations
 
         # Create variable for storing min-max
         self.scale1 = {'x': [], 'y': []}

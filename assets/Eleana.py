@@ -3,8 +3,33 @@ import sys
 import numpy as np
 from pathlib import Path
 import tempfile
+from dataclasses import dataclass, field
+from typing import Dict, Any
+import pickle
 
-class Eleana:
+@dataclass
+class GuiState:
+    autoscale_x: bool
+    autoscale_y: bool
+    log_x: bool
+    log_y: bool
+    indexed_x: bool
+    cursor_mode: str
+
+@dataclass
+class Settings:
+    general: Dict[str, Any] # Store general settings for GUI
+    grapher: Dict[str, Any] # Settings associated with grapher
+
+@dataclass
+class Storage:
+    subprog_settings: Dict[str, Any]
+    additional_plots: list[Any]
+    static_plots: list[Any]
+    active_static_plot_windows: list[Any]
+    cursor_annotations: list[Any]
+
+class Eleana():
     # Main attributes associated with data gathered in the programe
     def __init__(self, version, devel):
         self.busy = False                               # <-- This variable is set to True if something is triggered in application and other proces must wait until it is False
@@ -13,8 +38,6 @@ class Eleana:
         self.results_dataset = []                       # <-- This keeps data containing results
         self.assignmentToGroups = {'<group-list/>': ['All']} # <-- This keeps information about which data from dataset is assigned to particular group
         self.groupsHierarchy = {}                       # <-- This store information about which group belongs to other
-        self.static_plots = []                          # This contains a list of created simple static plots
-        self.active_static_plot_windows = []
         self.devel_mode = devel
         self.cmd_error = ''                             # This contains the current error for command line
 
@@ -73,20 +96,36 @@ class Eleana:
         #       status - is the current clicking operations: 0 - wait for first click
         #                                                    1 - first X point was clicked
         #
-        self.color_span = {'color': 'gray',
-                           'alpha': 0.2,
-                           'ranges': [],
-                           'status':0,
-                           'start':0,
-                           'end':0}
 
-        self.custom_annotations = []
 
         # Storage for settings for subprogs
         # The structure is list of dicts. Dicts has structure:
         # {'subprog':'SUBPROG_PYTHON_FILENAME', 'content':[LIST_OF_DICTS_CONTAINING_STORAGE]}
 
-        self.subprog_storage = {}
+
+        # Create contener for guistate
+        self.gui_state = GuiState(  autoscale_x = True,
+                                    autoscale_y = True,
+                                    log_x = False,
+                                    log_y = False,
+                                    indexed_x = False,
+                                    cursor_mode = 'None'
+                                    )
+
+        # Create temporary storages
+        self.storage = Storage(subprog_settings = [],
+                               static_plots = [],
+                               active_static_plot_windows = [],
+                               additional_plots = [],
+                               cursor_annotations = []
+                               )
+
+        # Try loading saved settings
+        self.settings = self.load_settings()
+        if self.settings is None:
+            self.set_default_settings()
+            # Save settings on disk
+            self.save_settings()
 
     ''' ***************************** 
      *         OBSERVER METHODS      *
@@ -122,6 +161,123 @@ class Eleana:
             #    print('Eleana.py: Activate observer')
 
     # End of methods for observers --------------------
+    def set_default_settings(self):
+        ''' Set default settings '''
+
+        # Default general settings
+        grapher = {}
+        general = {'gui_appearance': 'dark',
+                   'color_theme': 'dark-blue'}
+        # Settings for Grapher
+        grapher['cursor_modes'] = [
+            {'label': 'None', 'hov': False, 'a_txt': False, 'annot': False, 'multip': False, 'store': False},
+            {'label': 'Continuous read XY', 'hov': True, 'a_txt': True, 'annot': True, 'multip': False, 'store': False},
+            {'label': 'Selection of points with labels', 'hov': False, 'annot': True, 'a_txt': True, 'multip': True,
+             'store': True},
+            {'label': 'Selection of points', 'hov': False, 'annot': True, 'a_txt': False, 'multip': True,
+             'store': True},
+            {'label': 'Numbered selections', 'hov': False, 'annot': True, 'a_txt': True, 'multip': True, 'store': True,
+             'nr': True},
+            {'label': 'Free select'},
+            {'label': 'Crosshair', 'hov': True, 'a_txt': True, 'annot': True, 'multip': False, 'store': False},
+            {'label': 'Range select', 'hov': False, 'annot': True, 'a_txt': True, 'multip': True, 'store': True,
+             'nr': True}
+        ]
+        grapher['style_of_annotation'] = {
+            'text': "", 'number': True,
+            'xytext': (0.03, 0.03),
+            'arrowprops': {
+                "arrowstyle": "->",  # Arrow style
+                "lw": 1.5,  # Arrow thickness
+                "color": "black",  # Arrow color
+            },
+            "bbox": {
+                "boxstyle": "round",  # Rounded text field
+                "fc": "orange",  # Background color
+                "ec": "black",  # Border color
+                "lw": 0.5  # Border thickness
+            },
+            "fontsize": 10,  # Font size
+            "color": "black"  # Font color
+        }
+        grapher['plt_style'] = 'Solarize_Light2'
+        grapher['style_first'] = {
+            'plot_type': 'line',
+            'linewidth': 2,
+            'linestyle': 'solid',
+            'marker': '.',
+            's': 5,
+            'color_re': "#d53422",
+            'color_im': "#ef6f74"
+        }
+        grapher['style_second'] = {
+            'plot_type': 'line',
+            'linewidth': 2,
+            'linestyle': 'solid',
+            's': 5,
+            'marker': '.',
+            'color_re': '#008cb3',
+            'color_im': '#07bbed'
+        }
+        grapher['style_result'] = {
+            'plot_type': 'line',
+            'linewidth': 2,
+            'linestyle': 'solid',
+            's': 5,
+            'marker': '.',
+            'color_re': '#108d3d',
+            'color_im': '#32ab5d'
+        }
+
+        grapher['additional_plots_style'] = {
+            'color': 'gray',
+            'linewidth': 2,
+            'linestyle': 'dashed',
+        }
+        grapher['color_span'] = {'color': 'gray',
+                                 'alpha': 0.2,
+                                 'ranges': [],
+                                 'status': 0,
+                                 'start': 0,
+                                 'end': 0}
+        grapher['custom_annotations'] = []
+
+        # Static plots
+        grapher['static_plots'] = []
+        grapher['active_static_plot_windows'] = []
+
+        # Store settings in Settings dataclass
+        self.settings = Settings(general=general, grapher=grapher)
+
+    def save_settings(self):
+        """Save settings in .EleanaPy/preferences.pic"""
+        try:
+            filename = Path(self.paths['home_dir']) / '.EleanaPy' / 'settings.pic'
+            filename.parent.mkdir(parents=True, exist_ok=True)
+            with open(filename, 'wb') as file:
+                pickle.dump(self.settings, file, protocol=4)
+            return True
+        except Exception as e:
+            print(f"Error saving settings: {e}")
+            return False
+
+    def load_settings(self):
+        ''' Load saved graph settings from home/.EleanaPy/preferences.pic'''
+        try:
+            filename = Path(self.paths['home_dir'], '.EleanaPy', 'settings.pic')
+            # Read paths.pic
+            file_to_read = open(filename, "rb")
+            preferences = pickle.load(file_to_read)
+            file_to_read.close()
+            return preferences
+        except Exception as e:
+            print(e)
+            self.set_default_settings()
+            return None
+
+    #
+    # Operations on dataset
+    #
 
     def name_nr_to_index(self, selected_value_text):
         ''' Returns index of Eleana.dataset which name_nr attribute is equal to argument: selected_value_text'''

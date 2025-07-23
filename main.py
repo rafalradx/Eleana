@@ -111,8 +111,6 @@ if __name__ == "__main__":
     app.run()
 
 
-    # grapher = Grapher(main_menu)
-    # app.set_grapher(grapher)
     #
     # load = Load(main_menu)
     # save = Save(app)

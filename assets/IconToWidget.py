@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from PIL import Image
 from pathlib import Path
+import weakref
 
 class IconToWidget:
     @staticmethod
@@ -16,11 +17,11 @@ class IconToWidget:
         IconToWidget.set(widget, png, iconset = iconset, size=size)
 
     @staticmethod
-    def eleana(app, iconset = 'default'):
-
+    def eleana(application, iconset = 'default'):
+        app = weakref.proxy(application)
          #          PYGUBU ID                   PNG FILE (no suffix)                SIZE
          #          ----------------------      --------------------------          ------------
-         items = (( 'btn_swap'                  ,'btn_swap',                        (30,20)),
+        items = (( 'btn_swap'                  ,'btn_swap',                        (30,20)),
                   ( 'btn_second_modify'         ,'btn_modify',                      (20,20)),
                   ( 'btn_first_modify'          ,'btn_modify',                      (20,20)),
                   ( 'btn_first_to_result'       ,'to_result',                       (20,20)),
@@ -34,11 +35,11 @@ class IconToWidget:
                   ('btn_all_to_new'             ,'btn_all_to_new',                  (20,20))
                 )
 
-         for item in items:
-             id = item[0]
-             png = item[1]
-             size = item[2]
-             IconToWidget.set2id(id=id, png=png, app = app, iconset = iconset, size = size)
+        for item in items:
+            id = item[0]
+            png = item[1]
+            size = item[2]
+            IconToWidget.set2id(id=id, png=png, app = app, iconset = iconset, size = size)
 
 
 

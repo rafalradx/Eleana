@@ -29,32 +29,32 @@ class Load:
             filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'preferences.pic')
             # Read paths.pic
             file_to_read = open(filename, "rb")
-            preferences = pickle.load(file_to_read)
+            settings = pickle.load(file_to_read)
             file_to_read.close()
-            return preferences
+            return settings
         except Exception as e:
             print(e)
             return None
 
-    @classmethod
-    def load_paths_settings(cls, eleana):
-        ''' Load saved settings from home/.EleanaPy/paths.pic'''
-        try:
-            filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
-            # Read paths.pic
-            file_to_read = open(filename, "rb")
-            paths = pickle.load(file_to_read)
-            eleana.paths = paths
-            file_to_read.close()
-            # Create last project list in the main menu
-            last_projects = eleana.paths['last_projects']
-            last_projects = [element for i, element in enumerate(last_projects) if i <= 10]
-            # Write the list to eleana.paths
-            eleana.paths['last_projects'] = last_projects
-            return True
-        except Exception as e:
-            print(e)
-            return None
+    # @classmethod
+    # def load_paths_settings(cls, eleana):
+    #     ''' Load saved settings from home/.EleanaPy/paths.pic'''
+    #     try:
+    #         filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
+    #         # Read paths.pic
+    #         file_to_read = open(filename, "rb")
+    #         paths = pickle.load(file_to_read)
+    #         eleana.paths = paths
+    #         file_to_read.close()
+    #         # Create last project list in the main menu
+    #         last_projects = eleana.paths['last_projects']
+    #         last_projects = [element for i, element in enumerate(last_projects) if i <= 10]
+    #         # Write the list to eleana.paths
+    #         eleana.paths['last_projects'] = last_projects
+    #         return True
+    #     except Exception as e:
+    #         print(e)
+    #         return None
 
     def load_project(self, recent=None):
         ''' This method loads projects created by Eleana'''
@@ -352,44 +352,45 @@ class Save:
         self.eleana = app_instance.eleana
 
     @classmethod
-    def save_preferences(cls, eleana, app, grapher):
-        ''' Save graph preferences in .EleanaPy/preferences.pic '''
-        try:
-            # Create object to store preferences
-            preferences = Preferences(app, grapher)
-            # Save current settings:
-            filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'preferences.pic')
-            with open(filename, 'wb') as file:
-                pickle.dump(preferences, file)
-            return True
-        except Exception as e:
-            print(e)
-            return None
-    @classmethod
-    def save_settings_paths(cls, eleana):
-        ''' Save settings in .EleanaPy/paths.pic '''
-        try:
-            # Save current settings:
-            filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
-            content = eleana.paths
-            with open(filename, 'wb') as file:
-                pickle.dump(content, file)
-            return True
-        except Exception as e:
-            Error.show(info="Cannot save settings", details=e)
-            return None
+    # def save_preferences(cls, eleana, app, grapher):
+    #     ''' Save graph preferences in .EleanaPy/preferences.pic '''
+    #     try:
+    #         # Create object to store preferences
+    #         preferences = Preferences(app, grapher)
+    #         # Save current settings:
+    #         filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'preferences.pic')
+    #         with open(filename, 'wb') as file:
+    #             pickle.dump(preferences, file)
+    #         return True
+    #     except Exception as e:
+    #         print(e)
+    #         return None
 
-
-    def save_eleana_paths(self, show_error=False):
-        '''Save self.eleana.paths to .EleanaPy user folder'''
-        try:
-            filename = Path(self.eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
-            content = self.eleana.paths
-            with open(filename, 'wb') as file:
-                pickle.dump(content, file)
-        except Exception as e:
-            if show_error:
-                Error.show(info = "Cannot save config paths.pic file", details = e)
+    # @classmethod
+    # def save_settings_paths(cls, eleana):
+    #     ''' Save settings in .EleanaPy/paths.pic '''
+    #     try:
+    #         # Save current settings:
+    #         filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
+    #         content = eleana.paths
+    #         with open(filename, 'wb') as file:
+    #             pickle.dump(content, file)
+    #         return True
+    #     except Exception as e:
+    #         Error.show(info="Cannot save settings", details=e)
+    #         return None
+    #
+    #
+    # def save_eleana_paths(self, show_error=False):
+    #     '''Save self.eleana.paths to .EleanaPy user folder'''
+    #     try:
+    #         filename = Path(self.eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
+    #         content = self.eleana.paths
+    #         with open(filename, 'wb') as file:
+    #             pickle.dump(content, file)
+    #     except Exception as e:
+    #         if show_error:
+    #             Error.show(info = "Cannot save config paths.pic file", details = e)
 
     def save_project(self, save_current=False):
         ''' Save project to a file '''

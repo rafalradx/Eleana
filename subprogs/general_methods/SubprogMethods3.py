@@ -609,15 +609,16 @@ class SubMethods_03:
         self.data_for_calculations = []
 
         # Get data from self.original_data1
-        x_data1 = copy.deepcopy(self.original_data1.x)
-        y_data1 = copy.deepcopy(self.original_data1.y)
-        z_data1 = copy.deepcopy(self.original_data1.z)
-        name1 = copy.deepcopy(self.original_data1.name)
-        complex1 = copy.deepcopy(self.original_data1.complex)
-        datatype1 = copy.deepcopy(self.original_data1.type)
-        origin1 = copy.deepcopy(self.original_data1.origin)
-        comment1 = copy.deepcopy(self.original_data1.comment)
-        parameters1 = copy.deepcopy(self.original_data1.parameters)
+        x_data1 = self.original_data1.x.copy()
+        y_data1 = self.original_data1.y.copy()
+        z_data1 = copy(self.original_data1.z)
+
+        name1 = self.original_data1.name.copy()
+        complex1 = self.original_data1.complex.copy()
+        datatype1 = self.original_data1.type.copy()
+        origin1 = self.original_data1.origin.copy()
+        comment1 = self.original_data1.comment.copy()
+        parameters1 = self.original_data1.parameters.copy()
 
         # Extract the data in x and y if needed
         x_data1, y_data1 = self.extract_region_xy(x=x_data1, y=y_data1)
@@ -642,9 +643,9 @@ class SubMethods_03:
 
         # Add non extracted data if ORIG_IN_ODD_IDX is True
         if self.regions['orig_in_odd_idx']:
-            x_data1_orig = copy.deepcopy(self.original_data1.x)
-            y_data1_orig = copy.deepcopy(self.original_data1.y)
-            z_data1_orig = copy.deepcopy(self.original_data1.z)
+            x_data1_orig = self.original_data1.x.copy()
+            y_data1_orig = self.original_data1.y.copy()
+            z_data1_orig = self.original_data1.z.copy()
             data_1_orig = {'x': x_data1_orig,
                            'y': y_data1_orig,
                            'z': z_data1_orig,
@@ -663,15 +664,16 @@ class SubMethods_03:
             is_2D = self.original_data2.y.ndim == 2
             if self.original_data2.type.lower() != 'single 2D' or is_2D != 2:
                 # First is single 2D and second is single 2D
-                x_data2 = copy.deepcopy(self.original_data2.x)
-                y_data2 = copy.deepcopy(self.original_data2.y)
-                z_data2 = copy.deepcopy(self.original_data2.z)
-                name2 = copy.deepcopy(self.original_data2.name)
-                complex2 = copy.deepcopy(self.original_data1.complex)
-                datatype2 = copy.deepcopy(self.original_data1.type)
-                origin2 = copy.deepcopy(self.original_data1.origin)
-                comment2 = copy.deepcopy(self.original_data1.comment)
-                parameters2 = copy.deepcopy(self.original_data1.parameters)
+                x_data2 = self.original_data2.x.copy()
+                y_data2 = self.original_data2.y.copy()
+                z_data2 = self.original_data2.z.copy()
+
+                name2 = self.original_data2.name.copy()
+                complex2 = self.original_data1.complex.copy()
+                datatype2 = self.original_data1.type.copy()
+                origin2 = self.original_data1.origin.copy()
+                comment2 = self.original_data1.comment.copy()
+                parameters2 = self.original_data1.parameters.copy()
 
                 # Extract the data in x and y
                 x_data2, y_data2 = self.extract_region_xy(x=x_data2, y=y_data2)
@@ -690,9 +692,9 @@ class SubMethods_03:
 
                 # Add original data
                 if self.regions['orig_in_odd_idx']:
-                    x_data2_orig = copy.deepcopy(self.original_data2.x)
-                    y_data2_orig = copy.deepcopy(self.original_data2.y[self.stk_index])
-                    z_data2_orig = copy.deepcopy(self.original_data2.z)
+                    x_data2_orig = self.original_data2.x.copy()
+                    y_data2_orig = self.original_data2.y[self.stk_index].copy()
+                    z_data2_orig = self.original_data2.z.copy()
                     data_2_orig = {'x': x_data2_orig,
                                    'y': y_data2_orig,
                                    'z': z_data2_orig,

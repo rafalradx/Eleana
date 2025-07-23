@@ -10,7 +10,7 @@ class Configure:
     def __init__(self, eleana):
 
         self.eleana = eleana
-        self.load = Load()
+        #self.load = Load()
 
     def main_window(self, mainwindow, style):
         '''This method sets properties of the main window'''
@@ -27,30 +27,13 @@ class Configure:
         mainwindow.title('new project - Eleana')
 
         # Set color modes for GUI
-        settings = self.load.load_preferences(self.eleana)
-        settings = None
-        if settings is None:
-            style['gui_appearence'] = 'dark'
-            style['color_theme'] = 'dark-blue'
-            #preferences = PreferencesApp(self.app)
-            #preferences.ok()
-            #Save.save_preferences(self.eleana, self.app, self.grapher)
-        else:
-            mode = settings.gui_appearence
-            ctk.set_appearance_mode(mode)
-            self.app.gui_appearence = mode
-            color = settings.color_theme
-            ctk.set_default_color_theme(color)
-            self.app.color_theme = color
-
-
-        #mode = settings.gui_appearence
-        ctk.set_appearance_mode(style['gui_appearence'])
-        #self.app.gui_appearence = mode
-        #color = settings.color_theme
-        #ctk.set_default_color_theme(color)
-        #self.app.color_theme = color
-        return
+        try:
+            ctk.set_appearance_mode(self.eleana.settings.general['gui_appearance'])
+            ctk.set_default_color_theme(self.eleana.settings.general['color_theme'])
+        except Exception as e:
+            self.eleana.set_default_settings()
+            self.eleana.save_settings()
+            print(e)
 # ---------------------- Set default values in GUI -------
         self.app.sel_group.configure(values=['All'])
         self.app.sel_group.set('All')

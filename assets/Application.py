@@ -8,7 +8,9 @@ import customtkinter as ctk
 import numpy as np
 import pandas
 import pygubu
+import tkinter as tk
 
+''' ELEANA MODULES '''
 # Import modules from "/modules" folder
 from modules.CTkListbox import CTkListbox
 from modules.CTkMessagebox import CTkMessagebox
@@ -20,63 +22,43 @@ from MainMenu import MainMenu
 from Grapher import Grapher
 from Configure import Configure
 from IconToWidget import IconToWidget
-# from LoadSave import Load, Save, Export
+from LoadSave import Load, Save, Export
 # from DataClasses import BaseDataModel
 # from Error import Error
 # from IconToWidget import IconToWidget
 
+
+''' SUBPROGS '''
 from filter_fft.fft_filter import FFTFilter
 from filter_savitzky_golay.sav_gol import SavGol
 from edit_values_in_table.edit_values_in_table import EditValuesInTable
 from pseudomodulation.pseudomodulation import PseudoModulation
 from fft.fast_fourier_transform import FastFourierTransform
 from spectra_subtraction.spectra_subtration import SpectraSubtraction
-
-#list_of_subprogs.append(['edit_values_in_table', 'cancel'])
 from EPR_B_to_g.B_to_g import EPR_B_to_g
-#list_of_subprogs.append(['subprog_epr_b_to_b', 'cancel'])
 from trim_data.Trim_data import TrimData
-#list_of_subprogs.append(['subprog_trim_data', 'cancel'])
 from spline_baseline.Spline_baseline import SplineBaseline
-#list_of_subprogs.append(['subprog_spline_baseline', 'cancel'])
 from polynomial_baseline.Polynomial_baseline import PolynomialBaseline
-#list_of_subprogs.append(['subprog_polynomial_baseline', 'cancel'])
 from distance_read.Distance_read import DistanceRead
-#list_of_subprogs.append(['xy_distance', 'cancel'])
 from integrate_region.IntegrateRegion import IntegrateRegion
-#list_of_subprogs.append(['integrate_region', 'cancel'])
 from normalize.normalize_2 import Normalize
-#list_of_subprogs.append(['normalize', 'cancel'])
 from group_edit.add_group import Groupcreate
-#list_of_subprogs.append(['group_create', 'cancel'])
 from group_edit.assign_to_group import Groupassign
-#list_of_subprogs.append(['group_assign', 'cancel'])
 from user_input.single_dialog import SingleDialog
-#list_of_subprogs.append(['single_dialog', 'cancel'])
 from select_data.select_data import SelectData
-#list_of_subprogs.append(['select_items', 'cancel'])
 from select_data.select_items import SelectItems
-#list_of_subprogs.append(['select_data', 'cancel'])
 from notepad.notepad import Notepad
-#list_of_subprogs.append(['notepad', 'cancel'])
 from table.table import CreateFromTable
-#list_of_subprogs.append(['spreadsheet', 'cancel'])
 from edit_parameters.edit_parameters import EditParameters
-#list_of_subprogs.append(['edit_par', 'cancel'])
 from modify.modify import ModifyData
-#list_of_subprogs.append(['modify_data', 'cancel'])
 from group_edit.move_to_group import MoveToGroup
-#list_of_subprogs.append(['move_to_group', 'cancel'])
 from preferences.preferences import PreferencesApp
-#list_of_subprogs.append(['prefereces', 'cancel'])
 from group_edit.stack_to_group import StackToGroup
-#list_of_subprogs.append(['convert_stack_to_group', 'cancel'])
 
 # Widgets used by main application
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
 
 def check_busy(method):
-
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         self.mainwindow.configure(cursor="watch")
@@ -136,6 +118,9 @@ class Application():
         self.secondComplex = builder.get_object("secondComplex", self.mainwindow)
         self.resultComplex = builder.get_object("resultComplex", self.mainwindow)
         self.graphFrame = builder.get_object('graphFrame', self.mainwindow)
+        self.graphFrame.rowconfigure(0, weight=1)
+        self.graphFrame.columnconfigure(0, weight=1)
+
         self.swapFrame = builder.get_object('swapFrame', self.mainwindow)
         self.f_stk = builder.get_object('f_stk', self.mainwindow)
         self.s_stk = builder.get_object('s_stk', self.mainwindow)
@@ -240,7 +225,6 @@ class Application():
         self._main_menubar.create(master = self.mainwindow)
 
 
-
         # Keyboard bindings
         self.mainwindow.bind("<Control-c>", self.copy_to_clipboard)
         self.mainwindow.bind("<Control-s>", self.save_current)
@@ -257,12 +241,47 @@ class Application():
         self.comparison_settings = {'vsep': 0, 'hsep': 0, 'indexes': (), 'v_factor': '1', 'h_factor': '1'}
 
         # Set icons for buttons and widgets
-        #IconToWidget.eleana(app = self)
+        IconToWidget.eleana(application = self)
+
+        # Create and configure Grapher
+        self.grapher = Grapher(master = self.graphFrame, eleana = self.eleana)
 
         # Configure Main Window
-        self.application_style = {}
-        configure = Configure(self.eleana)
-        configure.main_window(mainwindow = self.mainwindow, style = self.application_style)
+        #configure = Configure(self.eleana)
+        #configure.main_window(mainwindow=self.mainwindow, style=self.eleana.settings.general)
+        self.configure_main_application_window()
+
+
+    def configure_main_application_window(self):
+        width = self.mainwindow.winfo_screenwidth()  # Get screen width
+        height = self.mainwindow.winfo_screenheight()  # Get screen height
+        self.mainwindow.geometry('800x800')
+        self.mainwindow.geometry(str(width) + 'x' + str(height) + "+0+0")  # Set geometry to max
+
+        # Add icon to the top window bar form pixmaps folder
+        top_window_icon = Path(self.eleana.paths['pixmaps'], "eleana_top_window.png")
+        main_icon = tk.PhotoImage(file=top_window_icon)
+        self.mainwindow.iconphoto(True, main_icon)
+        self.mainwindow.title('new project - Eleana')
+
+        # Set color modes for GUI
+        try:
+            ctk.set_appearance_mode(self.eleana.settings.general['gui_appearance'])
+            ctk.set_default_color_theme(self.eleana.settings.general['color_theme'])
+        except Exception as e:
+            self.eleana.set_default_settings()
+            self.eleana.save_settings()
+            print(e)
+        # ---------------------- Set default values in GUI -------
+        self.sel_group.configure(values=['All'])
+        self.sel_group.set('All')
+        self.sel_first.configure(values=['None'])
+        self.sel_first.set('None')
+        self.sel_second.configure(values=['None'])
+        self.sel_second.set('None')
+        self.sel_result.configure(values=['None', 'yes'])
+        self.sel_result.set('None')
+        self.mainwindow.protocol('WM_DELETE_WINDOW', self.close_application)
 
 
     def scrollable_dropdown(self, selection, combobox):
