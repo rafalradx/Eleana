@@ -9,6 +9,9 @@ import numpy as np
 import pandas
 import pygubu
 import tkinter as tk
+import pickle
+
+from assets.MainMenu import ContextMenu
 
 ''' ELEANA MODULES '''
 # Import modules from "/modules" folder
@@ -20,40 +23,40 @@ from widgets.CTkSpinbox import CTkSpinbox
 # Import Eleana specific classes
 from MainMenu import MainMenu
 from Grapher import Grapher
-from Configure import Configure
 from IconToWidget import IconToWidget
 from LoadSave import Load, Save, Export
+from Update import Update
 # from DataClasses import BaseDataModel
-# from Error import Error
+from Error import Error
 # from IconToWidget import IconToWidget
 
 
 ''' SUBPROGS '''
-from filter_fft.fft_filter import FFTFilter
-from filter_savitzky_golay.sav_gol import SavGol
-from edit_values_in_table.edit_values_in_table import EditValuesInTable
-from pseudomodulation.pseudomodulation import PseudoModulation
-from fft.fast_fourier_transform import FastFourierTransform
-from spectra_subtraction.spectra_subtration import SpectraSubtraction
-from EPR_B_to_g.B_to_g import EPR_B_to_g
-from trim_data.Trim_data import TrimData
-from spline_baseline.Spline_baseline import SplineBaseline
-from polynomial_baseline.Polynomial_baseline import PolynomialBaseline
-from distance_read.Distance_read import DistanceRead
-from integrate_region.IntegrateRegion import IntegrateRegion
-from normalize.normalize_2 import Normalize
-from group_edit.add_group import Groupcreate
-from group_edit.assign_to_group import Groupassign
-from user_input.single_dialog import SingleDialog
-from select_data.select_data import SelectData
-from select_data.select_items import SelectItems
-from notepad.notepad import Notepad
-from table.table import CreateFromTable
-from edit_parameters.edit_parameters import EditParameters
-from modify.modify import ModifyData
-from group_edit.move_to_group import MoveToGroup
-from preferences.preferences import PreferencesApp
-from group_edit.stack_to_group import StackToGroup
+from subprogs.filter_fft.fft_filter import FFTFilter
+from subprogs.filter_savitzky_golay.sav_gol import SavGol
+from subprogs.edit_values_in_table.edit_values_in_table import EditValuesInTable
+from subprogs.pseudomodulation.pseudomodulation import PseudoModulation
+from subprogs.fft.fast_fourier_transform import FastFourierTransform
+from subprogs.spectra_subtraction.spectra_subtration import SpectraSubtraction
+from subprogs.EPR_B_to_g.B_to_g import EPR_B_to_g
+from subprogs.trim_data.Trim_data import TrimData
+from subprogs.spline_baseline.Spline_baseline import SplineBaseline
+from subprogs.polynomial_baseline.Polynomial_baseline import PolynomialBaseline
+from subprogs.distance_read.Distance_read import DistanceRead
+from subprogs.integrate_region.IntegrateRegion import IntegrateRegion
+from subprogs.normalize.normalize_2 import Normalize
+from subprogs.group_edit.add_group import Groupcreate
+from subprogs.group_edit.assign_to_group import Groupassign
+from subprogs.user_input.single_dialog import SingleDialog
+from subprogs.select_data.select_data import SelectData
+from subprogs.select_data.select_items import SelectItems
+from subprogs.notepad.notepad import Notepad
+from subprogs.table.table import CreateFromTable
+from subprogs.edit_parameters.edit_parameters import EditParameters
+from subprogs.modify.modify import ModifyData
+from subprogs.group_edit.move_to_group import MoveToGroup
+from subprogs.preferences.preferences import PreferencesApp
+from subprogs.group_edit.stack_to_group import StackToGroup
 
 # Widgets used by main application
 from widgets.CTkHorizontalSlider import CTkHorizontalSlider
@@ -180,7 +183,7 @@ class Application():
         self.first_mod_panel_8.set(1)
 
         # Create Grapher
-        self.grapher = Grapher(master = self.graphFrame, eleana = self.eleana )
+        #self.grapher = Grapher(master = self.graphFrame, eleana = self.eleana )
 
         # Hide FIRST modifications
         self.first_modFrame.grid_remove()
@@ -216,14 +219,63 @@ class Application():
         self.pane9 = builder.get_object('pane9', self.mainwindow)
         #self.pane6 = builder.get_object('pane6', self.mainwindow)
 
+        # Create loader/saver/exporter
+        self.load = Load(eleana=self.eleana)
+        self.save = Save(eleana=self.eleana)
+        self.export = Export(eleana=self.eleana)
+
         # Create Main Menu
-        self._main_menubar = MainMenu(master = self.mainwindow, pixmap_folder = self.eleana.paths['pixmaps'],
-                             callbacks={
+        self.main_menubar = MainMenu(
+                            master = self.mainwindow,
+                            pixmap_folder = self.eleana.paths['pixmaps'],
+                            eleana = self.eleana,
+                            callbacks={
                                  "load_project": self.load_project,
                                  "save_as": self.save_as,
-                             })
-        self._main_menubar.create(master = self.mainwindow)
+                                 "import_elexsys": self.import_elexsys,
+                                 "import_EMX": self.import_EMX,
+                                 "import_magnettech1": self.import_magnettech1,
+                                 "import_magnettech2": self.import_magnettech2,
+                                 "import_adani_dat": self.import_adani_dat,
+                                 "import_shimadzu_spc": self.import_shimadzu_spc,
+                                 "import_ascii": self.import_ascii,
+                                 "import_excel": self.import_excel,
 
+                            })
+        # Create the main menu
+        self.main_menubar.create(master = self.mainwindow)
+
+        # Create context menues
+        self.contextmenu = ContextMenu(master = self.mainwindow,
+                                       eleana = self.eleana,
+                                       gui_references = {
+                                            "groupFrame": self.groupFrame,
+                                            "sel_group": self.sel_group,
+                                            "firstFrame": self.firstFrame,
+                                            "sel_first": self.sel_first,
+                                            "firstStkFrame": self.firstStkFrame,
+                                            "f_stk": self.f_stk,
+                                            "seconFrame": self.secondFrame,
+                                            "sel_second": self.sel_second,
+                                            "secondStkFrame": self.secondStkFrame,
+                                            "s_stk": self.s_stk,
+                                            "resultFrame": self.resultFrame,
+                                            "sel_result": self.sel_result
+                                            },
+                                       callbacks={
+                                            "delete_group": self.delete_group,
+                                            "data_to_other_group": self.data_to_other_group,
+                                            "delete_data_from_group": self.delete_data_from_group,
+                                            "convert_group_to_stack": self.convert_group_to_stack,
+                                            "rename_data": self.rename_data,
+                                            "delete_data": self.delete_data,
+                                            "duplicate_data": self.duplicate_data,
+                                            "first_to_group": self.first_to_group,
+                                            "stack_to_group": self.stack_to_group,
+                                            "edit_comment": self.edit_comment,
+                                            "edit_parameters": self.edit_parameters,
+                                            "delete_single_stk_data": self.delete_single_stk_data,
+                                            })
 
         # Keyboard bindings
         self.mainwindow.bind("<Control-c>", self.copy_to_clipboard)
@@ -244,13 +296,69 @@ class Application():
         IconToWidget.eleana(application = self)
 
         # Create and configure Grapher
-        self.grapher = Grapher(master = self.graphFrame, eleana = self.eleana)
+        self.grapher = Grapher(master = self.graphFrame,
+                               eleana = self.eleana,
+                               gui_references = {
+                                   'sel_cursor_mode': self.sel_cursor_mode,
+                                   'btn_clear_cursors': self.btn_clear_cursors,
+                                   'sel_cursor_mode': self.sel_cursor_mode,
+                                   'annotationsFrame': self.annotationsFrame,
+                                   'infoframe': self.infoframe,
+                                   'info': self.info
+                               },
+                               callbacks = {}
+
+                               )
 
         # Configure Main Window
         #configure = Configure(self.eleana)
         #configure.main_window(mainwindow=self.mainwindow, style=self.eleana.settings.general)
         self.configure_main_application_window()
+        self.configure_graph_buttons()
+        self.configure_paths()
+        self.configure_graph()
 
+        # # Create loader/saver/exporter
+        self.load = Load(eleana = self.eleana)
+        self.save = Save(eleana = self.eleana)
+        self.export = Export(eleana = self.eleana)
+
+        # Create Update module
+        self.update = Update(eleana = self.eleana,
+                             widgetsIDs = {
+                                    'sel_group' : self.sel_group,
+                                    'sel_first' : self.sel_first,
+                                    'sel_second': self.sel_second,
+                                    'sel_result': self.sel_result,
+                                    'f_stk' : self.f_stk,
+                                    's_stk': self.s_stk,
+                                    'r_stk':self.r_stk,
+                                    'scrollabledropdown' : self.scrollable_dropdown,
+                                    'resultFrame' : self.resultFrame,
+                                    'firstStkFrame' :self.firstStkFrame,
+                                    'secondStkFrame' : self.secondStkFrame,
+                                    'resultStkFrame' : self.resultStkFrame,
+                                    'firstComplex' : self.firstComplex,
+                                    'secondComplex': self.secondComplex,
+                                    'resultComplex' : self.resultComplex
+                                    },
+                             menu_recent = self.main_menubar.menu_recent,
+                             callbacks = {
+                                    'scrollable_dropdown': self.scrollable_dropdown,                                    }
+                             )
+
+        self.gui_to_selections()
+
+        # Configure initial gui states
+        self.update.gui_widgets()
+        self.update.all_lists()
+
+        # Create Recent projects menu
+        self.main_menubar.last_projects_menu()
+
+    ''' 
+     ----------    METHODS   -------------
+    '''
 
     def configure_main_application_window(self):
         width = self.mainwindow.winfo_screenwidth()  # Get screen width
@@ -272,7 +380,8 @@ class Application():
             self.eleana.set_default_settings()
             self.eleana.save_settings()
             print(e)
-        # ---------------------- Set default values in GUI -------
+
+        # --------- Set default values in GUI -------
         self.sel_group.configure(values=['All'])
         self.sel_group.set('All')
         self.sel_first.configure(values=['None'])
@@ -283,6 +392,77 @@ class Application():
         self.sel_result.set('None')
         self.mainwindow.protocol('WM_DELETE_WINDOW', self.close_application)
 
+    def configure_graph_buttons(self):
+        # -------- Set graph buttons ------------
+        state = self.eleana.gui_state
+        if state.autoscale_x:
+            self.check_autoscale_x.select()
+        else:
+            self.check_autoscale_x.deselect()
+        if state.autoscale_y:
+            self.check_autoscale_y.select()
+        else:
+            self.check_autoscale_y.deselect()
+        if state.log_x:
+            self.check_log_x.select()
+        else:
+            self.check_log_x.deselect()
+        if state.log_y:
+            self.check_log_y.select()
+        else:
+            self.check_log_y.deselect()
+        if state.indexed_x:
+            self.check_indexed_x.select()
+        else:
+            self.check_indexed_x.deselect()
+
+    def configure_paths(self):
+        '''This method creates standard Eleana folder in user directory.
+            If the folder does not exist it will be created.'''
+
+        home_dir = self.eleana.paths['home_dir']
+        eleana_user_dir = Path(home_dir, '.EleanaPy')
+        if not eleana_user_dir.exists():
+            try:
+                eleana_user_dir.mkdir()
+            except:
+                print("Cannot create working Eleana folder in your home directory.")
+        try:
+            filename = Path(self.eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
+            # Read paths.pic
+            file_to_read = open(filename, "rb")
+            paths = pickle.load(file_to_read)
+            self.eleana.paths['last_import_dir'] = paths['last_import_dir']
+            self.eleana.paths['last_project_dir'] = paths['last_project_dir']
+            self.eleana.paths['last_projects'] = paths['last_projects']
+            self.eleana.paths['last_export_dir'] = paths['last_export_dir']
+            file_to_read.close()
+            # Create last project list in the main menu
+            last_projects = self.eleana.paths['last_projects']
+            last_projects = [element for i, element in enumerate(last_projects) if i <= 10]
+            # Write the list to eleana.paths
+            self.eleana.paths['last_projects'] = last_projects
+            # Perform update to place the item into menu
+            #self.update.last_projects_menu()
+        except:
+            pass
+
+    def configure_graph(self):
+        # Bind keyboard Navbar events to function
+        self.grapher.canvas.mpl_connect("key_press_event", lambda event: self.grapher.on_key_press_on_graph(event))
+
+        # Set variables for Graph buttons
+        self.firstComplex.set(value="re")
+        self.secondComplex.set(value="re")
+        self.resultComplex.set(value="re")
+        self.check_first_show.select()
+        self.check_second_show.select()
+        self.check_result_show.select()
+        self.check_autoscale_x.select()
+        self.check_autoscale_y.select()
+        self.check_log_x.deselect()
+        self.check_log_y.deselect()
+        self.check_indexed_x.deselect()
 
     def scrollable_dropdown(self, selection, combobox):
         ''' Interconnects CTkScrollableDropdown to standard CTkCombobox'
@@ -307,18 +487,11 @@ class Application():
         elif combobox == 'r_stk':
             self.r_stk_selected(selection)
             self.r_stk.set(selection)
-
         self.mainwindow.focus_set()
 
     def create_f_stk(self):
         #self.f_stk = self.builder.get_object('f_stk', self.mainwindow)
         self.builder.connect_callbacks()
-
-    def set_grapher(self, grapher):
-        self.grapher = grapher
-
-    def set_update(self, update):
-        self.update = update
 
     def set_pane_height(self):
         self.mainwindow.update_idletasks()
@@ -536,12 +709,12 @@ class Application():
     #@check_busy
     def group_selected(self, value):
         self.eleana.set_selections('group', value)
-        update.all_lists()
+        self.update.all_lists()
         self.sel_first.set('None')
         self.sel_second.set('None')
         self.eleana.set_selections('first', - 1)
         self.eleana.set_selections('second', -1)
-        update.gui_widgets()
+        self.update.gui_widgets()
         self.grapher.plot_graph()
         self.comparison_view()
 
@@ -578,9 +751,9 @@ class Application():
             if current_group in data_groups:
                 data_groups.remove(current_group)
                 self.eleana.dataset[index].groups = data_groups
-        update.dataset_list()
-        update.groups()
-        update.all_lists()
+        self.update.dataset_list()
+        self.update.groups()
+        self.update.all_lists()
         if current_group not in self.eleana.assignmentToGroups['<group-list/>']:
             self.sel_group.set('All')
             self.eleana.selections['group'] = 'All'
@@ -628,9 +801,9 @@ class Application():
                 self.eleana.dataset[index].groups = groups
             else:
                 return
-        update.dataset_list()
-        update.groups()
-        update.all_lists()
+        self.update.dataset_list()
+        self.update.groups()
+        self.update.all_lists()
         self.sel_group.set('All')
 
     #@check_busy
@@ -653,15 +826,15 @@ class Application():
         if group in group_list:
             group_list.remove(group)
             self.eleana.assignmentToGroups['<group-list/>'] = group_list
-        update.dataset_list()
-        update.groups()
+        self.update.dataset_list()
+        self.update.groups()
         self.sel_group.set('All')
         self.sel_first.set('None')
         self.eleana.selections['first'] = -1
         self.sel_second.set('None')
         self.eleana.selections['second'] = -1
-        update.all_lists()
-        update.gui_widgets()
+        self.update.all_lists()
+        self.update.gui_widgets()
 
     #@check_busy
     def convert_group_to_stack(self, all = False):
@@ -679,8 +852,9 @@ class Application():
                 return
             indexes = [self.eleana.get_index_by_name(i) for i in response]
         # Check if data are of the same type
+        if not indexes:
+            return
         template = self.eleana.dataset[indexes[0]]
-        new_stack = {}
         stk_names = []
         list_of_y = []
         for i in indexes:
@@ -777,7 +951,7 @@ class Application():
             self.eleana.set_selections('first', -1)
             self.firstComplex.grid_remove()
             self.firstStkFrame.grid_remove()
-            #self.grapher.plot_graph()
+            self.grapher.plot_graph()
             return
         i = 0
         while i < len(self.eleana.dataset):
@@ -787,14 +961,14 @@ class Application():
                 self.sel_first.set(name)
                 break
             i += 1
-        #update.list_in_combobox('sel_first')
-        #update.list_in_combobox('f_stk')
+        self.update.list_in_combobox('sel_first')
+        self.update.list_in_combobox('f_stk')
         if self.eleana.dataset[self.eleana.selections['first']].complex:
             self.firstComplex.grid()
         else:
             self.firstComplex.grid_remove()
         self.eleana.selections['f_stk'] = 0
-        #self.grapher.plot_graph()
+        self.grapher.plot_graph()
 
     #@check_busy
     def f_stk_selected(self, selected_value_text):
@@ -883,8 +1057,8 @@ class Application():
                 self.eleana.set_selections('second', i)
                 break
             i += 1
-        update.list_in_combobox('sel_second')
-        update.list_in_combobox('s_stk')
+        self.update.list_in_combobox('sel_second')
+        self.update.list_in_combobox('s_stk')
         if self.eleana.dataset[self.eleana.selections['second']].complex:
             self.secondComplex.grid()
         else:
@@ -1019,8 +1193,8 @@ class Application():
 
         # Send to result and update lists
         self.eleana.results_dataset.append(spectrum)
-        update.list_in_combobox('sel_result')
-        update.list_in_combobox('r_stk')
+        self.update.list_in_combobox('sel_result')
+        self.update.list_in_combobox('r_stk')
 
         # Set the position to the last added item
         list_of_results = self.sel_result._values
@@ -1055,8 +1229,8 @@ class Application():
                 self.eleana.set_selections('result', i)
                 break
             i += 1
-        update.list_in_combobox('sel_result')
-        update.list_in_combobox('r_stk')
+        self.update.list_in_combobox('sel_result')
+        self.update.list_in_combobox('r_stk')
         if self.eleana.results_dataset[self.eleana.selections['result']].complex:
             self.resultComplex.grid()
         else:
@@ -1158,8 +1332,8 @@ class Application():
             result = copy.deepcopy(each)
             result.groups = [self.sel_group.get()]
             self.eleana.dataset.append(result)
-        update.dataset_list()
-        update.all_lists()
+        self.update.dataset_list()
+        self.update.all_lists()
         added_item = self.eleana.dataset[-1].name_nr
         group = self.sel_group.get()
         self.group_selected(group)
@@ -1174,8 +1348,8 @@ class Application():
             result = copy.deepcopy(each)
             result.groups = [self.sel_group.get()]
             self.eleana.dataset.append(result)
-        update.dataset_list()
-        update.all_lists()
+        self.update.dataset_list()
+        self.update.all_lists()
         added_item = self.eleana.dataset[-1].name_nr
         group = self.sel_group.get()
         self.group_selected(group)
@@ -1192,8 +1366,8 @@ class Application():
         result.groups = [self.sel_group.get()]
         self.eleana.dataset.pop(index_first)
         self.eleana.dataset.insert(index_first, result)
-        update.dataset_list()
-        update.all_lists()
+        self.update.dataset_list()
+        self.update.all_lists()
         group = self.sel_group.get()
         self.group_selected(group)
         name = self.eleana.dataset[index_first].name_nr
@@ -1220,8 +1394,8 @@ class Application():
         result = copy.deepcopy(self.eleana.results_dataset[index])
         result.groups = [self.sel_group.get()]
         self.eleana.dataset.append(result)
-        update.dataset_list()
-        update.all_lists()
+        self.update.dataset_list()
+        self.update.all_lists()
         added_item = self.eleana.dataset[-1].name_nr
         group = self.sel_group.get()
         self.group_selected(group)
@@ -1234,8 +1408,8 @@ class Application():
             return
         self.eleana.results_dataset.pop(index)
         self.eleana.set_selections('result', -1)
-        update.all_lists()
-        update.gui_widgets()
+        self.update.all_lists()
+        self.update.gui_widgets()
         self.sel_result.set('None')
         self.grapher.plot_graph()
 
@@ -1264,8 +1438,8 @@ class Application():
 
         # Send to result and update lists
         self.eleana.results_dataset.append(spectrum)
-        update.list_in_combobox('sel_result')
-        update.list_in_combobox('r_stk')
+        self.update.list_in_combobox('sel_result')
+        self.update.list_in_combobox('r_stk')
         # Set the position to the last added item
         list_of_results = self.sel_result._values
         position = list_of_results[-1]
@@ -1356,10 +1530,10 @@ class Application():
         self.sel_first.set('None')
         self.sel_first.set('None')
         self.comparison_settings['indexes'] = []
-        update.dataset_list()
-        update.group_list()
-        update.all_lists()
-        update.gui_widgets()
+        self.update.dataset_list()
+        self.update.group_list()
+        self.update.all_lists()
+        self.update.gui_widgets()
         self.comparison_view()
 
     def delete_data(self, which, dialog=True):
@@ -1406,8 +1580,8 @@ class Application():
             self.eleana.result_dataset.append(new_data)
         else:
             self.eleana.dataset.append(new_data)
-        update.dataset_list()
-        update.all_lists()
+        self.update.dataset_list()
+        self.update.all_lists()
 
     def clear_results(self, skip_question = True):
         if not skip_question:
@@ -1520,18 +1694,23 @@ class Application():
 
     def load_project(self, event=None, recent=None):
         ''' Load project created with the Application '''
-        project = load.load_project(recent)
-        print(self.eleana.selections)
+        if recent is not None:
+            try:
+                recent = self.eleana.paths['last_projects'][recent]
+            except IndexError:
+                Error.show(title = 'Error', info = "The project could not be found on list.")
+        project = self.load.load_project(recent)
+        self.main_menubar.create_showplots_menu()
         if not project:
             return
-        update.dataset_list()
-        update.groups()
-        update.all_lists()
+        self.update.dataset_list()
+        self.update.groups()
+        self.update.all_lists()
         path_to_file = Path(self.eleana.paths['last_projects'][0])
         name = path_to_file.name
-        app.mainwindow.title(name + ' - Eleana')
+        self.mainwindow.title(name + ' - Eleana')
         self.eleana.paths['last_project_dir'] = str(Path(path_to_file).parent)
-        main_menu.last_projects_menu()
+        self.main_menubar.last_projects_menu()
 
         # Set settings to GUI
         # try:
@@ -1586,24 +1765,13 @@ class Application():
         self.grapher.plot_graph()
 
     def save_as(self, filename = None):
-        file_saved = save.save_project(filename)
+        file_saved = self.eleana.save_project(filename)
         if not file_saved:
             return
         else:
-            last_projects = self.eleana.paths['last_projects']
-            saved_path_string = str(file_saved)
-            if saved_path_string in last_projects:
-                index = last_projects.index(saved_path_string)
-                del last_projects[index]
-            last_projects.insert(0, str(saved_path_string))
-        last_projects = last_projects[:20]
-        # Write the list to eleana.paths
-        self.eleana.paths['last_projects'] = last_projects
-        self.eleana.paths['last_project_dir'] = Path(last_projects[0]).parent
-        Save.save_settings_paths(self.eleana)
-        # Perform update to place the item into menu
-        main_menu.last_projects_menu()
-        app.mainwindow.title(Path(last_projects[0]).name[:-4] + ' - Eleana')
+            # Perform update to place the item into menu
+            self.main_menubar.last_projects_menu()
+            self.mainwindow.title(Path(file_saved).name[:-4] + ' - Eleana')
 
     def save_current(self, event=None):
         win_title = self.mainwindow.title()
@@ -1622,84 +1790,91 @@ class Application():
     def import_elexsys(self):
         ''' Open window that loads the spectra '''
         try:
-            load.loadElexsys()
-            update.dataset_list()
-            update.all_lists()
-            Save.save_settings_paths(self.eleana)
+            self.load.loadElexsys()
+            self.update.dataset_list()
+            self.update.all_lists()
+            self.eleana.save_paths()
             last_in_list = self.sel_first._values
             self.first_selected(last_in_list[-1])
-
         except Exception as e:
-            Error.show(info='Unable to import Elexsys file. Please verify that you have selected the correct format for import.', details=e)
+            Error.show(title = "Error loading Elexsys file.", info = e)
 
     def import_EMX(self):
         try:
-            load.loadEMX()
-            update.dataset_list()
-            update.all_lists()
-            Save.save_settings_paths(self.eleana)
+            self.load.loadEMX()
+            self.update.dataset_list()
+            self.update.all_lists()
+            self.eleana.save_paths()
+            self.first_selected(self.sel_first._values[-1])
         except Exception as e:
-            Error.show(info='Unable to import EMX file. Please verify that you have selected the correct format for import.', details=e)
+            Error.show(title="Error loading EMX file.", info=e)
 
     def import_magnettech1(self):
         try:
-            load.loadMagnettech(1)
-            update.dataset_list()
-            update.all_lists()
-            Save.save_settings_paths(self.eleana)
+            self.load.loadMagnettech(1)
+            self.update.dataset_list()
+            self.update.all_lists()
+            self.eleana.save_paths()
+            self.first_selected(self.sel_first._values[-1])
         except Exception as e:
-            Error.show(info='Unable to import Magnettech file. Please verify that you have selected the correct format for import.', details=e)
+            Error.show(title="Error loading Magnettech file.", info=e)
 
     def import_magnettech2(self):
         try:
-            load.loadMagnettech(2)
-            update.dataset_list()
-            update.all_lists()
-            Save.save_settings_paths(self.eleana)
+            self.load.loadMagnettech(2)
+            self.update.dataset_list()
+            self.update.all_lists()
+            self.eleana.save_paths()
+            self.first_selected(self.sel_first._values[-1])
         except Exception as e:
-            Error.show(info='Unable to import Magnettech file. Please verify that you have selected the correct format for import.', details=e)
+            Error.show(title="Error loading Magnettech file.", info=e)
 
     def import_adani_dat(self):
         try:
-            load.loadAdaniDat()
-            update.dataset_list()
-            update.all_lists()
-            Save.save_settings_paths(self.eleana)
+            self.load.loadAdaniDat()
+            self.update.dataset_list()
+            self.update.all_lists()
+            self.eleana.save_paths()
+            self.first_selected(self.sel_first._values[-1])
         except Exception as e:
-            Error.show(info='Unable to import Adani file. Please verify that you have selected the correct format for import.', details=e)
+            Error.show(title="Error loading Adani dat file.", info=e)
 
     def import_shimadzu_spc(self):
         try:
-            load.loadShimadzuSPC()
-            update.dataset_list()
-            update.all_lists()
-            Save.save_settings_paths(self.eleana)
+            self.load.loadShimadzuSPC()
+            self.update.dataset_list()
+            self.update.all_lists()
+            self.eleana.save_paths()
+            self.first_selected(self.sel_first._values[-1])
         except Exception as e:
-            Error.show(info='Unable to import Shimadzu file. Please verify that you have selected the correct format for import.', details=e)
+            Error.show(title="Error loading Shimadzu spc file.", info=e)
 
     def import_ascii(self, clipboard=None):
         try:
-            load.loadAscii(clipboard)
-            update.dataset_list()
-            update.group_list()
-            update.all_lists()
-            Save.save_settings_paths(self.eleana)
+            self.load.loadAscii(master = self.mainwindow, clipboard = clipboard)
+            self.update.dataset_list()
+            self.update.group_list()
+            self.update.all_lists()
+            self.eleana.save_paths()
+            self.first_selected(self.sel_first._values[-1])
         except Exception as e:
-            Error.show(info='Unable to import Ascii file. Please verify that you have selected the correct format for import.', details=e)
+            Error.show(title="Error loading Ascii file.", info=e)
 
-    def load_excel(self):
+
+    def import_excel(self):
         try:
             x = [['', ''], ['', '']]
             headers = ['A', 'B']
             empty = pandas.DataFrame(x, columns=headers)
-            table = CreateFromTable(eleana_app=self.eleana, master=self.mainwindow, df=empty, loadOnStart='excel')
+            table = CreateFromTable(eleana=self.eleana, master=self.mainwindow, df=empty, loadOnStart='excel')
             response = table.get()
-            update.dataset_list()
-            update.group_list()
-            update.all_lists()
-            Save.save_settings_paths(self.eleana)
+            self.update.dataset_list()
+            self.update.group_list()
+            self.update.all_lists()
+            self.eleana.save_paths()
+            self.first_selected(self.sel_first._values[-1])
         except Exception as e:
-            Error.show(info='Unable to import Excel file. Please verify that you have selected the correct format for import.', details=e)
+            Error.show(title="Error loading Excel file.", info=e)
 
     def quick_copy(self):
         curves = self.grapher.ax.get_lines()
@@ -1741,45 +1916,30 @@ class Application():
         self.import_ascii(text)
 
     def export_first(self):
-        export.csv('first')
+        self.export.csv('first')
 
     def export_group(self):
-        export.group_csv(self.eleana.selections['group'])
+        self.export.group_csv(self.eleana.selections['group'])
 
     # --- Quit (also window close by clicking on X)
     def close_application(self, event=None):
-        global list_of_subprogs
         quit_dialog = CTkMessagebox(master = self.mainwindow, title="Quit", message="Do you want to close the program?",
                                     icon="warning", option_1="No", option_2="Yes")
         response = quit_dialog.get()
         if response == "Yes":
             # # Save current settings:
-            Save.save_settings_paths(self.eleana)
-            Save.save_preferences(self.eleana, self, self.grapher)
-            self.mainwindow.iconify()
-            # Close all subprograms from the list
-            self.close_all_subprogs()
+            self.eleana.save_paths()
+            self.eleana.save_settings()
+            #self.mainwindow.iconify()
             # Close all static_plot windows from self.eleana.active_static_windows
-            if self.eleana.active_static_plot_windows:
-                for window_nr in self.eleana.active_static_plot_windows:
+            if self.eleana.storage.static_plots:
+                for window_nr in self.eleana.storage.static_plots:
                     close_cmd = "self.grapher.static_plot_" + str(window_nr) + ".cancel()"
                     try:
                         exec(close_cmd)
                     except:
                         print("Error: " + close_cmd)
             self.mainwindow.destroy()
-
-
-    ''' DO USUNIĘCIA '''
-    def close_all_subprogs(self):
-        for each in list_of_subprogs:
-            close_cmd = 'self.' + each[0] + '.' + each[1] + '()'
-            try:
-                exec(close_cmd)
-            except:
-                pass
-
-
 
     def edit_values_in_table(self, which ='first'):
         if which == 'first' or which == 'second':
@@ -1814,15 +1974,12 @@ class Application():
             return
         data.x = response[0]
         data.y = response[1]
-        update.dataset_list()
-        update.group_list()
-        update.all_lists()
+        self.update.dataset_list()
+        self.update.group_list()
+        self.update.all_lists()
         self.grapher.plot_graph()
 
     def notes(self):
-        #self.notepad = Notepad(master=self.mainwindow, title="Edit notes", text=self.eleana.notes)
-        #response = self.notepad.get()
-
         notepad = Notepad(master=self.mainwindow, title="Edit notes", text=self.eleana.notes)
         response = notepad.get()
         if response == None:
@@ -1831,12 +1988,10 @@ class Application():
             self.eleana.notes = response
 
     def create_new_group(self):
-        # self.group_create = Groupcreate(self.mainwindow, eleana)
-        # response = self.group_create.get()
+        raise Exception("Application.py: create_new_group - needs ")
         group_create = Groupcreate(self.mainwindow, eleana)
         response = group_create.get()
-
-        update.list_in_combobox('sel_group')
+        self.update.list_in_combobox('sel_group')
 
     def create_from_table(self):
         headers = ['A', 'B', 'C']
@@ -1846,9 +2001,9 @@ class Application():
         spreadsheet = CreateFromTable(self.eleana, self.mainwindow, df=df, name=name,
                                            group=self.eleana.selections['group'])
         response = spreadsheet.get()
-        update.group_list()
-        update.dataset_list()
-        update.all_lists()
+        self.update.group_list()
+        self.update.dataset_list()
+        self.update.all_lists()
 
 
     def first_to_group(self):
@@ -1856,8 +2011,8 @@ class Application():
             return
         group_assign = Groupassign(master=app, which='first')
         response = group_assign.get()
-        update.group_list()
-        update.all_lists()
+        self.update.group_list()
+        self.update.all_lists()
 
     def second_to_group(self):
         if self.eleana.selections['second'] < 0:

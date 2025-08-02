@@ -139,4 +139,4 @@ if __name__ == "__main__":
     # app.graphFrame.rowconfigure(0, weight=1)
     # main_menu.last_projects_menu()
     #
-    app.run()
+    #app.run()

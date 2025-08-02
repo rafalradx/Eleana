@@ -17,13 +17,13 @@ matplotlib.use('TkAgg')
 # Remove CTRL+S shortcut to allow open 'Save' by pressing CTRL+S
 matplotlib.rcParams['keymap.save'] = ''
 
-class GraphPreferences:
-    def __init__(self, eleana):
+#class GraphPreferences:
+#    def __init__(self, eleana):
         # self.app = None
         # self.eleana = eleana
 
 
-        ''' CURSOR DEFINITIONS '''
+        #''' CURSOR DEFINITIONS '''
         # Create avaliable cursor modes: hov - enable hover,
         #                                a_txt - display text label,
         #                                annot - display selection on graph
@@ -101,13 +101,29 @@ class GraphPreferences:
     #     self.app.sel_cursor_mode.set('None')
 
 class Grapher():
-    def __init__(self, master, eleana):
+    def __init__(self, master, eleana, gui_references, callbacks):
         # Initialize GraphPreferences
 
         ''' Initialize app, eleana and graphs objects (fig, canvas, toolbar)'''
 
-        self.graphFrame = master
         self.eleana = eleana
+        self.graphFrame = master
+        self.callbacks = callbacks
+
+        # References to Main Gui Combobox and button
+        self.btn_clear_cursors = gui_references['btn_clear_cursors']
+        self.sel_cursor_mode = gui_references['sel_cursor_mode']
+        self.annotationsFrame = gui_references['annotationsFrame']
+        self.infoframe = gui_references['infoframe']
+
+        # Set values to Combobox
+        box_values = []
+        for each in self.eleana.settings.grapher['cursor_modes']:
+            box_values.append(each['label'])
+        self.sel_cursor_mode.configure(values=box_values)
+        self.sel_cursor_mode.set('None')
+
+
         self.plt = plt
         self.mplcursors = mplcursors
         self.cursor = None
@@ -147,6 +163,12 @@ class Grapher():
         # Create empty list of created annotations
         self.cursor_annotations = self.eleana.storage.cursor_annotations
 
+        # Setting cursor mode
+        self.cursor_modes = self.eleana.settings.grapher['cursor_modes']
+        self.current_cursor_mode = self.cursor_modes[0]
+
+
+
         # Create variable for storing min-max
         self.scale1 = {'x': [], 'y': []}
 
@@ -165,12 +187,12 @@ class Grapher():
         # Recreate canvas
         self.fig = Figure(figsize=(8, 4), dpi=100)
         self.ax = self.fig.add_subplot(111)
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.app.graphFrame)
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.graphFrame)
         self.canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
         self.canvas.draw()
 
         # Recreate toolbar
-        self.toolbar = NavigationToolbar2Tk(self.canvas, self.app.graphFrame, pack_toolbar=False)
+        self.toolbar = NavigationToolbar2Tk(self.canvas, self.graphFrame, pack_toolbar=False)
         self.toolbar.update()
         self.toolbar.grid(row=1, column=0, sticky="ew")
 
@@ -291,7 +313,7 @@ class Grapher():
         # Add first
         data = self.data_for_plot('first')
         # If indexed is True replace X values with consecutive points
-        if bool(self.app.check_indexed_x.get()):
+        if self.eleana.gui_state.indexed_x:
             length = len(data['x'])+1
             data['x'] = [i for i in range(1, length)]
         first_shown = True if len(data['x']) > 0 else False
@@ -323,7 +345,7 @@ class Grapher():
         # Add second
         data = self.data_for_plot('second')
         # If indexed is True replace X values with consecutive points
-        if bool(self.app.check_indexed_x.get()):
+        if self.eleana.gui_state.indexed_x:
             length = len(data['x']) + 1
             data['x'] = [i for i in range(1, length)]
         legend = self.create_legend('second')
@@ -355,7 +377,7 @@ class Grapher():
         # Add result
         data = self.data_for_plot('result')
         # If indexed is True replace X values with consecutive points
-        if bool(self.app.check_indexed_x.get()):
+        if self.eleana.gui_state.indexed_x:
             length = len(data['x']) + 1
             data['x'] = [i for i in range(1, length)]
         legend = self.create_legend('result')
@@ -388,11 +410,11 @@ class Grapher():
         self.plot_additional_curves()
 
         # Log or Linear scales
-        if bool(self.app.check_log_x.get()):
+        if self.eleana.gui_state.log_x:
             self.ax.set_xscale('log')
         else:
             self.ax.set_xscale('linear')
-        if bool(self.app.check_log_y.get()):
+        if self.eleana.gui_state.log_y:
             self.ax.set_yscale('log')
         else:
             self.ax.set_yscale('linear')
@@ -407,30 +429,30 @@ class Grapher():
                        fancybox=False, shadow=False, ncol=5)
 
         # Handle autoscaling
-        if bool(self.app.check_autoscale_x.get()):
+        if self.eleana.gui_state.autoscale_x:
             self.scale1['x'] = copy.deepcopy(self.ax.get_xlim())
         else:
             self.ax.set_xlim(self.scale1['x'])
-        if bool(self.app.check_autoscale_y.get()):
+        if self.eleana.gui_state.autoscale_y:
             self.scale1['y'] = copy.deepcopy(self.ax.get_ylim())
         else:
             self.ax.set_ylim(self.scale1['y'])
 
-        if self.inverted_x_axis:
+        if self.eleana.gui_state.inverted_x:
             self.ax.invert_xaxis()
 
         # Draw color span
         self.show_color_span()
 
         # Create custom annotations
-        if self.eleana.custom_annotations:
-            self.app.btn_clear_cursors.grid()
-            self.app.btn_clear_cursors.configure(text='Clear cursors', command=self.clear_all_annotations)
-            self.annotationlist = CTkListbox(self.app.annotationsFrame, command=self.annotationlist_clicked,
+        if self.eleana.settings.grapher['custom_annotations']:
+            self.btn_clear_cursors.grid()
+            self.btn_clear_cursors.configure(text='Clear cursors', command=self.clear_all_annotations)
+            self.annotationlist = CTkListbox(self.annotationsFrame, command=self.annotationlist_clicked,
                                              multiple_selection=True, height=300)
-            self.app.annotationsFrame.grid()
-            self.app.annotationsFrame.grid_columnconfigure(0, weight=1)
-            self.app.annotationsFrame.grid_rowconfigure(0, weight=1)
+            self.annotationsFrame.grid()
+            self.annotationsFrame.grid_columnconfigure(0, weight=1)
+            self.annotationsFrame.grid_rowconfigure(0, weight=1)
             self.annotationlist.grid(column=0, row=0, sticky="nsew")
             annots = self.eleana.custom_annotations
             i = 0
@@ -485,9 +507,9 @@ class Grapher():
         ''' Prints the ranges selected on graph according to defined
             selections in self.eleana.color_span
         '''
-        ranges = self.eleana.color_span['ranges']
-        alpha = self.eleana.color_span['alpha']
-        color = self.eleana.color_span['color']
+        ranges = self.eleana.settings.grapher['color_span']['ranges']
+        alpha = self.eleana.settings.grapher['color_span']['alpha']
+        color = self.eleana.settings.grapher['color_span']['color']
         if ranges:
             for range in ranges:
                 min = range[0]
@@ -544,18 +566,17 @@ class Grapher():
 
     def cursor_on_off(self):
         def _show_annotation_list():
-            self.annotationlist = CTkListbox(self.app.annotationsFrame, command=self.annotationlist_clicked,
+            self.annotationlist = CTkListbox(self.annotationsFrame, command=self.annotationlist_clicked,
                                              multiple_selection=True, height=300)
-            self.app.annotationsFrame.grid()
-            self.app.annotationsFrame.grid_columnconfigure(0, weight=1)
-            self.app.annotationsFrame.grid_rowconfigure(0, weight=1)
+            self.annotationsFrame.grid()
+            self.annotationsFrame.grid_columnconfigure(0, weight=1)
+            self.annotationsFrame.grid_rowconfigure(0, weight=1)
             self.annotationlist.grid(column=0, row=0, sticky="nsew")
-            self.app.infoframe.grid()
-            self.app.infoframe.grid_columnconfigure(0, weight=1)
-            self.app.infoframe.grid_rowconfigure(0, weight=1)
-            self.app.info.grid()
-            self.app.annotationsFrame.grid()
-            self.app.info.grid()
+            self.infoframe.grid()
+            self.infoframe.grid_columnconfigure(0, weight=1)
+            self.infoframe.grid_rowconfigure(0, weight=1)
+            self.annotationsFrame.grid()
+            self.info.grid()
 
         self.free_move_binding_id = None
         self.click_binding_id = None
@@ -565,40 +586,40 @@ class Grapher():
                     self.cursor.remove_selection(sel)
         except:
             pass
-        index = self.app.sel_cursor_mode._values.index(crs_mode)
+        index = self.sel_cursor_mode._values.index(crs_mode)
         self.current_cursor_mode = self.cursor_modes[index]
         if index == 0:
             # Switch off mplcursors
-            self.app.btn_clear_cursors.grid_remove()
+            self.btn_clear_cursors.grid_remove()
             if hasattr(self.cursor, "events"):
                 self.cursor.events["add"].disconnect()
                 self.cursor = None
                 self.cursor_binding_id = None
-            self.app.annotationsFrame.grid_remove()
-            self.app.infoframe.grid_remove()
-            self.app.btn_clear_cursors.grid_remove()
-            self.app.btn_clear_cursors.configure(text='Clear cursors', command=self.clear_all_annotations)
+            self.annotationsFrame.grid_remove()
+            self.infoframe.grid_remove()
+            self.btn_clear_cursors.grid_remove()
+            self.btn_clear_cursors.configure(text='Clear cursors', command=self.clear_all_annotations)
 
         elif index > 0 and index < 5:
             # Switch on the mplcursors
-            self.app.btn_clear_cursors.grid()
-            self.app.btn_clear_cursors.configure(text='Clear cursors', command=self.clear_all_annotations)
+            self.btn_clear_cursors.grid()
+            self.btn_clear_cursors.configure(text='Clear cursors', command=self.clear_all_annotations)
             _show_annotation_list()
             self.cursor = self.mplcursors.cursor(self.ax,
                                                  multiple=self.current_cursor_mode['multip'],
                                                  hover=self.current_cursor_mode['hov'])
             self.cursor.connect("add", self.annotation_create)
             self.cursor.connect("remove", self.annotation_removed)
-            self.app.info.configure(text='LEFT CLICK - select point\nRIGHT CLICK - delete selected point')
+            self.info.configure(text='LEFT CLICK - select point\nRIGHT CLICK - delete selected point')
 
         elif index == 5:
             # Free select
-            self.app.btn_clear_cursors.grid()
-            self.app.btn_clear_cursors.configure(text='Clear cursors', command=self.clear_all_annotations)
+            self.btn_clear_cursors.grid()
+            self.btn_clear_cursors.configure(text='Clear cursors', command=self.clear_all_annotations)
             _show_annotation_list()
             # Switch on Free point selections
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
-            self.app.info.configure(text='LEFT CLICK - select point\nRIGHT CLICK - delete selected point')
+            self.info.configure(text='LEFT CLICK - select point\nRIGHT CLICK - delete selected point')
 
             # Podłączenie zdarzeń myszy
             self.motion_binding_id = self.canvas.mpl_connect('motion_notify_event', self.on_mouse_move_in_free_select)
@@ -606,21 +627,21 @@ class Grapher():
 
         elif index == 6:
             # Crosshair
-            self.app.btn_clear_cursors.grid()
-            self.app.btn_clear_cursors.configure(text='Clear cursors', command=self.clear_all_annotations)
+            self.btn_clear_cursors.grid()
+            self.btn_clear_cursors.configure(text='Clear cursors', command=self.clear_all_annotations)
             _show_annotation_list()
             self.cursor = self.mplcursors.cursor(self.ax, multiple=False, hover=True)
             self.cursor.connect("add", self.mplcursor_crosshair)
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
-            self.app.info.configure(text='LEFT CLICK - select point\nRIGHT CLICK - delete selected point')
+            self.info.configure(text='LEFT CLICK - select point\nRIGHT CLICK - delete selected point')
 
         elif index == 7:
             # Range select
-            self.app.btn_clear_cursors.grid()
-            self.app.btn_clear_cursors.configure(text='Clear ranges', command = self.clear_selected_ranges)
+            self.btn_clear_cursors.grid()
+            self.btn_clear_cursors.configure(text='Clear ranges', command = self.clear_selected_ranges)
             _show_annotation_list()
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.range_clicked)
-            self.app.info.configure(text='  LEFT CLICK - select the beginning \n  of the range\n  SECOND LEFT CLICK - select the end of the range\n  RIGHT CLICK INSIDE THE RANGE - delete \n  the range under the cursor')
+            self.info.configure(text='  LEFT CLICK - select the beginning \n  of the range\n  SECOND LEFT CLICK - select the end of the range\n  RIGHT CLICK INSIDE THE RANGE - delete \n  the range under the cursor')
             self.eleana.color_span['ranges'] = []
             self.eleana.color_span['status'] = 0
         else:
@@ -628,7 +649,7 @@ class Grapher():
                 # Switch off mplcursor
                 self.cursor.events["add"].disconnect()
                 self.cursor = None
-            self.app.annotationsFrame.grid_remove()
+            self.annotationsFrame.grid_remove()
             # Switch off free mouse events
             if self.free_move_binding_id is not None:
                 self.plt.disconnect(self.free_move_binding_id)
@@ -718,7 +739,7 @@ class Grapher():
         state = self.toolbar.mode
         if state == 'zoom rect' or state == 'pan/zoom':
             return
-        if (event.inaxes is not None and (self.app.sel_cursor_mode.get() == 'Free select' or self.app.sel_cursor_mode.get() == 'Crosshair') and event.button == 1):
+        if (event.inaxes is not None and (self.sel_cursor_mode.get() == 'Free select' or self.sel_cursor_mode.get() == 'Crosshair') and event.button == 1):
             # Create annotation when left mouse button is clicked
             if self.cursor_limit !=0:
                if len(self.cursor_annotations) >= self.cursor_limit:
@@ -750,7 +771,7 @@ class Grapher():
             self.canvas.draw()
             self.eleana.set_selections(variable='grapher_action', value='point_selected')
 
-        elif (event.inaxes is not None and (self.app.sel_cursor_mode.get() == 'Free select' or self.app.sel_cursor_mode.get() == 'Crosshair')  and event.button == 3):
+        elif (event.inaxes is not None and (self.sel_cursor_mode.get() == 'Free select' or self.sel_cursor_mode.get() == 'Crosshair')  and event.button == 3):
             # Remove annotation when right mouse button is clicked
             x, y = event.xdata, event.ydata
             xlim = self.ax.get_xlim()
@@ -790,7 +811,7 @@ class Grapher():
         ''' Create range entry in self.eleana.color_span to generate
             area between clicked positions.
         '''
-        if self.app.sel_cursor_mode.get() != 'Range select':
+        if self.sel_cursor_mode.get() != 'Range select':
             return
         if sel.xdata is None or sel.ydata is None:
             return
@@ -917,7 +938,7 @@ class Grapher():
         if skip:
             return
         else:
-            value = self.app.sel_cursor_mode.get()
+            value = self.sel_cursor_mode.get()
             self.current_cursor_mode['label'] = value
             self.plot_graph()
             self.cursor_on_off()
@@ -972,7 +993,7 @@ class Grapher():
         return xytext
 
     def indexCurveForAnnot(self, curve):
-        if self.app.sel_cursor_mode.get() == "Free select":
+        if self.sel_cursor_mode.get() == "Free select":
             return
         # Search name in the main dataset
         if '/' in curve:
@@ -1029,12 +1050,12 @@ class Grapher():
     def on_ylim_changed(self, axes):
         ylim = self.ax.get_ylim()
         self.scale1['y'] = ylim
-        self.app.check_autoscale_y.deselect()
+        self.check_autoscale_y.deselect()
 
     def on_xlim_changed(self, axes):
         xlim = self.ax.get_xlim()
         self.scale1['x'] = xlim
-        self.app.check_autoscale_x.deselect()
+        self.check_autoscale_x.deselect()
 
     def plot_comparison(self, indexes, vsep, hsep):
         self.ax.clear()
@@ -1113,7 +1134,7 @@ class Grapher():
         curve = {'legend':None,'x':None,'re_y':None, 'im_y':None, 'style':None,'disp':None}
         data = self.data_for_plot('first')
         # If indexed is True replace X values with consecutive points
-        if bool(self.app.check_indexed_x.get()):
+        if bool(self.check_indexed_x.get()):
             length = len(data['x']) + 1
             data['x'] = [i for i in range(1, length)]
         first_shown = True if len(data['x']) > 0 else False
@@ -1137,7 +1158,7 @@ class Grapher():
         curve = {'legend': None, 'x': None, 're_y': None, 'im_y': None, 'style': None, 'disp': None}
         data = self.data_for_plot('second')
         # If indexed is True replace X values with consecutive points
-        if bool(self.app.check_indexed_x.get()):
+        if bool(self.check_indexed_x.get()):
             length = len(data['x']) + 1
             data['x'] = [i for i in range(1, length)]
         second_shown = True if len(data['x']) > 0 else False
@@ -1161,7 +1182,7 @@ class Grapher():
         curve = {'legend': None, 'x': None, 're_y': None, 'im_y': None, 'style': None, 'disp': None}
         data = self.data_for_plot('result')
         # If indexed is True replace X values with consecutive points
-        if bool(self.app.check_indexed_x.get()):
+        if bool(self.check_indexed_x.get()):
             length = len(data['x']) + 1
             data['x'] = [i for i in range(1, length)]
         result_shown = True if len(data['x']) > 0 else False

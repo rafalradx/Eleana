@@ -1,5 +1,8 @@
 from pathlib import Path
 import tkinter as tk
+
+
+
 from assets.LoadSave import Load, Save
 import copy
 from modules.CTkScrollableDropdown import CTkScrollableDropdown
@@ -20,10 +23,12 @@ Example usage in main Eleana.py:
 This will create 3 positions in the list of Second combobox
 '''
 class Update:
-    def __init__(self, main_menu, scroll_start = 30):
-        self.main_menu = main_menu
-        self.app = main_menu.app
-        self.eleana = self.app.eleana
+    def __init__(self, eleana, widgetsIDs, menu_recent, callbacks, scroll_start = 30):
+        self.eleana = eleana
+        self.widgetsIDs = widgetsIDs
+        self.menu_recent = menu_recent
+        self.callbacks = callbacks
+
         # scroll_start defines minimum numer of items in combobox when scroll in list is activated
         self.scroll_start = scroll_start
         self.active_scrollable_dropdowns = {}
@@ -74,7 +79,7 @@ class Update:
         ''' It scans the whole dataset, create numbered names, collects groups and assigns to groups'''
         i = 0
         while i < len(self.eleana.dataset):
-            # Replace forbiden marks
+            # Replace forbidden marks
             name = self.eleana.dataset[i].name
             name = name.replace('.', '-')
             name = name.replace(',', '-')
@@ -85,8 +90,9 @@ class Update:
             self.eleana.dataset[i].name_nr = new_name_nr
             i += 1
 
-    def list_in_combobox(self, comboboxID):
-        box = self.ref_to_combobox(self.app, comboboxID)
+    def list_in_combobox(self, cb_id):
+        comboboxID = cb_id
+        box = self.widgetsIDs[cb_id]
         comboboxList = ['None']
         if comboboxID == 'sel_group':
             list_of_groups = self.eleana.assignmentToGroups['<group-list/>']
@@ -106,7 +112,7 @@ class Update:
             currentGroup = self.eleana.selections['group']
             if currentGroup not in self.eleana.assignmentToGroups['<group-list/>']:
                 currentGroup = 'All'
-                self.app.sel_group.set('All')
+                self.widgetsIDs['sel_group'].set('All')
             if currentGroup == 'All':
                 for each in self.eleana.dataset:
                     comboboxList.append(each.name_nr)
@@ -116,15 +122,16 @@ class Update:
                     item = self.eleana.dataset[each].name_nr
                     comboboxList.append(item)
             box.configure(values=comboboxList)
-            self.dropdowns[comboboxID] = CTkScrollableDropdown(attach = box, values=comboboxList, justify="left", button_color="transparent", command=lambda selection: self.app.scrollable_dropdown(selection=selection, combobox = comboboxID))
+            #self.dropdowns[comboboxID] = CTkScrollableDropdown(attach = box, values=comboboxList, justify="left", button_color="transparent", command=lambda selection: self.app.scrollable_dropdown(selection=selection, combobox = comboboxID))
+            self.dropdowns[comboboxID] = CTkScrollableDropdown(attach = box, values=comboboxList, justify="left", button_color="transparent", command = lambda selection: self.callbacks.get('scrollable_dropdown')(selection=selection, combobox=comboboxID))
             return
 
         # Fill list in RESULT
         elif comboboxID == 'sel_result':
             if len(self.eleana.results_dataset) == 0:
-                self.app.resultFrame.grid_remove()
+                self.widgetsIDs['resultFrame'].grid_remove()
                 return
-            self.app.resultFrame.grid()
+            self.widgetsIDs['resultFrame'].grid()
             for each in self.eleana.results_dataset:
                 comboboxList.append(each.name)
             box.configure(values=comboboxList)
@@ -137,7 +144,7 @@ class Update:
         elif comboboxID == 'f_stk':
             index = self.eleana.selections['first']
             if index < 0:
-                self.app.firstStkFrame.grid_remove()
+                self.widgetsIDs['firstStkFrame'].grid_remove()
                 return
             if self.eleana.dataset[index].type == 'stack 2D':
                 stk_list = self.eleana.dataset[index].stk_names
@@ -151,16 +158,16 @@ class Update:
                                       button_height=10,
                                       autocomplete=True,
                                       command=lambda selection: self.app.scrollable_dropdown(selection=selection, combobox=comboboxID))
-                self.app.firstStkFrame.grid()
+                self.widgetsIDs['firstStkFrame'].grid()
                 box.set(stk_list[0])
             else:
-                self.app.firstStkFrame.grid_remove()
+                self.widgetsIDs['firstStkFrame'].grid_remove()
             return
 
         elif comboboxID == 's_stk':
             index = self.eleana.selections['second']
             if index < 0:
-                self.app.secondStkFrame.grid_remove()
+                self.widgetsIDs['secondStkFrame'].grid_remove()
                 return
             if self.eleana.dataset[index].type == 'stack 2D':
                 stk_list = self.eleana.dataset[index].stk_names
@@ -168,21 +175,21 @@ class Update:
                 self.dropdowns[comboboxID] = CTkScrollableDropdown(attach=box, values=stk_list, justify="left", button_color="transparent",
                                            command=lambda selection: self.app.scrollable_dropdown(selection=selection,
                                                                                                   combobox=comboboxID))
-                self.app.secondStkFrame.grid()
+                self.widgetsIDs['secondStkFrame'].grid()
                 box.set(stk_list[0])
             else:
-                self.app.secondStkFrame.grid_remove()
+                self.widgetsIDs['secondStkFrame'].grid_remove()
             return
 
         elif comboboxID == 'r_stk':
             index = self.eleana.selections['result']
             if index < 0:
-                self.app.resultStkFrame.grid_remove()
+                self.widgetsIDs['resultStkFrame'].grid_remove()
                 return
             if self.eleana.results_dataset[index].type == 'stack 2D':
                 stk_list = self.eleana.results_dataset[index].stk_names
                 box.configure(values=stk_list)
-                self.app.resultStkFrame.grid()
+                self.widgetsIDs['resultStkFrame'].grid()
                 box.set(stk_list[0])
                 if len(stk_list) >= self.scroll_start:
                     self.dropdowns[comboboxID] = CTkScrollableDropdown(attach=box, values=stk_list, justify="left", button_color="transparent",
@@ -190,7 +197,7 @@ class Update:
                                                                                                  combobox = comboboxID))
 
             else:
-                self.app.resultStkFrame.grid_remove()
+                self.widgetsIDs['resultStkFrame'].grid_remove()
             return
 
     def all_lists(self):
@@ -202,22 +209,24 @@ class Update:
         self.list_in_combobox('r_stk')
         self.list_in_combobox('sel_group')
 
-    def ref_to_combobox(self, app: object, comboboxID: str):
-        if comboboxID == 'sel_first':
-            box = self.app.sel_first
-        elif comboboxID == 'sel_second':
-            box = self.app.sel_second
-        elif comboboxID == 'sel_result':
-            box = self.app.sel_result
-        elif comboboxID == 'f_stk':
-            box = self.app.f_stk
-        elif comboboxID == 's_stk':
-            box = self.app.s_stk
-        elif comboboxID == 'r_stk':
-            box = self.app.r_stk
-        elif comboboxID == 'sel_group':
-            box = self.app.sel_group
-        return box
+    # def ref_to_combobox(self, app: object, comboboxID: str):
+    #     if comboboxID == 'sel_first':
+    #         box = self.app.sel_first
+    #     elif comboboxID == 'sel_second':
+    #         box = self.app.sel_second
+    #     elif comboboxID == 'sel_result':
+    #         box = self.app.sel_resul
+    #     treturn box
+    #
+    #     elif comboboxID == 'f_stk':
+    #         box = self.app.f_stk
+    #     elif comboboxID == 's_stk':
+    #         box = self.app.s_stk
+    #     elif comboboxID == 'r_stk':
+    #         box = self.app.r_stk
+    #     elif comboboxID == 'sel_group':
+    #         box = self.app.sel_group
+    #     return box
 
     def gui_widgets(self):
         first_nr = self.eleana.selections['first']
@@ -254,56 +263,56 @@ class Update:
 
         # FIRST frame
         if len(self.eleana.dataset) == 0 or first.type != "stack 2D" or is_first_none:
-            self.app.firstStkFrame.grid_remove()
-            self.app.firstComplex.grid_remove()
+            self.widgetsIDs['firstStkFrame'].grid_remove()
+            self.widgetsIDs['firstComplex'].grid_remove()
 
         elif first.type == "stack 2D":
-            self.app.firstStkFrame.grid(row=2, column=0)
+            self.widgetsIDs['firstStkFrame'].grid(row=2, column=0)
             self.app.f_stk.configure(values=first.stk_names)
             entry_index = int(self.eleana.selections['f_stk'])
             entry = first.stk_names[entry_index]
             self.app.f_stk.set(value=entry)
         try:
             if first.complex and first_nr >= 0:
-                self.app.firstComplex.grid()
+                self.widgetsIDs['firstComplex'].grid()
         except:
             pass
 
         # Update SECOND frame
         if len(self.eleana.dataset) == 0 or second.type != "stack 2D" or is_second_none:
-            self.app.secondStkFrame.grid_remove()
-            self.app.secondComplex.grid_remove()
+            self.widgetsIDs['secondStkFrame'].grid_remove()
+            self.widgetsIDs['secondComplex'].grid_remove()
 
         elif second.type == "stack 2D":
-            self.app.secondStkFrame.grid(row=2, column=0)
-            self.app.s_stk.configure(values=second.stk_names)
+            self.widgetsIDs['secondStkFrame'].grid(row=2, column=0)
+            self.widgetsIDs['s_stk'].configure(values=second.stk_names)
             entry_index = int(self.eleana.selections['s_stk'])
             entry = second.stk_names[entry_index]
-            self.app.s_stk.set(value=entry)
+            self.widgetsIDs['s_stk'].set(value=entry)
         try:
             if second.complex and second_nr >= 0:
-                self.app.secondComplex.grid()
+                self.widgetsIDs['secondComplex'].grid()
         except:
             pass
 
         # Update RESULT frame
         if len(self.eleana.results_dataset) == 0:
-            self.app.resultFrame.grid_remove()
+            self.widgetsIDs['resultFrame'].grid_remove()
             return
         else:
-            self.app.resultFrame.grid()
+            self.widgetsIDs['resultFrame'].grid()
 
         if result.type != "stack 2D" or is_result_none:
-            self.app.resultStkFrame.grid_remove()
+            self.widgetsIDs['resultStkFrame'].grid_remove()
 
         elif result.type == "stack 2D":
-            self.app.resultStkFrame.grid(row=2, column=0)
-            self.app.r_stk.configure(values=result.stk_names)
+            self.widgetsIDs['resultStkFrame'].grid(row=2, column=0)
+            self.widgetsIDs['r_stk'].configure(values=result.stk_names)
 
         if result.complex:
-            self.app.resultComplex.grid()
+            self.widgetsIDs['resultComplex'].grid()
         else:
-            self.app.resultComplex.grid_remove()
+            self.widgetsIDs['resultComplex'].grid_remove()
 
     def results_list(self, results):
         names = []

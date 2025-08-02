@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="20"
+   height="20"
+   viewBox="0 0 24 24"
+   fill="none"
+   stroke="#aaaaaa"
+   stroke-width="1.5"
+   stroke-linecap="round"
+   stroke-linejoin="round"
+   class="feather feather-airplay"
+   version="1.1"
+   id="svg3973"
+   sodipodi:docname="subtract.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   inkscape:export-filename="../subtract.png"
+   inkscape:export-xdpi="124"
+   inkscape:export-ydpi="124"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs3977" />
+  <sodipodi:namedview
+     id="namedview3975"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="39.95"
+     inkscape:cx="9.6620776"
+     inkscape:cy="10"
+     inkscape:window-width="1920"
+     inkscape:window-height="1008"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg3973" />
+  <path
+     d="M 5.5119084,20.385739 H 4.5723851 A 1.8790466,2.4752845 0 0 1 2.6933385,17.910454 V 5.5340315 A 1.8790466,2.4752845 0 0 1 4.5723851,3.0587468 H 19.604757 a 1.8790466,2.4752845 0 0 1 1.879047,2.4752847 V 17.910454 a 1.8790466,2.4752845 0 0 1 -1.879047,2.475285 h -0.939523"
+     id="path3969"
+     style="stroke-width:1.61749" />
+  <text
+     xml:space="preserve"
+     style="font-size:35.7596px;font-family:'Noto Sans Bassa Vah';-inkscape-font-specification:'Noto Sans Bassa Vah';fill:#aaaaaa;fill-opacity:1;stroke:none;stroke-width:6.81222;stroke-linecap:round;stroke-dasharray:none"
+     x="6.5433211"
+     y="21.485672"
+     id="text4344"><tspan
+       sodipodi:role="line"
+       id="tspan4342"
+       style="fill:#aaaaaa;fill-opacity:1;stroke-width:6.81222;stroke-dasharray:none"
+       x="6.5433211"
+       y="21.485672">-</tspan></text>
+</svg>

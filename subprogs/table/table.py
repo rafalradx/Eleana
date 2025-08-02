@@ -11,12 +11,13 @@ from tkinter import filedialog
 from modules.tksheet import Sheet
 import copy
 from subprogs.edit_parameters.edit_parameters import EditParameters
+from pandastable import MultipleValDialog
 
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "table.ui"
 
 class CreateFromTable:
-    def __init__(self, eleana_app,
+    def __init__(self, eleana,
                  master=None,
                  list2D = None,
                  df = None,
@@ -32,7 +33,7 @@ class CreateFromTable:
                  y_name=None,
                  set_parameters=None):
         self.master = master
-        self.eleana = eleana_app
+        self.eleana = eleana
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)

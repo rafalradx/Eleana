@@ -16,25 +16,26 @@ from subprogs.ascii_file_preview.ascii_file_preview import AsciFilePreview
 from subprogs.table.table import CreateFromTable
 
 class Load:
-    def __init__(self):
+    def __init__(self, eleana):
+        self.eleana = eleana
         #self.menu = menu_instance
         #self.app = self.menu.app
         #self.eleana = eleana
         pass
 
-    @staticmethod
-    def load_preferences(eleana):
-        ''' Load saved graph settings from home/.EleanaPy/preferences.pic'''
-        try:
-            filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'preferences.pic')
-            # Read paths.pic
-            file_to_read = open(filename, "rb")
-            settings = pickle.load(file_to_read)
-            file_to_read.close()
-            return settings
-        except Exception as e:
-            print(e)
-            return None
+    # @staticmethod
+    # def load_preferences(eleana):
+    #     ''' Load saved graph settings from home/.EleanaPy/preferences.pic'''
+    #     try:
+    #         filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'preferences.pic')
+    #         # Read paths.pic
+    #         file_to_read = open(filename, "rb")
+    #         settings = pickle.load(file_to_read)
+    #         file_to_read.close()
+    #         return settings
+    #     except Exception as e:
+    #         print(e)
+    #         return None
 
     # @classmethod
     # def load_paths_settings(cls, eleana):
@@ -66,7 +67,7 @@ class Load:
                 index = last_projects.index(filename)
                 last_projects.pop(index)
             last_projects.insert(0, filename)
-            Save.save_settings_paths(self.eleana)
+            self.eleana.save_paths()
             self.eleana.paths['last_projects'] = last_projects
         init_dir = Path(self.eleana.paths['last_project_dir'])
         try:
@@ -119,7 +120,7 @@ class Load:
             copy_of_eleana_groupsHierarchy = copy.deepcopy(self.eleana.groupsHierarchy)
             copy_of_eleana_notes = copy.deepcopy(self.eleana.notes)
             copy_of_eleana_selections = copy.deepcopy(self.eleana.selections)
-            copy_of_eleana_static_plots = copy.deepcopy(self.eleana.static_plots)
+            copy_of_eleana_static_plots = copy.deepcopy(self.eleana.storage.static_plots)
 
             # Check if dataset is empty
             if len(self.eleana.dataset) > 0:
@@ -157,7 +158,7 @@ class Load:
                 self.eleana.selections = copy.deepcopy(loaded_object.selections)
                 self.eleana.static_plots = copy.deepcopy(loaded_object.static_plots)
                 _update_last_projects(filename)
-                self.menu.create_showplots_menu()
+                #self.create_showplots_menu()
             return True
         except Exception as e:
             Error.show(info="Cannot load the project file", details=e)
@@ -237,7 +238,7 @@ class Load:
         self.eleana.paths['last_import_dir'] = last_import_dir
         return
 
-    def loadAscii(self, from_clipboard = None):
+    def loadAscii(self, master, clipboard = None):
         def _create_headers(amount):
             alphabet = list(string.ascii_uppercase)
             current_len = len(alphabet)
@@ -258,7 +259,7 @@ class Load:
             alphabet.extend(headers)
             return alphabet
 
-        if from_clipboard == None:
+        if clipboard == None:
             path = self.eleana.paths['last_import_dir']
             filetypes = (
                 ('CSV file', '*.csv'),
@@ -268,12 +269,12 @@ class Load:
             filename = filedialog.askopenfilename(initialdir=path, filetypes=filetypes)
             if not filename:
                 return
-            preview = AsciFilePreview(master = self.app.mainwindow, filename=filename, eleana = self.eleana)
+            preview = AsciFilePreview(master = master, filename=filename, eleana = self.eleana)
             response = preview.get()
             last_import_dir = Path(filename).parent
             self.eleana.paths['last_import_dir'] = last_import_dir
         else:
-            preview = AsciFilePreview(master=self.app.mainwindow, filename=None, clipboard = from_clipboard, eleana = self.eleana)
+            preview = AsciFilePreview(master=master, filename=None, clipboard = clipboard, eleana = self.eleana)
             response = preview.get()
             filename = None
 
@@ -320,7 +321,7 @@ class Load:
                 name = Path(filename).name
             else:
                 name = ''
-        spreadsheet = CreateFromTable(self.eleana, self.app.mainwindow, df=df, name=name, group = self.eleana.selections['group'])
+        spreadsheet = CreateFromTable(self.eleana, master, df=df, name=name, group = self.eleana.selections['group'])
         response = spreadsheet.get()
 
     def loadAdaniDat(self):
@@ -348,8 +349,8 @@ class Load:
                               message=f"Cannot load data from {list}.", icon="cancel")
 
 class Save:
-    def __init__(self, app_instance):
-        self.eleana = app_instance.eleana
+    def __init__(self, eleana):
+        self.eleana = eleana
 
     @classmethod
     # def save_preferences(cls, eleana, app, grapher):
@@ -452,8 +453,8 @@ class Save:
         return filename
 
 class Export:
-    def __init__(self, app_instance):
-        self.eleana = app_instance.eleana
+    def __init__(self, eleana):
+        self.eleana = eleana
     def csv(self, which = 'first', filename=None):
         if filename == None:
             if which == 'first' and self.eleana.selections['first'] < 0:
@@ -582,15 +583,15 @@ class Export:
             self.csv(which = which, filename = each)
             i += 1
 
-class Project_1:
-    ''' Create object used to save/load Eleana projects ver. 1'''
-    def __init__(self, eleana):
-        self.dataset = eleana.dataset
-        self.results_dataset = eleana.results_dataset
-        self.groupsHierarchy = eleana.groupsHierarchy
-        self.notes = eleana.notes
-        self.selections = eleana.selections
-        self.static_plots = eleana.static_plots
+# class Project_1:
+#     ''' Create object used to save/load Eleana projects ver. 1'''
+#     def __init__(self, eleana):
+#         self.dataset = eleana.dataset
+#         self.results_dataset = eleana.results_dataset
+#         self.groupsHierarchy = eleana.groupsHierarchy
+#         self.notes = eleana.notes
+#         self.selections = eleana.selections
+#        self.static_plots = eleana.static_plots
 class Preferences:
     ''' This class is used to create preferences'''
     def __init__(self, app, grapher):

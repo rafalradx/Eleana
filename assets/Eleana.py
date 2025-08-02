@@ -1,4 +1,5 @@
 # Import Python Modules
+import gc
 import sys
 import numpy as np
 from pathlib import Path
@@ -6,6 +7,12 @@ import tempfile
 from dataclasses import dataclass, field
 from typing import Dict, Any
 import pickle
+from Error import Error
+import shutil
+import json
+from tkinter.filedialog import asksaveasfile, askopenfilename
+import gc
+from modules.CTkMessagebox import CTkMessagebox
 
 @dataclass
 class GuiState:
@@ -15,6 +22,7 @@ class GuiState:
     log_y: bool
     indexed_x: bool
     cursor_mode: str
+    inverted_x: bool
 
 @dataclass
 class Settings:
@@ -28,6 +36,15 @@ class Storage:
     static_plots: list[Any]
     active_static_plot_windows: list[Any]
     cursor_annotations: list[Any]
+
+@dataclass
+class Project_1:
+    dataset: list[object]
+    results_dataset: list[object]
+    groupsHierarchy: dict
+    notes: str
+    selections: Dict[str, Any]
+    static_plots: list
 
 class Eleana():
     # Main attributes associated with data gathered in the programe
@@ -54,6 +71,11 @@ class Eleana():
              'last_projects': [],
              'last_export_dir':''
              }
+        # Load saved paths
+        try:
+            self.load_paths()
+        except:
+            pass
 
         # Attribute selection is the basic storage of the settings obtained from states in GUI
         # Description:
@@ -109,11 +131,12 @@ class Eleana():
                                     log_x = False,
                                     log_y = False,
                                     indexed_x = False,
-                                    cursor_mode = 'None'
+                                    cursor_mode = 'None',
+                                    inverted_x = False
                                     )
 
         # Create temporary storages
-        self.storage = Storage(subprog_settings = [],
+        self.storage = Storage(subprog_settings = {},
                                static_plots = [],
                                active_static_plot_windows = [],
                                additional_plots = [],
@@ -260,6 +283,130 @@ class Eleana():
         except Exception as e:
             print(f"Error saving settings: {e}")
             return False
+
+    def save_paths(self):
+        ''' Save settings in .EleanaPy/paths.pic '''
+        filename = Path(self.paths['home_dir'], '.EleanaPy', 'paths.pic')
+        content = self.paths
+        with open(filename, 'wb') as file:
+            pickle.dump(content, file, protocol=4)
+        return True
+
+    def save_project(self, save_current=False):
+        ''' Save project to a file '''
+        init_dir = Path(self.paths.get('last_project_dir', Path.home()))
+        if not save_current:
+            filename = asksaveasfile(
+                initialdir=init_dir,
+                initialfile='',
+                defaultextension=".ele",
+                filetypes=[("Eleana project", "*.ele"),("All Files", "*.*")]
+            )
+            if not filename:
+                return None
+            filename = Path(filename.name)
+        else:
+            filename = Path(save_current)
+        working_folder = Path(filename.parent, '~eleana_project.tmp')
+        if working_folder.exists():
+            try:
+                shutil.rmtree(working_folder)
+            except Exception as e:
+                Error.show(info="Cannot create the project file", details=e)
+                return None
+        try:
+            working_folder.mkdir(parents=True)
+        except Exception as e:
+            Error.show(info="Cannot create the project file", details=e)
+            return None
+        project_information = {'project version':'1.0'}
+        project_to_save = Project_1(dataset = self.dataset,
+                                    results_dataset = self.results_dataset,
+                                    groupsHierarchy = self.groupsHierarchy,
+                                    notes = self.notes,
+                                    selections = self.selections,
+                                    static_plots = self.storage.static_plots
+                                    )
+
+
+        working_filename = Path(working_folder, 'project_1')
+        working_information = Path(working_folder, 'info.txt')
+        try:
+            with open(working_filename, 'wb') as file:
+                pickle.dump(project_to_save, file)
+            with open(working_information, 'w') as file:
+                json.dump(project_information, file)
+        except Exception as e:
+            message = 'Could not save the file.'
+            message = message + f'\n\nDetails:\n{e}'
+            info = CTkMessagebox(title="Error", message=message, icon='cancel')
+        del project_to_save
+        gc.collect()
+
+        # Create zip file form the directory
+        try:
+            working_folder = Path(working_folder)
+            path_to_folder = Path(filename.parent)
+            zip_file = Path(path_to_folder, ('~' + str(filename.name[:-4] + '_tmpProject')))
+            project_zip = shutil.make_archive(zip_file, 'zip', working_folder)
+            project_zip = Path(project_zip)
+            project_ele = project_zip.rename(filename)
+        except Exception as e:
+            Error.show(info="Error while creating project archive.", details=e)
+            return None
+        try:
+            shutil.rmtree(working_folder)
+        except Exception as e:
+            Error.show(info="Cannot remove temporary project folder. Please remove it manually.", details=e)
+            return None
+
+
+        # last_projects = self.paths['last_projects']
+        # saved_path_string = str(project_ele)
+        # if saved_path_string in last_projects:
+        #     index = last_projects.index(saved_path_string)
+        #     del last_projects[index]
+        # last_projects.insert(0, str(saved_path_string))
+        # last_projects = last_projects[:20]
+        # # Write the list to eleana.paths
+        # self.paths['last_projects'] = last_projects
+        # self.paths['last_project_dir'] = Path(last_projects[0]).parent
+        # self.save_paths()
+        # # Perform update to place the item into menu
+        # return str(Path(last_projects[0]).name[:-4] + ' - Eleana')
+
+        saved_path_string = str(project_ele)
+        last_projects = list(self.paths.get('last_projects', []))  # jawna kopia
+
+        if saved_path_string in last_projects:
+            last_projects.remove(saved_path_string)
+        last_projects.insert(0, saved_path_string)
+        last_projects = last_projects[:20]
+
+        self.paths['last_projects'] = last_projects
+        self.paths['last_project_dir'] = Path(last_projects[0]).parent
+        self.save_paths()
+
+        return f"{Path(last_projects[0]).stem} - Eleana"
+
+    def load_paths(self):
+        ''' Load saved settings from home/.EleanaPy/paths.pic'''
+        filename = Path(self.paths['home_dir'], '.EleanaPy', 'paths.pic')
+        # Read paths.pic
+        file_to_read = open(filename, "rb")
+        paths = pickle.load(file_to_read)
+
+        self.paths['last_import_dir'] = paths['last_import_dir']
+        self.paths['last_projects_dir'] = paths['last_projects_dir']
+        self.paths['last_export_dir'] = paths['last_export_dir']
+
+        file_to_read.close()
+        # Create last project list in the main menu
+        last_projects = self.paths['last_projects']
+        last_projects = [element for i, element in enumerate(last_projects) if i <= 10]
+        # Write the list to eleana.paths
+        self.paths['last_projects'] = last_projects
+        return True
 
     def load_settings(self):
         ''' Load saved graph settings from home/.EleanaPy/preferences.pic'''

@@ -49,9 +49,9 @@ class AsciFilePreview:
         self.check_whitemarks = builder.get_object('check_whitemarks', master)
 
         self.textframe = builder.get_object('textframe', master)
-        scrollbar_y = ttk.Scrollbar(self.textframe, orient="vertical")
-        scrollbar_x = ttk.Scrollbar(self.textframe, orient="horizontal")
-        self.preview = ctk.CTkTextbox(self.textframe, wrap=tk.NONE, yscrollcommand=scrollbar_y.set,  xscrollcommand=scrollbar_x.set)
+        self.scrollbar_y = ttk.Scrollbar(self.textframe, orient="vertical")
+        self.scrollbar_x = ttk.Scrollbar(self.textframe, orient="horizontal")
+        self.preview = ctk.CTkTextbox(self.textframe, wrap=tk.NONE, yscrollcommand=self.scrollbar_y.set,  xscrollcommand=self.scrollbar_x.set)
         self.preview.pack(expand=True, fill="both")
 
         # Set as modal
@@ -125,9 +125,10 @@ class AsciFilePreview:
         data = []
         try:
             for line in lines:
-                column = line.split(sep = separator)
-                numbers = [float(i) for i in column]
-                data.append(column)
+                if line:
+                    column = line.split(sep = separator)
+                    numbers = [float(i) for i in column]
+                    data.append(column)
         except ValueError:
             info = CTkMessagebox(title='Error', message='One of the values could not be converted to a float. Make sure the text contains valid numbers and that the separator is correct.', icon="cancel")
             return False
@@ -248,14 +249,13 @@ class AsciFilePreview:
         elements = self.save_settings()
         for element in elements:
             self.subprog_storage_data.append(element)
-        storage = copy.deepcopy(self.subprog_storage_data)
-        self.eleana.subprog_storage[self.subprog_id] = storage
+        self.eleana.storage.subprog_settings[self.subprog_id] = copy.deepcopy(self.subprog_storage_data)
 
     def restore(self, element):
         ''' Get data from self.eleana.subprog_storage
             for widget and returns stored values
         '''
-        subprog_field = self.eleana.subprog_storage.get(self.subprog_id, None)
+        subprog_field = self.eleana.storage.subprog_settings.get(self.subprog_id, None)
         if subprog_field is None:
             return None
         to_restore = next(line[element] for line in subprog_field if element in line)

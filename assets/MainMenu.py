@@ -3,10 +3,11 @@ from pathlib import Path
 from LoadSave import Save
 
 class MainMenu:
-    def __init__(self, master, pixmap_folder, callbacks):
+    def __init__(self, master, pixmap_folder, callbacks, eleana):
         self.icons = pixmap_folder
         self.callbacks = callbacks or {}
         self.master = master
+        self.eleana = eleana
 
         ''' Styling of the menu '''
         self.bg = '#303030'
@@ -21,6 +22,7 @@ class MainMenu:
         self.icon_dropdown = self.prepare_icon("dropdown.png")
         self.icon_load_project = self.prepare_icon("load-project.png")
         self.icon_recent_projects = self.prepare_icon("recent_projects.png")
+        self.icon_project2 = self.prepare_icon("project2.png")
         self.icon_save_as = self.prepare_icon("save_as.png")
         self.icon_import = self.prepare_icon("import.png")
         self.icon_exit = self.prepare_icon("exit.png")
@@ -83,52 +85,54 @@ class MainMenu:
 
         # - Save As
         self.menu_file.add_command(label="Save As", command=self.callbacks.get("save_as"), image = self.icon_save_as, compound="left")
+
         # - Save
-        #self.menu_file.add_command(label="Save", command=self.app.save_current, image=self.icon_save_as, compound="left", accelerator="Ctrl+S")
-        #
+        self.menu_file.add_command(label="Save", command=self.callbacks.get("save_current"), image=self.icon_save_as, compound="left", accelerator="Ctrl+S")
+
         # # - Import data
-        # self.menu_import = tk.Menu(self.menu_file, tearoff=0, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        # self.menu_file.add_cascade(label="Import data", menu=self.menu_import, image = self.icon_import, compound="left")
-        #
-        # # ------------ Bruker Elexsys
-        # self.menu_import.add_command(label="Bruker Elexsys (DTA)", command=self.app.import_elexsys, image = self.icon_import_elexsys, compound="left")
-        # # ------------ Bruker EMX
-        # self.menu_import.add_command(label="Bruker ESP/EMX (spc)", command=self.app.import_EMX, image = self.icon_import_emx, compound="left")
-        # # ------------ Adani dat
-        # self.menu_import.add_command(label="Adani text (dat)", command = self.app.import_adani_dat, image = self.icon_import_adani, compound="left")
-        #
-        # # ------------ Magnettech
-        # self.menu_import.add_command(label="Magnettech older (spe)", command=self.app.import_magnettech1,
-        #                              image=self.icon_epr,
-        #                              compound="left")
-        # self.menu_import.add_command(label="Magnettech newer (spe)", command=self.app.import_magnettech2,
-        #                              image=self.icon_epr,
-        #                              compound="left")
-        # # ------------ Separator
-        # self.menu_import.add_separator()
-        #
-        # # ------------ Shimadzu SPC
-        # self.menu_import.add_command(label="Shimadzu UV/VIS (spc)", command=self.app.import_shimadzu_spc, image=self.icon_shimadzu,
-        #                              compound="left")
-        #
-        # # ------------ Separator
-        # self.menu_import.add_separator()
-        #
-        # # ------------ ASCII Files
-        # self.menu_import.add_command(label="ASCII file", command=self.app.import_ascii, image=self.icon_import_ascii, compound="left")
-        # # ------------ Excel
-        # self.menu_import.add_command(label="MS Excel/LibreOffice Calc", command = self.app.load_excel, image = self.icon_import_excel, compound='left')
+        self.menu_import = tk.Menu(self.menu_file, tearoff=0, bg = self.bg, fg = self.fg, font = self.font, activebackground=self.activebg, activeforeground=self.activefg, borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.menu_file.add_cascade(label="Import data", menu=self.menu_import, image = self.icon_import, compound="left")
+
+        # ------------ Bruker Elexsys
+        self.menu_import.add_command(label="Bruker Elexsys (DTA)", command=self.callbacks.get("import_elexsys"), image = self.icon_import_elexsys, compound="left")
+        # ------------ Bruker EMX
+        self.menu_import.add_command(label="Bruker ESP/EMX (spc)", command=self.callbacks.get("import_EMX"), image = self.icon_import_emx, compound="left")
+        # ------------ Adani dat
+        self.menu_import.add_command(label="Adani text (dat)", command = self.callbacks.get("import_adani_dat"), image = self.icon_import_adani, compound="left")
+
+        # ------------ Magnettech
+        self.menu_import.add_command(label="Magnettech older (spe)", command=self.callbacks.get("import_magnettech1"),
+                                     image=self.icon_epr,
+                                     compound="left")
+        self.menu_import.add_command(label="Magnettech newer (spe)", command=self.callbacks.get("import_magnettech2"),
+                                     image=self.icon_epr,
+                                     compound="left")
+        # ------------ Separator
+        self.menu_import.add_separator()
+
+        # ------------ Shimadzu SPC
+        self.menu_import.add_command(label="Shimadzu UV/VIS (spc)", command=self.callbacks.get("import_shimadzu_spc"), image=self.icon_shimadzu,
+                                     compound="left")
+
+        # ------------ Separator
+        self.menu_import.add_separator()
+
+        # ------------ ASCII Files
+        self.menu_import.add_command(label="ASCII file", command=self.callbacks.get("import_ascii"), image=self.icon_import_ascii, compound="left")
+        # ------------ Excel
+        self.menu_import.add_command(label="MS Excel/LibreOffice Calc", command = self.callbacks.get("import_excel"), image = self.icon_import_excel, compound='left')
         #
         # # - SEPARATOR -
-        # self.menu_file.add_separator()
+        self.menu_file.add_separator()
         #
-        # # Export
-        # self.menu_export = tk.Menu(self.menu_file, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
-        #                            activebackground=self.activebg, activeforeground=self.activefg,
-        #                            borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        # self.menu_file.add_cascade(label="Export", menu=self.menu_export, image=self.icon_export, compound="left")
-        # # - Export first
-        # self.menu_export.add_command(label="Export First", command=self.app.export_first, image=self.icon_export_first,
+        # Export
+        self.menu_export = tk.Menu(self.menu_file, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                                   activebackground=self.activebg, activeforeground=self.activefg,
+                                   borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.menu_file.add_cascade(label="Export", menu=self.menu_export, image=self.icon_export, compound="left")
+
+        # - Export first
+        #self.menu_export.add_command(label="Export First", command=self.app.export_first, image=self.icon_export_first,
         #                            compound="left")
         # # - Export group
         # self.menu_export.add_command(label="Export Group", command=self.app.export_group, image=self.icon_export_group,
@@ -342,8 +346,7 @@ class MainMenu:
         def _clear_recent_list():
             last = self.eleana.paths['last_projects'][0]
             self.eleana.paths['last_projects'] = [last]
-            self.last_projects_menu()
-            Save.save_settings_paths(self.eleana)
+            self.eleana.save_paths()
         list_for_menu = []
         i = 1
         for each in self.eleana.paths['last_projects']:
@@ -353,15 +356,15 @@ class MainMenu:
             i += 1
         recent_menu = self.menu_recent
         recent_menu.delete(0, tk.END)
-        icon_file = Path(self.eleana.paths['pixmaps'], 'project.png')
+        icon_file = Path(self.eleana.paths['pixmaps'], 'project2.png')
         icon_clear = tk.PhotoImage(file=icon_file)
-        for label in list_for_menu:
-            def create_command(l):
-                return lambda: self.app.load_recent(l)
-            recent_menu.add_command(label=label, image=icon_clear, compound="left", command=create_command(label))
+
+        for i, label in enumerate(list_for_menu):
+            recent_menu.add_command(label=label, image = self.icon_project2, compound="left", command=lambda x=i: self.callbacks.get("load_project")(recent=x))
+
         # Separator and clear
         recent_menu.add_separator()
-        recent_menu.add_command(label='Keep only last', image=icon_clear, compound="left", command=_clear_recent_list)
+        recent_menu.add_command(label='Keep only last', image = self.icon_clear, compound="left", command=_clear_recent_list)
 
     def create_showplots_menu(self):
         '''
@@ -378,6 +381,7 @@ class MainMenu:
 
         if not self.eleana.static_plots:
             return
+
         # Create new menu
         self.menu_showPlots = tk.Menu(self.menu_file, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
                                       activebackground=self.activebg, activeforeground=self.activefg,
@@ -402,9 +406,24 @@ class MainMenu:
 
 class ContextMenu:
     ''' Create shortcut menu triggered by right mouse button'''
-    def __init__(self, app_instance):
-        self.app = app_instance
-        self.eleana = app_instance.eleana
+    def __init__(self, master, eleana, gui_references, callbacks):
+        self.eleana = eleana
+        self.callbacks = callbacks
+        self.master = master
+
+        # References to GUI in the main applicationcwindow
+        self.groupFrame = gui_references['groupFrame']
+        self.sel_group = gui_references['sel_group']
+        self.firstFrame = gui_references['firstFrame']
+        self.sel_first =  gui_references['sel_first']
+        self.firstStkFrame = gui_references['firstStkFrame']
+        self.f_stk = gui_references["f_stk"]
+        self.secondFrame = gui_references["seconFrame"]
+        self.sel_second = gui_references["sel_second"]
+        self.secondStkFrame = gui_references["secondStkFrame"]
+        self.s_stk = gui_references["s_stk"]
+        self.resultFrame = gui_references["resultFrame"]
+        self.sel_result = gui_references["sel_result"]
 
         ''' Styling of the context menu '''
         self.bg = '#505050'
@@ -413,34 +432,34 @@ class ContextMenu:
 
         ''' References to Widgets '''
         # GROUPS
-        self.app.groupFrame.bind("<Button-3>", self.show_context_menu_group)
-        self.app.sel_group.bind("<Button-3>", self.show_context_menu_group)
-        self.context_menu_group = tk.Menu(self.app.mainwindow, tearoff=0, bg=self.bg, fg=self.fg, font=self.font)
+        self.groupFrame.bind("<Button-3>", self.show_context_menu_group)
+        self.sel_group.bind("<Button-3>", self.show_context_menu_group)
+        self.context_menu_group = tk.Menu(self.master, tearoff=0, bg=self.bg, fg=self.fg, font=self.font)
 
         # FIRST
-        self.app.firstFrame.bind("<Button-3>", self.show_context_menu_first)
-        self.app.sel_first.bind("<Button-3>", self.show_context_menu_first)
-        self.context_menu_first = tk.Menu(self.app.mainwindow, tearoff=0, bg=self.bg, fg=self.fg, font = self.font)
+        self.firstFrame.bind("<Button-3>", self.show_context_menu_first)
+        self.sel_first.bind("<Button-3>", self.show_context_menu_first)
+        self.context_menu_first = tk.Menu(self.master, tearoff=0, bg=self.bg, fg=self.fg, font = self.font)
 
         # FIRST STK
-        self.app.firstStkFrame.bind("<Button-3>", self.show_context_menu_first_stk)
-        self.app.f_stk.bind("<Button-3>", self.show_context_menu_first_stk)
-        self.context_menu_first_stk = tk.Menu(self.app.mainwindow, tearoff=0, bg=self.bg, fg=self.fg, font=self.font)
+        self.firstStkFrame.bind("<Button-3>", self.show_context_menu_first_stk)
+        self.f_stk.bind("<Button-3>", self.show_context_menu_first_stk)
+        self.context_menu_first_stk = tk.Menu(self.master, tearoff=0, bg=self.bg, fg=self.fg, font=self.font)
 
         # SECOND
-        self.app.secondFrame.bind("<Button-3>", self.show_context_menu_second)
-        self.app.sel_second.bind("<Button-3>", self.show_context_menu_second)
-        self.context_menu_second = tk.Menu(self.app.mainwindow, tearoff=0, bg=self.bg, fg=self.fg, font = self.font)
+        self.secondFrame.bind("<Button-3>", self.show_context_menu_second)
+        self.sel_second.bind("<Button-3>", self.show_context_menu_second)
+        self.context_menu_second = tk.Menu(self.master, tearoff=0, bg=self.bg, fg=self.fg, font = self.font)
 
         # SECOND STK
-        self.app.secondStkFrame.bind("<Button-3>", self.show_context_menu_second_stk)
-        self.app.s_stk.bind("<Button-3>", self.show_context_menu_second_stk)
-        self.context_menu_second_stk = tk.Menu(self.app.mainwindow, tearoff=0, bg=self.bg, fg=self.fg, font=self.font)
+        self.secondStkFrame.bind("<Button-3>", self.show_context_menu_second_stk)
+        self.s_stk.bind("<Button-3>", self.show_context_menu_second_stk)
+        self.context_menu_second_stk = tk.Menu(self.master, tearoff=0, bg=self.bg, fg=self.fg, font=self.font)
 
         # RESULT
-        self.app.resultFrame.bind("<Button-3>", self.show_context_menu_result)
-        self.app.sel_result.bind("<Button-3>", self.show_context_menu_result)
-        self.context_menu_result = tk.Menu(self.app.mainwindow, tearoff=0, bg=self.bg, fg=self.fg, font = self.font)
+        self.resultFrame.bind("<Button-3>", self.show_context_menu_result)
+        self.sel_result.bind("<Button-3>", self.show_context_menu_result)
+        self.context_menu_result = tk.Menu(self.master, tearoff=0, bg=self.bg, fg=self.fg, font = self.font)
 
         # Build context menu for FIRST
         self.build_menu_group()
@@ -452,48 +471,48 @@ class ContextMenu:
 
     def build_menu_group(self):
         '''This creates positions for FIRST context menu '''
-        self.context_menu_group.add_command(label="Remove assignments to the group", command=self.app.delete_group)
-        self.context_menu_group.add_command(label="Assign data to additional group", command=lambda: self.app.data_to_other_group(move=False))
-        self.context_menu_group.add_command(label="Move data to other group", command=lambda: self.app.data_to_other_group(move=True))
-        self.context_menu_group.add_command(label="Delete data assigned to the group",  command=self.app.delete_data_from_group)
-        self.context_menu_group.add_command(label ="Convert whole group to a stack", command=lambda: self.app.convert_group_to_stack(all = True))
-        self.context_menu_group.add_command(label="Convert selected to a stack", command=lambda: self.app.convert_group_to_stack(all=False))
+        self.context_menu_group.add_command(label="Remove assignments to the group", command=self.callbacks.get('app.delete_group'))
+        self.context_menu_group.add_command(label="Assign data to additional group", command=lambda: self.callbacks.get('data_to_other_group')(move=False))
+        self.context_menu_group.add_command(label="Move data to other group", command=lambda: self.callbacks.get('data_to_other_group')(move=True))
+        self.context_menu_group.add_command(label="Delete data assigned to the group",  command=self.callbacks.get('delete_data_from_group'))
+        self.context_menu_group.add_command(label ="Convert whole group to a stack", command=lambda: self.callbacks.get('convert_group_to_stack')(all = True))
+        self.context_menu_group.add_command(label="Convert selected to a stack", command=lambda: self.callbacks.get('convert_group_to_stack')(all = False))
 
     def build_menu_first(self):
         '''This creates positions for FIRST context menu '''
-        self.context_menu_first.add_command(label="Rename", command=lambda: self.app.rename_data('first'))
-        self.context_menu_first.add_command(label="Delete", command=lambda: self.app.delete_data('first'))
-        self.context_menu_first.add_command(label="Duplicate", command=lambda: self.app.duplicate_data('first'))
-        self.context_menu_first.add_command(label="Assign to group", command=self.app.first_to_group)
-        self.context_menu_first.add_command(label="Convert stack to group", command=lambda: self.app.stack_to_group('first'))
-        self.context_menu_first.add_command(label="Edit comment", command=lambda: self.app.edit_comment('first'))
-        self.context_menu_first.add_command(label="Edit parameters", command = lambda: self.app.edit_parameters('first'))
+        self.context_menu_first.add_command(label="Rename", command=lambda: self.callbacks.get('rename_data')('first'))
+        self.context_menu_first.add_command(label="Delete", command=lambda: self.callbacks.get('delete_data')('first'))
+        self.context_menu_first.add_command(label="Duplicate", command=lambda: self.callbacks.get('duplicate_data')('first'))
+        self.context_menu_first.add_command(label="Assign to group", command=self.callbacks.get('first_to_group'))
+        self.context_menu_first.add_command(label="Convert stack to group", command=lambda: self.callbacks.get('stack_to_group')('first'))
+        self.context_menu_first.add_command(label="Edit comment", command=lambda: self.callbacks.get('edit_comment')('first'))
+        self.context_menu_first.add_command(label="Edit parameters", command = lambda: self.callbacks.get('edit_parameters')('first'))
 
     def build_menu_f_stk(self):
         '''This creates positions for FIRST STK context menu '''
-        self.context_menu_first_stk.add_command(label="Delete", command=lambda: self.app.delete_single_stk_data('first'))
+        self.context_menu_first_stk.add_command(label="Delete", command=lambda: self.callbacks.get('delete_single_stk_data')('first'))
 
 
     def build_menu_second(self):
         '''This creates positions for SECOND context menu '''
-        self.context_menu_second.add_command(label="Rename", command=lambda: self.app.rename_data('second'))
-        self.context_menu_second.add_command(label="Delete", command=lambda: self.app.delete_data('second'))
-        self.context_menu_second.add_command(label="Duplicate", command=lambda: self.app.duplicate_data('second'))
-        self.context_menu_second.add_command(label="Assign to group", command=self.app.second_to_group)
-        self.context_menu_second.add_command(label="Convert stack to group", command=lambda: self.app.stack_to_group('second'))
-        self.context_menu_second.add_command(label="Edit comment", command=lambda: self.app.edit_comment('second'))
-        self.context_menu_second.add_command(label="Edit parameters", command=lambda: self.app.edit_parameters('second'))
+        self.context_menu_second.add_command(label="Rename", command=lambda: self.callbacks.get('rename_data')('second'))
+        self.context_menu_second.add_command(label="Delete", command=lambda: self.callbacks.get('delete_data')('second'))
+        self.context_menu_second.add_command(label="Duplicate", command=lambda: self.callbacks.get('duplicate_data')('second'))
+        self.context_menu_second.add_command(label="Assign to group", command=self.callbacks.get('second_to_group'))
+        self.context_menu_second.add_command(label="Convert stack to group", command=lambda: self.callbacks.get('stack_to_group')('second'))
+        self.context_menu_second.add_command(label="Edit comment", command=lambda: self.callbacks.get('edit_comment')('second'))
+        self.context_menu_second.add_command(label="Edit parameters", command=lambda: self.callbacks.get('edit_parameters')('second'))
 
     def build_menu_s_stk(self):
         '''This creates positions for SECOND STK context menu '''
-        self.context_menu_second_stk.add_command(label="Delete", command=lambda: self.app.delete_single_stk_data('second'))
+        self.context_menu_second_stk.add_command(label="Delete", command=lambda: self.callbacks.get('delete_single_stk_data')('second'))
 
 
     def build_menu_result(self):
         '''This creates positions for SECOND context menu '''
-        self.context_menu_result.add_command(label="Rename", command=lambda: self.app.rename_data('result'))
-        self.context_menu_result.add_command(label="Delete", command=lambda: self.app.delete_data('result'))
-        self.context_menu_second.add_command(label="Duplicate", command=lambda: self.app.duplicate_data('result'))
+        self.context_menu_result.add_command(label="Rename", command=lambda: self.callbacks.get('rename_data')('result'))
+        self.context_menu_result.add_command(label="Delete", command=lambda: self.callbacks.get('delete_data')('result'))
+        self.context_menu_second.add_command(label="Duplicate", command=lambda: self.callbacks.get('duplicate_data')('result'))
 
     def show_context_menu_group(self, event):
         self.context_menu_group.tk_popup(event.x_root, event.y_root)

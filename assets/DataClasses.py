@@ -95,7 +95,7 @@ class BaseDataModel:
 
     @classmethod
     def from_dict(cls, data):
-        return BaseDataModel(*data)
+        return BaseDataModel(**data)
     
     def is_stack(self) -> bool:
         return self.type == 'stack 2D'
