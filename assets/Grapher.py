@@ -156,11 +156,12 @@ class Grapher():
 
         # Apply plt style
         try:
+            self.plt.style.use(self.plt_style)
             plt.style.use(self.plt_style)
         except:
-             self.plt_style =  'Solarize_Light2'
-             plt.style.use(self.plt_style)
-
+            self.plt_style =  'Solarize_Light2'
+            self.plt.style.use(self.plt_style)
+            plt.style.use('Solarize_Light2')
 
         # Create empty list of created annotations
         self.cursor_annotations = self.eleana.storage.cursor_annotations

@@ -11,7 +11,7 @@ import pygubu
 import tkinter as tk
 import pickle
 
-from assets.MainMenu import ContextMenu
+from assets.Menu import ContextMenu
 
 ''' ELEANA MODULES '''
 # Import modules from "/modules" folder
@@ -21,7 +21,8 @@ from modules.CTkMessagebox import CTkMessagebox
 from widgets.CTkSpinbox import CTkSpinbox
 
 # Import Eleana specific classes
-from MainMenu import MainMenu
+from Menu import MainMenu
+from Callbacks import main_menubar_callbacks, contextmenu_callbacks
 from Grapher import Grapher
 from IconToWidget import IconToWidget
 from LoadSave import Load, Save, Export
@@ -182,9 +183,6 @@ class Application():
         self.first_mod_panel_8.grid(row=1, column=1, sticky="ew")
         self.first_mod_panel_8.set(1)
 
-        # Create Grapher
-        #self.grapher = Grapher(master = self.graphFrame, eleana = self.eleana )
-
         # Hide FIRST modifications
         self.first_modFrame.grid_remove()
         self.btn_toggle_first_mod = builder.get_object("btn_toggle_first_mod", self.mainwindow)
@@ -229,53 +227,17 @@ class Application():
                             master = self.mainwindow,
                             pixmap_folder = self.eleana.paths['pixmaps'],
                             eleana = self.eleana,
-                            callbacks={
-                                 "load_project": self.load_project,
-                                 "save_as": self.save_as,
-                                 "import_elexsys": self.import_elexsys,
-                                 "import_EMX": self.import_EMX,
-                                 "import_magnettech1": self.import_magnettech1,
-                                 "import_magnettech2": self.import_magnettech2,
-                                 "import_adani_dat": self.import_adani_dat,
-                                 "import_shimadzu_spc": self.import_shimadzu_spc,
-                                 "import_ascii": self.import_ascii,
-                                 "import_excel": self.import_excel,
-
-                            })
+                            callbacks=main_menubar_callbacks(self)
+                            )
         # Create the main menu
         self.main_menubar.create(master = self.mainwindow)
 
         # Create context menues
         self.contextmenu = ContextMenu(master = self.mainwindow,
                                        eleana = self.eleana,
-                                       gui_references = {
-                                            "groupFrame": self.groupFrame,
-                                            "sel_group": self.sel_group,
-                                            "firstFrame": self.firstFrame,
-                                            "sel_first": self.sel_first,
-                                            "firstStkFrame": self.firstStkFrame,
-                                            "f_stk": self.f_stk,
-                                            "seconFrame": self.secondFrame,
-                                            "sel_second": self.sel_second,
-                                            "secondStkFrame": self.secondStkFrame,
-                                            "s_stk": self.s_stk,
-                                            "resultFrame": self.resultFrame,
-                                            "sel_result": self.sel_result
-                                            },
-                                       callbacks={
-                                            "delete_group": self.delete_group,
-                                            "data_to_other_group": self.data_to_other_group,
-                                            "delete_data_from_group": self.delete_data_from_group,
-                                            "convert_group_to_stack": self.convert_group_to_stack,
-                                            "rename_data": self.rename_data,
-                                            "delete_data": self.delete_data,
-                                            "duplicate_data": self.duplicate_data,
-                                            "first_to_group": self.first_to_group,
-                                            "stack_to_group": self.stack_to_group,
-                                            "edit_comment": self.edit_comment,
-                                            "edit_parameters": self.edit_parameters,
-                                            "delete_single_stk_data": self.delete_single_stk_data,
-                                            })
+                                       gui_references = contextmenu_callbacks(self)['gui_references'],
+                                       callbacks= contextmenu_callbacks(self)['callbacks'],
+                                    )
 
         # Keyboard bindings
         self.mainwindow.bind("<Control-c>", self.copy_to_clipboard)
@@ -2067,7 +2029,7 @@ class Application():
         to_delete.sort(reverse=True)
         for i in to_delete:
             self.eleana.static_plots.pop(i)
-        main_menu.create_showplots_menu()
+        self.main_menubar.create_showplots_menu()
 
     def xy_distance(self):
         xy_distance = DistanceRead(self, which='first')
@@ -2146,6 +2108,7 @@ class Application():
         if clear_annotations:
             self.grapher.clear_all_annotations(True)
         self.grapher.current_cursor_mode['label'] = value
+        self.eleana.gui_state.cursor_mode = copy.copy(value)
         self.grapher.plot_graph()
         self.grapher.cursor_on_off()
 

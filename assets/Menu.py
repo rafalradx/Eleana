@@ -132,30 +132,30 @@ class MainMenu:
         self.menu_file.add_cascade(label="Export", menu=self.menu_export, image=self.icon_export, compound="left")
 
         # - Export first
-        #self.menu_export.add_command(label="Export First", command=self.app.export_first, image=self.icon_export_first,
-        #                            compound="left")
+        self.menu_export.add_command(label="Export First", command=self.callbacks.get('export_first'), image=self.icon_export_first,
+                                    compound="left")
         # # - Export group
-        # self.menu_export.add_command(label="Export Group", command=self.app.export_group, image=self.icon_export_group,
-        #                            compound="left", accelerator="Ctrl+Q")
-        #
-        # # - SEPARATOR -
-        # self.menu_file.add_separator()
-        #
-        # # - Quit
-        # self.menu_file.add_command(label="Quit", command=self.app.close_application, image = self.icon_exit, compound="left", accelerator="Ctrl+Q")
-        #
+        self.menu_export.add_command(label="Export Group", command=self.callbacks.get('export_group'), image=self.icon_export_group,
+                                   compound="left", accelerator="Ctrl+Q")
+
+        # - SEPARATOR -
+        self.menu_file.add_separator()
+
+        # - Quit
+        self.menu_file.add_command(label="Quit", command=self.callbacks.get('close_application'), image = self.icon_exit, compound="left", accelerator="Ctrl+Q")
+
         # ''' Menu EDIT'''
-        #
+
         # #  EDIT
-        # self.menu_edit = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
-        #                          activebackground=self.activebg, activeforeground=self.activefg,
-        #                          borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        # self.main_menu.add_cascade(label=" Edit ", menu=self.menu_edit)
-        #
-        # # - Data in spreadsheet
+        self.menu_edit = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                                  activebackground=self.activebg, activeforeground=self.activefg,
+                                  borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.main_menu.add_cascade(label=" Edit ", menu=self.menu_edit)
+
+        # - Data in spreadsheet
         # self.menu_edit.add_command(label="Edit data in table", command=self.app.edit_values_in_table,
         #                            image=self.icon_table, compound="left")
-        #
+
         # # - Create from table
         # self.menu_edit.add_command(label="Create data from table", command=self.app.create_from_table, image=self.icon_table, compound="left")
         #

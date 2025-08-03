@@ -132,7 +132,7 @@ class Eleana():
                                     log_y = False,
                                     indexed_x = False,
                                     cursor_mode = 'None',
-                                    inverted_x = False
+                                    inverted_x = False,
                                     )
 
         # Create temporary storages
