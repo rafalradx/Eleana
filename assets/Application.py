@@ -22,7 +22,9 @@ from widgets.CTkSpinbox import CTkSpinbox
 
 # Import Eleana specific classes
 from Menu import MainMenu
-from Callbacks import main_menubar_callbacks, contextmenu_callbacks
+from Callbacks import main_menubar_callbacks, contextmenu_callbacks, grapher_callbacks
+from Callbacks import update_callbacks
+
 from Grapher import Grapher
 from IconToWidget import IconToWidget
 from LoadSave import Load, Save, Export
@@ -217,6 +219,8 @@ class Application():
         self.pane9 = builder.get_object('pane9', self.mainwindow)
         #self.pane6 = builder.get_object('pane6', self.mainwindow)
 
+        ''' CREATE INSTANCES '''
+
         # Create loader/saver/exporter
         self.load = Load(eleana=self.eleana)
         self.save = Save(eleana=self.eleana)
@@ -260,16 +264,8 @@ class Application():
         # Create and configure Grapher
         self.grapher = Grapher(master = self.graphFrame,
                                eleana = self.eleana,
-                               gui_references = {
-                                   'sel_cursor_mode': self.sel_cursor_mode,
-                                   'btn_clear_cursors': self.btn_clear_cursors,
-                                   'sel_cursor_mode': self.sel_cursor_mode,
-                                   'annotationsFrame': self.annotationsFrame,
-                                   'infoframe': self.infoframe,
-                                   'info': self.info
-                               },
-                               callbacks = {}
-
+                               gui_references = grapher_callbacks(self)['gui_references'],
+                               callbacks = grapher_callbacks(self)['callbacks']
                                )
 
         # Configure Main Window
@@ -287,26 +283,9 @@ class Application():
 
         # Create Update module
         self.update = Update(eleana = self.eleana,
-                             widgetsIDs = {
-                                    'sel_group' : self.sel_group,
-                                    'sel_first' : self.sel_first,
-                                    'sel_second': self.sel_second,
-                                    'sel_result': self.sel_result,
-                                    'f_stk' : self.f_stk,
-                                    's_stk': self.s_stk,
-                                    'r_stk':self.r_stk,
-                                    'scrollabledropdown' : self.scrollable_dropdown,
-                                    'resultFrame' : self.resultFrame,
-                                    'firstStkFrame' :self.firstStkFrame,
-                                    'secondStkFrame' : self.secondStkFrame,
-                                    'resultStkFrame' : self.resultStkFrame,
-                                    'firstComplex' : self.firstComplex,
-                                    'secondComplex': self.secondComplex,
-                                    'resultComplex' : self.resultComplex
-                                    },
+                             widgetsIDs = update_callbacks(self)['gui_references'],
                              menu_recent = self.main_menubar.menu_recent,
-                             callbacks = {
-                                    'scrollable_dropdown': self.scrollable_dropdown,                                    }
+                             callbacks = update_callbacks(self)['callbacks']
                              )
 
         self.gui_to_selections()
