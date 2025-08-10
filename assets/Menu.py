@@ -153,42 +153,42 @@ class MainMenu:
         self.main_menu.add_cascade(label=" Edit ", menu=self.menu_edit)
 
         # - Data in spreadsheet
-        # self.menu_edit.add_command(label="Edit data in table", command=self.app.edit_values_in_table,
-        #                            image=self.icon_table, compound="left")
+        self.menu_edit.add_command(label="Edit data in table", command=self.callbacks.get('edit_values_in_table'),
+                                   image=self.icon_table, compound="left")
 
-        # # - Create from table
-        # self.menu_edit.add_command(label="Create data from table", command=self.app.create_from_table, image=self.icon_table, compound="left")
-        #
-        # # - Edit parameters
-        # self.menu_edit.add_command(label="Edit parameters", command = self.app.edit_parameters, image=self.icon_edit_par, compound="left")
-        #
-        # # - SEPARATOR -
-        # self.menu_edit.add_separator()
-        #
-        # # - Copy to clipboard
-        # self.menu_edit.add_command(label="Copy", command=self.app.quick_copy, image=self.icon_clipboard, compound="left", accelerator='Ctrl+C')
-        #
-        # # - Create from clipboard
-        # self.menu_edit.add_command(label="Paste", command=self.app.quick_paste,  image=self.icon_fromclipboard, compound="left", accelerator='Ctrl+V')
-        #
-        # # - SEPARATOR -
-        # self.menu_edit.add_separator()
-        #
-        # # - Delete selected data
-        # self.menu_edit.add_command(label="Delete selected data", command=self.app.delete_selected_data, image = self.icon_trash, compound="left")
-        #
-        # # - Notes
-        # self.menu_edit.add_command(label="Notes", command=self.app.notes, image = self.icon_notes, compound="left")
-        #
-        # # - Clear
-        # self.menu_clear = tk.Menu(self.menu_edit, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
-        #                          activebackground=self.activebg, activeforeground=self.activefg,
-        #                          borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        # self.menu_edit.add_cascade(label="Clear", menu=self.menu_clear, image = self.icon_clear, compound="left")
-        #
-        # # -------- Clear dataset
-        # self.menu_clear.add_command(label="Dataset", image = self.icon_trash, command=self.app.clear_dataset, compound="left")
-        #
+        # - Create from table
+        self.menu_edit.add_command(label="Create data from table", command=self.callbacks.get('create_from_table'), image=self.icon_table, compound="left")
+
+        # - Edit parameters
+        self.menu_edit.add_command(label="Edit parameters", command = self.callbacks.get('edit_parameters'), image=self.icon_edit_par, compound="left")
+
+        # - SEPARATOR -
+        self.menu_edit.add_separator()
+
+        # - Copy to clipboard
+        self.menu_edit.add_command(label="Copy", command=self.callbacks.get('quick_copy'), image=self.icon_clipboard, compound="left", accelerator='Ctrl+C')
+
+        # - Create from clipboard
+        self.menu_edit.add_command(label="Paste", command=self.callbacks.get('quick_paste'),  image=self.icon_fromclipboard, compound="left", accelerator='Ctrl+V')
+
+        # - SEPARATOR -
+        self.menu_edit.add_separator()
+
+        # - Delete selected data
+        self.menu_edit.add_command(label="Delete selected data", command=self.callbacks.get('delete_selected_data'), image = self.icon_trash, compound="left")
+
+        # - Notes
+        self.menu_edit.add_command(label="Notes", command=self.callbacks.get('notes'), image = self.icon_notes, compound="left")
+
+        # - Clear
+        self.menu_clear = tk.Menu(self.menu_edit, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                                 activebackground=self.activebg, activeforeground=self.activefg,
+                                 borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.menu_edit.add_cascade(label="Clear", menu=self.menu_clear, image = self.icon_clear, compound="left")
+
+        # -------- Clear dataset
+        self.menu_clear.add_command(label="Dataset", image = self.icon_trash, command=self.callbacks.get('clear_dataset'), compound="left")
+
         # # -------- Clear result
         # self.menu_clear.add_command(label="Result", image = self.icon_trashres, command=self.app.clear_results, compound="left")
         #

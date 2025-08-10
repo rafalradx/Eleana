@@ -1,27 +1,9 @@
 from pathlib import Path
-import tkinter as tk
-
-
-
-from assets.LoadSave import Load, Save
-import copy
 from modules.CTkScrollableDropdown import CTkScrollableDropdown
 
 PROJECT_PATH = Path(__file__).parent.parent
 PROJECT_UI = PROJECT_PATH / "Eleana_interface.ui"
 
-'''
-Update class contains methods for creating list in comboboxes
-and adds the created lists to the ComboboxLists.entries
-Arguments: app     <-- is the mani application object (=app)
-           entries <-- list of elements that will added to the list
-Example usage in main Eleana.py:
-
-  entries = ['1. FeS', '2. Heme_bL', '3. Spin_label']
-  update.second(app, entries)
-
-This will create 3 positions in the list of Second combobox
-'''
 class Update:
     def __init__(self, eleana, widgetsIDs, menu_recent, callbacks, scroll_start = 30):
         self.eleana = eleana
@@ -98,7 +80,7 @@ class Update:
             list_of_groups = self.eleana.assignmentToGroups['<group-list/>']
             box.configure(values = list_of_groups)
             CTkScrollableDropdown(attach=box, values=list_of_groups, justify="left", button_color="transparent",
-                                       command=lambda selection: self.app.scrollable_dropdown(selection=selection,
+                                       command=lambda selection: self.callbacks.get('scrollable_dropdown')(selection=selection,
                                                                                               combobox=comboboxID))
             return
 
@@ -122,7 +104,6 @@ class Update:
                     item = self.eleana.dataset[each].name_nr
                     comboboxList.append(item)
             box.configure(values=comboboxList)
-            #self.dropdowns[comboboxID] = CTkScrollableDropdown(attach = box, values=comboboxList, justify="left", button_color="transparent", command=lambda selection: self.app.scrollable_dropdown(selection=selection, combobox = comboboxID))
             self.dropdowns[comboboxID] = CTkScrollableDropdown(attach = box, values=comboboxList, justify="left", button_color="transparent", command = lambda selection: self.callbacks.get('scrollable_dropdown')(selection=selection, combobox=comboboxID))
             return
 
@@ -136,7 +117,7 @@ class Update:
                 comboboxList.append(each.name)
             box.configure(values=comboboxList)
             self.dropdowns[comboboxID] = CTkScrollableDropdown(attach=box, values=comboboxList, justify="left", button_color="transparent",
-                                       command=lambda selection: self.app.scrollable_dropdown(selection=selection,combobox=comboboxID))
+                                       command=lambda selection: self.callbacks.get('scrollable_dropdown')(selection=selection,combobox=comboboxID))
 
             return
 
@@ -149,6 +130,7 @@ class Update:
             if self.eleana.dataset[index].type == 'stack 2D':
                 stk_list = self.eleana.dataset[index].stk_names
                 box.configure(values=stk_list)
+
                 self.dropdowns[comboboxID] = CTkScrollableDropdown(attach=box,
                                       values=stk_list,
                                       justify="left",
@@ -157,7 +139,8 @@ class Update:
                                       scrollbar=True,
                                       button_height=10,
                                       autocomplete=True,
-                                      command=lambda selection: self.app.scrollable_dropdown(selection=selection, combobox=comboboxID))
+                                      command=lambda selection: self.callbacks.get('scrollable_dropdown')(selection=selection, combobox=comboboxID))
+
                 self.widgetsIDs['firstStkFrame'].grid()
                 box.set(stk_list[0])
             else:
@@ -173,7 +156,7 @@ class Update:
                 stk_list = self.eleana.dataset[index].stk_names
                 box.configure(values=stk_list)
                 self.dropdowns[comboboxID] = CTkScrollableDropdown(attach=box, values=stk_list, justify="left", button_color="transparent",
-                                           command=lambda selection: self.app.scrollable_dropdown(selection=selection,
+                                           command=lambda selection: self.callbacks.get('scrollable_dropdown')(selection=selection,
                                                                                                   combobox=comboboxID))
                 self.widgetsIDs['secondStkFrame'].grid()
                 box.set(stk_list[0])
@@ -193,9 +176,7 @@ class Update:
                 box.set(stk_list[0])
                 if len(stk_list) >= self.scroll_start:
                     self.dropdowns[comboboxID] = CTkScrollableDropdown(attach=box, values=stk_list, justify="left", button_color="transparent",
-                                          command=lambda selection: self.app.scrollable_dropdown(selection=selection,
-                                                                                                 combobox = comboboxID))
-
+                                          command=lambda selection: self.callbacks.get('scrollable_dropdown')(selection=selection))
             else:
                 self.widgetsIDs['resultStkFrame'].grid_remove()
             return
@@ -233,13 +214,13 @@ class Update:
         second_nr = self.eleana.selections['second']
         result_nr = self.eleana.selections['result']
 
-        f_stk = self.eleana.selections['f_stk']
-        s_stk = self.eleana.selections['s_stk']
-        r_stk = self.eleana.selections['r_stk']
+        # f_stk = self.eleana.selections['f_stk']
+        # s_stk = self.eleana.selections['s_stk']
+        # r_stk = self.eleana.selections['r_stk']
 
         try:
             first = self.eleana.dataset[first_nr]
-            f_stk = self.eleana.selections['f_stk']
+            # f_stk = self.eleana.selections['f_stk']
         except IndexError:
             pass
 
@@ -268,10 +249,10 @@ class Update:
 
         elif first.type == "stack 2D":
             self.widgetsIDs['firstStkFrame'].grid(row=2, column=0)
-            self.app.f_stk.configure(values=first.stk_names)
+            self.widgetsIDs['f_stk'].configure(values=first.stk_names)
             entry_index = int(self.eleana.selections['f_stk'])
             entry = first.stk_names[entry_index]
-            self.app.f_stk.set(value=entry)
+            self.widgetsIDs['f_stk'].set(value=entry)
         try:
             if first.complex and first_nr >= 0:
                 self.widgetsIDs['firstComplex'].grid()

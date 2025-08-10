@@ -10,6 +10,7 @@ import pandas
 import pygubu
 import tkinter as tk
 import pickle
+import time
 
 from assets.Menu import ContextMenu
 
@@ -19,7 +20,7 @@ from modules.CTkListbox import CTkListbox
 from modules.CTkMessagebox import CTkMessagebox
 #from modules.CTkScrollableDropdown import CTkScrollableDropdown
 from widgets.CTkSpinbox import CTkSpinbox
-
+from modules.CTkScrollableDropdown import CTkScrollableDropdown
 # Import Eleana specific classes
 from Menu import MainMenu
 from Callbacks import main_menubar_callbacks, contextmenu_callbacks, grapher_callbacks
@@ -75,6 +76,16 @@ def check_busy(method):
         result = method(self, *args, **kwargs)
         self.mainwindow.configure(cursor="")
         self.after_gui_action(by_method = method.__name__)
+        return result
+    return wrapper
+
+def timeit(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()  # dokładniejszy niż time.time()
+        result = func(*args, **kwargs)
+        end = time.perf_counter()
+        print(f"{func.__name__} executed in {end - start:.4f} seconds")
         return result
     return wrapper
 
@@ -244,7 +255,7 @@ class Application():
                                     )
 
         # Keyboard bindings
-        self.mainwindow.bind("<Control-c>", self.copy_to_clipboard)
+        self.mainwindow.bind("<Control-c>", self.quick_copy)
         self.mainwindow.bind("<Control-s>", self.save_current)
         self.mainwindow.bind("<Control-q>", self.close_application)
         self.mainwindow.bind("<Control-o>", self.load_project)
@@ -887,6 +898,7 @@ class Application():
         self.grapher.plot_graph()
 
     #@check_busy
+    @timeit
     def first_selected(self, selected_value_text):
         if selected_value_text == 'None':
             self.eleana.set_selections('first', -1)
@@ -1452,9 +1464,9 @@ class Application():
         av_data.pop(0)
         # Open dialog if index_to_delete was not set
         if index_to_delete is None:
-            self.select_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'],
+            select_data = SelectData(master=self.mainwindow, title='Select data', group=self.eleana.selections['group'],
                                       items=av_data)
-            response = self.select_data.get()
+            response = select_data.get()
             if response == None:
                 return
             # Get indexes of selected data to remove
@@ -1464,7 +1476,7 @@ class Application():
             indexes = [index_to_delete]
         indexes.sort(reverse=True)
         for each in indexes:
-            eleana.dataset.pop(each)
+            self.eleana.dataset.pop(each)
         # Set all data to None
         self.eleana.set_selections('first', -1)
         self.eleana.set_selections('second', -1)
@@ -1613,14 +1625,18 @@ class Application():
                                     icon="warning", option_1="No", option_2="Yes")
         response = quit_dialog.get()
         if response == "Yes":
-            init.main_window()
+            #init.main_window()
             self.resultFrame.grid_remove()
             self.firstComplex.grid_remove()
             self.firstStkFrame.grid_remove()
             self.secondComplex.grid_remove()
             self.secondStkFrame.grid_remove()
-            init.eleana_variables()
-            self.grapher.plot_graph()
+            self.eleana.reset()
+            self.update.dataset_list()
+            self.update.group_list()
+            self.update.all_lists()
+            self.update.gui_widgets()
+            self.gui_to_selections()
 
     def preferences(self):
         ''' Open window for editing preferences '''
@@ -1817,7 +1833,7 @@ class Application():
         except Exception as e:
             Error.show(title="Error loading Excel file.", info=e)
 
-    def quick_copy(self):
+    def quick_copy(self, event = None):
         curves = self.grapher.ax.get_lines()
         the_longest = 0
         collected_list = []
@@ -1909,7 +1925,7 @@ class Application():
                                 window_title = f"Edit {data.name}",
                                 column_names = headers,
                                 complex = data.complex
-                                  )
+                                )
         response = table.get()
         if response is None:
             return
@@ -1936,11 +1952,14 @@ class Application():
 
     def create_from_table(self):
         headers = ['A', 'B', 'C']
-        date = [['', '', ''],['', '', ''],['', '', ''],['', '', ''],['', '', ''],['', '', '']]
-        df = pandas.DataFrame(columns=headers, data=date)
+        data = [['', '', ''],['', '', ''],['', '', ''],['', '', ''],['', '', ''],['', '', '']]
+        df = pandas.DataFrame(columns=headers, data=data)
         name = 'new'
-        spreadsheet = CreateFromTable(self.eleana, self.mainwindow, df=df, name=name,
-                                           group=self.eleana.selections['group'])
+        spreadsheet = CreateFromTable(eleana = self.eleana,
+                                      master = self.mainwindow,
+                                      df = df,
+                                      name = name,
+                                      group = self.eleana.selections['group'])
         response = spreadsheet.get()
         self.update.group_list()
         self.update.dataset_list()
@@ -2212,9 +2231,7 @@ class Application():
             return
         par_to_edit = self.eleana.dataset[idx].parameters
         name_nr = self.eleana.dataset[idx].name_nr
-        #self.edit_par = EditParameters(self.mainwindow, parameters=par_to_edit, name=name_nr)
-        #response = self.edit_par.get()
-        edit_par = EditParameters(self.mainwindow, parameters=par_to_edit, name=name_nr)
+        edit_par = EditParameters(master = self.mainwindow, parameters = par_to_edit, name = name_nr)
         response = edit_par.get()
 
         if response:
@@ -2265,7 +2282,4 @@ class Application():
             new_log = '\n' + output
             self.log_field.insert("end", new_log)
             return output
-
-    def copy_to_clipboard(self, event):
-        print('Copy to clipboard. (1395)')
 

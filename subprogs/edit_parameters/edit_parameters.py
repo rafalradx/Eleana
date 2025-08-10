@@ -9,7 +9,7 @@ PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "edit_parameters.ui"
 
 class EditParameters:
-    def __init__(self, master=None, parameters = None, name = None):
+    def __init__(self, master, parameters = None, name = None):
         self.master = master
         self.builder = builder = pygubu.Builder()
         self.parameters = parameters

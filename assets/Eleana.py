@@ -49,13 +49,16 @@ class Project_1:
 class Eleana():
     # Main attributes associated with data gathered in the programe
     def __init__(self, version, devel):
-        self.busy = False                               # <-- This variable is set to True if something is triggered in application and other proces must wait until it is False
+        self.devel_mode = devel
         self.version = version
+        self.initialize()
+
+    def initialize(self):
+        self.busy = False                               # <-- This variable is set to True if something is triggered in application and other proces must wait until it is False
         self.dataset = []                               # <-- This variable keeps all spectra available in Eleana. It is a list of objects
         self.results_dataset = []                       # <-- This keeps data containing results
         self.assignmentToGroups = {'<group-list/>': ['All']} # <-- This keeps information about which data from dataset is assigned to particular group
         self.groupsHierarchy = {}                       # <-- This store information about which group belongs to other
-        self.devel_mode = devel
         self.cmd_error = ''                             # This contains the current error for command line
 
         # Attribute "notes" contains general notes edited by Edit --> Notes in RTF
@@ -100,6 +103,7 @@ class Eleana():
         # f_dsp\
         # s_dsp )--> Can be True or False. If false then the spectrum selected is not displayed on graph by data is selected
         # r_dsp/
+
         self.selections = {'group':'All',
                       'first':-1, 'second':-1, 'result':-1,
                       'f_cpl':'re','s_cpl':'re', 'r_cpl':'re',
@@ -133,6 +137,7 @@ class Eleana():
                                     indexed_x = False,
                                     cursor_mode = 'None',
                                     inverted_x = False,
+
                                     )
 
         # Create temporary storages
@@ -149,6 +154,16 @@ class Eleana():
             self.set_default_settings()
             # Save settings on disk
             self.save_settings()
+
+    def reset(self):
+        self._observers.clear()
+        self.dataset.clear()
+        self.results_dataset.clear()
+        self.gui_state = None
+        self.settings = None
+        self.storage = None
+        gc.collect()
+        self.__init__(version = self.version, devel = self.devel_mode)
 
     ''' ***************************** 
      *         OBSERVER METHODS      *

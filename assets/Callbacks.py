@@ -1,63 +1,73 @@
-def main_menubar_callbacks(application_instance):
+def main_menubar_callbacks(inst):
     ''' This creates callbacks for mein menubar to methods in Application.py '''
     return {
-             "load_project": application_instance.load_project,
-             "save_as": application_instance.save_as,
-             "import_elexsys": application_instance.import_elexsys,
-             "import_EMX": application_instance.import_EMX,
-             "import_magnettech1": application_instance.import_magnettech1,
-             "import_magnettech2": application_instance.import_magnettech2,
-             "import_adani_dat": application_instance.import_adani_dat,
-             "import_shimadzu_spc": application_instance.import_shimadzu_spc,
-             "import_ascii": application_instance.import_ascii,
-             "import_excel": application_instance.import_excel,
-             "export_first": application_instance.export_first,
-             "export_group": application_instance.export_group,
-             "close_application": application_instance.close_application,
+             # FILE
+             "load_project": inst.load_project,
+             "save_as": inst.save_as,
+             "import_elexsys": inst.import_elexsys,
+             "import_EMX": inst.import_EMX,
+             "import_magnettech1": inst.import_magnettech1,
+             "import_magnettech2": inst.import_magnettech2,
+             "import_adani_dat": inst.import_adani_dat,
+             "import_shimadzu_spc": inst.import_shimadzu_spc,
+             "import_ascii": inst.import_ascii,
+             "import_excel": inst.import_excel,
+             "export_first": inst.export_first,
+             "export_group": inst.export_group,
+             "close_application": inst.close_application,
+             # EDIT
+             "edit_values_in_table": inst.edit_values_in_table,
+             "create_from_table": inst.create_from_table,
+             "edit_parameters": inst.edit_parameters,
+             "quick_copy": inst.quick_copy,
+             "quick_paste": inst.quick_paste,
+             "delete_selected_data": inst.delete_selected_data,
+             "notes" : inst.notes,
+             "clear_dataset": inst.clear_dataset,
             }
 
-def contextmenu_callbacks(application_instance):
+def contextmenu_callbacks(inst):
     return {'gui_references':
                 {
-                    "groupFrame": application_instance.groupFrame,
-                    "sel_group": application_instance.sel_group,
-                    "firstFrame": application_instance.firstFrame,
-                    "sel_first": application_instance.sel_first,
-                    "firstStkFrame": application_instance.firstStkFrame,
-                    "f_stk": application_instance.f_stk,
-                    "seconFrame": application_instance.secondFrame,
-                    "sel_second": application_instance.sel_second,
-                    "secondStkFrame": application_instance.secondStkFrame,
-                    "s_stk": application_instance.s_stk,
-                    "resultFrame": application_instance.resultFrame,
-                    "sel_result": application_instance.sel_result
+                    "groupFrame": inst.groupFrame,
+                    "sel_group": inst.sel_group,
+                    "firstFrame": inst.firstFrame,
+                    "sel_first": inst.sel_first,
+                    "firstStkFrame": inst.firstStkFrame,
+                    "f_stk": inst.f_stk,
+                    "seconFrame": inst.secondFrame,
+                    "sel_second": inst.sel_second,
+                    "secondStkFrame": inst.secondStkFrame,
+                    "s_stk": inst.s_stk,
+                    "resultFrame": inst.resultFrame,
+                    "sel_result": inst.sel_result
                 },
             'callbacks':
                 {
-                    "delete_group": application_instance.delete_group,
-                    "data_to_other_group": application_instance.data_to_other_group,
-                    "delete_data_from_group": application_instance.delete_data_from_group,
-                    "convert_group_to_stack": application_instance.convert_group_to_stack,
-                    "rename_data": application_instance.rename_data,
-                    "delete_data": application_instance.delete_data,
-                    "duplicate_data": application_instance.duplicate_data,
-                    "first_to_group": application_instance.first_to_group,
-                    "stack_to_group": application_instance.stack_to_group,
-                    "edit_comment": application_instance.edit_comment,
-                    "edit_parameters": application_instance.edit_parameters,
-                    "delete_single_stk_data": application_instance.delete_single_stk_data,
+                    "delete_group": inst.delete_group,
+                    "data_to_other_group": inst.data_to_other_group,
+                    "delete_data_from_group": inst.delete_data_from_group,
+                    "convert_group_to_stack": inst.convert_group_to_stack,
+                    "rename_data": inst.rename_data,
+                    "delete_data": inst.delete_data,
+                    "duplicate_data": inst.duplicate_data,
+                    "first_to_group": inst.first_to_group,
+                    "stack_to_group": inst.stack_to_group,
+                    "edit_comment": inst.edit_comment,
+                    "edit_parameters": inst.edit_parameters,
+                    "delete_single_stk_data": inst.delete_single_stk_data,
                 }
             }
 
-def grapher_callbacks(application_instance):
+def grapher_callbacks(inst):
     return {'gui_references':
                 {
-                    'sel_cursor_mode': application_instance.sel_cursor_mode,
-                    'btn_clear_cursors': application_instance.btn_clear_cursors,
-                    'sel_cursor_mode': application_instance.sel_cursor_mode,
-                    'annotationsFrame': application_instance.annotationsFrame,
-                    'infoframe': application_instance.infoframe,
-                    'info': application_instance.info
+                    'sel_cursor_mode': inst.sel_cursor_mode,
+                    'btn_clear_cursors': inst.btn_clear_cursors,
+                    'sel_cursor_mode': inst.sel_cursor_mode,
+                    'annotationsFrame': inst.annotationsFrame,
+                    'infoframe': inst.infoframe,
+                    'info': inst.info
                     
                 },
             'callbacks':
@@ -66,27 +76,27 @@ def grapher_callbacks(application_instance):
                 }
             }   
 
-def update_callbacks(application_instance):
+def update_callbacks(inst):
     return {'gui_references':
                 {
-                    'sel_group': application_instance.sel_group,
-                    'sel_first': application_instance.sel_first,
-                    'sel_second': application_instance.sel_second,
-                    'sel_result': application_instance.sel_result,
-                    'f_stk': application_instance.f_stk,
-                    's_stk': application_instance.s_stk,
-                    'r_stk': application_instance.r_stk,
-                    'scrollabledropdown': application_instance.scrollable_dropdown,
-                    'resultFrame': application_instance.resultFrame,
-                    'firstStkFrame': application_instance.firstStkFrame,
-                    'secondStkFrame': application_instance.secondStkFrame,
-                    'resultStkFrame': application_instance.resultStkFrame,
-                    'firstComplex': application_instance.firstComplex,
-                    'secondComplex': application_instance.secondComplex,
-                    'resultComplex': application_instance.resultComplex
+                    'sel_group': inst.sel_group,
+                    'sel_first': inst.sel_first,
+                    'sel_second': inst.sel_second,
+                    'sel_result': inst.sel_result,
+                    'f_stk': inst.f_stk,
+                    's_stk': inst.s_stk,
+                    'r_stk': inst.r_stk,
+                    'scrollabledropdown': inst.scrollable_dropdown,
+                    'resultFrame': inst.resultFrame,
+                    'firstStkFrame': inst.firstStkFrame,
+                    'secondStkFrame': inst.secondStkFrame,
+                    'resultStkFrame': inst.resultStkFrame,
+                    'firstComplex': inst.firstComplex,
+                    'secondComplex': inst.secondComplex,
+                    'resultComplex': inst.resultComplex
                 },
             'callbacks':
                 {
-                    'scrollable_dropdown': application_instance.scrollable_dropdown
+                    'scrollable_dropdown': inst.scrollable_dropdown
                 }
             }

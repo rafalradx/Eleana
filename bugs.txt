@@ -1,3 +1,4 @@
 2025/06/19
-    File --> Export --> Export Grooup: This function does not work properly
+    1. File --> Export --> Export Grooup: This function does not work properly
 
+    2. Edit --> Paste --> Nie działa Add and Close (przynajmniej gdy wybiorę dane zespolone)

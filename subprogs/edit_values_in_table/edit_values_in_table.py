@@ -4,10 +4,9 @@ import customtkinter as ctk
 import numpy as np
 import pygubu
 import string
-from modules.CTkMessagebox import CTkMessagebox
 from modules.tksheet import Sheet
-import copy
 from assets.Error import Error
+
 
 PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "edit_values_in_table.ui"
@@ -16,7 +15,6 @@ class EditValuesInTable:
     def __init__(self, eleana_app, master,
                     x,                      # X array as 1D of np.array type
                     y,                      # Y array as 1D or 2D np.array type
-                    name = None,            # The name of the currently edited data
                     column_names = None,    # The column headers if None will be default
                     window_title = None,    # The title of the window. If none it will be default
                     complex = None          # Are the data complex? If None, it will be determined automatically

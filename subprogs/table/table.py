@@ -17,8 +17,9 @@ PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "table.ui"
 
 class CreateFromTable:
-    def __init__(self, eleana,
-                 master=None,
+    def __init__(self,
+                 eleana,
+                 master,
                  list2D = None,
                  df = None,
                  name = None,
@@ -210,7 +211,7 @@ class CreateFromTable:
             if isinstance(imy, str):
                 info = CTkMessagebox(title="", messaage=imy, icon="cancel")
                 return
-            elif imy.size != reY.size:
+            elif imy.size != rey.size:
                 info = CTkMessagebox(title="", message="ReY and ImY tables have different lenght.", icon="cancel")
                 return
             data_complex = rey + 1j * imy
