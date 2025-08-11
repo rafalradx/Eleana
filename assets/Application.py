@@ -439,6 +439,9 @@ class Application():
         elif combobox == 'r_stk':
             self.r_stk_selected(selection)
             self.r_stk.set(selection)
+        elif combobox == 'sel_group':
+            self.group_selected(selection)
+            self.sel_group.set(selection)
         self.mainwindow.focus_set()
 
     def create_f_stk(self):
@@ -1573,7 +1576,6 @@ class Application():
         else:
             self.check_result_show.deselect()
 
-
         # Set Values in comboboxes
         # FIRST
         if select['first'] >= 0:
@@ -1588,6 +1590,8 @@ class Application():
                 self.firstComplex.set(select['f_cpl'])
             else:
                 self.firstComplex.grid_remove()
+        else:
+            self.sel_first.set('None')
 
         # SECOND
         if select['second'] >= 0:
@@ -1602,6 +1606,8 @@ class Application():
                 self.secondComplex.set(select['s_cpl'])
             else:
                 self.secondComplex.grid_remove()
+        else:
+            self.sel_second.set('None')
 
         # RESULT
         if select['result'] >= 0:
@@ -1616,7 +1622,8 @@ class Application():
                 self.resultComplex.set(select['r_cpl'])
             else:
                 self.resultComplex.grid_remove()
-
+        else:
+            self.sel_result.set('None')
         self.grapher.plot_graph()
 
     def clear_dataset(self):
@@ -1625,7 +1632,6 @@ class Application():
                                     icon="warning", option_1="No", option_2="Yes")
         response = quit_dialog.get()
         if response == "Yes":
-            #init.main_window()
             self.resultFrame.grid_remove()
             self.firstComplex.grid_remove()
             self.firstStkFrame.grid_remove()
@@ -1965,11 +1971,10 @@ class Application():
         self.update.dataset_list()
         self.update.all_lists()
 
-
     def first_to_group(self):
         if self.eleana.selections['first'] < 0:
             return
-        group_assign = Groupassign(master=app, which='first')
+        group_assign = Groupassign(master=self.mainwindow, eleana = self.eleana, which='first')
         response = group_assign.get()
         self.update.group_list()
         self.update.all_lists()

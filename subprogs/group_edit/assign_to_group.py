@@ -11,13 +11,12 @@ PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "assign_to_group.ui"
 
 class Groupassign:
-    def __init__(self, master = None, which = 'first', window_title = "Add new group"):
+    def __init__(self, master, eleana, which = 'first', window_title = "Add new group"):
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)
-        self.app = master
-        self.master = self.app.mainwindow
-        self.eleana = self.app.eleana
+        self.master = master
+        self.eleana = eleana
         self.response = None
         # Main widget
         self.mainwindow = builder.get_object("toplevel1", self.master)

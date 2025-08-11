@@ -189,16 +189,18 @@ class MainMenu:
         # -------- Clear dataset
         self.menu_clear.add_command(label="Dataset", image = self.icon_trash, command=self.callbacks.get('clear_dataset'), compound="left")
 
-        # # -------- Clear result
-        # self.menu_clear.add_command(label="Result", image = self.icon_trashres, command=self.app.clear_results, compound="left")
-        #
-        # # - First
-        # self.menu_groups = tk.Menu(self.menu_edit, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
-        #                          activebackground=self.activebg, activeforeground=self.activefg,
-        #                          borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        # self.menu_edit.add_cascade(label="Groups", menu=self.menu_groups, image=self.icon_dropdown, compound="left")
-        # # -------- Assign First to group
-        # self.menu_groups.add_command(label="Assign First to group", command=self.app.first_to_group)
+        # -------- Clear result
+        self.menu_clear.add_command(label="Result", image = self.icon_trashres, command=self.callbacks.get('clear_results'), compound="left")
+
+        # - Groups
+        self.menu_groups = tk.Menu(self.menu_edit, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                                 activebackground=self.activebg, activeforeground=self.activefg,
+                                 borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.menu_edit.add_cascade(label="Groups", menu=self.menu_groups, image=self.icon_dropdown, compound="left")
+
+        # -------- Assign First to group
+        self.menu_groups.add_command(label="Assign First to group", command=self.callbacks.get('first_to_group'))
+
         # # -------- Assign Second to group
         # self.menu_groups.add_command(label="Assign Second to group", command=self.app.second_to_group)
         #
