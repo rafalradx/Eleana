@@ -6,7 +6,6 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib
 import mplcursors
-import customtkinter as ctk
 import copy
 from CTkListbox import CTkListbox
 import numpy as np
@@ -17,98 +16,26 @@ matplotlib.use('TkAgg')
 # Remove CTRL+S shortcut to allow open 'Save' by pressing CTRL+S
 matplotlib.rcParams['keymap.save'] = ''
 
-#class GraphPreferences:
-#    def __init__(self, eleana):
-        # self.app = None
-        # self.eleana = eleana
-
-
-        #''' CURSOR DEFINITIONS '''
-        # Create avaliable cursor modes: hov - enable hover,
-        #                                a_txt - display text label,
-        #                                annot - display selection on graph
-        #                                multp - enable multiple annotations on graph
-        #                                store - enable collecting the selected points
-        # self.cursor_modes = [
-        #                 {'label': 'None', 'hov':False, 'a_txt':False, 'annot':False, 'multip':False, 'store': False},
-        #                 {'label': 'Continuous read XY', 'hov':True, 'a_txt':True, 'annot':True, 'multip':False, 'store': False},
-        #                 {'label': 'Selection of points with labels', 'hov': False, 'annot':True, 'a_txt':True, 'multip':True, 'store': True},
-        #                 {'label': 'Selection of points', 'hov': False, 'annot':True, 'a_txt': False, 'multip':True, 'store': True},
-        #                 {'label': 'Numbered selections', 'hov':False, 'annot':True, 'a_txt': True, 'multip':True, 'store': True, 'nr': True},
-        #                 {'label': 'Free select'},
-        #                 {'label': 'Crosshair', 'hov':True, 'a_txt':True, 'annot':True, 'multip':False, 'store': False},
-        #                 {'label': 'Range select', 'hov':False, 'annot':True, 'a_txt': True, 'multip':True, 'store': True, 'nr': True}
-        #                     ]
-
-        #self.cursor_modes = self.eleana.settings.grapher['cursor_modes']
-
-       # Style of the custom annotation
-       #  self.style_of_annotation = {'text':"Point: ", 'number':True,
-       #                              'arrowprops' :{'facecolor':'yellow', 'edgecolor':'blue'}}
-
-        # self.style_of_annotation = self.eleana.settings.grapher['style_of_annotation']
-        # # Scale settings
-        # self.inverted_x_axis = False
-        #
-        # # Set cursor modes
-        # self.set_cursor_modes()
-        # self.current_cursor_mode = self.cursor_modes[0]
-        # self.cursor_limit = 0
-        #
-        # # Load preferences from the settings file
-        # try:
-        #     preferences = Load.load_preferences(self.eleana)
-        #     if not preferences:
-        #         # Use default if not exists
-        #         self.default_settings()
-        #     else:
-        #         self.plt_style = preferences.plt_style
-        #         self.style_first = preferences.style_first
-        #         self.style_second = preferences.style_second
-        #         self.style_result = preferences.style_result
-        #
-        # except Exception as e:
-        #     print('Unable to read preferences.pic file.')
-        #     print(e)
-        #     self.default_settings()
-        # try:
-        #     plt.style.use(self.plt_style)
-        # except:
-        #     self.plt_style =  'Solarize_Light2'
-        #     plt.style.use(self.plt_style)
-        #
-        # self.additional_plots_style = self.eleana.settings.grapher['additional_plots_style']
-        #
-        # self.additional_plots = []
-
-    # def default_settings(self):
-    #     self.plt_style = self.eleana.settings.grapher['plt_style']
-    #     self.style_first = self.eleana.settings.grapher['style_first']
-    #     self.style_second = self.eleana.settings.grapher['style_second']
-    #     self.style_result = self.eleana.settings.grapher['style_result']
-    #
-    #     ctk.set_appearance_mode('light')
-
-    # def set_cursor_modes(self):
-    #     ''' This function creates list of cursor
-    #         modes in cursor combobox'''
-    #     print("set_cursor_modes - wyłączone")
-    #     return
-    #     box_values = []
-    #     for each in self.cursor_modes:
-    #         box_values.append(each['label'])
-    #     self.app.sel_cursor_mode.configure(values=box_values)
-    #     self.app.sel_cursor_mode.set('None')
-
 class Grapher():
     def __init__(self, master, eleana, gui_references, callbacks):
-        # Initialize GraphPreferences
-
         ''' Initialize app, eleana and graphs objects (fig, canvas, toolbar)'''
 
         self.eleana = eleana
         self.graphFrame = master
         self.callbacks = callbacks
+        self.plt = plt
+        self.plt_style = self.eleana.settings.grapher['plt_style']
+
+        # Apply matplotlib style
+        try:
+            self.plt.style.use(self.plt_style)
+            #plt.style.use(self.plt_style)
+        except Exception as e:
+            if self.eleana.devel_mode:
+                print(e)
+            self.plt_style =  'Solarize_Light2'
+            self.plt.style.use(self.plt_style)
+            #plt.style.use('Solarize_Light2')
 
         # References to Main Gui Combobox and button
         self.btn_clear_cursors = gui_references['btn_clear_cursors']
@@ -123,7 +50,6 @@ class Grapher():
             box_values.append(each['label'])
         self.sel_cursor_mode.configure(values=box_values)
         self.sel_cursor_mode.set('None')
-
 
         self.plt = plt
         self.mplcursors = mplcursors
@@ -145,7 +71,6 @@ class Grapher():
         # Create references to settings
         self.cursor_modes = self.eleana.settings.grapher['cursor_modes']
         self.style_of_annotation = self.eleana.settings.grapher['style_of_annotation']
-        self.plt_style = self.eleana.settings.grapher['plt_style']
         self.style_first = self.eleana.settings.grapher['style_first']
         self.style_second = self.eleana.settings.grapher['style_second']
         self.style_result =  self.eleana.settings.grapher['style_result']
@@ -154,15 +79,6 @@ class Grapher():
         # Additional plots
         self.additional_plots = self.eleana.storage.additional_plots
 
-        # Apply plt style
-        try:
-            self.plt.style.use(self.plt_style)
-            plt.style.use(self.plt_style)
-        except:
-            self.plt_style =  'Solarize_Light2'
-            self.plt.style.use(self.plt_style)
-            plt.style.use('Solarize_Light2')
-
         # Create empty list of created annotations
         self.cursor_annotations = self.eleana.storage.cursor_annotations
 
@@ -170,18 +86,21 @@ class Grapher():
         self.cursor_modes = self.eleana.settings.grapher['cursor_modes']
         self.current_cursor_mode = self.cursor_modes[0]
 
-
-
         # Create variable for storing min-max
         self.scale1 = {'x': [], 'y': []}
 
     '''Methods for the Grapher class '''
 
-    # Setter for attributes that should be observed ---
     def update_plot_style(self, new_style):
         """ Update plot style """
+        # Destroy old canvas and toolbar if they exist
+        if hasattr(self, "canvas") and self.canvas.get_tk_widget().winfo_exists():
+            self.canvas.get_tk_widget().destroy()
+        if hasattr(self, "toolbar") and self.toolbar.winfo_exists():
+            self.toolbar.destroy()
+
         self.plt_style = new_style
-        plt.style.use(self.plt_style)
+        self.plt.style.use(self.plt_style)
         # Reset pyplot
         self.plt = plt
         self.mplcursors = mplcursors
@@ -508,7 +427,7 @@ class Grapher():
 
     def show_color_span(self):
         ''' Prints the ranges selected on graph according to defined
-            selections in self.eleana.color_span
+            selections in self.eleana.settings.grapher['color_span']
         '''
         ranges = self.eleana.settings.grapher['color_span']['ranges']
         alpha = self.eleana.settings.grapher['color_span']['alpha']
@@ -645,8 +564,8 @@ class Grapher():
             _show_annotation_list()
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.range_clicked)
             self.info.configure(text='  LEFT CLICK - select the beginning \n  of the range\n  SECOND LEFT CLICK - select the end of the range\n  RIGHT CLICK INSIDE THE RANGE - delete \n  the range under the cursor')
-            self.eleana.color_span['ranges'] = []
-            self.eleana.color_span['status'] = 0
+            self.eleana.settings.grapher['color_span']['ranges'] = []
+            self.eleana.settings.grapher['color_span']['status'] = 0
         else:
             if hasattr(self.cursor, "events"):
                 # Switch off mplcursor
@@ -811,7 +730,7 @@ class Grapher():
             return
 
     def range_clicked(self, sel):
-        ''' Create range entry in self.eleana.color_span to generate
+        ''' Create range entry in self.eleana.settings.grapher['color_span'] to generate
             area between clicked positions.
         '''
         if self.sel_cursor_mode.get() != 'Range select':
@@ -822,22 +741,22 @@ class Grapher():
         y = float(sel.ydata)
         if sel.button == 1: # Left button
             # Add point
-            if self.eleana.color_span['status'] == 0:
+            if self.eleana.settings.grapher['color_span']['status'] == 0:
                 # Define first point in the range
-                self.eleana.color_span['start'] = x
-                self.eleana.color_span['status'] = 1
+                self.eleana.settings.grapher['color_span']['start'] = x
+                self.eleana.settings.grapher['color_span']['status'] = 1
                 self.eleana.set_selections(variable='grapher_action', value='range_start')
-            elif self.eleana.color_span['status'] == 1:
+            elif self.eleana.settings.grapher['color_span']['status'] == 1:
                 # Define second point and add range to the 'ranges' and merge if necessary
-                self.eleana.color_span['end'] = x
-                x1 = copy.copy(self.eleana.color_span['start'])
-                x2 = copy.copy(self.eleana.color_span['end'])
+                self.eleana.settings.grapher['color_span']['end'] = x
+                x1 = copy.copy(self.eleana.settings.grapher['color_span']['start'])
+                x2 = copy.copy(self.eleana.settings.grapher['color_span']['end'])
                 range = [x1, x2]
                 range = sorted(range)
-                self.eleana.color_span['ranges'].append(range)
-                self.eleana.color_span['status'] = 0
+                self.eleana.settings.grapher['color_span']['ranges'].append(range)
+                self.eleana.settings.grapher['color_span']['status'] = 0
                 # Merge ranges if necessary
-                ranges = self.eleana.color_span['ranges']
+                ranges = self.eleana.settings.grapher['color_span']['ranges']
                 ranges.sort(key=lambda x: x[0])
                 merged_ranges = [ranges[0]]
                 for current in ranges[1:]:
@@ -846,19 +765,19 @@ class Grapher():
                         merged_ranges[-1] = [last_merged[0], max(last_merged[1], current[1])]
                     else:
                         merged_ranges.append(current)
-                self.eleana.color_span['ranges'] = merged_ranges
+                self.eleana.settings.grapher['color_span']['ranges'] = merged_ranges
                 self.updateAnnotationList()
                 self.eleana.set_selections(variable='grapher_action', value='range_end')
         elif sel.button == 3: # Right button
             # Remove range
-            if self.eleana.color_span['ranges'] is not None:
-                self.eleana.color_span['status'] = 0
-                ranges = self.eleana.color_span['ranges']
+            if self.eleana.settings.grapher['color_span']['ranges'] is not None:
+                self.eleana.settings.grapher['color_span']['status'] = 0
+                ranges = self.eleana.settings.grapher['color_span']['ranges']
                 i = 0
                 while i < len(ranges):
-                    range = self.eleana.color_span['ranges'][i]
+                    range = self.eleana.settings.grapher['color_span']['ranges'][i]
                     if (range[0] >= x and range[1] <= x) or (range[0] <= x and range[1] >= x):
-                        del self.eleana.color_span['ranges'][i]
+                        del self.eleana.settings.grapher['color_span']['ranges'][i]
                         break
                     i+=1
                 self.updateAnnotationList()
@@ -867,8 +786,8 @@ class Grapher():
 
     def clear_selected_ranges(self):
         ''' Remove all selected ranges from the graph and clear variable that stores the ranges '''
-        self.eleana.color_span['ranges'] = []
-        self.eleana.color_span['status'] = 0
+        self.eleana.settings.grapher['color_span']['ranges'] = []
+        self.eleana.settings.grapher['color_span']['status'] = 0
         self.clearAnnotationList()
         self.plot_graph()
 
@@ -970,7 +889,7 @@ class Grapher():
                 self.annotationlist.insert("END", entry)
         else:
             i = 0
-            for each in self.eleana.color_span['ranges']:
+            for each in self.eleana.settings.grapher['color_span']['ranges']:
                 if i < 10:
                     nr = '#0' + str(i)
                 else:
@@ -1092,7 +1011,7 @@ class Grapher():
         if region_from_scale:
             ranges = [self.ax.get_xlim()]
         if region:
-            ranges = self.eleana.color_span['ranges']
+            ranges = self.eleana.settings.grapher['color_span']['ranges']
         if region_from_scale or region:
             # If region_from_scale or region is True then extract
             # data between x_min and x_max or from selected range, respectively

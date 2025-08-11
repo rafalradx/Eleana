@@ -12,9 +12,10 @@ PROJECT_PATH = pathlib.Path(__file__).parent
 PROJECT_UI = PROJECT_PATH / "preferences.ui"
 
 class PreferencesApp:
-    def __init__(self, app_instance):
-        self.grapher = app_instance.grapher
-        self.master = app_instance.mainwindow
+    def __init__(self, master, eleana, grapher):
+        self.grapher = grapher
+        self.eleana = eleana
+        self.master = master
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)
@@ -55,20 +56,21 @@ class PreferencesApp:
         self.mainwindow.attributes('-topmost', False)
 
         # References to settings
-        self.style_first = self.grapher.style_first
-        self.style_second = self.grapher.style_second
-        self.style_result = self.grapher.style_result
-        self.gui_appearence = app_instance.gui_appearence
-        self.color_mode = app_instance.color_theme
-        self.plt_style = self.grapher.plt_style
+        self.style_first = self.eleana.settings.grapher['style_first']
+        self.style_second = self.eleana.settings.grapher['style_second']
+        self.style_result = self.eleana.settings.grapher['style_result']
+        self.gui_appearence = self.eleana.settings.general['gui_appearance']
+        self.color_mode = self.eleana.settings.general['color_theme']
+        self.plt_style = self.eleana.settings.grapher['plt_style']
+
 
         # Copy current settings
-        self.copy_style_first = copy.copy(self.style_first)
-        self.copy_style_second = copy.copy(self.style_second)
-        self.copy_style_result = copy.copy(self.style_result)
-        self.copy_plt_style = copy.copy(self.plt_style)
-        self.copy_gui_appearence = copy.copy(self.gui_appearence)
-        self.copy_color_mode = copy.copy(self.color_mode)
+        self.copy_style_first = copy.deepcopy(self.style_first)
+        self.copy_style_second = copy.deepcopy(self.style_second)
+        self.copy_style_result = copy.deepcopy(self.style_result)
+        self.copy_plt_style = copy.deepcopy(self.plt_style)
+        self.copy_gui_appearence = copy.deepcopy(self.gui_appearence)
+        self.copy_color_mode = copy.deepcopy(self.color_mode)
 
         # References to widgets
         self.gui_style_box = builder.get_object("gui_style_box", self.mainwindow)
@@ -99,7 +101,6 @@ class PreferencesApp:
         self.btn_result_color_im = builder.get_object('ctkbutton9', self.mainwindow)
 
         self.response = None
-        self.on_start()
 
         # Set values for graph_general_box
         styles = tuple(self.matplotlib_styles.keys())
@@ -111,6 +112,7 @@ class PreferencesApp:
         self.first_linewidth.grid_remove()
         self.first_linewidth = CTkSpinbox(self.ctkframe9, command=self.selected_first_linewidth, min_value=1)
         self.first_linewidth.grid(column=1, row=0, sticky="ew", padx=0)
+        self.on_start()
 
     ''' STANDARD METHODS TO HANDLE WINDOW BEHAVIOR '''
     def get(self):
@@ -133,8 +135,16 @@ class PreferencesApp:
         self.mainwindow.destroy()
 
     def ok(self):
-        self.response = {'gui_appearance':self.gui_appearence, 'color_theme':self.color_mode}
+        #self.response = {'gui_appearance':self.gui_appearence, 'color_theme':self.color_mode}
+        self.eleana.settings.grapher['style_first'] = copy.deepcopy(self.style_first)
+        self.eleana.settings.grapher['style_second'] = copy.deepcopy(self.style_second)
+        self.eleana.settings.grapher['style_result'] = copy.deepcopy(self.style_result)
+        self.eleana.settings.grapher['plt_style'] = self.matplotlib_styles.get(self.graph_general_box.get())
+        self.eleana.settings.general['gui_appearance'] = self.gui_appearence
+        self.eleana.settings.general['color_theme'] = self.color_mode
+        self.eleana.save_settings()
         self.mainwindow.destroy()
+
     def run(self):
         self.mainwindow.mainloop()
     ''' END OF STANDARD METHODS '''
@@ -151,8 +161,8 @@ class PreferencesApp:
         self.graph_general_box.set(self.plt_style)
 
         self.first_plot_type_box.set(self.style_first['plot_type'])
-        self.first_linewidth.delete(0,'end')
-        self.first_linewidth.insert(0, self.style_first['linewidth'])
+        #self.first_linewidth.delete(0,'end')
+        #self.first_linewidth.insert(0, self.style_first['linewidth'])
         self.first_linestyle.set(self.style_first['linestyle'])
         self.first_marker.set(self.style_first['marker'])
         self.first_markersize.delete(0, 'end')
@@ -187,7 +197,6 @@ class PreferencesApp:
     def select_color_scheme(self, value):
         self.color_mode = value
         customtkinter.set_default_color_theme(self.color_mode)
-
 
     # Set plot style for First
     def selected_first_plot_type(self, value):
@@ -324,7 +333,14 @@ class PreferencesApp:
             print(value)
         return
 
-
+    def reset_to_default(self):
+        self.eleana.set_default_settings()
+        self.grapher.update_plot_style(self.plt_style)
+        self.gui_appearence = self.eleana.settings.general['gui_appearance']
+        customtkinter.set_appearance_mode(self.gui_appearence)
+        self.color_mode = self.eleana.settings.general['color_theme']
+        customtkinter.set_default_color_theme(self.color_mode)
+        self.on_start()
 
 if __name__ == "__main__":
     app = PreferencesApp()

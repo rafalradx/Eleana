@@ -201,25 +201,24 @@ class MainMenu:
         # -------- Assign First to group
         self.menu_groups.add_command(label="Assign First to group", command=self.callbacks.get('first_to_group'))
 
-        # # -------- Assign Second to group
-        # self.menu_groups.add_command(label="Assign Second to group", command=self.app.second_to_group)
-        #
-        # # - Graph Preferences
-        # self.menu_edit.add_command(label="Preferences", command = self.app.preferences, image=self.icon_graphPrefs, compound="left")
-        #
-        # ''' Menu ANALYSIS '''
-        #
-        # # ANALYSIS
-        # self.menu_analysis = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
-        #                     activebackground=self.activebg, activeforeground=self.activefg,
-        #                     borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        # #self.main_menu.add_cascade(label="Analysis", menu=self.menu_analysis, image=self.icon_dropdown, compound="left")
-        # self.main_menu.add_cascade(label="Analysis ", menu=self.menu_analysis)
-        #
-        # #  - Distance read
-        # self.menu_analysis.add_command(label="Calculate XY Distance", command=self.app.xy_distance,
-        #                                image=self.icon_distance, compound="left")
-        #
+        # -------- Assign Second to group
+        self.menu_groups.add_command(label="Assign Second to group", command=self.callbacks.get('second_to_group'))
+
+        # - Graph Preferences
+        self.menu_edit.add_command(label="Preferences", command = self.callbacks.get('preferences'), image=self.icon_graphPrefs, compound="left")
+
+        ''' Menu ANALYSIS '''
+
+        # ANALYSIS
+        self.menu_analysis = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                            activebackground=self.activebg, activeforeground=self.activefg,
+                            borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.main_menu.add_cascade(label="Analysis ", menu=self.menu_analysis)
+
+        #  - Distance read
+        self.menu_analysis.add_command(label="Calculate XY Distance", command=self.callbacks.get('xy_distance'),
+                                       image=self.icon_distance, compound="left")
+
         # #  - Integrate region
         # self.menu_analysis.add_command(label="Integrate region", command=self.app.integrate_region,
         #                           image=self.icon_integrate_region, compound="left")

@@ -18,9 +18,8 @@ from assets.Menu import ContextMenu
 # Import modules from "/modules" folder
 from modules.CTkListbox import CTkListbox
 from modules.CTkMessagebox import CTkMessagebox
-#from modules.CTkScrollableDropdown import CTkScrollableDropdown
 from widgets.CTkSpinbox import CTkSpinbox
-from modules.CTkScrollableDropdown import CTkScrollableDropdown
+
 # Import Eleana specific classes
 from Menu import MainMenu
 from Callbacks import main_menubar_callbacks, contextmenu_callbacks, grapher_callbacks
@@ -75,7 +74,7 @@ def check_busy(method):
             return
         result = method(self, *args, **kwargs)
         self.mainwindow.configure(cursor="")
-        self.after_gui_action(by_method = method.__name__)
+        #self.after_gui_action(by_method = method.__name__)
         return result
     return wrapper
 
@@ -444,9 +443,8 @@ class Application():
             self.sel_group.set(selection)
         self.mainwindow.focus_set()
 
-    def create_f_stk(self):
-        #self.f_stk = self.builder.get_object('f_stk', self.mainwindow)
-        self.builder.connect_callbacks()
+    # def create_f_stk(self):
+    #     self.builder.connect_callbacks()
 
     def set_pane_height(self):
         self.mainwindow.update_idletasks()
@@ -455,12 +453,12 @@ class Application():
         self.pane5.sashpos(0, 1100)
         self.mainwindow.update_idletasks()
 
-    def center_window(self, window, width, height):
-        screen_width = window.winfo_screenwidth()
-        screen_height = window.winfo_screenheight()
-        x = (screen_width - width) // 2
-        y = (screen_height - height) // 2
-        window.geometry(f"{width}x{height}+{x}+{y}")
+    # def center_window(self, window, width, height):
+    #     screen_width = window.winfo_screenwidth()
+    #     screen_height = window.winfo_screenheight()
+    #     x = (screen_width - width) // 2
+    #     y = (screen_height - height) // 2
+    #     window.geometry(f"{width}x{height}+{x}+{y}")
 
     def run(self):
         self.mainwindow.after(100, self.set_pane_height)
@@ -1647,13 +1645,8 @@ class Application():
     def preferences(self):
         ''' Open window for editing preferences '''
         #preferences = PreferencesApp(self.mainwindow, self.grapher, self.color_theme, self.gui_appearence)
-        preferences = PreferencesApp(self)
+        preferences = PreferencesApp(master = self.mainwindow, eleana = self.eleana, grapher = self.grapher)
         response = preferences.get()
-        if not response:
-            return
-        self.grapher.plot_graph()
-        self.gui_appearence = response['gui_appearance']
-        self.color_theme = response['color_theme']
 
     def load_project(self, event=None, recent=None):
         ''' Load project created with the Application '''

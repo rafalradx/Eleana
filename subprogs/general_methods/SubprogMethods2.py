@@ -116,6 +116,8 @@ class SubMethods_02:
         ''' Makes a copy of the selected data and stores it in self.original_data.
             You may perform calculations on self.original_data. '''
         index = self.eleana.selections[self.which]
+        if index < 0:
+            return
         parameters = self.eleana.dataset[index].parameters
         origin = parameters.get('origin', None)
         if self.eleana.selections[self.which] >= 0: # If selection is not None
@@ -769,8 +771,6 @@ class SubMethods_02:
             if self.eleana.devel_mode:
                 print("There is no reports in self.report")
             return
-
-
         rows = self.report['rows']
         headers = self.report['headers']
         df = pandas.DataFrame(rows, columns=headers)
@@ -784,7 +784,7 @@ class SubMethods_02:
         window_title = self.report['report_window_title']
         name = self.report['report_name']
         table = CreateFromTable(window_title=window_title,
-                                eleana_app=self.eleana,
+                                eleana=self.eleana,
                                 master=self.mainwindow,
                                 df=df,
                                 name=name,

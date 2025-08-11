@@ -26,7 +26,10 @@ def main_menubar_callbacks(inst):
              "clear_dataset": inst.clear_dataset,
              "clear_results": inst.clear_results,
              "first_to_group": inst.first_to_group,
-
+             "second_to_group": inst.second_to_group,
+             "preferences": inst.preferences,
+             # ANALYSIS
+             'xy_distance': inst.xy_distance,
             }
 
 def contextmenu_callbacks(inst):
