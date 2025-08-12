@@ -70,7 +70,7 @@ ORIG_IN_ODD_IDX: bool = False
 USE_SECOND: bool = True
 
 # If First and Second data have different dimensions, the error will be shown.
-# if you want to override checking if the dimmensions are the same set this parameter True
+# if you want to override checking if the dimensions are the same set this parameter True
 IGNORE_DIMENSIONS: bool = True
 
 # If each subspectrum in a Stack 2D can be processed separately set this to True
@@ -213,16 +213,18 @@ else:
 mod = importlib.import_module(module_path)
 WindowGUI = getattr(mod, class_name)
 
-from subprogs.general_methods.SubprogMethods4 import SubMethods_04 as Methods                       #|
-class SpectraSubtraction(Methods, WindowGUI):                                                           #|
+from subprogs.general_methods.SubprogMethods5 import SubMethods_05 as Methods
+class SpectraSubtraction(Methods, WindowGUI):
     #_instances = []
-    def __init__(self, app=None, which='first', commandline=False):                                 #|
+    def __init__(self, app=None, which='first', commandline=False):
 
         #SpectraSubtraction._instances.append(weakref.ref(self))
 
-        if app and not commandline:                                                                 #|
+        self.app = weakref.ref(app)
+
+        if self.app() and not commandline:                                                                 #|
             # Initialize window if app is defined and not commandline                               #|
-            WindowGUI.__init__(self, app.mainwindow)                                                #|
+            WindowGUI.__init__(self, self.app().mainwindow)                                                #|
         # Create settings for the subprog                                                           #|
         self.subprog_settings = {'folder':SUBPROG_FOLDER, 'title': TITLE, 'on_top': ON_TOP, 'data_label': DATA_LABEL, 'name_suffix': NAME_SUFFIX,
                                  'restore':RESTORE_SETTINGS, 'auto_calculate': AUTO_CALCULATE, 'result': RESULT_CREATE, 'result_ignore':RESULT_IGNORE,
@@ -234,7 +236,7 @@ class SpectraSubtraction(Methods, WindowGUI):                                   
                                'cursor_outside_x':CURSOR_OUTSIDE_X, 'cursor_outside_y':CURSOR_OUTSIDE_Y, 'cursor_outside_text':CURSOR_OUTSIDE_TEXT}
         self.use_second = USE_SECOND                                                                #|
         self.stack_sep = STACK_SEP                                                                  #|
-        Methods.__init__(self, app=app, which=which, commandline=commandline, close_subprogs=CLOSE_SUBPROGS)
+        Methods.__init__(self, app=self.app, which=which, commandline=commandline, close_subprogs=CLOSE_SUBPROGS)
 
 
     # PRE-DEFINED FUNCTIONS TO EXECUTE AT DIFFERENT STAGES OF SUBPROG METHODS
