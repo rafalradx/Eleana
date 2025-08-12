@@ -226,12 +226,13 @@ class MainMenu:
         # self.menu_analysis.add_command(label="Statistics", command=self.app.quick_paste,
         #                            image=self.icon_statistics, compound="left")
         #
-        # ''' Menu MODIFICATIONS '''
-        # self.menu_modifications = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
-        #                              activebackground=self.activebg, activeforeground=self.activefg,
-        #                              borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        # self.main_menu.add_cascade(label=" Modifications ", menu=self.menu_modifications)
-        #
+
+        ''' Menu MODIFICATIONS '''
+        self.menu_modifications = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                                     activebackground=self.activebg, activeforeground=self.activefg,
+                                     borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.main_menu.add_cascade(label=" Modifications ", menu=self.menu_modifications)
+
         # # - Normalize amplitude
         # self.menu_modifications.add_command(label="Normalize amplitude", command=self.app.normalize,
         #                                image=self.icon_normalize, compound="left")
@@ -252,10 +253,10 @@ class MainMenu:
         #
         # self.menu_modifications.add_separator()
         #
-        # # - Spectra subtraction
-        # self.menu_modifications.add_command(label="Spectra subtraction", command=self.app.spectra_subtraction,
-        #                                    image=self.icon_spectrasubtract, compound="left")
-        #
+        # - Spectra subtraction
+        self.menu_modifications.add_command(label="Spectra subtraction", command=self.callbacks.get('spectra_subtraction'),
+                                           image=self.icon_spectrasubtract, compound="left")
+
         # self.menu_modifications.add_separator()
         #
         # # - Filter

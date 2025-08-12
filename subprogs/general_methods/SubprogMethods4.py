@@ -41,9 +41,6 @@ class SubMethods_04:
             TYLKO DO DEBUGINGU'''
         SubMethods_04._instances.append(weakref.ref(self))
 
-
-
-
         self.registered_custom_widgets = []
         self.subprog_storage_data = []
         self.commandline = commandline
@@ -186,8 +183,8 @@ class SubMethods_04:
 
         # Show unclosed references if there are any
         if DEVEL:
-            refererrs = gc.get_referrers(self)
-            if refererrs:
+            references = gc.get_referrers(self)
+            if references:
                 print("\n🔎 Niezamknięte referencje do self:")
                 for referrer in gc.get_referrers(self):
                     print(type(referrer), referrer)
@@ -273,6 +270,9 @@ class SubMethods_04:
         return True
 
     def clear_memory_after(self):
+        self.data_for_calculations = None
+        self.original_data1 = None
+        self.original_data2 = None
         del self.data_for_calculations
         del self.original_data1
         del self.original_data2
@@ -947,7 +947,7 @@ class SubMethods_04:
         if self.regions['from'] == 'scale':
             ranges = [self.grapher.ax.get_xlim()]
         elif self.regions['from'] == 'selection':
-            ranges = self.eleana.color_span['ranges']
+            ranges = self.eleana.settings.grapher['color_span']['ranges']
         elif self.regions['from'] == 'none':
             return x, y
         else:
@@ -1421,19 +1421,19 @@ class SubMethods_04:
 
     def save_storage_on_close(self):
         ''' Create entry for all subprog storge values in
-            self.eleana.subprog_storage
+            self.eleana.storage.subprog_settings
         '''
         elements = self.save_settings()
         for element in elements:
             self.to_store(element)
         storage = copy.deepcopy(self.subprog_storage_data)
-        self.eleana.subprog_storage[self.subprog_id] = storage
+        self.eleana.storage.subprog_settings[self.subprog_id] = storage
 
     def restore(self, element):
-        ''' Get data from self.eleana.subprog_storage
+        ''' Get data from self.eleana.storage.subprog_settings
             for widget and returns stored values
         '''
-        subprog_field = self.eleana.subprog_storage.get(self.subprog_id, None)
+        subprog_field = self.eleana.storage.subprog_settings.get(self.subprog_id, None)
         if subprog_field is None:
             return None
         to_restore = next(line[element] for line in subprog_field if element in line)

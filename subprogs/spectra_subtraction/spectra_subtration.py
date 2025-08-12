@@ -215,10 +215,10 @@ WindowGUI = getattr(mod, class_name)
 
 from subprogs.general_methods.SubprogMethods4 import SubMethods_04 as Methods                       #|
 class SpectraSubtraction(Methods, WindowGUI):                                                           #|
-    _instances = []
+    #_instances = []
     def __init__(self, app=None, which='first', commandline=False):                                 #|
 
-        SpectraSubtraction._instances.append(weakref.ref(self))
+        #SpectraSubtraction._instances.append(weakref.ref(self))
 
         if app and not commandline:                                                                 #|
             # Initialize window if app is defined and not commandline                               #|

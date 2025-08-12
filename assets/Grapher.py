@@ -10,7 +10,7 @@ import copy
 from CTkListbox import CTkListbox
 import numpy as np
 from Plots import Staticplotwindow
-
+import pprint
 # Make matplotlib to use tkinter
 matplotlib.use('TkAgg')
 # Remove CTRL+S shortcut to allow open 'Save' by pressing CTRL+S
@@ -29,13 +29,11 @@ class Grapher():
         # Apply matplotlib style
         try:
             self.plt.style.use(self.plt_style)
-            #plt.style.use(self.plt_style)
         except Exception as e:
             if self.eleana.devel_mode:
                 print(e)
             self.plt_style =  'Solarize_Light2'
             self.plt.style.use(self.plt_style)
-            #plt.style.use('Solarize_Light2')
 
         # References to Main Gui Combobox and button
         self.btn_clear_cursors = gui_references['btn_clear_cursors']

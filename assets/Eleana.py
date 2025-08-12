@@ -150,6 +150,7 @@ class Eleana():
 
         # Try loading saved settings
         self.settings = self.load_settings()
+        #self.settings = None
         if self.settings is None:
             self.set_default_settings()
             # Save settings on disk

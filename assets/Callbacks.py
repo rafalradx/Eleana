@@ -29,7 +29,10 @@ def main_menubar_callbacks(inst):
              "second_to_group": inst.second_to_group,
              "preferences": inst.preferences,
              # ANALYSIS
-             'xy_distance': inst.xy_distance,
+             "xy_distance": inst.xy_distance,
+
+             # MODIFICATION
+             "spectra_subtraction": inst.spectra_subtraction,
             }
 
 def contextmenu_callbacks(inst):
