@@ -22,9 +22,9 @@ import weakref
 def check_busy(method):
     @wraps(method)
     def wrapper(self, *args, **kwargs):
-        if self.eleana().busy:
-            if self.eleana().devel_mode:
-                print(f"{Path(__file__).name}, {method.__name__}: self.eleana().busy = True")
+        if self.eleana.busy:
+            if self.eleana.devel_mode:
+                print(f"{Path(__file__).name}, {method.__name__}: self.eleana.busy = True")
             return  # Breaks a method execution
         return method(self, *args, **kwargs)  # Go to a method
     return wrapper
@@ -34,12 +34,14 @@ class SubMethods_05:
 
     ''' Ten fragment tworzy listę instancji tej klasy
         TYLKO DO DEBUGINGU'''
+    # List of class instances
     _instances = []
-    def __init__(self, app=None, commandline=False, which = 'first', close_subprogs = False):
 
-        ''' Dodanie instancji do _instances
-            TYLKO DO DEBUGINGU'''
+    def __init__(self, app_weak=None, commandline=False, which = 'first', close_subprogs = False):
+        # Add created instance to the list
         SubMethods_05._instances.append(weakref.ref(self))
+
+        ''' Start init '''
         self.registered_custom_widgets = []
         self.subprog_storage_data = []
         self.commandline = commandline
@@ -53,15 +55,9 @@ class SubMethods_05:
             'linestyle': 'dashed',
         }
 
-        if app and not self.commandline:
+        if app_weak and not self.commandline:
             # Window start from Menu in GUI
-            self.app = app
-            self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
-            self.master = weakref.ref(self.app().mainwindow)
-            self.eleana = weakref.ref(self.app().eleana)
-            #self.eleana().active_subprog = self
-            self.grapher = weakref.ref(self.app().grapher)
-            self.update = weakref.ref(self.app().update)
+            self.__app = app_weak
             self.mainwindow.title(self.subprog_settings.get('title', ''))
             self.mainwindow.attributes('-topmost', self.subprog_settings.get('on_top', True))
 
@@ -69,62 +65,101 @@ class SubMethods_05:
                 self.data_label = self.builder.get_object(self.subprog_settings.get('data_label'), self.mainwindow)
             else:
                 self.data_label = None
-        else:
-            # Instance created directly from subprog.
-            self.app = None
-            self.master = None
-            self.grapher = None
-            self.update = None
 
         # Set to which selection 'First' or 'Second'
         self.which = which
         # If self.app is defined, configure window, observer and grapher
-        if self.app():
+        if self.app:
             # Custom window configuration in parent
             self.configure_window()
             # Create observer
             self.observer = Observer(self.eleana, self)
-            self.eleana().notify_on = True
+            self.eleana.notify_on = True
             # Set current position in Results Dataset
             cursor_type = self.subprog_cursor.get('type', 'none').lower()
             if cursor_type != 'none' or cursor_type != '':
                 # Configure cursor
-                self.subprog_cursor['previous'] = copy.copy(self.grapher().current_cursor_mode['label'])
-                self.grapher().cursor_limit = self.subprog_cursor.get('limit', 0)
-                self.app().sel_cursor_mode.set(self.subprog_cursor['type'])
-                self.app().sel_graph_cursor(self.subprog_cursor['type'])
-                self.app().mainwindow.update()
+                self.subprog_cursor['previous'] = copy.copy(self.grapher.current_cursor_mode['label'])
+                self.grapher.cursor_limit = self.subprog_cursor.get('limit', 0)
+                self.app.sel_cursor_mode.set(self.subprog_cursor['type'])
+                self.app.sel_graph_cursor(self.subprog_cursor['type'])
+                self.app.mainwindow.update()
                 if not self.subprog_cursor.get('changing'):
                     # Disable cursor changing
-                    self.app().sel_cursor_mode.configure(state="disabled")
+                    self.app.sel_cursor_mode.configure(state="disabled")
                 if self.subprog_cursor['clear_on_start']:
                     # Clear current cursors
                     if self.subprog_cursor.get('type').lower() == 'range select':
-                        self.grapher().clear_selected_ranges()
+                        self.grapher.clear_selected_ranges()
                     else:
-                        self.grapher().clear_all_annotations()
+                        self.grapher.clear_all_annotations()
             # Restore settings for the subporg
             self.subprog_id = self.subprog_settings['folder'] + "|" + self.subprog_settings.get('title', '')
-            if self.subprog_settings.get('restore', True):
+            if self.subprog_settings.get('restore', False):
                 self.restore_settings()
+            self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
+
+    # Create weak references to eleana, grapher and update
+    # through weakref app
+    # ----------------------------------------------
+
+    @property
+    def app(self):
+        return self.__app()
+
+    @app.setter
+    def app(self, value):
+        if value is None:
+            self.__app = lambda: None
+        else:
+            self.__app = weakref.ref(value)
+
+    @property
+    def master(self):
+        return self.app.mainwindow
+
+    @master.setter
+    def master(self, value):
+        if self.app is None:
+            self._master = value
+        else:
+            self.app.mainwindow = value
+
+    @property
+    def eleana(self):
+        return self.app.eleana
+
+    @eleana.setter
+    def eleana(self, value):
+        if self.app is None:
+            self._eleana = value
+        else:
+            self.app.eleana = value
+
+    @property
+    def grapher(self):
+        return self.app.grapher
+
+    @grapher.setter
+    def grapher(self, value):
+        if self.app is None:
+            self._grapher = value
+        else:
+            self.app.grapher = value
+
+    @property
+    def update(self):
+        return self.app.update
+
+    @update.setter
+    def update(self, value):
+        if self.app is None:
+            self._update = value
+        else:
+            self.app.update = value
 
     # STANDARD METHODS FOR MAIN APPLICATION
     # ----------------------------------------------
-
-    # @property
-    # def app(self):
-    #     return self.__app()
-    #
-    # @property
-    # def eleana(self):
-    #     return self.__eleana()
-    #
-    # @property
-    # def grapher(self):
-    #     return self.__grapher()
-    #
-    # @property
-
 
     def get(self):
         ''' Returns self.response to the main application after close '''
@@ -156,10 +191,11 @@ class SubMethods_05:
     def cancel(self, event=None):
         ''' Close the window with self.response = None '''
 
-        DEVEL = copy.copy(self.eleana().devel_mode)
+        DEVEL = copy.copy(self.eleana.devel_mode)
 
         # Unregister observer
-        self.eleana().detach(self.observer)
+        self.mainwindow.protocol('WM_DELETE_WINDOW', lambda: None)
+        self.eleana.detach(self.observer)
         self.observer = None
 
         # Store settings
@@ -179,39 +215,36 @@ class SubMethods_05:
         self.response = None
 
         # Return cursor selection to enabled
-        self.app().sel_cursor_mode.configure(state="normal")
-        self.app().sel_cursor_mode.set(self.subprog_cursor['previous'])
-        self.app().sel_graph_cursor(self.subprog_cursor['previous'])
+        self.app.sel_cursor_mode.configure(state="normal")
+        self.app.sel_cursor_mode.set(self.subprog_cursor['previous'])
+        self.app.sel_graph_cursor(self.subprog_cursor['previous'], clear_annotations = True)
 
-        self.grapher().clear_selected_ranges()
+        self.grapher.clear_selected_ranges()
         self.clear_additional_plots()
-        self.mainwindow.protocol('WM_DELETE_WINDOW', None)
-        self.mainwindow.destroy()
-        self.grapher().plot_graph()
-        self.eleana().busy = False
+
+        self.grapher.cursor_limit = 0
+        self.grapher.plot_graph()
+        self.eleana.busy = False
 
         # Remove validations
         self.validate_command = None
 
         # Excecute additional code in subprog
-        self.after_quit_subprog()
-
-        self.app = None
-        self.eleana = None
-        self.grapher = None
-        self.master = None
+        self.mainwindow.destroy()
         self.mainwindow = None
+        self.after_quit_subprog()
+        # Garbage collect
+        gc.collect()
 
         # Show unclosed references if there are any
+
         if DEVEL:
             references = gc.get_referrers(self)
             if references:
-                print("\n🔎 Niezamknięte referencje do self:")
+                print("\n🔎 Unclosed references to self:")
                 for referrer in gc.get_referrers(self):
                     print(type(referrer), referrer)
 
-        # Garbage collector
-        gc.collect()
 
     # GETTING THE DATA ACCORDING TO ELEANA.SELECTION
     # ----------------------------------------------
@@ -219,17 +252,17 @@ class SubMethods_05:
     def get_data(self, group_processing = False, variable=None, value=None):
         ''' Makes a copy of the selected data and stores it in self.original_data.
             You may perform calculations on self.original_data. '''
-        index = self.eleana().selections[self.which]
+        index = self.eleana.selections[self.which]
         if index < 0:
             return False
-        parameters = self.eleana().dataset[index].parameters
+        parameters = self.eleana.dataset[index].parameters
         origin = parameters.get('origin', None)
-        if self.eleana().selections[self.which] >= 0:  # If selection is not None
+        if self.eleana.selections[self.which] >= 0:  # If selection is not None
             ignore = self.subprog_settings.get('result_ignore', True)
             if origin == "@result" and ignore:
                 return False
-            self.eleana().notify_on = False
-            self.original_data1 = copy.deepcopy(self.eleana().dataset[index])
+            self.eleana.notify_on = False
+            self.original_data1 = copy.deepcopy(self.eleana.dataset[index])
             self.original_data2 = None
         else:
             if self.app:
@@ -237,46 +270,46 @@ class SubMethods_05:
             return False
         if self.use_second:
             # --- TWO DATA ARE NEEDED ---
-            index2 = self.eleana().selections['second']
-            if self.eleana().selections['second'] == -1:
+            index2 = self.eleana.selections['second']
+            if self.eleana.selections['second'] == -1:
                 if self.app:
                     Error.show(info='No second data selected', details='')
                 self.original_data2 = None
                 return False
-            self.original_data2 = copy.deepcopy(self.eleana().dataset[index2])
+            self.original_data2 = copy.deepcopy(self.eleana.dataset[index2])
         return True
 
     def data_changed(self, variable, value):
         ''' Activate get_data when selection changed.
             This is triggered by the Observer.   '''
         if variable == "first" and value is None:
-            self.app().mainwindow.configure(cursor="")
-            self.grapher().canvas.get_tk_widget().config(cursor="")
+            self.app.mainwindow.configure(cursor="")
+            self.grapher.canvas.get_tk_widget().config(cursor="")
             if value is None:
                 try:
-                    self.grapher().clear_all_annotations()
+                    self.grapher.clear_all_annotations()
                 except:
-                    if self.eleana().devel_mode:
+                    if self.eleana.devel_mode:
                         print("Subprogmethods2.data_changed() - Clear all annotations failed")
             self.after_data_changed(variable=variable, value=value)
             return False
         elif variable == 'f_stk' or variable == 's_stk':
-            self.app().mainwindow.configure(cursor="")
-            self.grapher().canvas.get_tk_widget().config(cursor="")
+            self.app.mainwindow.configure(cursor="")
+            self.grapher.canvas.get_tk_widget().config(cursor="")
             try:
-                self.grapher().clear_all_annotations()
+                self.grapher.clear_all_annotations()
             except:
-                if self.eleana().devel_mode:
+                if self.eleana.devel_mode:
                     print("Subprogmethods2.data_changed() - Clear all annotations failed")
             self.after_data_changed(variable=variable, value=value)
             return False
         elif variable == 'grapher_action' and value == 'range_start':
-            self.app().mainwindow.configure(cursor="")
-            self.grapher().canvas.get_tk_widget().config(cursor="")
+            self.app.mainwindow.configure(cursor="")
+            self.grapher.canvas.get_tk_widget().config(cursor="")
             return False
         elif variable == 'grapher_action' and value == 'range_end':
-            self.app().mainwindow.configure(cursor="")
-            self.grapher().canvas.get_tk_widget().config(cursor="")
+            self.app.mainwindow.configure(cursor="")
+            self.grapher.canvas.get_tk_widget().config(cursor="")
             return False
         elif variable == 'grapher_action' and value == 'plot':
             self.after_graph_plot()
@@ -307,16 +340,16 @@ class SubMethods_05:
     def ok_clicked(self):
         ''' [-OK-] button
             This is standard function in SubprogMethods '''
-        if self.eleana().busy:
-            if self.eleana().devel_mode:
-                print('ok_clicked - blocked by self.eleana().busy')
+        if self.eleana.busy:
+            if self.eleana.devel_mode:
+                print('ok_clicked - blocked by self.eleana.busy')
             return
-        self.eleana().busy = True
+        self.eleana.busy = True
 
         self.start_single_calculations()
 
         self.set_mouse_state(state='')
-        self.eleana().busy = False
+        self.eleana.busy = False
         self.after_ok_clicked()
         self.show_results_matching_first()
 
@@ -329,18 +362,18 @@ class SubMethods_05:
     def process_group_clicked(self):
         ''' [-Process Group-] button
             This is standard function in SubprogMethods '''
-        if self.eleana().busy:
-            if self.eleana().devel_mode:
-                print('process_group_clicked - blocked by self.eleana().busy')
+        if self.eleana.busy:
+            if self.eleana.devel_mode:
+                print('process_group_clicked - blocked by self.eleana.busy')
             return
-        self.eleana().busy = True
+        self.eleana.busy = True
         self.set_mouse_state(state='watch')
 
 
         self.perform_group_calculations()
 
         self.set_mouse_state(state='')
-        self.eleana().busy = False
+        self.eleana.busy = False
 
         self.show_results_matching_first()
         self.after_process_group_clicked()
@@ -349,21 +382,21 @@ class SubMethods_05:
     def show_report_clicked(self):
         ''' [-Show Report-] button
             This is standard function in SubprogMethods '''
-        if self.eleana().busy:
-            if self.eleana().devel_mode:
-                print('show_report_clicked - blocked by self.eleana().busy')
+        if self.eleana.busy:
+            if self.eleana.devel_mode:
+                print('show_report_clicked - blocked by self.eleana.busy')
             return
-        self.eleana().busy = True
+        self.eleana.busy = True
         self.set_mouse_state(state='')
         self.show_report()
-        self.eleana().busy = False
+        self.eleana.busy = False
 
     def clear_report_clicked(self):
         ''' [-Show Report-] button
             This is standard function in SubprogMethods '''
-        if self.eleana().busy:
-            if self.eleana().devel_mode:
-                print('clear_report_clicked - blocked by self.eleana().busy')
+        if self.eleana.busy:
+            if self.eleana.devel_mode:
+                print('clear_report_clicked - blocked by self.eleana.busy')
             return
         self.clear_report()
 
@@ -373,7 +406,7 @@ class SubMethods_05:
     def start_single_calculations(self):
         ''' This function is triggered by clicking "Calculate" button'''
         required_cursors = self.subprog_cursor.get('cursor_required', 0)
-        nr_of_annotations = len(self.grapher().cursor_annotations)
+        nr_of_annotations = len(self.grapher.cursor_annotations)
         if required_cursors > nr_of_annotations:
             if self.subprog_cursor.get('cursor_req_text'):
                 Error.show(title='', info=self.subprog_cursor.get('cursor_req_text', 'CURSOR_REQ_TEXT not defined'))
@@ -406,14 +439,14 @@ class SubMethods_05:
 
             self.result_data.name = self.result_data.name + self.subprog_settings.get('name_suffix', '')
             self.result_data.name_nr = self.result_data.name_nr + self.subprog_settings.get('name_suffix', '')
-            self.eleana().results_dataset.append(self.result_data)
-            self.current_index_in_results = len(self.eleana().results_dataset) - 1
+            self.eleana.results_dataset.append(self.result_data)
+            self.current_index_in_results = len(self.eleana.results_dataset) - 1
 
         elif self.subprog_settings.get('result') == 'replace':
             # The replace mode was set
             self.result_data = copy.deepcopy(self.original_data1)
             self.result_data.name = self.result_data.name + self.subprog_settings.get('name_suffix', '')
-            if len(self.eleana().results_dataset) == 0:
+            if len(self.eleana.results_dataset) == 0:
                 # Results_dataset is empty so new_result must be added
                 self.result_data = copy.deepcopy(self.original_data1)
 
@@ -424,12 +457,12 @@ class SubMethods_05:
                     self.result_data.y = extr_y
 
                 self.result_data.name = self.result_data.name + self.subprog_settings.get('name_suffix', '')
-                self.eleana().results_dataset.append(self.result_data)
+                self.eleana.results_dataset.append(self.result_data)
                 self.current_index_in_results = 0
             else:
                 # Replace the last data in results_dataset
-                self.current_index_in_results = len(self.eleana().results_dataset) - 1
-                self.eleana().results_dataset[self.current_index_in_results] = self.result_data
+                self.current_index_in_results = len(self.eleana.results_dataset) - 1
+                self.eleana.results_dataset[self.current_index_in_results] = self.result_data
         else:
             # Do not create results
             self.result_data = None
@@ -453,7 +486,7 @@ class SubMethods_05:
                     if self.data_label is not None:
                         self.data_label.configure(text=name)
                         if group_processing == False:
-                            self.app().mainwindow.update()
+                            self.app.mainwindow.update()
                     status = self.do_calc_stk_data()
                     if status:
                         self.consecutive_number += 1
@@ -471,7 +504,7 @@ class SubMethods_05:
             if self.data_label is not None:
                 self.data_label.configure(text=self.original_data1.name_nr)
                 if group_processing == False:
-                    self.app().mainwindow.update()
+                    self.app.mainwindow.update()
             status = self.do_calc_single2D()
             if status:
                 self.consecutive_number += 1
@@ -489,16 +522,16 @@ class SubMethods_05:
             # If group processing is activated skip GUI update
             return True
         else:
-            if len(self.eleana().results_dataset) == 0:
+            if len(self.eleana.results_dataset) == 0:
                 self.after_calculations()
                 self.show_report()
                 return True
             else:
                 # Select result to the last entry
-                list_of_results = self.app().sel_result._values
+                list_of_results = self.app.sel_result._values
                 selected_value_text = list_of_results[-1]
-                self.app().result_selected(selected_value_text)
-                self.app().sel_result.set(selected_value_text)
+                self.app.result_selected(selected_value_text)
+                self.app.sel_result.set(selected_value_text)
         if not skip_report_show:
             self.after_calculations()
             self.show_report()
@@ -506,44 +539,44 @@ class SubMethods_05:
 
     def perform_group_calculations(self):
         required_cursors = self.subprog_cursor.get('cursor_required', 0)
-        nr_of_annotations = len(self.grapher().cursor_annotations)
+        nr_of_annotations = len(self.grapher.cursor_annotations)
         if required_cursors > nr_of_annotations:
             if self.subprog_cursor.get('cursor_req_text'):
                 Error.show(title='', info=self.subprog_cursor['cursor_req_text'])
             return False
 
         # Make copy of the settings and eleana.selections
-        copy_selections = self.eleana().selections.copy()
+        copy_selections = self.eleana.selections.copy()
         copy_of_subprog_settings = copy.deepcopy(self.subprog_settings)
 
         # Clear the whole results_dataset and report
-        self.eleana().results_dataset = []
+        self.eleana.results_dataset = []
         self.clear_report()
 
         # Prepare settings for group processing
-        current_group = self.eleana().selections['group']
+        current_group = self.eleana.selections['group']
         if current_group == "All":
-            group_list = tuple(range(len(self.eleana().dataset)))
+            group_list = tuple(range(len(self.eleana.dataset)))
         else:
-            group_list = self.eleana().assignmentToGroups[current_group]
+            group_list = self.eleana.assignmentToGroups[current_group]
         if self.subprog_settings.get('result') == 'replace':
             self.subprog_settings['result'] = 'add'
 
         # Do the single calculation for the each of the data in the
         for each in group_list:
-            self.eleana().selections['first'] = each
+            self.eleana.selections['first'] = each
             status1 = self.get_data(group_processing = True)
             if status1:
                 status2 = self.perform_single_calculations(group_processing=True)
                 if not status2:
-                    self.eleana().selections = copy_selections
+                    self.eleana.selections = copy_selections
                     self.subprog_settings = copy_of_subprog_settings
                     self.after_result_show_on_graph()
                     return False
 
 
         # After processing
-        self.eleana().selections = copy_selections
+        self.eleana.selections = copy_selections
         self.subprog_settings = copy_of_subprog_settings
 
         # Display result settings that match selection in first
@@ -966,11 +999,11 @@ class SubMethods_05:
         return True
 
     def extract_region_xy(self, x, y):
-        ''' Extract data using selected range (self.grapher().color_span) or scale (x_min, x_max) from array in x,y '''
+        ''' Extract data using selected range (self.grapher.color_span) or scale (x_min, x_max) from array in x,y '''
         if self.regions.get('from') == 'scale':
-            ranges = [self.grapher().ax.get_xlim()]
+            ranges = [self.grapher.ax.get_xlim()]
         elif self.regions.get('from') == 'selection':
-            ranges = self.eleana().settings.grapher['color_span']['ranges']
+            ranges = self.eleana.settings.grapher['color_span']['ranges']
         elif self.regions.get('from') == 'none':
             return x, y
         else:
@@ -1001,7 +1034,7 @@ class SubMethods_05:
             self.report['headers'] = headers
         if row:
             if len(row) != len(self.report['headers']):
-                if self.eleana().devel_mode:
+                if self.eleana.devel_mode:
                     Error.show(title="Error in report creating.",
                                info="The number of column headers is different than provided columns in row. See console for details")
                     raise ValueError
@@ -1017,7 +1050,7 @@ class SubMethods_05:
         ''' Display report as Table a table'''
 
         if not self.report['create']:
-            if self.eleana().devel_mode:
+            if self.eleana.devel_mode:
                 print("There is no reports in self.report")
             return
 
@@ -1034,7 +1067,7 @@ class SubMethods_05:
         window_title = self.report['report_window_title']
         name = self.report['report_name']
         table = CreateFromTable(window_title=window_title,
-                                eleana_app=self.eleana,
+                                eleana=self.eleana,
                                 master=self.mainwindow,
                                 df=df,
                                 name=name,
@@ -1048,9 +1081,9 @@ class SubMethods_05:
                                 set_parameters={'origin': '@result'})
         response = table.get()
 
-        self.update().dataset_list()
-        self.update().group_list()
-        self.update().all_lists()
+        self.update.dataset_list()
+        self.update.group_list()
+        self.update.all_lists()
 
     def clear_report(self):
         ''' Clear the created report '''
@@ -1063,19 +1096,19 @@ class SubMethods_05:
 
     def show_results_matching_first(self):
         if self.subprog_settings.get('result'):
-            self.app().update.list_in_combobox('sel_result')
-            self.app().update.list_in_combobox('r_stk')
-            self.app().mainwindow.update()
-            first_list = self.app().sel_first._values
-            selected_first = self.app().sel_first.get()
+            self.app.update.list_in_combobox('sel_result')
+            self.app.update.list_in_combobox('r_stk')
+            self.app.mainwindow.update()
+            first_list = self.app.sel_first._values
+            selected_first = self.app.sel_first.get()
             position_in_list = first_list.index(selected_first)
-            result_list = self.app().sel_result._values
+            result_list = self.app.sel_result._values
             try:
                 result_selected = result_list[position_in_list]
             except IndexError:
                 result_selected = result_list[-1]
-            self.app().result_selected(result_selected)
-            self.app().sel_result.set(result_selected)
+            self.app.result_selected(result_selected)
+            self.app.sel_result.set(result_selected)
         self.after_result_show_on_graph()
 
     def create_result_stack(self):
@@ -1086,7 +1119,7 @@ class SubMethods_05:
             return  # Do nothing if result should not be created
 
         # Calculate index where spectrum must be inserted:
-        results_dataset = self.eleana().results_dataset
+        results_dataset = self.eleana.results_dataset
         list_of_results = [obj.name for obj in results_dataset]
         new_result = copy.deepcopy(self.original_data1)
         new_result.x = copy(self.data_for_calculations[0]['x'])
@@ -1103,7 +1136,7 @@ class SubMethods_05:
             results_dataset[-1].x = new_result.x
             results_dataset[-1].y = new_result.y
             results_dataset[-1].z = new_result.z
-            name__ = self.app().generate_name_suffix(new_result.name, list_of_results)
+            name__ = self.app.generate_name_suffix(new_result.name, list_of_results)
             results_dataset[-1].name = name__ + self.subprog_settings.get('name_suffix', '')
             results_dataset[-1].complex = new_result.complex
             results_dataset[-1].type = new_result.type
@@ -1112,7 +1145,7 @@ class SubMethods_05:
             results_dataset[-1].comment = new_result.comment
         elif self.stk_index == -1 and not results_dataset:
             results_dataset.append(new_result)
-        self.app().update.list_in_combobox(comboboxID='sel_result')
+        self.app.update.list_in_combobox(comboboxID='sel_result')
 
         del new_result
         gc.collect()
@@ -1124,7 +1157,7 @@ class SubMethods_05:
             return  # Do nothing if result should not be created
 
         # Calculate index where spectrum must be inserted:
-        results_dataset = self.eleana().results_dataset
+        results_dataset = self.eleana.results_dataset
         list_of_results = [obj.name for obj in results_dataset]
         new_result = copy.deepcopy(self.original_data1)
         new_result.x = copy.copy(self.data_for_calculations[0]['x'])
@@ -1141,7 +1174,7 @@ class SubMethods_05:
             results_dataset[-1].x = new_result.x
             results_dataset[-1].y = new_result.y
             results_dataset[-1].z = new_result.z
-            name__ = self.app().generate_name_suffix(new_result.name, list_of_results)
+            name__ = self.app.generate_name_suffix(new_result.name, list_of_results)
             results_dataset[-1].name = name__ + self.subprog_settings.get('name_suffix')
             results_dataset[-1].complex = new_result.complex
             results_dataset[-1].type = new_result.type
@@ -1165,7 +1198,7 @@ class SubMethods_05:
                 results_dataset[index_in_result].origin = copy.copy(new_result.origin)
                 results_dataset[index_in_result].comment = copy.copy(new_result.comment)
                 results_dataset[index_in_result].parameters = copy.copy(new_result.parameters)
-        self.app().update.list_in_combobox(comboboxID='sel_result')
+        self.app.update.list_in_combobox(comboboxID='sel_result')
 
         del new_result
         gc.collect()
@@ -1173,11 +1206,11 @@ class SubMethods_05:
 
     def update_results_list(self, results):
         ''' Puts the created results names into result combobox'''
-        if len(self.eleana().results_dataset) == 0:
-            self.app().resultFrame.grid_remove()
+        if len(self.eleana.results_dataset) == 0:
+            self.app.resultFrame.grid_remove()
             return
-        self.app().resultFrame.grid()
-        self.app().sel_result.configure(values=results)
+        self.app.resultFrame.grid()
+        self.app.sel_result.configure(values=results)
 
     def add_to_additional_plots(self, x, y, label = None, style = None, clear = False):
         ''' This adds additional plots to the grapher
@@ -1186,17 +1219,17 @@ class SubMethods_05:
             self.additional_plots_settings
         '''
         if clear:
-            self.grapher().additional_plots = []
+            self.grapher.additional_plots = []
         if style is None:
             style = self.additional_plots_settings
         if np.size(x) != np.size(y) and not self.subprog_settings.get('ignore_dimensions', True):
             Error.show(master = self.mainwindow, info = f"X and Y have different dimensions.")
             return
         data = {'label':label, 'x':x, 'y':y, 'style': style}
-        self.grapher().additional_plots.append(data)
+        self.grapher.additional_plots.append(data)
 
     def clear_additional_plots(self):
-        self.grapher().additional_plots = []
+        self.grapher.additional_plots = []
 
     # ADDITIONAL METHODS FOR CHECKING CURSOR POSITIONS ON GRAPH
     # ------------------------------------------------
@@ -1219,7 +1252,7 @@ class SubMethods_05:
 
     def all_cursors_within_bounds(self, x=None, y=None):
         answers = []
-        for cursor in self.grapher().cursor_annotations:
+        for cursor in self.grapher.cursor_annotations:
             answer = self.is_cursors_within_bounds(cursor=cursor, x=x, y=y)
             answers.append(answer)
         return answers
@@ -1247,10 +1280,10 @@ class SubMethods_05:
     # ------------------------------------------------
     def get_selected_points(self):
         ''' Returns unique x and y data for selected points '''
-        if self.grapher().cursor_annotations:
+        if self.grapher.cursor_annotations:
             x = []
             y = []
-            for selection in self.grapher().cursor_annotations:
+            for selection in self.grapher.cursor_annotations:
                 nxt_x = selection['point'][0]
                 nxt_y = selection['point'][1]
                 if nxt_x not in x:
@@ -1262,9 +1295,9 @@ class SubMethods_05:
 
     def clear_custom_annotations_list(self):
         ''' Clear the list of added custom_annotations'''
-        self.eleana().custom_annotations = []
+        self.eleana.settings.grapher['custom_annotations'] = []
         try:
-            self.grapher().annotationlist.delete("all")
+            self.grapher.annotationlist.delete("all")
         except:
             pass
 
@@ -1279,33 +1312,38 @@ class SubMethods_05:
             snap = False
         else:
             snap = True
-        self.set_custom_annotation(point=(x, y), snap=snap, which=which)
-        annots = self.eleana().custom_annotations
+        try:
+            self.set_custom_annotation(point=(x, y), snap=snap, which=which)
+        except ValueError:
+            if self.eleana.devel_mode:
+                print("Error placing cusrom annotation. Empty array.")
+                return
+        annots = self.eleana.settings.grapher['custom_annotations']
         i = 0
         for annot in annots:
             xy = annot['point']
-            number_ = str(i + 1) if self.grapher().style_of_annotation['number'] else ''
-            # self.grapher().ax.annotate(text=self.grapher().style_of_annotation['text'] + number_,
-            #                  xy=xy, arrowprops=self.grapher().style_of_annotation['arrowprops']
+            number_ = str(i + 1) if self.grapher.style_of_annotation['number'] else ''
+            # self.grapher.ax.annotate(text=self.grapher.style_of_annotation['text'] + number_,
+            #                  xy=xy, arrowprops=self.grapher.style_of_annotation['arrowprops']
             #                  )
-            self.grapher().ax.annotate(text=self.grapher().style_of_annotation['text'] + number_,
+            self.grapher.ax.annotate(text=self.grapher.style_of_annotation['text'] + number_,
                                      xy=xy,
-                                     xytext=self.grapher().xytext_position(xy),
-                                     arrowprops=self.grapher().style_of_annotation['arrowprops'],
-                                     bbox=self.grapher().style_of_annotation['bbox'],
-                                     fontsize=self.grapher().style_of_annotation['fontsize'],
-                                     color=self.grapher().style_of_annotation['color']
+                                     xytext=self.grapher.xytext_position(xy),
+                                     arrowprops=self.grapher.style_of_annotation['arrowprops'],
+                                     bbox=self.grapher.style_of_annotation['bbox'],
+                                     fontsize=self.grapher.style_of_annotation['fontsize'],
+                                     color=self.grapher.style_of_annotation['color']
                                      )
 
             i += 1
-        self.grapher().canvas.draw()
+        self.grapher.canvas.draw()
 
     def remove_custom_annotations_from_graph(self):
         ''' Remove all annotations added to the graph '''
-        for child in self.grapher().ax.get_children():
+        for child in self.grapher.ax.get_children():
             if isinstance(child, plt.Annotation):
                 child.remove()
-        self.grapher().canvas.draw()
+        self.grapher.canvas.draw()
 
     def set_custom_annotation(self, point, snap=True, which='first'):
         ''' Create annotation programmatically at the specified (x, y) point. '''
@@ -1318,17 +1356,17 @@ class SubMethods_05:
         x_coord, y_coord = point  # Unpack the point coordinates
         if which == 'first':
             nr = 0
-            stk_index = self.eleana().selections['f_stk']
+            stk_index = self.eleana.selections['f_stk']
         elif which == 'second':
             nr = 1
-            stk_index = self.eleana().selections['s_stk']
+            stk_index = self.eleana.selections['s_stk']
         else:
             nr = 2
-            stk_index = self.eleana().selections['r_stk']
-        lines = self.grapher().ax.get_lines()
+            stk_index = self.eleana.selections['r_stk']
+        lines = self.grapher.ax.get_lines()
         line = lines[nr]
         curve_name = line.get_label()
-        index = self.eleana().get_index_by_name(selected_value_text=curve_name)
+        index = self.eleana.get_index_by_name(selected_value_text=curve_name)
         x_data, y_data = line.get_data()
         if snap:
             index_of_x = _find_nearest_index(x_data, x_coord)
@@ -1337,15 +1375,14 @@ class SubMethods_05:
         else:
             y_coord = point[1]
             x_coord = point[0]
-        number_ = len(self.eleana().custom_annotations)
+        number_ = len(self.eleana.settings.grapher['custom_annotations'])
         custom_annot = {'type': None,
                         'curve': curve_name,
                         'index': index,
                         'stk_index': stk_index,
                         'point': (x_coord, y_coord),
                         'nr': number_}
-        self.eleana().custom_annotations.append(custom_annot)
-        self.grapher().cursor_annotations.append(custom_annot)
+        self.eleana.settings.grapher['custom_annotations'].append(custom_annot)
         self.add_custom_annotation_entry(custom_annot)
 
     def add_custom_annotation_entry(self, annotation):
@@ -1359,7 +1396,7 @@ class SubMethods_05:
         else:
             nr = '#' + str(nr)
         entry = nr + ' | ' + str(curve) + ' (' + str(round(point_x, 2)) + ', ' + str(round(point_y, 2)) + ')'
-        self.grapher().annotationlist.insert("END", entry)
+        self.grapher.annotationlist.insert("END", entry)
 
     # METHODS FOR CTKENTRIES SUCH AS VALIDATION
     # -------------------------------------------
@@ -1373,7 +1410,7 @@ class SubMethods_05:
             self._remove_everything_from_widget(widget)
 
     def _destroy_custom_widgets(self):
-        for widget in getattr(self, "egistered_custom_widgets", []):
+        for widget in getattr(self, "registered_custom_widgets", []):
             try:
                 widget.destroy()
             except Exception as e:
@@ -1415,8 +1452,8 @@ class SubMethods_05:
     def set_mouse_state(self, state=""):
         ''' Set cursor to watch or ready for Main GUI and Main Graph'''
         if self.app:
-            self.grapher().canvas.get_tk_widget().config(cursor=state)
-            self.app().mainwindow.configure(cursor=state)
+            self.grapher.canvas.get_tk_widget().config(cursor=state)
+            self.app.mainwindow.configure(cursor=state)
         return
 
 
@@ -1429,24 +1466,26 @@ class SubMethods_05:
         if self.subprog_settings.get('restore', True):
             self.subprog_storage_data.append(to_save)
         else:
-            if self.eleana().devel_mode:
+            if self.eleana.devel_mode:
                 print('SubprogMethods5:store, if RESTORE is False or to_save parameter is None')
 
     def save_storage_on_close(self):
         ''' Create entry for all subprog storge values in
-            self.eleana().storage.subprog_settings
+            self.eleana.storage.subprog_settings
         '''
+        if not self.subprog_settings.get('restore', False):
+            return
         elements = self.save_settings()
         for element in elements:
             self.to_store(element)
         storage = copy.deepcopy(self.subprog_storage_data)
-        self.eleana().storage.subprog_settings[self.subprog_id] = storage
+        self.eleana.storage.subprog_settings[self.subprog_id] = storage
 
     def restore(self, element):
-        ''' Get data from self.eleana().storage.subprog_settings
+        ''' Get data from self.eleana.storage.subprog_settings
             for widget and returns stored values
         '''
-        subprog_field = self.eleana().storage.subprog_settings.get(self.subprog_id, None)
+        subprog_field = self.eleana.storage.subprog_settings.get(self.subprog_id, None)
         if subprog_field is None:
             return None
         to_restore = next(line[element] for line in subprog_field if element in line)

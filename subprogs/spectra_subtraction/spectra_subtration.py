@@ -206,7 +206,6 @@ CURSOR_OUTSIDE_TEXT: str = 'One or more selected points are outside the (x, y) r
 if __name__ == "__main__":
     module_path = f"subprogs.{SUBPROG_FOLDER}.{GUI_FILE[:-3]}"
     class_name = GUI_CLASS
-    from assets.Eleana import Eleana
 else:
     module_path = f"{SUBPROG_FOLDER}.{GUI_FILE[:-3]}"
     class_name = GUI_CLASS
@@ -215,16 +214,12 @@ WindowGUI = getattr(mod, class_name)
 
 from subprogs.general_methods.SubprogMethods5 import SubMethods_05 as Methods
 class SpectraSubtraction(Methods, WindowGUI):
-    #_instances = []
     def __init__(self, app=None, which='first', commandline=False):
-
-        #SpectraSubtraction._instances.append(weakref.ref(self))
-
-        self.app = weakref.ref(app)
-
-        if self.app() and not commandline:                                                                 #|
+        self.__app = weakref.ref(app)
+        if app and not commandline:                                                                 #|
             # Initialize window if app is defined and not commandline                               #|
-            WindowGUI.__init__(self, self.app().mainwindow)                                                #|
+            WindowGUI.__init__(self, self.__app().mainwindow)
+            #|
         # Create settings for the subprog                                                           #|
         self.subprog_settings = {'folder':SUBPROG_FOLDER, 'title': TITLE, 'on_top': ON_TOP, 'data_label': DATA_LABEL, 'name_suffix': NAME_SUFFIX,
                                  'restore':RESTORE_SETTINGS, 'auto_calculate': AUTO_CALCULATE, 'result': RESULT_CREATE, 'result_ignore':RESULT_IGNORE,
@@ -235,9 +230,9 @@ class SpectraSubtraction(Methods, WindowGUI):
         self.subprog_cursor = {'type': CURSOR_TYPE, 'changing': CURSOR_CHANGING, 'limit': CURSOR_LIMIT, 'clear_on_start': CURSOR_CLEAR_ON_START, 'cursor_required': CURSOR_REQUIRED, 'cursor_req_text':CURSOR_REQ_TEXT,
                                'cursor_outside_x':CURSOR_OUTSIDE_X, 'cursor_outside_y':CURSOR_OUTSIDE_Y, 'cursor_outside_text':CURSOR_OUTSIDE_TEXT}
         self.use_second = USE_SECOND                                                                #|
-        self.stack_sep = STACK_SEP                                                                  #|
-        Methods.__init__(self, app=self.app, which=which, commandline=commandline, close_subprogs=CLOSE_SUBPROGS)
-
+        self.stack_sep = STACK_SEP
+        Methods.__init__(self, app_weak=self.__app, which=which, commandline=commandline, close_subprogs=CLOSE_SUBPROGS)
+        self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
 
     # PRE-DEFINED FUNCTIONS TO EXECUTE AT DIFFERENT STAGES OF SUBPROG METHODS
     # Unused definitions can be deleted
@@ -278,18 +273,9 @@ class SpectraSubtraction(Methods, WindowGUI):
 
     def after_quit_subprog(self):
         ''' This method is called after clicking closing the window.
-            It is used to execute a code to upon clocsing the subprog
+            It is used to execute a code to upon closing the subprog
         '''
-        if self.second_on_copy:
-            self.app.check_second_show.select()
-        else:
-            self.app.check_second_show.deselect()
-        self.app.second_show()
-
-        gc.collect()
-        for ref in gc.get_referrers(self.parameters_changed):
-            print(type(ref), ref)
-
+        pass
 
     # DEFINE YOUR CUSTOM METHODS FOR THIS ROUTINE
     # ----------------------------------------------
@@ -301,7 +287,7 @@ class SpectraSubtraction(Methods, WindowGUI):
         from widgets.CTkSpinbox import CTkSpinbox
 
         self.second_on_copy = copy(self.eleana.selections['s_dsp'])
-
+        #
         self.data_frame = self.builder.get_object('ctkframe4', self.mainwindow)
         self.data_frame.grid_remove()
 
@@ -316,6 +302,7 @@ class SpectraSubtraction(Methods, WindowGUI):
         self.encoder3frame = self.builder.get_object('encoder3frame', self.mainwindow)
         self.encoder3 = self.custom_widget(Dial(master=self.encoder3frame,  command=self.parameters_changed))
         self.encoder3.grid(row=0, column=0, sticky="nsew")
+
         self.spinbox1frame = self.builder.get_object('spinbox1frame', self.mainwindow)
         self.spinbox1frame.grid_columnconfigure(0, weight=1)
         self.spinbox1 = self.custom_widget(CTkSpinbox(master = self.spinbox1frame, logarithm_step = True, disable_wheel = True, min_value = 1e-20, max_value = 1e+20, start_value = 1,  command=self.parameters_changed))
@@ -325,15 +312,16 @@ class SpectraSubtraction(Methods, WindowGUI):
         self.spinbox2frame.grid_columnconfigure(0, weight=1)
         self.spinbox2 = self.custom_widget(CTkSpinbox(master=self.spinbox2frame, logarithm_step = True, disable_wheel = True, min_value = 1e-20, max_value = 1e+20, start_value = 1,  command=self.parameters_changed))
         self.spinbox2.grid(row=0, column=0, sticky='nsew')
+
         self.spinbox3frame = self.builder.get_object('spinbox3frame', self.mainwindow)
         self.spinbox3frame.grid_columnconfigure(0, weight=1)
         self.spinbox3 = self.custom_widget(CTkSpinbox(master=self.spinbox3frame, logarithm_step = True, disable_wheel = True, min_value = 1e-20, max_value = 1e+20, start_value = 1,  command=self.parameters_changed))
         self.spinbox3.grid(row=0, column=0, sticky='nsew')
 
-        # Entry Boxes
-        self.multiply_y_by = self.builder.get_object("ctkentry1", self.mainwindow)
-        self.shift_y_by = self.builder.get_object("ctkentry2", self.mainwindow)
-        self.shift_x_by =   self.builder.get_object("ctkentry3", self.mainwindow)
+        # # Entry Boxes
+        self.multiply_y_by = self.custom_widget(self.builder.get_object("ctkentry1", self.mainwindow))
+        self.shift_y_by = self.custom_widget(self.builder.get_object("ctkentry2", self.mainwindow))
+        self.shift_x_by = self.custom_widget(self.builder.get_object("ctkentry3", self.mainwindow))
 
         # Bind Enter and Return
         self.multiply_y_by.bind("<Return>", self.value_entered)
@@ -363,6 +351,7 @@ class SpectraSubtraction(Methods, WindowGUI):
         if self.eleana.selections['s_dsp']:
             self.eleana.selections['s_dsp'] = False
             self.app.check_second_show.deselect()
+
 
     def value_entered(self, event):
         self.values['multiply_y'] = float(self.multiply_y_by.get())

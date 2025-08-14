@@ -46,7 +46,7 @@ class Project_1:
     selections: Dict[str, Any]
     static_plots: list
 
-class Eleana():
+class Eleana:
     # Main attributes associated with data gathered in the programe
     def __init__(self, version, devel):
         self.devel_mode = devel
@@ -195,7 +195,7 @@ class Eleana():
         if variable == 'result' or variable == 'r_stk':
             return
         if self.notify_on:
-            self.notify(variable=variable)
+            self.notify(variable=variable, value=value)
             #if self.devel_mode:
             #    print('Eleana.py: Activate observer')
 
@@ -223,7 +223,8 @@ class Eleana():
              'nr': True}
         ]
         grapher['style_of_annotation'] = {
-            'text': "", 'number': True,
+            'text': "",
+            'number': True,
             'xytext': (0.03, 0.03),
             'arrowprops': {
                 "arrowstyle": "->",  # Arrow style

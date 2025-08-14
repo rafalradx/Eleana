@@ -430,6 +430,25 @@ class Dial(tk.Canvas):
         angle = float(-(360/(self.__end - self.__start))*(value - self.__start))
         self.__rotate_needle(self, angle=angle, skip_command = skip_command)
 
+    def destroy(self):
+        try:
+            self.unbind('<MouseWheel>')
+            self.unbind('<Button-5>')
+            self.unbind('<Button-4>')
+            self.unbind("<ButtonRelease-1>")
+            self.tag_unbind("needle", "<ButtonPress-1>")
+            self.tag_unbind("needle", "<ButtonRelease-1>")
+            self.tag_unbind("needle", "<Motion>")
+        except Exception:
+            pass
+
+        self.__command = None
+
+        super().destroy()
+
+        self.value_text = None
+        self.__palette = None
+
     def configure(self, **kwargs):
         """
         This function contains some configurable options

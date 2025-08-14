@@ -1,3 +1,4 @@
+import gc
 from pathlib import Path
 import sys
 import copy
@@ -11,9 +12,9 @@ import pygubu
 import tkinter as tk
 import pickle
 import time
-
+import weakref
 from assets.Menu import ContextMenu
-
+import inspect
 ''' ELEANA MODULES '''
 # Import modules from "/modules" folder
 from modules.CTkListbox import CTkListbox
@@ -228,6 +229,12 @@ class Application():
         self.pane5 = builder.get_object('pane5', self.mainwindow)
         self.pane9 = builder.get_object('pane9', self.mainwindow)
         #self.pane6 = builder.get_object('pane6', self.mainwindow)
+
+
+        # Widgets for comparison view:
+        self.listbox = CTkListbox(self.listFrame, command=self.list_selected, multiple_selection=True, height=400, gui_appearance=self.eleana.settings.general['gui_appearance'])
+        self.ver_slider = CTkHorizontalSlider('Vertical separation', 'vsep', [0, 1], self.listFrame, self)
+        self.hor_slider = CTkHorizontalSlider('Horizontal separation', 'hsep', [-1, 1], self.listFrame, self)
 
         ''' CREATE INSTANCES '''
 
@@ -489,13 +496,9 @@ class Application():
             self.swapFrame.grid_remove()
 
             self.listFrame.grid(column=0, row=2, rowspan=3, sticky = "nsew")
-            self.listbox = CTkListbox(self.listFrame, command=self.list_selected, multiple_selection=True, height=400)
             self.listbox.grid(column=0, columnspan=1, rowspan=4, padx=4, pady=4, row=0, sticky="nsew")
-
-            self.ver_slider = CTkHorizontalSlider('Vertical separation', 'vsep', [0, 1], self.listFrame, self)
             self.ver_slider.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=5, sticky="nsew")
 
-            self.hor_slider = CTkHorizontalSlider('Horizontal separation', 'hsep', [-1, 1], self.listFrame, self)
             self.hor_slider.grid(column=0, columnspan=1, rowspan=3, padx=4, pady=4, row=8, sticky="nsew")
             self.ver_slider.factor.delete(0, 'end')
             self.ver_slider.factor.insert(0, self.comparison_settings['v_factor'])
@@ -899,7 +902,6 @@ class Application():
         self.grapher.plot_graph()
 
     #@check_busy
-    @timeit
     def first_selected(self, selected_value_text):
         if selected_value_text == 'None':
             self.eleana.set_selections('first', -1)
@@ -2052,15 +2054,7 @@ class Application():
         subprog_fft = FastFourierTransform(self, which = 'first')
 
     def spectra_subtraction(self):
-        def count_alive_instances():
-            alive = [ref for ref in SpectraSubtraction._instances if ref() is not None]
-            print(f"🔎 Aktywnych instancji SpectraSubtraction: {len(alive)}")
-            return alive
-
-        #print(self.eleana._observers)
-        #count_alive_instances()
         subprog_spectra_subtraction = SpectraSubtraction(self, which = 'first')
-        count_alive_instances()
 
 
     # --------------------------------------------

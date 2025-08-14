@@ -5,6 +5,7 @@
 import numpy as np
 import importlib
 from subprogs.integrate_region.IntegrateRegion import RESULT_CREATE
+import weakref
 
 # General setting of the application. Here is an example
 
@@ -93,41 +94,27 @@ else:
 mod = importlib.import_module(module_path)
 WindowGUI = getattr(mod, class_name)
                                                                                  #|
-from subprogs.general_methods.SubprogMethods2 import SubMethods_02 as Methods                                                    #|
-class DistanceRead(Methods, WindowGUI):                                                       #|
-    def __init__(self, app=None, which='first', commandline=False):  # |
+from subprogs.general_methods.SubprogMethods5 import SubMethods_05 as Methods
+class DistanceRead(Methods, WindowGUI):
+    def __init__(self, app=None, which='first', commandline=False):
+        self.__app = weakref.ref(app)
         if app and not commandline:
-            # Initialize window if app is defined and not commandline                               #|
-            WindowGUI.__init__(self, app.mainwindow)
+            # Initialize window if app is defined and not commandline
+            WindowGUI.__init__(self, self.__app().mainwindow)
+            #|
         # Create settings for the subprog                                                           #|
-        self.subprog_settings = {'title': TITLE, 'on_top': ON_TOP, 'data_label': DATA_LABEL,
-                                 'name_suffix': NAME_SUFFIX, 'auto_calculate': AUTO_CALCULATE,
-                                 'result': RESULT_CREATE, 'result_ignore':RESULT_IGNORE}
+        self.subprog_settings = {'folder':SUBPROG_FOLDER, 'title': TITLE, 'on_top': ON_TOP, 'data_label': DATA_LABEL, 'name_suffix': NAME_SUFFIX,
+                                 'auto_calculate': AUTO_CALCULATE, 'result': RESULT_CREATE, 'result_ignore':RESULT_IGNORE,
+                                 }
         self.regions = {'from': REGIONS_FROM}
-        self.report = self.report = {'nr': 1,
-                                     'create': REPORT_CREATE,
-                                     'headers': REPORT_HEADERS,
-                                     'rows': [],
-                                     'x_name': REPORT_NAME_X,
-                                     'y_name': REPORT_NAME_Y,
-                                     'default_x': REPORT_HEADERS[REPORT_DEFAULT_X],
-                                     'default_y': REPORT_HEADERS[REPORT_DEFAULT_Y],
-                                     'x_unit': REPORT_UNIT_X,
-                                     'y_unit': REPORT_UNIT_Y,
-                                     'to_group': REPORT_TO_GROUP,
-                                     'report_skip_for_stk': REPORT_SKIP_FOR_STK,
-                                     'report_window_title': REPORT_WINDOW_TITLE,
-                                     'report_name': REPORT_NAME
-                                     }
-        self.subprog_cursor = {'type': CURSOR_TYPE, 'changing': CURSOR_CHANGING, 'limit': CURSOR_LIMIT,
-                               'clear_on_start': CURSOR_CLEAR_ON_START, 'cursor_required': CURSOR_REQUIRED, 'cursor_req_text':CURSOR_REQ_TEXT,
-                               'cursor_outside_x':CURSOR_OUTSIDE_X, 'cursor_outside_y':CURSOR_OUTSIDE_Y,
-                               'cursor_outside_text':CURSOR_OUTSIDE_TEXT}
-        # Use second data
-        self.use_second = USE_SECOND
-        # Treat each data in stack separately
-        self.stack_sep = STACK_SEP  # |
-        Methods.__init__(self, app=app, which=which, commandline=commandline, close_subprogs=CLOSE_SUBPROGS)
+        self.report = {'nr': 1, 'create': REPORT_CREATE, 'headers': REPORT_HEADERS, 'rows': [], 'x_name': REPORT_NAME_X, 'y_name': REPORT_NAME_Y, 'default_x': REPORT_HEADERS[REPORT_DEFAULT_X], 'default_y': REPORT_HEADERS[REPORT_DEFAULT_Y],
+                       'x_unit': REPORT_UNIT_X, 'y_unit': REPORT_UNIT_Y, 'to_group': REPORT_TO_GROUP, 'report_skip_for_stk': REPORT_SKIP_FOR_STK, 'report_window_title': REPORT_WINDOW_TITLE, 'report_name': REPORT_NAME}
+        self.subprog_cursor = {'type': CURSOR_TYPE, 'changing': CURSOR_CHANGING, 'limit': CURSOR_LIMIT, 'clear_on_start': CURSOR_CLEAR_ON_START, 'cursor_required': CURSOR_REQUIRED, 'cursor_req_text':CURSOR_REQ_TEXT,
+                               'cursor_outside_x':CURSOR_OUTSIDE_X, 'cursor_outside_y':CURSOR_OUTSIDE_Y, 'cursor_outside_text':CURSOR_OUTSIDE_TEXT}
+        self.use_second = USE_SECOND                                                                #|
+        self.stack_sep = STACK_SEP
+        Methods.__init__(self, app_weak=self.__app, which=which, commandline=commandline, close_subprogs=CLOSE_SUBPROGS)
+        self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
 
 
     # PRE-DEFINED FUNCTIONS TO EXECUTE AT DIFFERENT STAGES OF SUBPROG METHODS

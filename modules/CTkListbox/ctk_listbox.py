@@ -26,13 +26,21 @@ class CTkListbox(customtkinter.CTkScrollableFrame):
                  command=None,
                  justify="left",
                  disable_selection = False,
+                 gui_appearance = 'dark',
                  **kwargs):
         # mode = customtkinter.get_appearance_mode()
+
+
         self.disable_selection = disable_selection
-        if customtkinter.get_appearance_mode() == 'Light':
-            text_color = '#454545'
+        if gui_appearance == 'light':
+           text_color = '#454545'
+           select_color = '#bbbbbb'
+           hover_color = '#aaaaaa'
+        else:
+            text_color = '#eaeaea'
             select_color = '#bbbbbb'
             hover_color = '#aaaaaa'
+
         super().__init__(master, width=width, height=height, fg_color=fg_color, border_width=border_width, **kwargs)
         self._scrollbar.grid_configure(padx=(0, border_width + 4))
         self._scrollbar.configure(width=12)

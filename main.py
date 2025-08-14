@@ -8,14 +8,8 @@ DEVEL = True                    # For final product set to False - no errors wil
 
 # Import basic modules and add ./modules to sys.path
 from pathlib import Path
-import copy
-import io
-import re
 import os
-from functools import wraps
-import customtkinter as ctk
 import ctypes
-
 
 # Set paths for assets, modules, subprogs and widgets
 PROJECT_PATH = Path(__file__).parent
@@ -36,15 +30,12 @@ from assets.CommandProcessor import CommandProcessor
 
 # Import External modules required
 import numpy as np
-import pandas
 
 # Import modules from ./modules folder
-import pygubu
 from assets.Application import Application
 from CTkListbox import CTkListbox
 from CTkMessagebox import CTkMessagebox
 from CTkScrollableDropdown import CTkScrollableDropdown
-from widgets.CTkSpinbox import CTkSpinbox
 
 
 # Import Eleana specific classes
@@ -53,18 +44,17 @@ from widgets.CTkHorizontalSlider import CTkHorizontalSlider
 
 ''' STARTING THE APPLICATION '''
 #
-# # Create general main instances for the program
-# if not DEVEL:
-#     # Switch off the error display in final product
-#     if os.name == 'posix':  # Unix/Linux/macOS
-#         sys.stderr = open(os.devnull, 'w')
-#     elif os.name == 'nt':  # Windows
-#         sys.stderr = open('nul', 'w')
-#
-#     # Switch off nupy RankWarnings in Numpy
-#     import warnings
-#     warnings.simplefilter('ignore', np.exceptions.RankWarning)
+# Create general main instances for the program
+if not DEVEL:
+    # Switch off the error display in final product
+    if os.name == 'posix':  # Unix/Linux/macOS
+        sys.stderr = open(os.devnull, 'w')
+    elif os.name == 'nt':  # Windows
+        sys.stderr = open('nul', 'w')
 
+    # Switch off nupy RankWarnings in Numpy
+    import warnings
+    warnings.simplefilter('ignore', np.exceptions.RankWarning)
 
 
 # Run
