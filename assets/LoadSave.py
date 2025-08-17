@@ -16,50 +16,12 @@ from subprogs.ascii_file_preview.ascii_file_preview import AsciFilePreview
 from subprogs.table.table import CreateFromTable
 
 class Load:
-    def __init__(self, eleana):
+    def __init__(self, eleana, callbacks):
         self.eleana = eleana
-        #self.menu = menu_instance
-        #self.app = self.menu.app
-        #self.eleana = eleana
-        pass
+        self.callbacks = callbacks
 
-    # @staticmethod
-    # def load_preferences(eleana):
-    #     ''' Load saved graph settings from home/.EleanaPy/preferences.pic'''
-    #     try:
-    #         filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'preferences.pic')
-    #         # Read paths.pic
-    #         file_to_read = open(filename, "rb")
-    #         settings = pickle.load(file_to_read)
-    #         file_to_read.close()
-    #         return settings
-    #     except Exception as e:
-    #         print(e)
-    #         return None
-
-    # @classmethod
-    # def load_paths_settings(cls, eleana):
-    #     ''' Load saved settings from home/.EleanaPy/paths.pic'''
-    #     try:
-    #         filename = Path(eleana.paths['home_dir'], '.EleanaPy', 'paths.pic')
-    #         # Read paths.pic
-    #         file_to_read = open(filename, "rb")
-    #         paths = pickle.load(file_to_read)
-    #         eleana.paths = paths
-    #         file_to_read.close()
-    #         # Create last project list in the main menu
-    #         last_projects = eleana.paths['last_projects']
-    #         last_projects = [element for i, element in enumerate(last_projects) if i <= 10]
-    #         # Write the list to eleana.paths
-    #         eleana.paths['last_projects'] = last_projects
-    #         return True
-    #     except Exception as e:
-    #         print(e)
-    #         return None
-
-    def load_project(self, recent=None):
+    def load_project(self, recent=None, response = None):
         ''' This method loads projects created by Eleana'''
-
         def _update_last_projects(filename):
             last_projects = self.eleana.paths['last_projects']
             filename = str(filename)
@@ -92,6 +54,15 @@ class Load:
         extract_dir = Path(self.eleana.paths['tmp_dir'], tmp_folder)
         archive_format = 'zip'
         try:
+            # Make copy in case of errors
+            copy_of_eleana_dataset = copy.deepcopy(self.eleana.dataset)
+            copy_of_eleana_results_dataset = copy.deepcopy(self.eleana.results_dataset)
+            copy_of_eleana_groupsHierarchy = copy.deepcopy(self.eleana.groupsHierarchy)
+            copy_of_eleana_notes = copy.deepcopy(self.eleana.notes)
+            copy_of_eleana_selections = copy.deepcopy(self.eleana.selections)
+            copy_of_eleana_static_plots = copy.deepcopy(self.eleana.storage.static_plots)
+            copy_of_eleana_custom_annotations = copy.deepcopy(self.eleana.settings.grapher['custom_annotations'])
+
             if not Path.exists(Path(filename)):
                 raise FileExistsError('File not found.')
             shutil.unpack_archive(filename, extract_dir, archive_format)
@@ -114,40 +85,35 @@ class Load:
             except:
                 pass
 
-            # Make copy in case of errors
-            copy_of_eleana_dataset = copy.deepcopy(self.eleana.dataset)
-            copy_of_eleana_results_dataset = copy.deepcopy(self.eleana.results_dataset)
-            copy_of_eleana_groupsHierarchy = copy.deepcopy(self.eleana.groupsHierarchy)
-            copy_of_eleana_notes = copy.deepcopy(self.eleana.notes)
-            copy_of_eleana_selections = copy.deepcopy(self.eleana.selections)
-            copy_of_eleana_static_plots = copy.deepcopy(self.eleana.storage.static_plots)
-
             # Check if dataset is empty
-            if len(self.eleana.dataset) > 0:
+            if len(self.eleana.dataset) > 0 and response is None:
                 # DATASET NOT EMPTY
-                question = CTkMessagebox(title="Dataset is not empty",
+                if response != 'Yes' or response != "Replace":
+                    question = CTkMessagebox(title="Dataset is not empty",
                                          message="There is data in the dataset. Choose what you want to",
                                          icon="question", option_3="Append to the dataset",
                                          option_2="Replace the dataset",
                                          option_1="Cancel")
-                response = question.get()
+                    response = question.get()
+
                 if response == None or response == 'Cancel':
                     return None
                 elif response == 'Replace the dataset':
-                    self.eleana.dataset = copy.deepcopy(loaded_object.dataset)
-                    self.eleana.results_dataset = copy.deepcopy(loaded_object.results_dataset)
-                    self.eleana.groupsHierarchy = copy.deepcopy(loaded_object.groupsHierarchy)
-                    self.eleana.notes = copy.deepcopy(loaded_object.notes)
-                    self.eleana.selections = copy.deepcopy(loaded_object.selections)
-                    self.eleana.static_plots = copy.deepcopy(loaded_object.static_plots)
-                    _update_last_projects(filename)
-                    self.menu.create_showplots_menu()
-                else:
+                    lambda: self.callbacks.get('clear_dataset')(dialog=False)
+                    self.load_project(recent = filename, response = 'Replace')
+                elif response == "Replace":
+                    # Replace the dataset
                     self.eleana.dataset.extend(copy.deepcopy(loaded_object.dataset))
                     self.eleana.results_dataset.extend(copy.deepcopy(loaded_object.results_dataset))
                     self.eleana.static_plots.extend(copy.deepcopy(loaded_object.static_plots))
-                    self.menu.create_showplots_menu()
-                    _update_last_projects(filename)
+                    #self.menu.create_showplots_menu()
+                    return
+                elif response == "Append to the dataset":
+                    self.eleana.dataset.extend(copy.deepcopy(loaded_object.dataset))
+                    self.eleana.results_dataset.extend(copy.deepcopy(loaded_object.results_dataset))
+                    #self.eleana.static_plots.extend(copy.deepcopy(loaded_object.static_plots))
+                    #self.menu.create_showplots_menu()
+                    #_update_last_projects(filename)
             # If success return True
             else:
                 # DATASET IS EMPTY
@@ -157,6 +123,7 @@ class Load:
                 self.eleana.notes = copy.deepcopy(loaded_object.notes)
                 self.eleana.selections = copy.deepcopy(loaded_object.selections)
                 self.eleana.static_plots = copy.deepcopy(loaded_object.static_plots)
+                self.eleana.settings.grapher['custom_annotations'] = copy.deepcopy(loaded_object.custom_annotations)
                 _update_last_projects(filename)
                 #self.create_showplots_menu()
             return True
@@ -169,6 +136,7 @@ class Load:
             self.eleana.notes = copy_of_eleana_notes
             self.eleana.selections = copy_of_eleana_selections
             self.eleana.static_plots = copy_of_eleana_static_plots
+            self.eleana.settings.grapher['custom_annotations'] = copy_of_eleana_custom_annotations
             return None
 
     # Import EPR

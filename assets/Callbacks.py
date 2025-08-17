@@ -76,8 +76,9 @@ def grapher_callbacks(inst):
                     'sel_cursor_mode': inst.sel_cursor_mode,
                     'annotationsFrame': inst.annotationsFrame,
                     'infoframe': inst.infoframe,
-                    'info': inst.info
-                    
+                    'info': inst.info,
+                    'check_autoscale_x': inst.check_autoscale_x,
+                    'check_autoscale_y': inst.check_autoscale_y
                 },
             'callbacks':
                 {
@@ -109,3 +110,11 @@ def update_callbacks(inst):
                     'scrollable_dropdown': inst.scrollable_dropdown
                 }
             }
+def loadsave_callbacks(inst):
+    return {
+        'callbacks':{
+            'clear_dataset': inst.clear_dataset
+        }
+
+    }
+    pass

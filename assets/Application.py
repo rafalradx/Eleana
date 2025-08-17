@@ -15,6 +15,7 @@ import time
 import weakref
 from assets.Menu import ContextMenu
 import inspect
+
 ''' ELEANA MODULES '''
 # Import modules from "/modules" folder
 from modules.CTkListbox import CTkListbox
@@ -24,7 +25,7 @@ from widgets.CTkSpinbox import CTkSpinbox
 # Import Eleana specific classes
 from Menu import MainMenu
 from Callbacks import main_menubar_callbacks, contextmenu_callbacks, grapher_callbacks
-from Callbacks import update_callbacks
+from Callbacks import update_callbacks, loadsave_callbacks
 
 from Grapher import Grapher
 from IconToWidget import IconToWidget
@@ -239,7 +240,7 @@ class Application():
         ''' CREATE INSTANCES '''
 
         # Create loader/saver/exporter
-        self.load = Load(eleana=self.eleana)
+        self.load = Load(eleana=self.eleana, callbacks=loadsave_callbacks(self)['callbacks'])
         self.save = Save(eleana=self.eleana)
         self.export = Export(eleana=self.eleana)
 
@@ -294,7 +295,7 @@ class Application():
         self.configure_graph()
 
         # # Create loader/saver/exporter
-        self.load = Load(eleana = self.eleana)
+        self.load = Load(eleana = self.eleana, callbacks = loadsave_callbacks)
         self.save = Save(eleana = self.eleana)
         self.export = Export(eleana = self.eleana)
 
@@ -1549,7 +1550,7 @@ class Application():
             response = 'Yes'
 
         if response == "Yes":
-            self.eleana.results_dataset = []
+            self.eleana.results_dataset.clear()
             self.eleana.selections['result'] = -1
             self.sel_result.configure(values=['None'])
             self.r_stk.configure(values=[])
@@ -1626,23 +1627,39 @@ class Application():
             self.sel_result.set('None')
         self.grapher.plot_graph()
 
-    def clear_dataset(self):
-        quit_dialog = CTkMessagebox(master = self.mainwindow, title="Clear dataset",
+    def clear_dataset(self, dialog = True):
+        if dialog:
+            quit_dialog = CTkMessagebox(master = self.mainwindow, title="Clear dataset",
                                     message="Are you sure you want to clear the entire dataset?",
                                     icon="warning", option_1="No", option_2="Yes")
-        response = quit_dialog.get()
+            response = quit_dialog.get()
+        else:
+            response = 'Yes'
+
         if response == "Yes":
             self.resultFrame.grid_remove()
             self.firstComplex.grid_remove()
             self.firstStkFrame.grid_remove()
             self.secondComplex.grid_remove()
             self.secondStkFrame.grid_remove()
-            self.eleana.reset()
+            #self.eleana.reset()
+            self.eleana.dataset.clear()
+            self.eleana.results_dataset.clear()
+
+            self.eleana.selections = {'group':'All',
+                      'first':-1, 'second':-1, 'result':-1,
+                      'f_cpl':'re','s_cpl':'re', 'r_cpl':'re',
+                      'f_stk':0, 's_stk':0, 'r_stk':0,
+                      'f_dsp':True, 's_dsp':True ,'r_dsp':True
+                      }
             self.update.dataset_list()
             self.update.group_list()
             self.update.all_lists()
             self.update.gui_widgets()
             self.gui_to_selections()
+
+            self.sel_graph_cursor(value = 'None', clear_annotations = True)
+
 
     def preferences(self):
         ''' Open window for editing preferences '''
@@ -1664,53 +1681,26 @@ class Application():
         self.update.dataset_list()
         self.update.groups()
         self.update.all_lists()
+        if self.eleana.settings.grapher['custom_annotations']:
+            pass
         path_to_file = Path(self.eleana.paths['last_projects'][0])
         name = path_to_file.name
         self.mainwindow.title(name + ' - Eleana')
         self.eleana.paths['last_project_dir'] = str(Path(path_to_file).parent)
         self.main_menubar.last_projects_menu()
 
-        # Set settings to GUI
-        # try:
-        #     selected_value_text = self.eleana.dataset[self.eleana.selections['first']].name_nr
-        #     self.first_selected(selected_value_text)
-        #     self.sel_first.set(selected_value_text)
-        # except:
-        #     pass
-        # try:
-        #     selected_value_text = self.eleana.dataset[self.eleana.selections['second']].name_nr
-        #     self.second_selected(selected_value_text)
-        #     self.sel_second.set(selected_value_text)
-        # except:
-        #     pass
-        # try:
-        #     selected_value_text = self.eleana.results_dataset[self.eleana.selections['result']].name
-        #     self.result_selected(selected_value_text)
-        #     self.sel_result.set(selected_value_text)
-        # except:
-        #     pass
-        # self.grapher.plot_graph()
-
+        # Set Selections according eleana.selections
         self.gui_to_selections()
-        # try:
-        #     selected_value_text = self.eleana.dataset[self.eleana.selections['first']].name_nr
-        #     self.first_selected(selected_value_text)
-        #     self.sel_first.set(selected_value_text)
-        # except:
-        #     pass
-        # try:
-        #     selected_value_text = self.eleana.dataset[self.eleana.selections['second']].name_nr
-        #     self.second_selected(selected_value_text)
-        #     self.sel_second.set(selected_value_text)
-        # except:
-        #     pass
-        # try:
-        #     selected_value_text = self.eleana.results_dataset[self.eleana.selections['result']].name
-        #     self.result_selected(selected_value_text)
-        #     self.sel_result.set(selected_value_text)
-        # except:
-        #     pass
-        # self.grapher.plot_graph()
+
+        # Add custom annotations to graph
+        if self.eleana.settings.grapher['custom_annotations']:
+            try:
+                cursor_mode = self.eleana.settings.grapher['custom_annotations'][0]['mode']
+            except KeyError:
+                cursor_mode = 'Free select'
+            self.sel_graph_cursor(value=cursor_mode, clear_annotations=False)
+            self.grapher.updateAnnotationList()
+            self.sel_cursor_mode.set(cursor_mode)
 
     def load_recent(self, selected_value_text):
         """ Load a project selected from Last Projects Menu"""
@@ -1729,7 +1719,7 @@ class Application():
         else:
             # Perform update to place the item into menu
             self.main_menubar.last_projects_menu()
-            self.mainwindow.title(Path(file_saved).name[:-4] + ' - Eleana')
+            self.mainwindow.title(Path(file_saved).name[:-9] + ' - Eleana')
 
     def save_current(self, event=None):
         win_title = self.mainwindow.title()
@@ -2091,16 +2081,15 @@ class Application():
     '''***********************************************
     *                    CURSORS                     *
     ***********************************************'''
-    def clear_cursors(self):
-        self.grapher.clear_all_annotations()
-
     def sel_graph_cursor(self, value, clear_annotations=True):
         if clear_annotations:
             self.grapher.clear_all_annotations(True)
         self.grapher.current_cursor_mode['label'] = value
+        self.sel_cursor_mode.set(value)
         self.eleana.gui_state.cursor_mode = copy.copy(value)
         self.grapher.plot_graph()
         self.grapher.cursor_on_off()
+
 
     '''***********************************************
     *           METHODS FOR CONTEXT MENU             *

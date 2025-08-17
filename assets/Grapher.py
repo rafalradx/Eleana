@@ -39,10 +39,13 @@ class Grapher():
         self.btn_clear_cursors = gui_references['btn_clear_cursors']
         self.sel_cursor_mode = gui_references['sel_cursor_mode']
         self.annotationsFrame = gui_references['annotationsFrame']
+        self.check_autoscale_x = gui_references['check_autoscale_x']
+        self.check_autoscale_y = gui_references['check_autoscale_y']
+
 
         self.annotationlist = CTkListbox(self.annotationsFrame, command=self.annotationlist_clicked,
                                          multiple_selection=True, height=300, text_color = '#eaeaea',
-                                         gui_appearance = self.eleana.settings.general['gui_appearance'])
+                                         gui_appearance = self.eleana.settings.general['gui_appearance'] )
         self.infoframe = gui_references['infoframe']
         self.info = gui_references['info']
 
@@ -86,14 +89,18 @@ class Grapher():
         self.additional_plots = self.eleana.storage.additional_plots
 
         # Create empty list of created annotations
-        self.cursor_annotations = self.eleana.storage.cursor_annotations
+        self.eleana.settings.grapher['custom_annotations'] = self.eleana.settings.grapher['custom_annotations']
 
         # Setting cursor mode
         self.cursor_modes = self.eleana.settings.grapher['cursor_modes']
         self.current_cursor_mode = self.cursor_modes[0]
 
+
         # Create variable for storing min-max
         self.scale1 = {'x': [], 'y': []}
+
+        # Clear some dirty annotations from the graphe
+        self.clear_all_annotations()
 
     '''Methods for the Grapher class '''
 
@@ -372,60 +379,8 @@ class Grapher():
         # Draw color span
         self.show_color_span()
 
-        # Create custom annotations
-        #if self.eleana.settings.grapher['custom_annotations']:
-
-        if self.eleana.gui_state.cursor_mode != 'None':
-            self.btn_clear_cursors.grid()
-            self.btn_clear_cursors.configure(text='Clear cursors', command=self.clear_all_annotations)
-            #self.annotationlist = CTkListbox(self.annotationsFrame, command=self.annotationlist_clicked,
-            #                                 multiple_selection=True, height=300)
-            self.annotationsFrame.grid()
-            self.annotationsFrame.grid_columnconfigure(0, weight=1)
-            self.annotationsFrame.grid_rowconfigure(0, weight=1)
-            self.annotationlist.grid(column=0, row=0, sticky="nsew")
-            annots = self.eleana.settings.grapher['custom_annotations']
-            i = 0
-            for annot in annots:
-                xy = annot['point']
-                number_ = str(i+1) if self.style_of_annotation['number'] else ''
-                # self.ax.annotate(text=self.style_of_annotation['text'] + number_,
-                #                  xy=xy, arrowprops = self.style_of_annotation['arrowprops']
-                #                  )
-                self.ax.annotate(text=self.style_of_annotation['text'] + number_,
-                                 xy=xy,
-                                 xytext=self.xytext_position(xy),
-                                 arrowprops=self.style_of_annotation['arrowprops'],
-                                 bbox=self.style_of_annotation['bbox'],
-                                 fontsize=self.style_of_annotation['fontsize'],
-                                 color=self.style_of_annotation['color']
-                                 )
-
-                i+=1
-        else:
-            self.btn_clear_cursors.grid_remove()
-            self.clearAnnotationList()
-            self.annotationlist.grid_remove()
-
-        # Add annotations from Free Select
-        if self.current_cursor_mode['label'] == "Free select" or self.current_cursor_mode['label'] == 'Crosshair':
-            annots = self.cursor_annotations
-            i = 0
-            for annot in annots:
-                xy = annot['point']
-                number_ = str(i + 1) if self.style_of_annotation['number'] else ''
-                self.ax.annotate(text=self.style_of_annotation['text'] + number_,
-                                 xy=xy,
-                                 xytext=self.xytext_position(xy),
-                                 arrowprops=self.style_of_annotation['arrowprops'],
-                                 bbox=self.style_of_annotation['bbox'],
-                                 fontsize=self.style_of_annotation['fontsize'],
-                                 color=self.style_of_annotation['color']
-                                 )
-                i += 1
-
-        # Draw canvas
-        self.canvas.draw()
+        # Add annotations
+        self.put_custom_annotations()
 
         # Notify graph plot
         self.notify_on_copy = copy.copy(self.eleana.notify_on)
@@ -436,6 +391,82 @@ class Grapher():
         # Connect changes in scales due to ZOOM or MOVE
         self.ax.callbacks.connect('ylim_changed', self.on_ylim_changed)
         self.ax.callbacks.connect('xlim_changed', self.on_xlim_changed)
+
+    def put_custom_annotations(self):
+        ''' Create custom annotations in the graph '''
+        if self.eleana.gui_state.cursor_mode != 'None':
+            self.btn_clear_cursors.grid()
+            self.btn_clear_cursors.configure(text='Clear cursors', command=self.clear_all_annotations)
+            self.annotationsFrame.grid()
+            self.annotationsFrame.grid_columnconfigure(0, weight=1)
+            self.annotationsFrame.grid_rowconfigure(0, weight=1)
+            self.annotationlist.grid(column=0, row=0, sticky="nsew")
+            annots = self.eleana.settings.grapher['custom_annotations']
+            i = 0
+            for annot in annots:
+                snap = annot.get('snap_to', None)
+                x_coord = annot['point'][0]
+                # For x coordinate get y for curve defined by snap
+                if snap == 'first' or snap == 'second' or snap == 'result':
+                    # Snap to plot
+                    if snap == 'first':
+                        nr = 0
+                    elif snap == 'second':
+                        nr = 1
+                    elif snap == 'result':
+                        nr = 2
+                    line = self.ax.get_lines()[nr]
+                    x_data, y_data = line.get_data()
+                    x_data = np.array(x_data)
+                    index = np.abs(x_data - x_coord).argmin()
+                    x = x_data[index]
+                    y = y_data[index]
+                    xy = (x,y)
+
+                    self.eleana.settings.grapher['custom_annotations'][i]['xy'] = xy
+                else:
+                    # Do not snap to plot
+                    xy = annot['point']
+                number_ = str(i + 1) if self.style_of_annotation['number'] else ''
+                if annot['curve'] == 'XY':
+                    self.ax.annotate(text=self.style_of_annotation['text'] + number_,
+                                     xy=xy,
+                                     xytext=self.xytext_position(xy),
+                                     arrowprops=self.style_of_annotation['arrowprops'],
+                                     bbox=self.style_of_annotation['bbox'],
+                                     fontsize=self.style_of_annotation['fontsize'],
+                                     color=self.style_of_annotation['color'],
+                                     xycoords='data',
+                                     textcoords='data',
+                                     )
+
+                i += 1
+        else:
+            self.btn_clear_cursors.grid_remove()
+            self.clearAnnotationList()
+            self.annotationlist.grid_remove()
+
+        self.canvas.draw_idle()
+
+        # Add annotations from Free Select
+        # if self.current_cursor_mode['label'] == "Free select" or self.current_cursor_mode['label'] == 'Crosshair':
+        #     annots = self.eleana.settings.grapher['custom_annotations']
+        #     i = 0
+        #     for annot in annots:
+        #         xy = annot['point']
+        #         number_ = str(i + 1) if self.style_of_annotation['number'] else ''
+        #         self.ax.annotate(text=self.style_of_annotation['text'] + number_,
+        #                          xy=xy,
+        #                          xytext=self.xytext_position(xy),
+        #                          arrowprops=self.style_of_annotation['arrowprops'],
+        #                          bbox=self.style_of_annotation['bbox'],
+        #                          fontsize=self.style_of_annotation['fontsize'],
+        #                          color=self.style_of_annotation['color']
+        #                          )
+        #         i += 1
+        #
+        # # Draw canvas
+        # self.canvas.draw_idle()
 
     def show_color_span(self):
         ''' Prints the ranges selected on graph according to defined
@@ -599,79 +630,6 @@ class Grapher():
         if not event.inaxes:  # If not inside the plot area
             return
 
-
-    # def on_click_in_plot(self, event):
-    #     """ Get coordinates from graph when Free Select is set in the combobox """
-    #     state = self.toolbar.mode
-    #     if state == 'zoom rect' or state == 'pan/zoom':
-    #         return
-    #     if (event.inaxes is not None and (
-    #             self.sel_cursor_mode.get() == 'Free select' or self.sel_cursor_mode.get() == 'Crosshair') and event.button == 1):
-    #         # Create annotation when left mouse button is clicked
-    #         if self.cursor_limit != 0:
-    #             if len(self.cursor_annotations) >= self.cursor_limit:
-    #                 return
-    #         x, y = event.xdata, event.ydata
-    #         point_selected = (x, y)
-    #         current_nr = 0
-    #         if self.cursor_annotations:
-    #             #last_annotation = self.cursor_annotations[-1]
-    #             annotation_numbers = []
-    #             for single_annotation in self.cursor_annotations:
-    #                 annotation_numbers.append(int(single_annotation['nr']))
-    #             current_nr = max(annotation_numbers) + 1
-    #             #current_nr = last_annotation.get('nr', 0) + 1
-    #         my_annotation = {'type': None, 'curve': 'XY', 'index': 0, 'stk_index': -1, 'point': point_selected,
-    #                          'nr': current_nr}
-    #         self.cursor_annotations.append(my_annotation)
-    #         self.updateAnnotationList(action='add')
-    #         #text = f'Point: {len(self.cursor_annotations)}'
-    #         #self.ax.annotate(text, xy=point_selected, arrowprops=self.style_of_annotation['arrowprops'])
-    #         number_ = str(current_nr) if self.style_of_annotation['number'] else ''
-    #         self.ax.annotate(text=self.style_of_annotation['text'] + number_,
-    #                          xy=xy, arrowprops=self.style_of_annotation['arrowprops']
-    #                          )
-    #
-    #         self.canvas.draw()
-    #         self.eleana.set_selections(variable='grapher_action', value='point_selected')
-    #
-    #     elif (event.inaxes is not None and (
-    #             self.sel_cursor_mode.get() == 'Free select' or self.sel_cursor_mode.get() == 'Crosshair') and event.button == 3):
-    #         # Remove annotation when right mouse button is clicked
-    #         x, y = event.xdata, event.ydata
-    #         xlim = self.ax.get_xlim()
-    #         ylim = self.ax.get_ylim()
-    #         x_span = abs(xlim[1] - xlim[0])
-    #         y_span = abs(ylim[1] - ylim[0])
-    #         tolerance = 0.05  # Tolerance for coordinates clicked
-    #         closest_point = None
-    #         closest_distance = float('inf')
-    #         for cursor_annotation in self.cursor_annotations:
-    #             point = cursor_annotation['point']
-    #             x_diff = abs(point[0] - x)
-    #             y_diff = abs(point[1] - y)
-    #             # Check if the point is within tolerance for clicking
-    #             if x_diff < tolerance * x_span and y_diff < tolerance * y_span:
-    #                 distance = (x_diff ** 2 + y_diff ** 2) ** 0.5
-    #                 if distance < closest_distance:
-    #                     closest_distance = distance
-    #                     closest_point = point
-    #         # If closest point was found, remove annotation
-    #         if closest_point is not None:
-    #             # Find index to remove
-    #             index_to_remove = next(
-    #                 i for i, annotation in enumerate(self.cursor_annotations) if annotation['point'] == closest_point)
-    #             self.cursor_annotations.pop(index_to_remove)  # Delete from list
-    #             annotation_to_remove = next(
-    #                 annotation for annotation in self.ax.texts if list(annotation.xy) == list(closest_point))
-    #             annotation_to_remove.remove()  # Remove from the graph
-    #             self.eleana.set_selections(variable='grapher_action', value='point_removed')
-    #         self.clearAnnotationList()
-    #         self.canvas.draw()
-    #         self.updateAnnotationList()
-    #     else:
-    #         return
-
     def on_click_in_plot(self, event):
         """ Get coordinates from graph when Free Select is set in the combobox """
         state = self.toolbar.mode
@@ -680,25 +638,22 @@ class Grapher():
         if (event.inaxes is not None and (self.sel_cursor_mode.get() == 'Free select' or self.sel_cursor_mode.get() == 'Crosshair') and event.button == 1):
             # Create annotation when left mouse button is clicked
             if self.cursor_limit !=0:
-               if len(self.cursor_annotations) >= self.cursor_limit:
+               if len(self.eleana.settings.grapher['custom_annotations']) >= self.cursor_limit:
                    return
             x, y = event.xdata, event.ydata
             point_selected = (x,y)
             current_nr = 0
-            if self.cursor_annotations:
-                #last_annotation = self.cursor_annotations[-1]
+            if self.eleana.settings.grapher['custom_annotations']:
+                #last_annotation = self.eleana.settings.grapher['custom_annotations'][-1]
                 annotation_numbers = []
-                for single_annotation in self.cursor_annotations:
+                for single_annotation in self.eleana.settings.grapher['custom_annotations']:
                     annotation_numbers.append(int(single_annotation['nr']))
                 current_nr = max(annotation_numbers) + 1
                 #current_nr = last_annotation.get('nr', 0) + 1
             my_annotation = {'type': None, 'curve': 'XY', 'index': 0, 'stk_index': -1, 'point': point_selected,
-                             'nr': current_nr}
-            self.cursor_annotations.append(my_annotation)
+                             'nr': current_nr, 'mode' : self.sel_cursor_mode.get(), 'snap_to':self.eleana.settings.grapher.get('snap_to', 'none')}
+            self.eleana.settings.grapher['custom_annotations'].append(my_annotation)
             self.updateAnnotationList(action='add')
-            # text = f'Point: {len(self.cursor_annotations)}'
-            # self.ax.annotate(text, xy=point_selected, arrowprops=self.style_of_annotation['arrowprops'])
-            #i = len(self.cursor_annotations) - 1
             number_ = str(current_nr) if self.style_of_annotation['number'] else ''
             self.ax.annotate(text=self.style_of_annotation['text'] + number_,
                              xy=point_selected,
@@ -723,7 +678,7 @@ class Grapher():
             tolerance = 0.05  # Tolerance for coordinates clicked
             closest_point = None
             closest_distance = float('inf')
-            for cursor_annotation in self.cursor_annotations:
+            for cursor_annotation in self.eleana.settings.grapher['custom_annotations']:
                 point = cursor_annotation['point']
                 x_diff = abs(point[0] - x)
                 y_diff = abs(point[1] - y)
@@ -737,8 +692,8 @@ class Grapher():
             if closest_point is not None:
                 # Find index to remove
                 index_to_remove = next(
-                    i for i, annotation in enumerate(self.cursor_annotations) if annotation['point'] == closest_point)
-                self.cursor_annotations.pop(index_to_remove)  # Delete from list
+                    i for i, annotation in enumerate(self.eleana.settings.grapher['custom_annotations']) if annotation['point'] == closest_point)
+                self.eleana.settings.grapher['custom_annotations'].pop(index_to_remove)  # Delete from list
                 annotation_to_remove = next(
                     annotation for annotation in self.ax.texts if list(annotation.xy) == list(closest_point))
                 annotation_to_remove.remove()  # Remove from the graph
@@ -814,9 +769,9 @@ class Grapher():
 
     def annotation_create(self, sel, curve = None):
         ''' This creates annotations on the graph and add selected
-            to the list in self.cursor_annotations '''
+            to the list in self.eleana.settings.grapher['custom_annotations'] '''
         if self.cursor_limit != 0:
-            if len(self.cursor_annotations) >= self.cursor_limit:
+            if len(self.eleana.settings.grapher['custom_annotations']) >= self.cursor_limit:
                 sel = self.cursor.selections[-1]
                 self.cursor.remove_selection(sel)
                 return
@@ -833,12 +788,12 @@ class Grapher():
         curve_type, index, stk_index = self.indexCurveForAnnot(curve)
         point = [x,y]
         current_nr = 0
-        if self.cursor_annotations:
-            last_annotation = self.cursor_annotations[-1]
+        if self.eleana.settings.grapher['custom_annotations']:
+            last_annotation = self.eleana.settings.grapher['custom_annotations'][-1]
             current_nr = last_annotation.get('nr', 0) + 1
         my_annotation = {'type': curve_type, 'curve':curve, 'index':index, 'stk_index':stk_index, 'point':point, 'nr': current_nr}
         if not self.current_cursor_mode['hov']:
-            self.cursor_annotations.append(my_annotation)
+            self.eleana.settings.grapher['custom_annotations'].append(my_annotation)
         label = f'Point: x={x:.2f}, y={y:.2f}'
         if not self.current_cursor_mode['a_txt']:
             label = ''
@@ -853,7 +808,7 @@ class Grapher():
     def annotation_removed(self, event=None, xy=None):
         ''' This deletes selected annotation from the graph
             and removes the respective point from the list in
-            self.cursor_annotations. '''
+            self.eleana.settings.grapher['custom_annotations']. '''
         if xy is not None:
             point = xy
         if event is not None:
@@ -861,15 +816,15 @@ class Grapher():
             x = annotation.xy[0]
             y = annotation.xy[1]
             point = [x,y]
-        points = [d['point'] for d in self.cursor_annotations if 'point' in d]
+        points = [d['point'] for d in self.eleana.settings.grapher['custom_annotations'] if 'point' in d]
         if point in points:
             index = points.index(point)
-            self.cursor_annotations.pop(index)
+            self.eleana.settings.grapher['custom_annotations'].pop(index)
             self.eleana.set_selections(variable='grapher_action', value='annotation_removed')
             self.updateAnnotationList()
 
     def clear_all_annotations(self, skip=None):
-        self.cursor_annotations = []
+        self.eleana.settings.grapher['custom_annotations'] = []
         self.additional_plots = []
         self.eleana.settings.grapher['custom_annotations'] = []
         self.eleana.set_selections(variable='grapher_action', value='annotations_cleared')
@@ -896,7 +851,7 @@ class Grapher():
     def updateAnnotationList(self, action=None):
         self.annotationlist.delete("all")
         if self.sel_cursor_mode.get() != 'Range select':
-            for each in self.cursor_annotations:
+            for each in self.eleana.settings.grapher['custom_annotations']:
                 nr = each['nr']
                 curve = each['curve']
                 point_x = each['point'][0]
@@ -993,6 +948,7 @@ class Grapher():
         ylim = self.ax.get_ylim()
         self.scale1['y'] = ylim
         self.check_autoscale_y.deselect()
+
 
     def on_xlim_changed(self, axes):
         xlim = self.ax.get_xlim()

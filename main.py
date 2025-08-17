@@ -56,7 +56,6 @@ if not DEVEL:
     import warnings
     warnings.simplefilter('ignore', np.exceptions.RankWarning)
 
-
 # Run
 if __name__ == "__main__":
     # Check if the program is started with root privileges:
@@ -99,34 +98,3 @@ if __name__ == "__main__":
 
     # Start application
     app.run()
-
-
-    #
-    # load = Load(main_menu)
-    # save = Save(app)
-    # export = Export(app)
-    # init = Init(main_menu)
-    # context_menu = ContextMenu(app)
-    # update = Update(main_menu)  # This contains methods for update things like lists, settings, gui, groups etc.
-    # app.set_update(update)
-    #
-    # # Initialize basic settings: geometry, icon, graph, binding, etc
-    # init.main_window()
-    # init.paths(update)
-    # init.folders()
-    # init.graph()
-
-    # Command Line and tests
-
-    # Create Graph canvas
-    # grapher.plot_graph()
-    # # Hide or show widgets in GUI
-    # update.gui_widgets()
-    # update.all_lists()
-    #
-    # # Set graph Frame scalable
-    # app.graphFrame.columnconfigure(0, weight=1)
-    # app.graphFrame.rowconfigure(0, weight=1)
-    # main_menu.last_projects_menu()
-    #
-    #app.run()

@@ -22,7 +22,7 @@ ON_TOP = True                           # <--- IF TRUE THE WINDOW WILL BE ALWAYS
 DATA_LABEL = 'data_label'               # <--- ID OF THE LABEL WIDGET WHERE NAME OF CURRENTLY SELECTED DATA WILL APPEAR.
                                         #      THE LABEL WIDGET OF THE SAME ID NAME MUST EXIST IN THE GUI. IF NOT USED SET THIS TO NONE
 NAME_SUFFIX = ''                        # <--- DEFINES THE SUFFIX THAT WILL BE ADDED TO NAME OF PROCESSED DATA IS RESULTS
-AUTO_CALCULATE = False                  # <--- DEFINES IF CALCULATION IS AUTOMATICALLY PERFORMED UPON DATA CHANGE IN GUI
+AUTO_CALCULATE = True                  # <--- DEFINES IF CALCULATION IS AUTOMATICALLY PERFORMED UPON DATA CHANGE IN GUI
 
 # Data settings
 REGIONS_FROM = 'none'                   # <--- DEFINES IF DATA FOR CALCULATIONS IS EXTRACTED:
@@ -72,6 +72,9 @@ CURSOR_LIMIT = 2                        # <--- SET THE MAXIMUM NUMBER OF CURSORS
 CURSOR_CLEAR_ON_START = True
 CURSOR_REQUIRED = 2                     # <--- MINIMUM NUMBER OF CURSORS TO PROCESS THE CALCULATIONS
                                         #      SET TO 0 FOR NO CHECKING
+
+CURSOR_SNAP = 'first'                    # <--- DEFINE TO WHICH CURVE CURSOR MUST BE SNAPPED TO
+
 CURSOR_REQ_TEXT = \
     'Please select two points.'         # <--- TEXT TO DISPLAY IF NR OF CURSORS IS LESS THAN REQUIRED
                                         #       LEAVE EMPTY IF YOU DO NOT WANT TO SHOW THE ERROR
@@ -97,6 +100,11 @@ WindowGUI = getattr(mod, class_name)
 from subprogs.general_methods.SubprogMethods5 import SubMethods_05 as Methods
 class DistanceRead(Methods, WindowGUI):
     def __init__(self, app=None, which='first', commandline=False):
+
+
+        print('Trzeba naprawić to, że report pokazuje się przed aktualizacją wykresu, a dane w okienku nie są akutualizowane gdy zmieniają się dana data_changed po kliknięciu w GUI')
+        exit()
+
         self.__app = weakref.ref(app)
         if app and not commandline:
             # Initialize window if app is defined and not commandline
@@ -110,7 +118,8 @@ class DistanceRead(Methods, WindowGUI):
         self.report = {'nr': 1, 'create': REPORT_CREATE, 'headers': REPORT_HEADERS, 'rows': [], 'x_name': REPORT_NAME_X, 'y_name': REPORT_NAME_Y, 'default_x': REPORT_HEADERS[REPORT_DEFAULT_X], 'default_y': REPORT_HEADERS[REPORT_DEFAULT_Y],
                        'x_unit': REPORT_UNIT_X, 'y_unit': REPORT_UNIT_Y, 'to_group': REPORT_TO_GROUP, 'report_skip_for_stk': REPORT_SKIP_FOR_STK, 'report_window_title': REPORT_WINDOW_TITLE, 'report_name': REPORT_NAME}
         self.subprog_cursor = {'type': CURSOR_TYPE, 'changing': CURSOR_CHANGING, 'limit': CURSOR_LIMIT, 'clear_on_start': CURSOR_CLEAR_ON_START, 'cursor_required': CURSOR_REQUIRED, 'cursor_req_text':CURSOR_REQ_TEXT,
-                               'cursor_outside_x':CURSOR_OUTSIDE_X, 'cursor_outside_y':CURSOR_OUTSIDE_Y, 'cursor_outside_text':CURSOR_OUTSIDE_TEXT}
+                               'cursor_outside_x':CURSOR_OUTSIDE_X, 'cursor_outside_y':CURSOR_OUTSIDE_Y, 'cursor_outside_text':CURSOR_OUTSIDE_TEXT,
+                               'snap_to': CURSOR_SNAP}
         self.use_second = USE_SECOND                                                                #|
         self.stack_sep = STACK_SEP
         Methods.__init__(self, app_weak=self.__app, which=which, commandline=commandline, close_subprogs=CLOSE_SUBPROGS)
@@ -142,22 +151,26 @@ class DistanceRead(Methods, WindowGUI):
         ''' This method is called when all functions are
              finished after clicking 'Process group' button. '''
 
+
     def after_graph_plot(self):
         ''' This method is called when the main application refreshes Graph canva content.
             For example, after changing First data, the graph is reploted and then
-            this function is run.
-            DO NOT USE FUNCTIONS USING GRAPHER METHODS HERE!'''
+            this function is run.'''
+
+        if self.keep_track:
+            self.clear_custom_annotations_list()
+            self.remove_custom_annotations_from_graph()
+            self.find_minmax_clicked()
+        # else:
+        #    self.clear_custom_annotations_list()
+        #    self.remove_custom_annotations_from_graph()
+        return
 
     def finish_action(self, by_method):
         ''' This method is called when all calculations are finished and main window
             awaits for action. This is useful if you need to put annotations to the graph etc.
             by_method - the name of a method that triggered the action.
         '''
-        if self.keep_track:
-            self.find_minmax_clicked()
-        else:
-           self.clear_custom_annotations_list()
-           self.remove_custom_annotations_from_graph()
 
     # DEFINE YOUR CUSTOM METHODS FOR THIS ROUTINE
     # ----------------------------------------------
@@ -307,7 +320,7 @@ class DistanceRead(Methods, WindowGUI):
             origin2 = self.data_for_calculations[1]['origin']
             comment2 = self.data_for_calculations[1]['comment']
             parameters2 = self.data_for_calculations[1]['parameters']
-        cursor_positions = self.grapher.cursor_annotations
+        cursor_positions = self.eleana.settings.grapher['custom_annotations']
         # ------------------------------------------
 
         if self.keep_track:

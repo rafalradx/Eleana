@@ -381,7 +381,7 @@ class MainMenu:
         except:
             pass
 
-        if not self.eleana.static_plots:
+        if not self.eleana.settings.grapher['static_plots']:
             return
 
         # Create new menu

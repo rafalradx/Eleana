@@ -35,7 +35,6 @@ class Storage:
     additional_plots: list[Any]
     static_plots: list[Any]
     active_static_plot_windows: list[Any]
-    cursor_annotations: list[Any]
 
 @dataclass
 class Project_1:
@@ -45,6 +44,7 @@ class Project_1:
     notes: str
     selections: Dict[str, Any]
     static_plots: list
+    custom_annotations: list
 
 class Eleana:
     # Main attributes associated with data gathered in the programe
@@ -129,24 +129,6 @@ class Eleana:
         # {'subprog':'SUBPROG_PYTHON_FILENAME', 'content':[LIST_OF_DICTS_CONTAINING_STORAGE]}
 
 
-        # Create contener for guistate
-        self.gui_state = GuiState(  autoscale_x = True,
-                                    autoscale_y = True,
-                                    log_x = False,
-                                    log_y = False,
-                                    indexed_x = False,
-                                    cursor_mode = 'None',
-                                    inverted_x = False,
-
-                                    )
-
-        # Create temporary storages
-        self.storage = Storage(subprog_settings = {},
-                               static_plots = [],
-                               active_static_plot_windows = [],
-                               additional_plots = [],
-                               cursor_annotations = []
-                               )
 
         # Try loading saved settings
         self.settings = self.load_settings()
@@ -155,6 +137,23 @@ class Eleana:
             self.set_default_settings()
             # Save settings on disk
             self.save_settings()
+
+        # Create contener for guistate
+        self.gui_state = GuiState(autoscale_x=True,
+                                  autoscale_y=True,
+                                  log_x=False,
+                                  log_y=False,
+                                  indexed_x=False,
+                                  cursor_mode='None',
+                                  inverted_x=False,
+                                  )
+
+        # Create temporary storages
+        self.storage = Storage(subprog_settings={},
+                               static_plots=self.settings.grapher['static_plots'],
+                               active_static_plot_windows=self.settings.grapher['active_static_plot_windows'],
+                               additional_plots=[],
+                               )
 
     def reset(self):
         self._observers.clear()
@@ -225,7 +224,7 @@ class Eleana:
         grapher['style_of_annotation'] = {
             'text': "",
             'number': True,
-            'xytext': (0.03, 0.03),
+            'xytext': (0.3, 0.3),
             'arrowprops': {
                 "arrowstyle": "->",  # Arrow style
                 "lw": 1.5,  # Arrow thickness
@@ -281,10 +280,7 @@ class Eleana:
                                  'start': 0,
                                  'end': 0}
         grapher['custom_annotations'] = []
-
-        # Static plots
-        grapher['static_plots'] = []
-        grapher['active_static_plot_windows'] = []
+        grapher['snap_to'] = 'none'
 
         # Store settings in Settings dataclass
         self.settings = Settings(general=general, grapher=grapher)
@@ -342,7 +338,8 @@ class Eleana:
                                     groupsHierarchy = self.groupsHierarchy,
                                     notes = self.notes,
                                     selections = self.selections,
-                                    static_plots = self.storage.static_plots
+                                    static_plots = self.storage.static_plots,
+                                    custom_annotations = self.settings.grapher['custom_annotations']
                                     )
 
 
@@ -357,7 +354,7 @@ class Eleana:
             message = 'Could not save the file.'
             message = message + f'\n\nDetails:\n{e}'
             info = CTkMessagebox(title="Error", message=message, icon='cancel')
-        del project_to_save
+        project_to_save = None
         gc.collect()
 
         # Create zip file form the directory
@@ -393,7 +390,7 @@ class Eleana:
         # return str(Path(last_projects[0]).name[:-4] + ' - Eleana')
 
         saved_path_string = str(project_ele)
-        last_projects = list(self.paths.get('last_projects', []))  # jawna kopia
+        last_projects = list(self.paths.get('last_projects', []))
 
         if saved_path_string in last_projects:
             last_projects.remove(saved_path_string)
@@ -414,7 +411,7 @@ class Eleana:
         paths = pickle.load(file_to_read)
 
         self.paths['last_import_dir'] = paths['last_import_dir']
-        self.paths['last_projects_dir'] = paths['last_projects_dir']
+        self.paths['last_project_dir'] = paths['last_project_dir']
         self.paths['last_export_dir'] = paths['last_export_dir']
 
         file_to_read.close()
@@ -443,14 +440,14 @@ class Eleana:
     # Operations on dataset
     #
 
-    def name_nr_to_index(self, selected_value_text):
-        ''' Returns index of Eleana.dataset which name_nr attribute is equal to argument: selected_value_text'''
-        numbered_names = []
-        for each in self.dataset:
-            numbered_names.append(each.name_nr)
-        if selected_value_text in numbered_names:
-            index = numbered_names.index(selected_value_text)
-            return index
+    # def name_nr_to_index(self, selected_value_text):
+    #     ''' Returns index of Eleana.dataset which name_nr attribute is equal to argument: selected_value_text'''
+    #     numbered_names = []
+    #     for each in self.dataset:
+    #         numbered_names.append(each.name_nr)
+    #     if selected_value_text in numbered_names:
+    #         index = numbered_names.index(selected_value_text)
+    #         return index
 
     def get_index_by_name(self, selected_value_text):
         ''' Function returns index in dataset of spectrum
@@ -461,6 +458,7 @@ class Eleana:
             if name == selected_value_text:
                 return i
             i += 1
+
     def get_indexes_from_group(self):
         ''' Return list of indexes in self.dataset
             that belongs to the current group '''
@@ -546,18 +544,15 @@ class Eleana:
                 y = data.y[index_stk]
         return {'x':x, 're_y':y, 'complex':False, 'im_y':np.array([])}
 
-    def data_from_selected_range(self, which='first'):
-        # Gets x and y data from the range selected in graph
-        x = None
-        y = None
-        index_in_dataset = self.selections[which]
-        if index_in_dataset == -1:
-            return x,y
-        data = self.dataset[index_in_dataset]
-        x = data.x
-        y = data.y
-        type = data.type
+    # def data_from_selected_range(self, which='first'):
+    #     # Gets x and y data from the range selected in graph
+    #     x = None
+    #     y = None
+    #     index_in_dataset = self.selections[which]
+    #     if index_in_dataset == -1:
+    #         return x,y
+    #     data = self.dataset[index_in_dataset]
+    #     x = data.x
+    #     y = data.y
+    #     type = data.type
 
-
-if __name__ == "__main__":
-    eleana = Eleana()

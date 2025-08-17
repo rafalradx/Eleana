@@ -29,11 +29,9 @@ def check_busy(method):
         return method(self, *args, **kwargs)  # Go to a method
     return wrapper
 
-
 class SubMethods_05:
 
-    ''' Ten fragment tworzy listę instancji tej klasy
-        TYLKO DO DEBUGINGU'''
+    ''' This list is only for debuging'''
     # List of class instances
     _instances = []
 
@@ -77,6 +75,13 @@ class SubMethods_05:
             self.eleana.notify_on = True
             # Set current position in Results Dataset
             cursor_type = self.subprog_cursor.get('type', 'none').lower()
+
+            # Current cursor snap state
+            self.snap_state = self.eleana.settings.grapher.get('snap_to', 'none')
+
+            # Set snap to plot if necesarry:
+            self.eleana.settings.grapher['snap_to'] = self.subprog_cursor.get('snap_to', 'none')
+
             if cursor_type != 'none' or cursor_type != '':
                 # Configure cursor
                 self.subprog_cursor['previous'] = copy.copy(self.grapher.current_cursor_mode['label'])
@@ -223,6 +228,7 @@ class SubMethods_05:
         self.clear_additional_plots()
 
         self.grapher.cursor_limit = 0
+        self.eleana.settings.grapher['snap_to'] = self.snap_state
         self.grapher.plot_graph()
         self.eleana.busy = False
 
@@ -282,6 +288,8 @@ class SubMethods_05:
     def data_changed(self, variable, value):
         ''' Activate get_data when selection changed.
             This is triggered by the Observer.   '''
+
+        collect_custom_annotations = copy.copy(self.eleana.settings.grapher['custom_annotations'])
         if variable == "first" and value is None:
             self.app.mainwindow.configure(cursor="")
             self.grapher.canvas.get_tk_widget().config(cursor="")
@@ -297,7 +305,8 @@ class SubMethods_05:
             self.app.mainwindow.configure(cursor="")
             self.grapher.canvas.get_tk_widget().config(cursor="")
             try:
-                self.grapher.clear_all_annotations()
+                #self.grapher.clear_all_annotations()
+                pass
             except:
                 if self.eleana.devel_mode:
                     print("Subprogmethods2.data_changed() - Clear all annotations failed")
@@ -378,7 +387,6 @@ class SubMethods_05:
         self.show_results_matching_first()
         self.after_process_group_clicked()
 
-
     def show_report_clicked(self):
         ''' [-Show Report-] button
             This is standard function in SubprogMethods '''
@@ -406,7 +414,7 @@ class SubMethods_05:
     def start_single_calculations(self):
         ''' This function is triggered by clicking "Calculate" button'''
         required_cursors = self.subprog_cursor.get('cursor_required', 0)
-        nr_of_annotations = len(self.grapher.cursor_annotations)
+        nr_of_annotations = len(self.eleana.settings.grapher['custom_annotations'])
         if required_cursors > nr_of_annotations:
             if self.subprog_cursor.get('cursor_req_text'):
                 Error.show(title='', info=self.subprog_cursor.get('cursor_req_text', 'CURSOR_REQ_TEXT not defined'))
@@ -539,7 +547,7 @@ class SubMethods_05:
 
     def perform_group_calculations(self):
         required_cursors = self.subprog_cursor.get('cursor_required', 0)
-        nr_of_annotations = len(self.grapher.cursor_annotations)
+        nr_of_annotations = len(self.eleana.settings.grapher['custom_annotations'])
         if required_cursors > nr_of_annotations:
             if self.subprog_cursor.get('cursor_req_text'):
                 Error.show(title='', info=self.subprog_cursor['cursor_req_text'])
@@ -1252,7 +1260,7 @@ class SubMethods_05:
 
     def all_cursors_within_bounds(self, x=None, y=None):
         answers = []
-        for cursor in self.grapher.cursor_annotations:
+        for cursor in self.eleana.settings.grapher['custom_annotations']:
             answer = self.is_cursors_within_bounds(cursor=cursor, x=x, y=y)
             answers.append(answer)
         return answers
@@ -1280,10 +1288,10 @@ class SubMethods_05:
     # ------------------------------------------------
     def get_selected_points(self):
         ''' Returns unique x and y data for selected points '''
-        if self.grapher.cursor_annotations:
+        if self.eleana.settings.grapher['custom_annotations']:
             x = []
             y = []
-            for selection in self.grapher.cursor_annotations:
+            for selection in self.eleana.settings.grapher['custom_annotations']:
                 nxt_x = selection['point'][0]
                 nxt_y = selection['point'][1]
                 if nxt_x not in x:
@@ -1316,7 +1324,7 @@ class SubMethods_05:
             self.set_custom_annotation(point=(x, y), snap=snap, which=which)
         except ValueError:
             if self.eleana.devel_mode:
-                print("Error placing cusrom annotation. Empty array.")
+                print("Error placing custom annotation. Empty array.")
                 return
         annots = self.eleana.settings.grapher['custom_annotations']
         i = 0
