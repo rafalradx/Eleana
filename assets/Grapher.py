@@ -392,10 +392,6 @@ class Grapher():
         self.eleana.notify(variable='grapher_action', value="plot")
         self.eleana.notify_on = self.notify_on_copy
 
-        # Connect changes in scales due to ZOOM or MOVE
-        # self.ax.callbacks.connect('ylim_changed', self.on_ylim_changed)
-        # self.ax.callbacks.connect('xlim_changed', self.on_xlim_changed)
-
     def put_custom_annotations(self):
         ''' Create custom annotations in the graph '''
         if self.eleana.gui_state.cursor_mode != 'None':

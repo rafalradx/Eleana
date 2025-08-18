@@ -220,9 +220,9 @@ class SubMethods_05:
         self.response = None
 
         # Return cursor selection to enabled
-        self.app.sel_cursor_mode.configure(state="normal")
-        self.app.sel_cursor_mode.set(self.subprog_cursor['previous'])
-        self.app.sel_graph_cursor(self.subprog_cursor['previous'], clear_annotations = True)
+        #self.app.sel_cursor_mode.configure(state="normal")
+        #self.app.sel_cursor_mode.set(self.subprog_cursor['previous'])
+
 
         self.grapher.clear_selected_ranges()
         self.clear_additional_plots()
@@ -239,6 +239,9 @@ class SubMethods_05:
         self.mainwindow.destroy()
         self.mainwindow = None
         self.after_quit_subprog()
+
+        self.app.sel_cursor_mode.configure(state="normal")
+        self.app.sel_graph_cursor(value=self.subprog_cursor['previous'], clear_annotations=True)
         # Garbage collect
         gc.collect()
 
@@ -532,6 +535,8 @@ class SubMethods_05:
         else:
             if len(self.eleana.results_dataset) == 0:
                 self.after_calculations()
+                if self.stk_index == -1 and self.report['report_skip_for_single']:
+                    return True
                 self.show_report()
                 return True
             else:

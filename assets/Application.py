@@ -12,7 +12,7 @@ import pygubu
 import tkinter as tk
 import pickle
 import time
-import weakref
+
 from assets.Menu import ContextMenu
 import inspect
 
@@ -31,7 +31,7 @@ from Grapher import Grapher
 from IconToWidget import IconToWidget
 from LoadSave import Load, Save, Export
 from Update import Update
-# from DataClasses import BaseDataModel
+from DataClasses import BaseDataModel
 from Error import Error
 # from IconToWidget import IconToWidget
 
@@ -694,7 +694,7 @@ class Application():
         #                              items=av_data)
         #names = self.select_data.get()
 
-        select_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'],
+        select_data = SelectData(master=self.mainwindow, title='Select data', group=self.eleana.selections['group'],
                                       items=av_data)
         names = select_data.get()
 
@@ -802,7 +802,7 @@ class Application():
             # Ask to select
             av_data = self.sel_first._values
             av_data.pop(0)
-            selected_data = SelectData(master=app.mainwindow, title='Select data', group=self.eleana.selections['group'],
+            selected_data = SelectData(master=self.mainwindow, title='Select data', group=self.eleana.selections['group'],
                                       items=av_data)
             response = selected_data.get()
             if response == None:
@@ -1982,13 +1982,13 @@ class Application():
         if not static_plot:
             info = CTkMessagebox(master = self.mainwindow, title="Info", message="An error occurred or there is no data for graph creation.")
             return
-        dialog = SingleDialog(master=app, title='Enter a name for the graph', label='Enter the graph name', text='')
+        dialog = SingleDialog(master=self.mainwindow, title='Enter a name for the graph', label='Enter the graph name', text='')
         name = dialog.get()
         if not name:
             return
         static_plot['name'] = name
         self.eleana.static_plots.append(static_plot)
-        main_menu.create_showplots_menu()
+        self.main_menubar.create_showplots_menu()
         self.grapher.show_static_graph_window(len(self.eleana.static_plots)-1)
 
     def clear_selected_ranges(self):
@@ -2088,7 +2088,6 @@ class Application():
         self.sel_cursor_mode.set(value)
         self.eleana.gui_state.cursor_mode = copy.copy(value)
         self.grapher.plot_graph()
-        self.grapher.cursor_on_off()
 
 
     '''***********************************************
@@ -2110,9 +2109,9 @@ class Application():
             response = convert_stack_to_group.get()
             if response == None:
                  return
-            update.dataset_list()
-            update.group_list()
-            update.all_lists()
+            self.update.dataset_list()
+            self.update.group_list()
+            self.update.all_lists()
 
     def delete_single_stk_data(self, which):
         ''' Remove single data from stk stack '''
@@ -2152,8 +2151,8 @@ class Application():
             self.eleana.selections['s_stk'] = 0
 
         # Update all GUI elements
-        update.dataset_list()
-        update.all_lists()
+        self.update.dataset_list()
+        self.update.all_lists()
         self.grapher.plot_graph()
 
     def rename_data(self, which):
@@ -2181,9 +2180,9 @@ class Application():
             return
         if not which == 'result':
             self.eleana.dataset[index].name = response
-            update.dataset_list()
-            update.group_list()
-            update.all_lists()
+            self.update.dataset_list()
+            self.update.group_list()
+            self.update.all_lists()
             if index_f >= 0:
                 self.sel_first.set(self.eleana.dataset[index_f].name_nr)
             if index_s >= 0:
@@ -2191,8 +2190,8 @@ class Application():
         else:
             self.eleana.results_dataset[index_r].name = response
             self.eleana.results_dataset[index_r].name_nr = response
-            update.dataset_list()
-            update.all_lists()
+            self.update.dataset_list()
+            self.update.all_lists()
         if index_r >= 0:
             self.sel_result.set(self.eleana.results_dataset[index_r].name_nr)
 
