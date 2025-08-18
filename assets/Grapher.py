@@ -72,6 +72,10 @@ class Grapher():
         self.canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
         self.canvas.draw()
 
+        # Connect callbacks
+        self.ax.callbacks.connect('ylim_changed', self.on_ylim_changed)
+        self.ax.callbacks.connect('xlim_changed', self.on_xlim_changed)
+
         # Create toolbar
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.graphFrame, pack_toolbar=False)
         self.toolbar.update()
@@ -389,8 +393,8 @@ class Grapher():
         self.eleana.notify_on = self.notify_on_copy
 
         # Connect changes in scales due to ZOOM or MOVE
-        self.ax.callbacks.connect('ylim_changed', self.on_ylim_changed)
-        self.ax.callbacks.connect('xlim_changed', self.on_xlim_changed)
+        # self.ax.callbacks.connect('ylim_changed', self.on_ylim_changed)
+        # self.ax.callbacks.connect('xlim_changed', self.on_xlim_changed)
 
     def put_custom_annotations(self):
         ''' Create custom annotations in the graph '''
@@ -403,6 +407,7 @@ class Grapher():
             self.annotationlist.grid(column=0, row=0, sticky="nsew")
             annots = self.eleana.settings.grapher['custom_annotations']
             i = 0
+            recreate_annotation_list = False
             for annot in annots:
                 snap = annot.get('snap_to', None)
                 x_coord = annot['point'][0]
@@ -418,12 +423,17 @@ class Grapher():
                     line = self.ax.get_lines()[nr]
                     x_data, y_data = line.get_data()
                     x_data = np.array(x_data)
-                    index = np.abs(x_data - x_coord).argmin()
+                    try:
+                        index = np.abs(x_data - x_coord).argmin()
+                    except ValueError:
+                        if self.eleana.devel_mode:
+                            print('ValueError: attempt to get argmin of an empty sequence')
                     x = x_data[index]
                     y = y_data[index]
                     xy = (x,y)
 
-                    self.eleana.settings.grapher['custom_annotations'][i]['xy'] = xy
+                    self.eleana.settings.grapher['custom_annotations'][i]['point'] = xy
+                    recreate_annotation_list = True
                 else:
                     # Do not snap to plot
                     xy = annot['point']
@@ -441,32 +451,16 @@ class Grapher():
                                      )
 
                 i += 1
+            if recreate_annotation_list:
+                self.clearAnnotationList()
+                self.updateAnnotationList()
         else:
             self.btn_clear_cursors.grid_remove()
             self.clearAnnotationList()
             self.annotationlist.grid_remove()
 
         self.canvas.draw_idle()
-
-        # Add annotations from Free Select
-        # if self.current_cursor_mode['label'] == "Free select" or self.current_cursor_mode['label'] == 'Crosshair':
-        #     annots = self.eleana.settings.grapher['custom_annotations']
-        #     i = 0
-        #     for annot in annots:
-        #         xy = annot['point']
-        #         number_ = str(i + 1) if self.style_of_annotation['number'] else ''
-        #         self.ax.annotate(text=self.style_of_annotation['text'] + number_,
-        #                          xy=xy,
-        #                          xytext=self.xytext_position(xy),
-        #                          arrowprops=self.style_of_annotation['arrowprops'],
-        #                          bbox=self.style_of_annotation['bbox'],
-        #                          fontsize=self.style_of_annotation['fontsize'],
-        #                          color=self.style_of_annotation['color']
-        #                          )
-        #         i += 1
-        #
-        # # Draw canvas
-        # self.canvas.draw_idle()
+        self.cursor_on_off()
 
     def show_color_span(self):
         ''' Prints the ranges selected on graph according to defined

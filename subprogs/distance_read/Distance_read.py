@@ -22,7 +22,7 @@ ON_TOP = True                           # <--- IF TRUE THE WINDOW WILL BE ALWAYS
 DATA_LABEL = 'data_label'               # <--- ID OF THE LABEL WIDGET WHERE NAME OF CURRENTLY SELECTED DATA WILL APPEAR.
                                         #      THE LABEL WIDGET OF THE SAME ID NAME MUST EXIST IN THE GUI. IF NOT USED SET THIS TO NONE
 NAME_SUFFIX = ''                        # <--- DEFINES THE SUFFIX THAT WILL BE ADDED TO NAME OF PROCESSED DATA IS RESULTS
-AUTO_CALCULATE = True                  # <--- DEFINES IF CALCULATION IS AUTOMATICALLY PERFORMED UPON DATA CHANGE IN GUI
+AUTO_CALCULATE = True                   # <--- DEFINES IF CALCULATION IS AUTOMATICALLY PERFORMED UPON DATA CHANGE IN GUI
 
 # Data settings
 REGIONS_FROM = 'none'                   # <--- DEFINES IF DATA FOR CALCULATIONS IS EXTRACTED:
@@ -44,6 +44,8 @@ RESULT_IGNORE = False                   # <-- IF TRUE DATA WITH origin:@result I
 # Report settings
 REPORT_CREATE = True                    # <--- IF TRUE THEN REPORT WILL BE CREATED AFTER CALCULATIONS
 REPORT_SKIP_FOR_STK = False
+REPORT_SKIP_FOR_SINGLE = True
+
 REPORT_WINDOW_TITLE = 'Results of distance measurements'
 REPORT_HEADERS = ['Nr',
                   'Name',
@@ -102,8 +104,8 @@ class DistanceRead(Methods, WindowGUI):
     def __init__(self, app=None, which='first', commandline=False):
 
 
-        print('Trzeba naprawić to, że report pokazuje się przed aktualizacją wykresu, a dane w okienku nie są akutualizowane gdy zmieniają się dana data_changed po kliknięciu w GUI')
-        exit()
+        #print('Trzeba naprawić to, że report pokazuje się przed aktualizacją wykresu, a dane w okienku nie są akutualizowane gdy zmieniają się dana data_changed po kliknięciu w GUI')
+        #exit()
 
         self.__app = weakref.ref(app)
         if app and not commandline:
@@ -115,8 +117,11 @@ class DistanceRead(Methods, WindowGUI):
                                  'auto_calculate': AUTO_CALCULATE, 'result': RESULT_CREATE, 'result_ignore':RESULT_IGNORE,
                                  }
         self.regions = {'from': REGIONS_FROM}
+
         self.report = {'nr': 1, 'create': REPORT_CREATE, 'headers': REPORT_HEADERS, 'rows': [], 'x_name': REPORT_NAME_X, 'y_name': REPORT_NAME_Y, 'default_x': REPORT_HEADERS[REPORT_DEFAULT_X], 'default_y': REPORT_HEADERS[REPORT_DEFAULT_Y],
-                       'x_unit': REPORT_UNIT_X, 'y_unit': REPORT_UNIT_Y, 'to_group': REPORT_TO_GROUP, 'report_skip_for_stk': REPORT_SKIP_FOR_STK, 'report_window_title': REPORT_WINDOW_TITLE, 'report_name': REPORT_NAME}
+                       'x_unit': REPORT_UNIT_X, 'y_unit': REPORT_UNIT_Y, 'to_group': REPORT_TO_GROUP, 'report_skip_for_stk': REPORT_SKIP_FOR_STK, 'report_window_title': REPORT_WINDOW_TITLE, 'report_name': REPORT_NAME,
+                       'report_ski_for_single':REPORT_SKIP_FOR_SINGLE}
+
         self.subprog_cursor = {'type': CURSOR_TYPE, 'changing': CURSOR_CHANGING, 'limit': CURSOR_LIMIT, 'clear_on_start': CURSOR_CLEAR_ON_START, 'cursor_required': CURSOR_REQUIRED, 'cursor_req_text':CURSOR_REQ_TEXT,
                                'cursor_outside_x':CURSOR_OUTSIDE_X, 'cursor_outside_y':CURSOR_OUTSIDE_Y, 'cursor_outside_text':CURSOR_OUTSIDE_TEXT,
                                'snap_to': CURSOR_SNAP}
