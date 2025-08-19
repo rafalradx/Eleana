@@ -101,11 +101,8 @@ WindowGUI = getattr(mod, class_name)
                                                                                  #|
 from subprogs.general_methods.SubprogMethods5 import SubMethods_05 as Methods
 class DistanceRead(Methods, WindowGUI):
+
     def __init__(self, app=None, which='first', commandline=False):
-
-
-        #print('Trzeba naprawić to, że report pokazuje się przed aktualizacją wykresu, a dane w okienku nie są akutualizowane gdy zmieniają się dana data_changed po kliknięciu w GUI')
-        #exit()
 
         self.__app = weakref.ref(app)
         if app and not commandline:

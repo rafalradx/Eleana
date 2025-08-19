@@ -132,11 +132,27 @@ class Eleana:
 
         # Try loading saved settings
         self.settings = self.load_settings()
-        #self.settings = None
+
         if self.settings is None:
             self.set_default_settings()
             # Save settings on disk
             self.save_settings()
+
+        # Override cursor modes
+        self.settings.grapher['cursor_modes'] = [
+            {'label': 'None', 'hov': False, 'a_txt': False, 'annot': False, 'multip': False, 'store': False},
+            {'label': 'Continuous read XY', 'hov': True, 'a_txt': True, 'annot': True, 'multip': False, 'store': False},
+            {'label': 'Selection of points with labels', 'hov': False, 'annot': True, 'a_txt': True, 'multip': True,
+             'store': True},
+            {'label': 'Selection of points', 'hov': False, 'annot': True, 'a_txt': False, 'multip': True,
+             'store': True},
+            {'label': 'Numbered selections', 'hov': False, 'annot': True, 'a_txt': True, 'multip': True, 'store': True,
+             'nr': True},
+            {'label': 'Free select'},
+            {'label': 'Crosshair', 'hov': True, 'a_txt': True, 'annot': True, 'multip': False, 'store': False},
+            {'label': 'Range select', 'hov': False, 'annot': True, 'a_txt': True, 'multip': True, 'store': True,
+             'nr': True}
+        ]
 
         # Create contener for guistate
         self.gui_state = GuiState(autoscale_x=True,
@@ -206,21 +222,7 @@ class Eleana:
         grapher = {}
         general = {'gui_appearance': 'dark',
                    'color_theme': 'dark-blue'}
-        # Settings for Grapher
-        grapher['cursor_modes'] = [
-            {'label': 'None', 'hov': False, 'a_txt': False, 'annot': False, 'multip': False, 'store': False},
-            {'label': 'Continuous read XY', 'hov': True, 'a_txt': True, 'annot': True, 'multip': False, 'store': False},
-            {'label': 'Selection of points with labels', 'hov': False, 'annot': True, 'a_txt': True, 'multip': True,
-             'store': True},
-            {'label': 'Selection of points', 'hov': False, 'annot': True, 'a_txt': False, 'multip': True,
-             'store': True},
-            {'label': 'Numbered selections', 'hov': False, 'annot': True, 'a_txt': True, 'multip': True, 'store': True,
-             'nr': True},
-            {'label': 'Free select'},
-            {'label': 'Crosshair', 'hov': True, 'a_txt': True, 'annot': True, 'multip': False, 'store': False},
-            {'label': 'Range select', 'hov': False, 'annot': True, 'a_txt': True, 'multip': True, 'store': True,
-             'nr': True}
-        ]
+
         grapher['style_of_annotation'] = {
             'text': "",
             'number': True,

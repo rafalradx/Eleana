@@ -575,10 +575,7 @@ class Grapher():
             # Switch on Free point selections
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
             self.info.configure(text='LEFT CLICK - select point\nRIGHT CLICK - delete selected point')
-
-
             self.motion_binding_id = self.canvas.mpl_connect('motion_notify_event', self.on_mouse_move_in_free_select)
-            #self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.on_click_in_plot)
 
         elif index == 6:
             # Crosshair
@@ -597,8 +594,8 @@ class Grapher():
             _show_annotation_list()
             self.click_binding_id = self.canvas.mpl_connect('button_press_event', self.range_clicked)
             self.info.configure(text='  LEFT CLICK - select the beginning \n  of the range\n  SECOND LEFT CLICK - select the end of the range\n  RIGHT CLICK INSIDE THE RANGE - delete \n  the range under the cursor')
-            self.eleana.settings.grapher['color_span']['ranges'] = []
-            self.eleana.settings.grapher['color_span']['status'] = 0
+            #self.eleana.settings.grapher['color_span']['ranges'] = []
+            #self.eleana.settings.grapher['color_span']['status'] = 0
         else:
             if hasattr(self.cursor, "events"):
                 # Switch off mplcursor
@@ -698,6 +695,7 @@ class Grapher():
         ''' Create range entry in self.eleana.settings.grapher['color_span'] to generate
             area between clicked positions.
         '''
+
         if self.sel_cursor_mode.get() != 'Range select':
             return
         if sel.xdata is None or sel.ydata is None:
@@ -755,7 +753,6 @@ class Grapher():
         self.eleana.settings.grapher['color_span']['status'] = 0
         self.clearAnnotationList()
         self.plot_graph()
-
 
     def annotation_create(self, sel, curve = None):
         ''' This creates annotations on the graph and add selected

@@ -53,6 +53,11 @@ class SubMethods_05:
             'linestyle': 'dashed',
         }
 
+        # This contains temporary information whether message should be
+        # diplayed when function is used for first time
+        self.display_for_first_time = {'stk_changed': True,
+
+                                    }
         if app_weak and not self.commandline:
             # Window start from Menu in GUI
             self.__app = app_weak
@@ -307,13 +312,11 @@ class SubMethods_05:
         elif variable == 'f_stk' or variable == 's_stk':
             self.app.mainwindow.configure(cursor="")
             self.grapher.canvas.get_tk_widget().config(cursor="")
-            try:
-                #self.grapher.clear_all_annotations()
-                pass
-            except:
-                if self.eleana.devel_mode:
-                    print("Subprogmethods2.data_changed() - Clear all annotations failed")
             self.after_data_changed(variable=variable, value=value)
+            if self.display_for_first_time.get('stk_changed', False):
+                Error.show(info = 'For stack data, click CALCULATE manually and SHOW REPORT.\n'
+                                  'This message will appear only once.')
+                self.display_for_first_time['stk_changed'] = False
             return False
         elif variable == 'grapher_action' and value == 'range_start':
             self.app.mainwindow.configure(cursor="")

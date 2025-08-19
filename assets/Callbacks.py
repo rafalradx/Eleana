@@ -30,8 +30,10 @@ def main_menubar_callbacks(inst):
              "preferences": inst.preferences,
              # ANALYSIS
              "xy_distance": inst.xy_distance,
+             "integrate_region": inst.integrate_region,
 
              # MODIFICATION
+             "normalize": inst.normalize,
              "spectra_subtraction": inst.spectra_subtraction,
             }
 

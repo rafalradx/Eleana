@@ -49,7 +49,7 @@ from subprogs.spline_baseline.Spline_baseline import SplineBaseline
 from subprogs.polynomial_baseline.Polynomial_baseline import PolynomialBaseline
 from subprogs.distance_read.Distance_read import DistanceRead
 from subprogs.integrate_region.IntegrateRegion import IntegrateRegion
-from subprogs.normalize.normalize_2 import Normalize
+from subprogs.normalize.normalize import Normalize
 from subprogs.group_edit.add_group import Groupcreate
 from subprogs.group_edit.assign_to_group import Groupassign
 from subprogs.user_input.single_dialog import SingleDialog
@@ -1460,7 +1460,6 @@ class Application():
 
     def normalize(self):
         ''' Normalization of the amplitutes'''
-        # self.normalize = Normalize(self, which = 'first')
         normalize = Normalize(self, which='first')
 
     def delete_selected_data(self, index_to_delete=None):

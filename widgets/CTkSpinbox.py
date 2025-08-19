@@ -347,11 +347,9 @@ class CTkSpinbox(ctk.CTkFrame):
                 self.counter_var.set(new_v)
 
     def destroy(self):
-        # Anuluj timer jeśli jest aktywny
         if self.update_timer:
             self.update_timer.cancel()
             self.update_timer = None
-        # Wywołaj destruktor rodzica (niszczy widget i dzieci)
         super().destroy()
 
 # Test the CTkSpinbox

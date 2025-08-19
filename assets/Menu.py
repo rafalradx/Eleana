@@ -219,9 +219,9 @@ class MainMenu:
         self.menu_analysis.add_command(label="Calculate XY Distance", command=self.callbacks.get('xy_distance'),
                                        image=self.icon_distance, compound="left")
 
-        # #  - Integrate region
-        # self.menu_analysis.add_command(label="Integrate region", command=self.app.integrate_region,
-        #                           image=self.icon_integrate_region, compound="left")
+        #  - Integrate region
+        self.menu_analysis.add_command(label="Integrate region", command=self.callbacks.get('integrate_region'),
+                                  image=self.icon_integrate_region, compound="left")
         # #  - Statistics
         # self.menu_analysis.add_command(label="Statistics", command=self.app.quick_paste,
         #                            image=self.icon_statistics, compound="left")
@@ -233,10 +233,10 @@ class MainMenu:
                                      borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
         self.main_menu.add_cascade(label=" Modifications ", menu=self.menu_modifications)
 
-        # # - Normalize amplitude
-        # self.menu_modifications.add_command(label="Normalize amplitude", command=self.app.normalize,
-        #                                image=self.icon_normalize, compound="left")
-        #
+        # - Normalize amplitude
+        self.menu_modifications.add_command(label="Normalize amplitude", command=self.callbacks.get('normalize'),
+                                       image=self.icon_normalize, compound="left")
+
         # # - Trim data
         # self.menu_modifications.add_command(label="Trim data", command=self.app.trim_data,
         #                                     image=self.icon_trimdata, compound="left")
