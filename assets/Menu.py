@@ -237,46 +237,46 @@ class MainMenu:
         self.menu_modifications.add_command(label="Normalize amplitude", command=self.callbacks.get('normalize'),
                                        image=self.icon_normalize, compound="left")
 
-        # # - Trim data
-        # self.menu_modifications.add_command(label="Trim data", command=self.app.trim_data,
-        #                                     image=self.icon_trimdata, compound="left")
-        #
-        # self.menu_modifications.add_separator()
-        #
-        # # - Subtract Polynomial baseline
-        # self.menu_modifications.add_command(label="Subtract polynomial baseline", command=self.app.polynomial_baseline,
-        #                                     image=self.icon_baselineplynom, compound="left")
-        #
-        # # - Subtract Spline baseline
-        # self.menu_modifications.add_command(label="Subtract spline baseline", command=self.app.spline_baseline,
-        #                                     image=self.icon_splinebaseline, compound="left")
-        #
-        # self.menu_modifications.add_separator()
+        # - Trim data
+        self.menu_modifications.add_command(label="Trim data", command=self.callbacks.get('trim_data'),
+                                            image=self.icon_trimdata, compound="left")
+
+        self.menu_modifications.add_separator()
+
+        # - Subtract Polynomial baseline
+        self.menu_modifications.add_command(label="Subtract polynomial baseline", command=self.callbacks.get('polynomial_baseline'),
+                                            image=self.icon_baselineplynom, compound="left")
+
+        # - Subtract Spline baseline
+        self.menu_modifications.add_command(label="Subtract spline baseline", command=self.callbacks.get('spline_baseline'),
+                                            image=self.icon_splinebaseline, compound="left")
+
+        self.menu_modifications.add_separator()
         #
         # - Spectra subtraction
         self.menu_modifications.add_command(label="Spectra subtraction", command=self.callbacks.get('spectra_subtraction'),
                                            image=self.icon_spectrasubtract, compound="left")
 
-        # self.menu_modifications.add_separator()
-        #
-        # # - Filter
-        # self.menu_filters = tk.Menu(self.menu_modifications, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
-        #                           activebackground=self.activebg, activeforeground=self.activefg,
-        #                           borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        # self.menu_modifications.add_cascade(label = "Filters", menu=self.menu_filters, image=self.icon_filter_general, compound='left')
-        #
-        # # --- Savitzky-Golay
-        # self.menu_filters.add_command(label="Savitzky-Golay Filter", command=self.app.filter_savitzky_golay,
-        #                                     image=self.icon_sav_gol, compound="left")
-        #
-        # # --- FFT filter
-        # self.menu_filters.add_command(label="FFT filter", command = self.app.filter_fft_lowpass,
-        #                               image=self.icon_fftfilter, compound="left")
-        #
-        # # --- Pseudomodulation
-        # self.menu_filters.add_command(label="Pseudomodulation", command=self.app.pseudomodulation,
-        #                               image=self.icon_pseudomod, compound="left")
-        #
+        self.menu_modifications.add_separator()
+
+        # - Filter
+        self.menu_filters = tk.Menu(self.menu_modifications, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                                  activebackground=self.activebg, activeforeground=self.activefg,
+                                  borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        self.menu_modifications.add_cascade(label = "Filters", menu=self.menu_filters, image=self.icon_filter_general, compound='left')
+
+        # --- Savitzky-Golay
+        self.menu_filters.add_command(label="Savitzky-Golay Filter", command=self.callbacks.get('filter_savitzky_golay'),
+                                            image=self.icon_sav_gol, compound="left")
+
+        # --- FFT filter
+        self.menu_filters.add_command(label="FFT filter", command = self.callbacks.get('filter_fft_lowpass'),
+                                      image=self.icon_fftfilter, compound="left")
+
+        # --- Pseudomodulation
+        self.menu_filters.add_command(label="Pseudomodulation", command=self.callbacks.get('pseudomodulation'),
+                                      image=self.icon_pseudomod, compound="left")
+
         # # - FFT
         # self.menu_modifications.add_command(label="FFT", command=self.app.fast_fourier_transform,
         #                                image=self.icon_fft, compound="left")

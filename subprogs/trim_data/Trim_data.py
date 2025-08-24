@@ -4,7 +4,7 @@
 
 import importlib
 import numpy as np
-from scipy.interpolate import CubicSpline, PchipInterpolator, Akima1DInterpolator, BarycentricInterpolator
+import weakref
 
 
 ''' GENERAL SETTINGS '''
@@ -98,6 +98,10 @@ REPORT_CREATE: bool = False
 # self.report['report_skip_for_stk']
 REPORT_SKIP_FOR_STK: bool = False
 
+# If set to True, the summary table will not be shown after calculations of single data.
+# self.report['report_skip_for_single']
+REPORT_SKIP_FOR_SINGLE:bool = False
+
 # The name of the window containg the reported results.
 # self.report['report_window_title']
 REPORT_WINDOW_TITLE: str = 'Results of distance measurements'
@@ -162,6 +166,10 @@ CURSOR_CHANGING: bool = False
 # self.subprog_cursor['type']
 CURSOR_TYPE: str = 'Range select'
 
+# If true then custom annotations will be snapped to the plot after
+# selecting a new data in FIRST
+CURSOR_SNAP: bool = False
+
 # Set the maximum number of annotations that can be added to the graph.
 # Set to 0 for no limit
 # self.subprog_cursor['limit']
@@ -207,23 +215,30 @@ else:
 mod = importlib.import_module(module_path)
 WindowGUI = getattr(mod, class_name)
 
-from subprogs.general_methods.SubprogMethods3 import SubMethods_03 as Methods                       #|
-class TrimData(Methods, WindowGUI):                                                           #|
-    def __init__(self, app=None, which='first', commandline=False):                                 #|
-        if app and not commandline:                                                                 #|
-            # Initialize window if app is defined and not commandline                               #|
-            WindowGUI.__init__(self, app.mainwindow)                                                #|
+from subprogs.general_methods.SubprogMethods5 import SubMethods_05 as Methods
+class TrimData(Methods, WindowGUI):
+    def __init__(self, app=None, which='first', commandline=False):
+        self.__app = weakref.ref(app)
+        if app and not commandline:
+            # Initialize window if app is defined and not commandline
+            WindowGUI.__init__(self, self.__app().mainwindow)
         # Create settings for the subprog                                                           #|
         self.subprog_settings = {'folder':SUBPROG_FOLDER, 'title': TITLE, 'on_top': ON_TOP, 'data_label': DATA_LABEL, 'name_suffix': NAME_SUFFIX,
-                                 'restore':RESTORE_SETTINGS, 'auto_calculate': AUTO_CALCULATE, 'result': RESULT_CREATE, 'result_ignore':RESULT_IGNORE}
-        self.regions = {'from': REGIONS_FROM, 'orig_in_odd_idx':int(ORIG_IN_ODD_IDX)}
+                                 'auto_calculate': AUTO_CALCULATE, 'result': RESULT_CREATE, 'result_ignore':RESULT_IGNORE,
+                                 'restore':RESTORE_SETTINGS}
+        self.regions = {'from': REGIONS_FROM, 'orig_in_odd_idx':ORIG_IN_ODD_IDX}
+
         self.report = {'nr': 1, 'create': REPORT_CREATE, 'headers': REPORT_HEADERS, 'rows': [], 'x_name': REPORT_NAME_X, 'y_name': REPORT_NAME_Y, 'default_x': REPORT_HEADERS[REPORT_DEFAULT_X], 'default_y': REPORT_HEADERS[REPORT_DEFAULT_Y],
-                       'x_unit': REPORT_UNIT_X, 'y_unit': REPORT_UNIT_Y, 'to_group': REPORT_TO_GROUP, 'report_skip_for_stk': REPORT_SKIP_FOR_STK, 'report_window_title': REPORT_WINDOW_TITLE, 'report_name': REPORT_NAME}
+                       'x_unit': REPORT_UNIT_X, 'y_unit': REPORT_UNIT_Y, 'to_group': REPORT_TO_GROUP, 'report_skip_for_stk': REPORT_SKIP_FOR_STK, 'report_window_title': REPORT_WINDOW_TITLE, 'report_name': REPORT_NAME,
+                       'report_skip_for_single':REPORT_SKIP_FOR_SINGLE}
+
         self.subprog_cursor = {'type': CURSOR_TYPE, 'changing': CURSOR_CHANGING, 'limit': CURSOR_LIMIT, 'clear_on_start': CURSOR_CLEAR_ON_START, 'cursor_required': CURSOR_REQUIRED, 'cursor_req_text':CURSOR_REQ_TEXT,
-                               'cursor_outside_x':CURSOR_OUTSIDE_X, 'cursor_outside_y':CURSOR_OUTSIDE_Y, 'cursor_outside_text':CURSOR_OUTSIDE_TEXT}
+                               'cursor_outside_x':CURSOR_OUTSIDE_X, 'cursor_outside_y':CURSOR_OUTSIDE_Y, 'cursor_outside_text':CURSOR_OUTSIDE_TEXT,
+                               'snap_to': CURSOR_SNAP}
         self.use_second = USE_SECOND                                                                #|
-        self.stack_sep = STACK_SEP                                                                  #|
-        Methods.__init__(self, app=app, which=which, commandline=commandline, close_subprogs=CLOSE_SUBPROGS)
+        self.stack_sep = STACK_SEP
+        Methods.__init__(self, app_weak=self.__app, which=which, commandline=commandline, close_subprogs=CLOSE_SUBPROGS)
+        self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
 
 
     # PRE-DEFINED FUNCTIONS TO EXECUTE AT DIFFERENT STAGES OF SUBPROG METHODS
@@ -272,7 +287,7 @@ class TrimData(Methods, WindowGUI):                                             
 
         # HERE DEFINE YOUR REFERENCES TO WIDGETS
         self.switch = self.builder.get_object('switch', self.mainwindow)
-
+        self.mode = False
 
     def switch_clicked(self):
         self.mode = self.switch.get()
@@ -371,7 +386,7 @@ class TrimData(Methods, WindowGUI):                                             
             origin2 = self.data_for_calculations[1+sft]['origin']
             comment2 = self.data_for_calculations[1+sft]['comment']
             parameters2 = self.data_for_calculations[1+sft]['parameters']
-        cursor_positions = self.grapher.cursor_annotations
+        #cursor_positions = self.grapher.cursor_annotations
         # ------------------------------------------
 
         # Get the x data that were not extracted

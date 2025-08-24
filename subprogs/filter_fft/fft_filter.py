@@ -1,12 +1,9 @@
 #!/usr/bin/python3
 # IMPORT MODULES NEEDED
 # -- Here is an example --
-from asyncio import set_event_loop_policy
-from assets.Error import Error
 import numpy as np
 import importlib
-from scipy.signal import savgol_filter
-
+import weakref
 
 ''' GENERAL SETTINGS '''
 # If True all active subprog windows will be closed on start this subprog
@@ -99,6 +96,7 @@ REPORT_CREATE: bool = False
 # self.report['report_skip_for_stk']
 REPORT_SKIP_FOR_STK: bool = False
 
+REPORT_SKIP_FOR_SINGLE:bool = False
 # The name of the window containg the reported results.
 # self.report['report_window_title']
 REPORT_WINDOW_TITLE: str = 'Results of distance measurements'
@@ -168,6 +166,7 @@ CURSOR_TYPE: str = 'None'
 # self.subprog_cursor['limit']
 CURSOR_LIMIT: int = 0
 
+CURSOR_SNAP: bool = False
 # If True the any added cursors in the graph will be removed
 # self.subprog_cursor['clear_on_start']
 CURSOR_CLEAR_ON_START: bool = False
@@ -208,24 +207,39 @@ else:
 mod = importlib.import_module(module_path)
 WindowGUI = getattr(mod, class_name)
 
-from subprogs.general_methods.SubprogMethods3 import SubMethods_03 as Methods                       #|
+from subprogs.general_methods.SubprogMethods5 import SubMethods_05 as Methods                       #|
 class FFTFilter(Methods, WindowGUI):                                                                   #|
-    def __init__(self, app=None, which='first', commandline=False):                                 #|
-        if app and not commandline:                                                                 #|
-            # Initialize window if app is defined and not commandline                               #|
-            WindowGUI.__init__(self, app.mainwindow)                                                #|
+    def __init__(self, app=None, which='first', commandline=False):
+        self.__app = weakref.ref(app)
+        if app and not commandline:
+            # Initialize window if app is defined and not commandline
+            WindowGUI.__init__(self, self.__app().mainwindow)
         # Create settings for the subprog                                                           #|
-        self.subprog_settings = {'folder':SUBPROG_FOLDER, 'title': TITLE, 'on_top': ON_TOP, 'data_label': DATA_LABEL, 'name_suffix': NAME_SUFFIX,
-                                 'restore':RESTORE_SETTINGS, 'auto_calculate': AUTO_CALCULATE, 'result': RESULT_CREATE, 'result_ignore':RESULT_IGNORE}
-        self.regions = {'from': REGIONS_FROM, 'orig_in_odd_idx':int(ORIG_IN_ODD_IDX)}
-        self.report = {'nr': 1, 'create': REPORT_CREATE, 'headers': REPORT_HEADERS, 'rows': [], 'x_name': REPORT_NAME_X, 'y_name': REPORT_NAME_Y, 'default_x': REPORT_HEADERS[REPORT_DEFAULT_X], 'default_y': REPORT_HEADERS[REPORT_DEFAULT_Y],
-                       'x_unit': REPORT_UNIT_X, 'y_unit': REPORT_UNIT_Y, 'to_group': REPORT_TO_GROUP, 'report_skip_for_stk': REPORT_SKIP_FOR_STK, 'report_window_title': REPORT_WINDOW_TITLE, 'report_name': REPORT_NAME}
-        self.subprog_cursor = {'type': CURSOR_TYPE, 'changing': CURSOR_CHANGING, 'limit': CURSOR_LIMIT, 'clear_on_start': CURSOR_CLEAR_ON_START, 'cursor_required': CURSOR_REQUIRED, 'cursor_req_text':CURSOR_REQ_TEXT,
-                               'cursor_outside_x':CURSOR_OUTSIDE_X, 'cursor_outside_y':CURSOR_OUTSIDE_Y, 'cursor_outside_text':CURSOR_OUTSIDE_TEXT}
-        self.use_second = USE_SECOND                                                                #|
-        self.stack_sep = STACK_SEP                                                                  #|
-        Methods.__init__(self, app=app, which=which, commandline=commandline, close_subprogs=CLOSE_SUBPROGS)
+        self.subprog_settings = {'folder': SUBPROG_FOLDER, 'title': TITLE, 'on_top': ON_TOP, 'data_label': DATA_LABEL,
+                                 'name_suffix': NAME_SUFFIX,
+                                 'auto_calculate': AUTO_CALCULATE, 'result': RESULT_CREATE,
+                                 'result_ignore': RESULT_IGNORE,
+                                 'restore': RESTORE_SETTINGS}
+        self.regions = {'from': REGIONS_FROM, 'orig_in_odd_idx': ORIG_IN_ODD_IDX}
 
+        self.report = {'nr': 1, 'create': REPORT_CREATE, 'headers': REPORT_HEADERS, 'rows': [], 'x_name': REPORT_NAME_X,
+                       'y_name': REPORT_NAME_Y, 'default_x': REPORT_HEADERS[REPORT_DEFAULT_X],
+                       'default_y': REPORT_HEADERS[REPORT_DEFAULT_Y],
+                       'x_unit': REPORT_UNIT_X, 'y_unit': REPORT_UNIT_Y, 'to_group': REPORT_TO_GROUP,
+                       'report_skip_for_stk': REPORT_SKIP_FOR_STK, 'report_window_title': REPORT_WINDOW_TITLE,
+                       'report_name': REPORT_NAME,
+                       'report_skip_for_single': REPORT_SKIP_FOR_SINGLE}
+
+        self.subprog_cursor = {'type': CURSOR_TYPE, 'changing': CURSOR_CHANGING, 'limit': CURSOR_LIMIT,
+                               'clear_on_start': CURSOR_CLEAR_ON_START, 'cursor_required': CURSOR_REQUIRED,
+                               'cursor_req_text': CURSOR_REQ_TEXT,
+                               'cursor_outside_x': CURSOR_OUTSIDE_X, 'cursor_outside_y': CURSOR_OUTSIDE_Y,
+                               'cursor_outside_text': CURSOR_OUTSIDE_TEXT,
+                               'snap_to': CURSOR_SNAP}
+        self.use_second = USE_SECOND  # |
+        self.stack_sep = STACK_SEP
+        Methods.__init__(self, app_weak=self.__app, which=which, commandline=commandline, close_subprogs=CLOSE_SUBPROGS)
+        self.mainwindow.protocol('WM_DELETE_WINDOW', self.cancel)
 
     # PRE-DEFINED FUNCTIONS TO EXECUTE AT DIFFERENT STAGES OF SUBPROG METHODS
     # Unused definitions can be deleted
@@ -311,7 +325,7 @@ l calculations are finished and main window
         self.remove = self.builder.get_object('remove', self.mainwindow)
         self.remove.grid_remove()
 
-        self.cutoff_box = CTkSpinbox(master = self.cutoffFrame, min_value=0, max_value=100000000, step_value=1, command=self.cutoff_changed, scroll_value=1)
+        self.cutoff_box = self.custom_widget(CTkSpinbox(master = self.cutoffFrame, min_value=0, max_value=100000000, step_value=1, command=self.cutoff_changed, scroll_value=1))
         self.cutoff_box.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
 
         self.switch = self.builder.get_object('switch', self.mainwindow)
@@ -406,7 +420,7 @@ l calculations are finished and main window
             origin2 = self.data_for_calculations[1+sft]['origin']
             comment2 = self.data_for_calculations[1+sft]['comment']
             parameters2 = self.data_for_calculations[1+sft]['parameters']
-        cursor_positions = self.grapher.cursor_annotations
+        #cursor_positions = self.grapher.cursor_annotations
         # ------------------------------------------
 
         min = np.min(y1)
@@ -423,7 +437,7 @@ l calculations are finished and main window
             fft_vals[np.abs(freqs) > self.freq] = 0
         else:
             fft_vals[np.abs(freqs) < self.freq] = 0
-        self.data_for_calculations[0]['y'] =  np.fft.ifft(fft_vals)
+        self.data_for_calculations[0]['y'] =  np.real(np.fft.ifft(fft_vals))
 
         # Send calculated values to result (if needed). This will be sent to command line
         result = None # <--- HERE IS THE RESULT TO SEND TO COMMAND LINE

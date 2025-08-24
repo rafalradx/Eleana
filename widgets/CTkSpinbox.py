@@ -38,7 +38,7 @@ class CTkSpinbox(ctk.CTkFrame):
                  state: str = 'normal',
                  command: any = None,
                  wait_for: float = 0.05,
-                 logarithm_step: bool = True,
+                 logarithm_step: bool = False,
                  disable_wheel = False):  # Add wait_for parameter
 
         super().__init__(master,

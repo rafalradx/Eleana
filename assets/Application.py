@@ -33,8 +33,6 @@ from LoadSave import Load, Save, Export
 from Update import Update
 from DataClasses import BaseDataModel
 from Error import Error
-# from IconToWidget import IconToWidget
-
 
 ''' SUBPROGS '''
 from subprogs.filter_fft.fft_filter import FFTFilter

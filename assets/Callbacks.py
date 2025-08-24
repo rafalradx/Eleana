@@ -35,6 +35,12 @@ def main_menubar_callbacks(inst):
              # MODIFICATION
              "normalize": inst.normalize,
              "spectra_subtraction": inst.spectra_subtraction,
+             "trim_data": inst.trim_data,
+             "polynomial_baseline": inst.polynomial_baseline,
+             "spline_baseline": inst.spline_baseline,
+             "filter_savitzky_golay": inst.filter_savitzky_golay,
+             "filter_fft_lowpass": inst.filter_fft_lowpass,
+             "pseudomodulation": inst.pseudomodulation,
             }
 
 def contextmenu_callbacks(inst):

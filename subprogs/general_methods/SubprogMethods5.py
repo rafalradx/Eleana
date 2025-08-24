@@ -19,15 +19,15 @@ import weakref
 ====================================================== 
 '''
 
-def check_busy(method):
-    @wraps(method)
-    def wrapper(self, *args, **kwargs):
-        if self.eleana.busy:
-            if self.eleana.devel_mode:
-                print(f"{Path(__file__).name}, {method.__name__}: self.eleana.busy = True")
-            return  # Breaks a method execution
-        return method(self, *args, **kwargs)  # Go to a method
-    return wrapper
+# def check_busy(method):
+#     @wraps(method)
+#     def wrapper(self, *args, **kwargs):
+#         if self.eleana.busy:
+#             if self.eleana.devel_mode:
+#                 print(f"{Path(__file__).name}, {method.__name__}: self.eleana.busy = True")
+#             return  # Breaks a method execution
+#         return method(self, *args, **kwargs)  # Go to a method
+#     return wrapper
 
 class SubMethods_05:
 
@@ -355,13 +355,18 @@ class SubMethods_05:
     def ok_clicked(self):
         ''' [-OK-] button
             This is standard function in SubprogMethods '''
+
         if self.eleana.busy:
             if self.eleana.devel_mode:
                 print('ok_clicked - blocked by self.eleana.busy')
             return
         self.eleana.busy = True
-
-        self.start_single_calculations()
+        try:
+            self.start_single_calculations()
+        except Exception as e:
+            self.eleana.busy = False
+            self.set_mouse_state(state='')
+            raise(e)
 
         self.set_mouse_state(state='')
         self.eleana.busy = False
@@ -1216,7 +1221,7 @@ class SubMethods_05:
                 results_dataset[index_in_result].parameters = copy.copy(new_result.parameters)
         self.app.update.list_in_combobox(comboboxID='sel_result')
 
-        del new_result
+        new_result = None
         gc.collect()
         return
 
