@@ -41,6 +41,7 @@ def main_menubar_callbacks(inst):
              "filter_savitzky_golay": inst.filter_savitzky_golay,
              "filter_fft_lowpass": inst.filter_fft_lowpass,
              "pseudomodulation": inst.pseudomodulation,
+             "fast_fourier_transform": inst.fast_fourier_transform,
             }
 
 def contextmenu_callbacks(inst):

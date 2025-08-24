@@ -277,17 +277,17 @@ class MainMenu:
         self.menu_filters.add_command(label="Pseudomodulation", command=self.callbacks.get('pseudomodulation'),
                                       image=self.icon_pseudomod, compound="left")
 
-        # # - FFT
-        # self.menu_modifications.add_command(label="FFT", command=self.app.fast_fourier_transform,
-        #                                image=self.icon_fft, compound="left")
-        #
-        # ''' Menu EPR '''
-        # self.menu_EPR = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
-        #                                   activebackground=self.activebg, activeforeground=self.activefg,
-        #                                   borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        #
-        # self.main_menu.add_cascade(label="EPR ", menu=self.menu_EPR)
-        #
+        # - FFT
+        self.menu_modifications.add_command(label="FFT", command=self.callbacks.get('fast_fourier_transform'),
+                                       image=self.icon_fft, compound="left")
+
+        ''' Menu EPR '''
+        self.menu_EPR = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                                          activebackground=self.activebg, activeforeground=self.activefg,
+                                          borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+
+        self.main_menu.add_cascade(label="EPR ", menu=self.menu_EPR)
+
         # # - B to g
         # self.menu_EPR.add_command(label="B to g value", command=self.app.epr_b_to_g,
         #                                     image=self.icon_btog, compound="left")
