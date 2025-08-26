@@ -153,6 +153,26 @@ class Eleana:
             {'label': 'Range select', 'hov': False, 'annot': True, 'a_txt': True, 'multip': True, 'store': True,
              'nr': True}
         ]
+        self.settings.grapher['style_of_annotation'] = {
+            'text': "",
+            'number': True,
+            'xytext': (30, 30),
+            'xycoords': 'data',
+            'textcoords': 'offset points',
+            'arrowprops': {
+                "arrowstyle": "->",  # Arrow style
+                "lw": 1.5,  # Arrow thickness
+                "color": "black",  # Arrow color
+            },
+            "bbox": {
+                "boxstyle": "round",  # Rounded text field
+                "fc": "orange",  # Background color
+                "ec": "black",  # Border color
+                "lw": 0.5  # Border thickness
+            },
+            "fontsize": 10,  # Font size
+            "color": "black"  # Font color
+        }
 
         # Create contener for guistate
         self.gui_state = GuiState(autoscale_x=True,
@@ -166,8 +186,8 @@ class Eleana:
 
         # Create temporary storages
         self.storage = Storage(subprog_settings={},
-                               static_plots=self.settings.grapher['static_plots'],
-                               active_static_plot_windows=self.settings.grapher['active_static_plot_windows'],
+                               static_plots=[],
+                               active_static_plot_windows=[],
                                additional_plots=[],
                                )
 
@@ -223,24 +243,6 @@ class Eleana:
         general = {'gui_appearance': 'dark',
                    'color_theme': 'dark-blue'}
 
-        grapher['style_of_annotation'] = {
-            'text': "",
-            'number': True,
-            'xytext': (0.3, 0.3),
-            'arrowprops': {
-                "arrowstyle": "->",  # Arrow style
-                "lw": 1.5,  # Arrow thickness
-                "color": "black",  # Arrow color
-            },
-            "bbox": {
-                "boxstyle": "round",  # Rounded text field
-                "fc": "orange",  # Background color
-                "ec": "black",  # Border color
-                "lw": 0.5  # Border thickness
-            },
-            "fontsize": 10,  # Font size
-            "color": "black"  # Font color
-        }
         grapher['plt_style'] = 'Solarize_Light2'
         grapher['style_first'] = {
             'plot_type': 'line',
@@ -344,7 +346,6 @@ class Eleana:
                                     custom_annotations = self.settings.grapher['custom_annotations']
                                     )
 
-
         working_filename = Path(working_folder, 'project_1')
         working_information = Path(working_folder, 'info.txt')
         try:
@@ -375,21 +376,6 @@ class Eleana:
         except Exception as e:
             Error.show(info="Cannot remove temporary project folder. Please remove it manually.", details=e)
             return None
-
-
-        # last_projects = self.paths['last_projects']
-        # saved_path_string = str(project_ele)
-        # if saved_path_string in last_projects:
-        #     index = last_projects.index(saved_path_string)
-        #     del last_projects[index]
-        # last_projects.insert(0, str(saved_path_string))
-        # last_projects = last_projects[:20]
-        # # Write the list to eleana.paths
-        # self.paths['last_projects'] = last_projects
-        # self.paths['last_project_dir'] = Path(last_projects[0]).parent
-        # self.save_paths()
-        # # Perform update to place the item into menu
-        # return str(Path(last_projects[0]).name[:-4] + ' - Eleana')
 
         saved_path_string = str(project_ele)
         last_projects = list(self.paths.get('last_projects', []))

@@ -10,8 +10,7 @@ PROJECT_UI = PROJECT_PATH / "single_dialog.ui"
 
 class SingleDialog:
     def __init__(self, master=None, title='', label='', text=''):
-        self.master = master.mainwindow
-
+        self.master = master
         # Pygubu part below:
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)

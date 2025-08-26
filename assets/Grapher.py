@@ -1,5 +1,5 @@
 
-from LoadSave import Load
+
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
@@ -9,9 +9,7 @@ import mplcursors
 import copy
 from CTkListbox import CTkListbox
 import numpy as np
-from Plots import Staticplotwindow
-import pprint
-# Make matplotlib to use tkinter
+
 matplotlib.use('TkAgg')
 # Remove CTRL+S shortcut to allow open 'Save' by pressing CTRL+S
 matplotlib.rcParams['keymap.save'] = ''
@@ -25,6 +23,7 @@ class Grapher():
         self.callbacks = callbacks
         self.plt = plt
         self.plt_style = self.eleana.settings.grapher['plt_style']
+        #self.application_mainwindow = gui_references['mainwindow']
 
         # Apply matplotlib style
         try:
@@ -41,7 +40,7 @@ class Grapher():
         self.annotationsFrame = gui_references['annotationsFrame']
         self.check_autoscale_x = gui_references['check_autoscale_x']
         self.check_autoscale_y = gui_references['check_autoscale_y']
-
+        self.check_indexed_x = gui_references['check_indexed_x']
 
         self.annotationlist = CTkListbox(self.annotationsFrame, command=self.annotationlist_clicked,
                                          multiple_selection=True, height=300, text_color = '#eaeaea',
@@ -437,13 +436,13 @@ class Grapher():
                 if annot['curve'] == 'XY':
                     self.ax.annotate(text=self.style_of_annotation['text'] + number_,
                                      xy=xy,
-                                     xytext=self.xytext_position(xy),
+                                     xytext=self.style_of_annotation['xytext'],
                                      arrowprops=self.style_of_annotation['arrowprops'],
                                      bbox=self.style_of_annotation['bbox'],
                                      fontsize=self.style_of_annotation['fontsize'],
                                      color=self.style_of_annotation['color'],
-                                     xycoords='data',
-                                     textcoords='data',
+                                     xycoords=self.style_of_annotation['xycoords'],
+                                     textcoords=self.style_of_annotation['textcoords'],
                                      )
 
                 i += 1
@@ -644,13 +643,22 @@ class Grapher():
             number_ = str(current_nr) if self.style_of_annotation['number'] else ''
             self.ax.annotate(text=self.style_of_annotation['text'] + number_,
                              xy=point_selected,
-                             xytext=self.xytext_position(point_selected),
+                             #xytext=self.xytext_position(point_selected),
+                             xytext = self.style_of_annotation['xytext'],
                              arrowprops=self.style_of_annotation['arrowprops'],
                              bbox=self.style_of_annotation['bbox'],
                              fontsize=self.style_of_annotation['fontsize'],
-                             color=self.style_of_annotation['color']
+                             color=self.style_of_annotation['color'],
+                             xycoords=self.style_of_annotation['xycoords'],
+                             textcoords = self.style_of_annotation['textcoords'],
                              )
 
+            print('Diagnostyka adnotacji')
+            # print("xy:", ann.xy)  # punkt docelowy
+            # print("xycoords:", ann.xycoords)  # system współrzędnych punktu
+            # print("xytext:", ann._text)  # pozycja tekstu (uwaga: prywatny atrybut)
+            # print("textcoords:", ann.textcoords)  # system współrzędnych tekstu
+            # print("text:", ann.get_text())
 
             self.canvas.draw()
             self.eleana.set_selections(variable='grapher_action', value='point_selected')
@@ -990,7 +998,7 @@ class Grapher():
             return x, y
 
     ''' 
-    Methods to handle Static Plots that are created as snaphots of
+    Methods to handle Static Plots that are created as snapshots of
     the main graph.
     '''
     def get_static_plot_data(self):
@@ -1003,7 +1011,7 @@ class Grapher():
         y_lim = copy.copy(self.ax.get_ylim())
         x_scale = copy.copy(self.ax.get_xscale())
         y_scale = copy.copy(self.ax.get_yscale())
-        inverted_x = copy.copy(self.inverted_x_axis)
+        inverted_x = copy.copy(self.ax.xaxis_inverted())
         plot_data = {'name': 'Static plot',
                     'x_title':'Abscissa [a.u.]',
                     'y_title':'Ordinate [a.u.]',
@@ -1088,18 +1096,18 @@ class Grapher():
         plot_data['curves'].append(curve)
         return plot_data
 
-    def show_static_graph_window(self, number_of_plot:int):
-        '''
-        Opens window containing a static plot stored in self.eleana.static_plots.
-        This function is activated by dynamically created menu in Plots --> Show plots
-        '''
-
-        if not self.eleana.active_static_plot_windows:
-            window_nr = 0
-        else:
-            last = self.eleana.active_static_plot_windows[-1]
-            window_nr = last + 1
-        self.eleana.active_static_plot_windows.append(window_nr)
-        command = "self.static_plot_" + str(window_nr) + " = Staticplotwindow(window_nr, number_of_plot, self.eleana.static_plots, self.eleana.active_static_plot_windows, self.app.mainwindow, self.main_menu)"
-        exec(command)
-        self.main_menu.create_showplots_menu()
+    # def show_static_graph_window(self, number_of_plot:int):
+    #     '''
+    #     Opens window containing a static plot stored in self.eleana.static_plots.
+    #     This function is activated by dynamically created menu in Plots --> Show plots
+    #     '''
+    #
+    #     if not self.eleana.storage.active_static_plot_windows:
+    #         window_nr = 0
+    #     else:
+    #         last = self.eleana.storage.active_static_plot_windows[-1]
+    #         window_nr = last + 1
+    #     self.eleana.storage.active_static_plot_windows.append(window_nr)
+    #     command = "self.static_plot_" + str(window_nr) + " = Staticplotwindow(window_nr, number_of_plot, self.eleana.storage.static_plots, self.eleana.storage.active_static_plot_windows, self.application_mainwindow, self.main_menu)"
+    #     exec(command)
+    #     self.main_menu.create_showplots_menu()

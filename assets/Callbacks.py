@@ -42,7 +42,18 @@ def main_menubar_callbacks(inst):
              "filter_fft_lowpass": inst.filter_fft_lowpass,
              "pseudomodulation": inst.pseudomodulation,
              "fast_fourier_transform": inst.fast_fourier_transform,
-            }
+
+             # EPR
+             "epr_b_to_g": inst.epr_b_to_g,
+
+             # TOOLS
+             "clear_selected_ranges": inst.clear_selected_ranges,
+             "create_simple_static_plot": inst.create_simple_static_plot,
+
+             # PLOTS
+             "show_static_graph_window": inst.show_static_graph_window,
+             "delete_simple_static_plot": inst.delete_simple_static_plot
+             }
 
 def contextmenu_callbacks(inst):
     return {'gui_references':
@@ -87,7 +98,8 @@ def grapher_callbacks(inst):
                     'infoframe': inst.infoframe,
                     'info': inst.info,
                     'check_autoscale_x': inst.check_autoscale_x,
-                    'check_autoscale_y': inst.check_autoscale_y
+                    'check_autoscale_y': inst.check_autoscale_y,
+                    'check_indexed_x':inst.check_indexed_x,
                 },
             'callbacks':
                 {

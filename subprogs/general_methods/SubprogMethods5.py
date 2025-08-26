@@ -1,3 +1,5 @@
+from os import close
+
 from assets.Observer import Observer
 import copy
 import numpy as np
@@ -366,8 +368,9 @@ class SubMethods_05:
         except Exception as e:
             self.eleana.busy = False
             self.set_mouse_state(state='')
-            raise(e)
+            raise e
 
+        self.set_mouse_state(state='')
         self.set_mouse_state(state='')
         self.eleana.busy = False
         self.after_ok_clicked()

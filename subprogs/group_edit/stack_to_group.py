@@ -9,10 +9,10 @@ PROJECT_UI = PROJECT_PATH / "stack_to_group.ui"
 import numpy as np
 
 class StackToGroup:
-    def __init__(self, master=None, which='first'):
-        self.eleana = master.eleana
+    def __init__(self, master, eleana, which='first'):
+        self.eleana = eleana
         self.builder = builder = pygubu.Builder()
-        self.master = master.mainwindow
+        self.master = master
         builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)
         # Main widget
@@ -34,7 +34,7 @@ class StackToGroup:
         self.index = self.eleana.selections[self.which]
 
         asToGr = self.eleana.assignmentToGroups
-        del asToGr['<group-list/>']
+        #asToGr['<group-list/>'].clear()
         groups = list(asToGr.keys())
         self.sel_group.configure(values=groups)
         self.sel_group.set('All')
@@ -66,6 +66,7 @@ class StackToGroup:
     def unfold_stack(self, group):
         dt: BaseDataModel = self.eleana.dataset[self.index]
         for new_data in dt.unfolded_stack():
+            new_data.groups.append(group)
             self.eleana.dataset.append(new_data)
         self.response = [group]
         self.quit()

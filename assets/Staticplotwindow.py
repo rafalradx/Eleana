@@ -13,14 +13,14 @@ PROJECT_UI = PROJECT_PATH / "ui" / "StaticPlotWindow.ui"
 
 
 class Staticplotwindow:
-    def __init__(self, window_nr, static_plot_index, eleana_static_plots, eleana_active_static_plots, master, main_menu):
+    def __init__(self, window_nr, static_plot_index, eleana_static_plots, eleana_active_static_plots, master, main_menubar):
         self.window_nr = window_nr
         self.plot_nr = static_plot_index
         self.static_plots = eleana_static_plots
         self.active_static_plots = eleana_active_static_plots
         matplotlib.use('TkAgg')
         self.plot_data = eleana_static_plots[self.plot_nr]
-        self.main_menu = main_menu
+        self.main_menubar = main_menubar
         self.builder = builder = pygubu.Builder()
         builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)
@@ -80,7 +80,50 @@ class Staticplotwindow:
     def cancel(self, event=None):
         self.response = None
         self.active_static_plots.remove(self.window_nr)
+
+        # Destroy matplotlib
+        widget = self.canvas.get_tk_widget()
+        widget.destroy()
+        widget = None
+
+        plt.close(self.fig)
+        self.fig = None
+        self.ax = None
+
+        # Destroy toolbar
+        self.toolbar.destroy()
+
+        # Cleanup pygubu widgets
+        for name in self.builder.objects:
+            widget = self.builder.get_object(name, self.mainwindow)
+            self._remove_everything_from_widget(widget)
+        del self.builder
+
+        # Destroy window
+        self.mainwindow.protocol('WM_DELETE_WINDOW', lambda: None)
         self.mainwindow.destroy()
+
+
+    def _remove_everything_from_widget(self, widget):
+        # Remove commands
+        try:
+            widget.configure(command=None)
+        except:
+            pass
+        # Remove bindings
+        try:
+            widget.bindtags()
+        except:
+            pass
+        try:
+            widget.unbind_all()
+        except:
+            pass
+        # Remove validations
+        try:
+            widget.configure(validate="none", validatecommand=None)
+        except:
+            pass
 
     def run(self):
         self.mainwindow.mainloop()
@@ -151,13 +194,14 @@ class Staticplotwindow:
         self.plot_data['comment'] = self.commentField.get(0.0, "end")
         self.static_plots[self.plot_nr]['on_top'] = mode
         self.cancel()
+
     def delete(self):
         msg = CTkMessagebox(title="Delete", message="Do you want to delete this plot",
                             icon="question", option_1="Cancel", option_2="No", option_3="Yes")
         response = msg.get()
         if response == "Yes":
-            del self.static_plots[self.plot_nr]
-            self.main_menu.create_showplots_menu()
+            self.static_plots[self.plot_nr] = None
+            self.main_menubar.create_showplots_menu()
             self.cancel()
 
 if __name__ == "__main__":

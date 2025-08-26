@@ -288,51 +288,50 @@ class MainMenu:
 
         self.main_menu.add_cascade(label="EPR ", menu=self.menu_EPR)
 
-        # # - B to g
-        # self.menu_EPR.add_command(label="B to g value", command=self.app.epr_b_to_g,
-        #                                     image=self.icon_btog, compound="left")
-        #
-        #
-        # ''' Menu Tools '''
-        # self.menu_tools = tk.Menu(self.main_menu, tearoff=1, bg=self.bg, fg=self.fg, font=self.font,
-        #                          activebackground=self.activebg, activeforeground=self.activefg,
-        #                          borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        #
-        #
-        # self.main_menu.add_cascade(label="Tools", menu=self.menu_tools)
-        # self.menu_graphtools = tk.Menu(self.main_menu, tearoff=1, bg=self.bg, fg=self.fg, font=self.font,
-        #                           activebackground=self.activebg, activeforeground=self.activefg,
-        #                           borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        #
-        # # - Graph tools
-        # self.menu_tools.add_cascade(label="Graph tools", menu=self.menu_graphtools, image=self.icon_graphtools, compound="left")
-        #
-        # # ---- Clear selected range
-        # self.menu_graphtools.add_command(label="Clear selected range", command=self.app.clear_selected_ranges,
-        #                             image=self.icon_clearrange, compound="left")
-        #
-        #
-        #
-        # # - Create plot
-        # self.menu_tools.add_command(label="Create plot", command=self.app.create_simple_static_plot,
-        #                             image=self.icon_create_static_plot, compound="left")
-        #
-        # # - Delete plot
-        # self.menu_tools.add_command(label="Delete plot", command=self.app.delete_simple_static_plot,
-        #                             image=self.icon_delete_static_plot, compound="left")
-        #
-        # # -Separator
-        # self.menu_tools.add_separator()
-        #
-        # # ---- ENTRIES IN menu_showPlots ARE GENERATED DYNAMICALLY
-        #
-        # ''' Menu HELP '''
-        # self.menu_help = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
-        #                         activebackground=self.activebg, activeforeground=self.activefg,
-        #                         borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
-        # #self.main_menu.add_cascade(label="Help", menu=self.menu_help, image=self.icon_dropdown, compound="left")
-        # self.main_menu.add_cascade(label="Help", menu=self.menu_help)
-        #
+        # - B to g
+        self.menu_EPR.add_command(label="B to g value", command=self.callbacks.get('epr_b_to_g'),
+                                            image=self.icon_btog, compound="left")
+
+
+        ''' Menu Tools '''
+        self.menu_tools = tk.Menu(self.main_menu, tearoff=1, bg=self.bg, fg=self.fg, font=self.font,
+                                 activebackground=self.activebg, activeforeground=self.activefg,
+                                 borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+
+
+        self.main_menu.add_cascade(label="Tools", menu=self.menu_tools)
+        self.menu_graphtools = tk.Menu(self.main_menu, tearoff=1, bg=self.bg, fg=self.fg, font=self.font,
+                                  activebackground=self.activebg, activeforeground=self.activefg,
+                                  borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+
+        # - Graph tools
+        self.menu_tools.add_cascade(label="Graph tools", menu=self.menu_graphtools, image=self.icon_graphtools, compound="left")
+
+        # ---- Clear selected range
+        self.menu_graphtools.add_command(label="Clear selected ranges", command=self.callbacks.get('clear_selected_ranges'),
+                                    image=self.icon_clearrange, compound="left")
+
+
+        # - Create plot
+        self.menu_tools.add_command(label="Create plot", command=self.callbacks.get('create_simple_static_plot'),
+                                    image=self.icon_create_static_plot, compound="left")
+
+        # - Delete plot
+        self.menu_tools.add_command(label="Delete plot", command=self.callbacks.get('delete_simple_static_plot'),
+                                    image=self.icon_delete_static_plot, compound="left")
+
+        # -Separator
+        self.menu_tools.add_separator()
+
+        # ---- ENTRIES IN menu_showPlots ARE GENERATED DYNAMICALLY
+
+        ''' Menu HELP '''
+        self.menu_help = tk.Menu(self.main_menu, tearoff=0, bg=self.bg, fg=self.fg, font=self.font,
+                                activebackground=self.activebg, activeforeground=self.activefg,
+                                borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
+        #self.main_menu.add_cascade(label="Help", menu=self.menu_help, image=self.icon_dropdown, compound="left")
+        self.main_menu.add_cascade(label="Help", menu=self.menu_help)
+
         # # - About
         # self.menu_help.add_command(label="About", command=self.app.quick_paste,
         #                                image=self.icon_statistics, compound="left")
@@ -381,7 +380,7 @@ class MainMenu:
         except:
             pass
 
-        if not self.eleana.settings.grapher['static_plots']:
+        if not self.eleana.storage.static_plots:
             return
 
         # Create new menu
@@ -390,19 +389,20 @@ class MainMenu:
                                       borderwidth=self.borderwidth, activeborderwidth=self.borderwidth)
         self.menu_tools.add_cascade(label="Show plot", menu=self.menu_showPlots, image=self.icon_dropdown,
                                     compound="left")
+
         # Scan the content of self.eleana.static_plots to populate menu items
         i = 0
-        while i < len(self.eleana.static_plots):
+        while i < len(self.eleana.storage.static_plots):
             # Replace forbidden marks
-            name = self.eleana.static_plots[i]['name']
+            name = self.eleana.storage.static_plots[i]['name']
             name = name.replace('.', '-')
             name = name.replace(',', '-')
             name = name.replace('/', '-')
             name = name.replace(':', '-')
-            self.eleana.static_plots[i]['name'] = name
+            self.eleana.storage.static_plots[i]['name'] = name
             new_name_nr = str(i + 1) + '. ' + name
-            self.eleana.static_plots[i]['name_nr'] = new_name_nr
-            self.menu_showPlots.add_command(label=new_name_nr, command=lambda position=i: self.app.grapher.show_static_graph_window(position),
+            self.eleana.storage.static_plots[i]['name_nr'] = new_name_nr
+            self.menu_showPlots.add_command(label=new_name_nr, command=lambda position=i: self.callbacks.get('show_static_graph_window')(position),
                                        image=self.icon_static_plot, compound="left")
             i += 1
 

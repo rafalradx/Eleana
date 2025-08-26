@@ -105,15 +105,12 @@ class Load:
                     # Replace the dataset
                     self.eleana.dataset.extend(copy.deepcopy(loaded_object.dataset))
                     self.eleana.results_dataset.extend(copy.deepcopy(loaded_object.results_dataset))
-                    self.eleana.static_plots.extend(copy.deepcopy(loaded_object.static_plots))
-                    #self.menu.create_showplots_menu()
+                    self.eleana.storage.static_plots.extend(copy.deepcopy(loaded_object.static_plots))
                     return
                 elif response == "Append to the dataset":
                     self.eleana.dataset.extend(copy.deepcopy(loaded_object.dataset))
                     self.eleana.results_dataset.extend(copy.deepcopy(loaded_object.results_dataset))
-                    #self.eleana.static_plots.extend(copy.deepcopy(loaded_object.static_plots))
-                    #self.menu.create_showplots_menu()
-                    #_update_last_projects(filename)
+                    self.eleana.storage.static_plots.extend(copy.deepcopy(loaded_object.static_plots))
             # If success return True
             else:
                 # DATASET IS EMPTY
@@ -122,10 +119,9 @@ class Load:
                 self.eleana.groupsHierarchy = copy.deepcopy(loaded_object.groupsHierarchy)
                 self.eleana.notes = copy.deepcopy(loaded_object.notes)
                 self.eleana.selections = copy.deepcopy(loaded_object.selections)
-                self.eleana.static_plots = copy.deepcopy(loaded_object.static_plots)
+                self.eleana.storage.static_plots = copy.deepcopy(loaded_object.static_plots)
                 self.eleana.settings.grapher['custom_annotations'] = copy.deepcopy(loaded_object.custom_annotations)
                 _update_last_projects(filename)
-                #self.create_showplots_menu()
             return True
         except Exception as e:
             Error.show(info="Cannot load the project file", details=e)
@@ -135,7 +131,7 @@ class Load:
             self.eleana.groupsHierarchy = copy_of_eleana_groupsHierarchy
             self.eleana.notes = copy_of_eleana_notes
             self.eleana.selections = copy_of_eleana_selections
-            self.eleana.static_plots = copy_of_eleana_static_plots
+            self.eleana.storage.static_plots = copy_of_eleana_static_plots
             self.eleana.settings.grapher['custom_annotations'] = copy_of_eleana_custom_annotations
             return None
 

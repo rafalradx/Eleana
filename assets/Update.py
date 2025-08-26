@@ -179,6 +179,7 @@ class Update:
                 original_box.configure(values=stk_list)
                 self.widgetsIDs['resultStkFrame'].grid()
                 box.set(stk_list[0])
+                original_box.set(stk_list[0])
             else:
                 self.widgetsIDs['resultStkFrame'].grid_remove()
             return

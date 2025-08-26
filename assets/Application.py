@@ -13,8 +13,9 @@ import tkinter as tk
 import pickle
 import time
 
+
 from assets.Menu import ContextMenu
-import inspect
+
 
 ''' ELEANA MODULES '''
 # Import modules from "/modules" folder
@@ -23,6 +24,7 @@ from modules.CTkMessagebox import CTkMessagebox
 from widgets.CTkSpinbox import CTkSpinbox
 
 # Import Eleana specific classes
+from Staticplotwindow import Staticplotwindow
 from Menu import MainMenu
 from Callbacks import main_menubar_callbacks, contextmenu_callbacks, grapher_callbacks
 from Callbacks import update_callbacks, loadsave_callbacks
@@ -81,7 +83,7 @@ def check_busy(method):
 def timeit(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        start = time.perf_counter()  # dokładniejszy niż time.time()
+        start = time.perf_counter()
         result = func(*args, **kwargs)
         end = time.perf_counter()
         print(f"{func.__name__} executed in {end - start:.4f} seconds")
@@ -1400,6 +1402,7 @@ class Application():
         position = list_of_results[-1]
         self.sel_result.set(position)
         self.result_selected(position)
+
         if skip_grapher:
             return
         self.grapher.plot_graph()
@@ -1513,7 +1516,7 @@ class Application():
             new_data = copy.deepcopy(self.eleana.results_dataset[index])
         else:
             new_data = copy.deepcopy(self.eleana.dataset[index])
-        dialog = SingleDialog(master = self, title = 'Enter', label = 'New name', text = new_data.name)
+        dialog = SingleDialog(master = self.mainwindow, title = 'Enter', label = 'New name', text = new_data.name)
         name = dialog.get()
 
         if not name:
@@ -1685,6 +1688,7 @@ class Application():
         self.mainwindow.title(name + ' - Eleana')
         self.eleana.paths['last_project_dir'] = str(Path(path_to_file).parent)
         self.main_menubar.last_projects_menu()
+        self.main_menubar.create_showplots_menu()
 
         # Set Selections according eleana.selections
         self.gui_to_selections()
@@ -1984,9 +1988,27 @@ class Application():
         if not name:
             return
         static_plot['name'] = name
-        self.eleana.static_plots.append(static_plot)
+        self.eleana.storage.static_plots.append(static_plot)
         self.main_menubar.create_showplots_menu()
-        self.grapher.show_static_graph_window(len(self.eleana.static_plots)-1)
+        self.show_static_graph_window(len(self.eleana.storage.static_plots)-1)
+
+    def show_static_graph_window(self, number_of_plot = None):
+        '''
+        Opens window containing a static plot stored in self.eleana.static_plots.
+        This function is activated by dynamically created menu in Plots --> Show plots
+        '''
+
+        if not self.eleana.storage.active_static_plot_windows:
+            window_nr = 0
+        elif number_of_plot is not None:
+            window_nr = number_of_plot
+        else:
+            last = self.eleana.storage.active_static_plot_windows[-1]
+            window_nr = last + 1
+        self.eleana.storage.active_static_plot_windows.append(window_nr)
+        command = "self.static_plot_" + str(window_nr) + " = Staticplotwindow(window_nr, number_of_plot, self.eleana.storage.static_plots, self.eleana.storage.active_static_plot_windows, self.mainwindow, self.main_menubar)"
+        exec(command)
+        self.main_menubar.create_showplots_menu()
 
     def clear_selected_ranges(self):
         self.grapher.clear_selected_ranges()
@@ -1997,15 +2019,15 @@ class Application():
         Opens window to ask which plots
         from created Static Plots will be removed
         '''
-        plots = self.eleana.static_plots
+        plots = self.eleana.storage.static_plots
         if not plots:
             return
         av_plots = []
         for plot in plots:
             av_plots.append(plot['name_nr'])
-        self.select_items = SelectItems(master=app.mainwindow, title='Select plots',
+        select_items = SelectItems(master=self.mainwindow, title='Select plots',
                                   items=av_plots)
-        names = self.select_items.get()
+        names = select_items.get()
         if not names:
             return
         to_delete = []
@@ -2013,7 +2035,7 @@ class Application():
             to_delete.append(names.index(name))
         to_delete.sort(reverse=True)
         for i in to_delete:
-            self.eleana.static_plots.pop(i)
+            self.eleana.storage.static_plots.pop(i)
         self.main_menubar.create_showplots_menu()
 
     def xy_distance(self):
@@ -2102,7 +2124,7 @@ class Application():
             #self.convert_stack_to_group = StackToGroup(app, which)
             #response = self.convert_stack_to_group.get()
 
-            convert_stack_to_group = StackToGroup(app, which)
+            convert_stack_to_group = StackToGroup(master = self.mainwindow, eleana = self.eleana, which = which)
             response = convert_stack_to_group.get()
             if response == None:
                  return
@@ -2170,7 +2192,7 @@ class Application():
         #self.single_dialog = SingleDialog(master=app, title=title, label='Enter new name', text=name)
         #response = self.single_dialog.get()
 
-        single_dialog = SingleDialog(master=app, title=title, label='Enter new name', text=name)
+        single_dialog = SingleDialog(master=self.mainwindow, title=title, label='Enter new name', text=name)
         response = single_dialog.get()
 
         if response == None:
