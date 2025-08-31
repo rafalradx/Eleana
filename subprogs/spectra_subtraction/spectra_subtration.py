@@ -565,7 +565,7 @@ class SpectraSubtraction(Methods, WindowGUI):
             origin2 = self.data_for_calculations[1+sft]['origin']
             comment2 = self.data_for_calculations[1+sft]['comment']
             parameters2 = self.data_for_calculations[1+sft]['parameters']
-        cursor_positions = self.grapher.cursor_annotations
+        # cursor_positions = self.grapher.cursor_annotations
         # ------------------------------------------
 
         # Shift X2
